@@ -1,0 +1,6 @@
+dist
+node_modules
+supabase/.temp
+src/lib/database.types.ts
+public/assets
+package-lock.json
