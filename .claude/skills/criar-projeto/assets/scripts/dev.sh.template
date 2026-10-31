@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# ============================================================
+#  dev.sh - controle do ambiente local (Linux/Mac)
+#  Uso:  ./scripts/dev.sh [start|stop|restart|status|logs]
+#  Encapsula o docker compose para o desenvolvedor nao decorar comandos.
+#  Le a config do .env (fonte unica de verdade).
+#  Lembre de tornar executavel:  chmod +x scripts/dev.sh
+# ============================================================
+set -euo pipefail
+
+# roda sempre a partir da raiz do projeto
+cd "$(dirname "$0")/.."
+
+ACAO="${1:-start}"
+
+case "$ACAO" in
+  start)   docker compose up -d ;;
+  stop)    docker compose down ;;
+  restart) docker compose down && docker compose up -d ;;
+  status)  docker compose ps ;;
+  logs)    docker compose logs -f ;;
+  *)
+    echo "Uso: ./scripts/dev.sh [start|stop|restart|status|logs]"
+    exit 1
+    ;;
+esac
