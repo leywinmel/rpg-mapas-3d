@@ -1,4 +1,11 @@
-import { diceToThrow, evaluateDice, parseDice, rollDice, type DiceExpression } from './dice';
+import {
+  diceToThrow,
+  evaluateDice,
+  formatNotation,
+  parseDice,
+  rollDice,
+  type DiceExpression,
+} from './dice';
 
 function parsed(notation: string): DiceExpression {
   const result = parseDice(notation);
@@ -64,5 +71,12 @@ describe('dice', () => {
     expect(max.total).toBe(20);
     const min = rollDice(parsed('3d6+2'), () => 0);
     expect(min.total).toBe(5);
+  });
+
+  it('shouldWriteGroupsBackIntoTheStandardNotation', () => {
+    const expression = parsed('2d20kh1 + 1d4 - 1d6 - 2');
+    expect(formatNotation(expression.groups, expression.modifier)).toBe(expression.notation);
+    expect(formatNotation([], 0)).toBe('');
+    expect(formatNotation([{ count: 1, sides: 8, sign: -1 }], 3)).toBe('-1d8 + 3');
   });
 });
