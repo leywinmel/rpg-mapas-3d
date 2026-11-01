@@ -126,6 +126,13 @@ sincronia com a nuvem [#7][#23]. O site roda direto com o Vite.
 - **Comandos úteis:** `npm run db:reset` (recria o banco e aplica migrations + seed),
   `npm run db:new <nome>` (nova migration), `npm run db:types` (gera os tipos TS do banco).
 - **Verificação:** `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.
+- **Testes do banco:** `npm run test:db` roda os testes pgTAP de `supabase/tests/database/`
+  (regras de acesso de cada papel). Rode depois de `db:reset` sempre que mexer em RLS [#49][#55].
+- **Serviços desligados:** `analytics` e `edge_runtime` ficam `enabled = false` no
+  `supabase/config.toml`: o projeto não usa Edge Functions nem o painel de logs, e eles custam
+  memória numa máquina de 16 GB [#8].
+- **Convidados:** `enable_anonymous_sign_ins = true`; convidado é usuário `authenticated` com
+  `is_anonymous = true` e não cria mesa, mapa nem biblioteca (checado no banco por `is_registered()`).
 
 ## 🔗 Integrações
 
