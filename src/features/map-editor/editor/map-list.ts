@@ -3,7 +3,13 @@
  * zod, mesmos limites do banco), nome da cópia e reordenação.
  */
 import { z } from 'zod';
-import { MAX_MAP_SIZE } from '@/domain';
+import {
+  createEmptyDocument,
+  MAX_MAP_SIZE,
+  parseMapDocument,
+  type MapDocument,
+  type MapResult,
+} from '@/domain';
 import { pieceCatalog } from '@/features/scene';
 import type { MapSummary } from '../types';
 
@@ -47,6 +53,15 @@ export function parseNewMap(input: Record<keyof NewMapInput, unknown>): FormResu
     if (field && !errors[field]) errors[field] = issue.message;
   }
   return { ok: false, errors };
+}
+
+/**
+ * Documento do mapa novo. Passa pelo mesmo validador do domínio que guarda o
+ * salvamento e a leitura: nada chega ao banco sem ele.
+ */
+export function newMapDocument(input: NewMapInput): MapResult<MapDocument> {
+  const size = { width: input.width, depth: input.depth };
+  return parseMapDocument(createEmptyDocument(size, input.floor), size);
 }
 
 export function copyName(name: string): string {

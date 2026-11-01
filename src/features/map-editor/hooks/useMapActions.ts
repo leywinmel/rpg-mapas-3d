@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
-import { createEmptyDocument, parseMapDocument } from '@/domain';
+import { parseMapDocument } from '@/domain';
 import { reportError } from '@/lib/report-error';
 import {
   copyName,
   moveMap,
+  newMapDocument,
   nextSortOrder,
   type MoveDirection,
   type NewMapInput,
@@ -47,12 +48,14 @@ export function useMapActions(snapshot: RoomMapsSnapshot) {
     (input: NewMapInput) =>
       attempt(
         async () => {
+          const document = newMapDocument(input);
+          if (!document.ok) throw new Error(document.errors.join(' | '));
           const summary = await service.createMap({
             roomId,
             name: input.name,
             width: input.width,
             depth: input.depth,
-            document: createEmptyDocument({ width: input.width, depth: input.depth }, input.floor),
+            document: document.value,
             sortOrder: nextSortOrder(maps),
           });
           patch({ maps: [...maps, summary] });

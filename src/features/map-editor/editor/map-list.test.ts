@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { MapSummary } from '../types';
-import { copyName, MAX_MAP_NAME_LENGTH, moveMap, nextSortOrder, parseNewMap } from './map-list';
+import {
+  copyName,
+  MAX_MAP_NAME_LENGTH,
+  moveMap,
+  newMapDocument,
+  nextSortOrder,
+  parseNewMap,
+} from './map-list';
 
 function summary(id: string, sortOrder: number): MapSummary {
   return { id, name: id, width: 10, depth: 10, sortOrder, updatedAt: '2026-11-01T00:00:00Z' };
@@ -21,6 +28,19 @@ describe('map-list', () => {
     if (result.ok) return;
     expect(Object.keys(result.errors).sort()).toEqual(['depth', 'floor', 'name', 'width']);
     expect(result.errors.width).toMatch(/mínimo/);
+  });
+
+  it('shouldBuildANewMapDocumentThatPassesTheDomainValidation', () => {
+    const result = newMapDocument({ name: 'Cripta', width: 3, depth: 2, floor: 'piso-madeira' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.floors).toHaveLength(6);
+    expect(result.value.floors.every((floor) => floor.tile === 'piso-madeira')).toBe(true);
+  });
+
+  it('shouldRefuseANewMapDocumentThatTheDomainRejects', () => {
+    const result = newMapDocument({ name: 'Cripta', width: 3, depth: 2, floor: 'Piso Torto' });
+    expect(result.ok).toBe(false);
   });
 
   it('shouldKeepTheCopyNameWithinTheLimit', () => {
