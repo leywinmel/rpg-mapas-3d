@@ -13,7 +13,7 @@ em tempo real, com dados 3D, névoa e anotações enviadas pelo mestre.
 - Tokens com imagem ou boneco 3D, barra de vida e notas.
 - Névoa que o mestre pinta e revela.
 - Anotações do mestre para a mesa toda ou para jogadores escolhidos.
-- Dados 3D com física, que todos veem rolar.
+- Dados 3D com física, que todos veem rolar; o mestre pode rolar escondido e a mesa guarda o histórico.
 - Exportar mapas como arquivo do site, imagem PNG ou modelo 3D `.glb`.
 - Contas com e-mail ou Google para salvar mapas e mesas.
 
@@ -80,6 +80,26 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   10 MB. O modelo é ajustado ao tamanho de uma casa e entra no mapa como as outras peças.
 - **Jogadores:** veem só o mapa que o mestre mostrou, sem as ferramentas de edição. A troca de mapa e
   cada alteração salva aparecem na hora, sem recarregar a página.
+
+### Dados 3D
+
+- **Abrir:** o botão de dados no canto inferior direito da sala abre o painel "Dados". Quando alguém
+  rola em público, o painel abre sozinho para todos verem a mesma jogada.
+- **Rolar (mestre e jogador):** clique nos dados (d4, d6, d8, d10, d12, d20 e d100) para montar a
+  rolagem, tire um dado com o "−" do chip, ajuste o bônus ou digite a notação direto, como `2d6+3`,
+  `4d6` ou `2d20kh1` (vantagem; `kl1` é desvantagem). Enter ou "Rolar" joga os dados na bandeja:
+  todos veem os mesmos dados caírem e o mesmo total, e o dado descartado por `kh`/`kl` aparece
+  apagado e riscado. O limite é de 50 dados por rolagem, e uma notação inválida mostra o motivo no
+  próprio campo.
+- **Rolagem escondida (só o mestre):** com a chave "Rolar escondido" ligada, só o mestre vê os dados
+  e o resultado (marcado como "Escondida" no histórico). Os jogadores não recebem nada, nem o aviso
+  de que houve rolagem.
+- **Histórico:** a lista do painel mostra as últimas 30 rolagens da mesa, ao vivo: quem rolou, a
+  notação, cada dado, o bônus, o total e a hora. O mestre limpa o histórico (lixeira do painel), com
+  confirmação, e a lista esvazia para todos.
+- **Testar sozinho:** abra http://localhost:5173 com a conta de mestre e http://127.0.0.1:5173 com a
+  de jogador (origens diferentes guardam sessões separadas), entre os dois em `/sala/demo` e role
+  numa aba olhando a outra. Se o `127.0.0.1` não abrir, suba o site com `npm run dev -- --host 127.0.0.1`.
 
 ### Ligar o login com Google
 

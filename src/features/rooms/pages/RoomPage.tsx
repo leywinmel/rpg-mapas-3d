@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { useParams } from 'react-router-dom';
 import { MapPinOff } from 'lucide-react';
 import { ButtonLink, EmptyState, ErrorBoundary, ErrorState, LoadingState } from '@/components';
@@ -10,6 +11,11 @@ import { RoomSessionProvider } from '../components/RoomSessionProvider';
 import { useRoomEntry } from '../hooks/useRoomEntry';
 import { LOBBY_PATH, roomPath } from '../paths';
 import { roomErrorMessage } from '../services/room-errors';
+
+// Os dados são um pedaço à parte: quem só olha o mapa não paga por eles.
+const DiceTray = lazy(() =>
+  import('@/features/dice').then((module) => ({ default: module.DiceTray })),
+);
 
 function RoomNotFound() {
   return (
@@ -77,6 +83,11 @@ export default function RoomPage() {
           <RoomMap />
         </ErrorBoundary>
         <RoomHud />
+        <ErrorBoundary area="os dados">
+          <Suspense fallback={null}>
+            <DiceTray />
+          </Suspense>
+        </ErrorBoundary>
       </main>
     </RoomSessionProvider>
   );

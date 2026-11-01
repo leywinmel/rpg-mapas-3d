@@ -107,7 +107,8 @@ export function parseDice(input: string): ParseResult {
   return { ok: true, expression: { groups, modifier, notation: formatNotation(groups, modifier) } };
 }
 
-function formatNotation(groups: readonly DiceGroup[], modifier: number): string {
+/** Escreve grupos e bônus na notação padrão, ex: "2d20kh1 + 1d4 - 2" (vazio se não houver nada). */
+export function formatNotation(groups: readonly DiceGroup[], modifier: number): string {
   const parts = groups.map((group, index) => {
     const keep = group.keep ? `${group.keep.mode === 'high' ? 'kh' : 'kl'}${group.keep.count}` : '';
     const term = `${group.count}d${group.sides}${keep}`;
