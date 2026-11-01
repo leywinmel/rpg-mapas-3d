@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Quaternion, type Group } from 'three';
 import { CORRECTION_MS } from '../../constants';
@@ -8,6 +8,7 @@ import { positionAt, rotationAt } from '../../physics/simulate';
 import type { CurrentPlay } from '../../hooks/tray-player';
 import { playDurationMs } from '../../hooks/tray-player';
 import { DieModel } from './DieModel';
+import { onAtlasRepaint } from './label-atlas';
 
 const MS_PER_SECOND = 1000;
 
@@ -97,6 +98,9 @@ export function PlaybackDice({ play, expectedValues, reducedMotion }: PlaybackDi
     if (present(performance.now())) invalidate();
   });
 
+  // A fonte dos números pode chegar depois do primeiro quadro: desenha de novo quando chegar.
+  useEffect(() => onAtlasRepaint(invalidate), [invalidate]);
+
   // A bandeja só desenha quando algo muda: este efeito acorda o primeiro quadro.
   useLayoutEffect(() => {
     correctionStartedAt.current = null;
@@ -114,7 +118,7 @@ export function PlaybackDice({ play, expectedValues, reducedMotion }: PlaybackDi
           }}
           scale={dieScale}
         >
-          <DieModel kind={kind} onTextureChange={invalidate} />
+          <DieModel kind={kind} />
         </group>
       ))}
     </>

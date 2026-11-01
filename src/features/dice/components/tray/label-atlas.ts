@@ -77,12 +77,19 @@ function paint(context: CanvasRenderingContext2D): void {
 }
 
 let atlas: CanvasTexture | null = null;
+const repaintListeners = new Set<() => void>();
+
+/** Avisa quando a textura é repintada (a fonte chegou): cada bandeja aberta pede um quadro novo. */
+export function onAtlasRepaint(listener: () => void): () => void {
+  repaintListeners.add(listener);
+  return () => repaintListeners.delete(listener);
+}
 
 /**
  * Textura com todos os números dos dados numa grade. É uma só para todos os dados e
  * é repintada quando a fonte dos títulos termina de carregar.
  */
-export function getLabelAtlas(onRepaint?: () => void): CanvasTexture {
+export function getLabelAtlas(): CanvasTexture {
   if (atlas) return atlas;
   const canvas = document.createElement('canvas');
   canvas.width = COLUMNS * CELL_SIZE;
@@ -103,7 +110,7 @@ export function getLabelAtlas(onRepaint?: () => void): CanvasTexture {
     .then(() => {
       paint(context);
       texture.needsUpdate = true;
-      onRepaint?.();
+      repaintListeners.forEach((listener) => listener());
     })
     .catch((error: unknown) => {
       // Sem a fonte dos títulos os números saem na fonte reserva; o dado continua legível.
