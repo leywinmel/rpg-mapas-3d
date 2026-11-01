@@ -4,26 +4,29 @@
  */
 import type { Cell } from '@/domain';
 
-/** Linha de casas de `from` até `to` (Bresenham), sem repetir e incluindo as duas pontas. */
+/**
+ * Linha de casas de `from` até `to`, incluindo as duas pontas, em que cada casa
+ * encosta pelo lado na seguinte. Na diagonal ela vira escada: casas que só se
+ * tocam pela quina parecem soltas na câmera inclinada e deixam o caminho pintado
+ * sem passagem.
+ */
 export function cellsOnLine(from: Cell, to: Cell): Cell[] {
-  const cells: Cell[] = [];
-  const dx = Math.abs(to.x - from.x);
-  const dz = Math.abs(to.z - from.z);
-  const stepX = from.x < to.x ? 1 : -1;
-  const stepZ = from.z < to.z ? 1 : -1;
-  let error = dx - dz;
+  const spanX = Math.abs(to.x - from.x);
+  const spanZ = Math.abs(to.z - from.z);
+  const stepX = Math.sign(to.x - from.x);
+  const stepZ = Math.sign(to.z - from.z);
+  const cells: Cell[] = [{ x: from.x, z: from.z }];
   let { x, z } = from;
-  for (;;) {
-    cells.push({ x, z });
-    if (x === to.x && z === to.z) return cells;
-    const doubled = error * 2;
-    if (doubled > -dz) {
-      error -= dz;
+  for (let movedX = 0, movedZ = 0; movedX < spanX || movedZ < spanZ;) {
+    // Anda no eixo cuja próxima borda de casa a reta cruza primeiro (conta inteira, sem divisão).
+    if ((1 + 2 * movedX) * spanZ < (1 + 2 * movedZ) * spanX) {
       x += stepX;
-    }
-    if (doubled < dx) {
-      error += dx;
+      movedX += 1;
+    } else {
       z += stepZ;
+      movedZ += 1;
     }
+    cells.push({ x, z });
   }
+  return cells;
 }
