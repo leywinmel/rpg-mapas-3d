@@ -16,7 +16,12 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    environment: 'jsdom',
+    // Regras puras rodam em Node (rápido); componentes pedem jsdom no próprio arquivo
+    // com o comentário `// @vitest-environment jsdom`.
+    environment: 'node',
+    // Threads iniciam mais rápido que processos no Windows, sobretudo com o Docker ocupando a máquina.
+    pool: 'threads',
+    testTimeout: 15000,
     setupFiles: ['./tests/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}', 'tests/**/*.test.{ts,tsx}'],
   },
