@@ -65,6 +65,18 @@ visão automática dos personagens (linha de visão), chat livre entre jogadores
   - Cena 3D carregada sob demanda (lazy) para a tela inicial ficar leve. [#68]
   - Otimização só com gargalo medido. [#99]
 
+### Interface (base visual)
+
+- Cores, espaços, fontes e camadas só por variáveis de `src/styles/tokens.css`: tema escuro é o
+  padrão, o claro vem de `data-theme="light"` no `<html>`. Nada de cor chumbada no componente. [#3][#6]
+- Componentes genéricos em `src/components` (importar de `@/components`), cada um com seu CSS Module.
+  Antes de criar um novo, veja se já existe; o catálogo vivo fica em `/componentes` (só em desenvolvimento).
+- Zero falha silenciosa: erro vai para `reportError` (`src/lib/report-error.ts`), que grava no log
+  estruturado (`src/lib/logger.ts`, e-mail mascarado) e mostra um aviso amigável, sem detalhe técnico
+  na tela. Toda carga tem estado de carregando, vazio e erro (`LoadingState`, `EmptyState`, `ErrorState`). [#91][#92][#93]
+- Dentro de uma janela (`Dialog`), mostre o erro na própria janela: os avisos do canto ficam atrás dela.
+- Botão só de ícone usa `IconButton` com `label` (vira o nome lido pelo leitor de tela e a dica).
+
 ## 📂 Estrutura de Diretórios
 
 ```
