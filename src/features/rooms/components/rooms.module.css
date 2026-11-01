@@ -232,7 +232,8 @@
   white-space: nowrap;
 }
 
-.presence {
+/* Canto da barra do topo: abriga um painel lateral por vez (presença ou anotações). */
+.sidePanel {
   position: absolute;
   top: calc(var(--space-4) + var(--control-lg) + var(--space-3));
   right: var(--space-4);
