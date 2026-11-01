@@ -86,8 +86,9 @@ export function PlaybackDice({ play, expectedValues, reducedMotion }: PlaybackDi
         group.quaternion.copy(scratch.from.slerp(scratch.to, correctionProgress));
       });
 
-      const correctionEnds = corrections.length > 0 ? CORRECTION_MS : 0;
-      return elapsed < durationMs + correctionEnds;
+      // A correção tem relógio próprio: pode começar bem depois do fim da física, se o banco demorar.
+      const correcting = corrections.length > 0 && correctionProgress < 1;
+      return elapsed < durationMs || correcting;
     },
     [corrections, durationMs, play.startedAt, reducedMotion, scratch, sim],
   );
