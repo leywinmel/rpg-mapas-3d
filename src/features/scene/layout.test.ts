@@ -49,6 +49,22 @@ describe('pickCell', () => {
     expect(hit?.surface).toBe(floorTop(4));
   });
 
+  it('shouldPickARaisedCellWhenTheRayHitsItsSideInsteadOfTheGroundBehind', () => {
+    const map = buildHeightMap([{ x: 2, z: 1, tile: 'terra', height: 2 }], size);
+    // Chega em x = 2 na altura 0,75, abaixo do topo (y = 1): bate na lateral oeste da casa (2,1).
+    const ray: Ray = { origin: { x: 0.5, y: 1.5, z: 1.5 }, direction: { x: 1, y: -0.5, z: 0 } };
+    const hit = pickCell(ray, map);
+    expect(hit?.cell).toEqual({ x: 2, z: 1 });
+    expect(hit?.point.x).toBeCloseTo(2);
+    expect(hit?.surface).toBe(floorTop(2));
+  });
+
+  it('shouldHitTheOuterSideOfABorderBlockWhenTheRayComesFromOutsideTheBoard', () => {
+    const map = buildHeightMap([{ x: 0, z: 1, tile: 'terra', height: 4 }], size);
+    const ray: Ray = { origin: { x: -3, y: 2.5, z: 1.5 }, direction: { x: 1, y: -0.5, z: 0 } };
+    expect(pickCell(ray, map)?.cell).toEqual({ x: 0, z: 1 });
+  });
+
   it('shouldReturnNullOutsideTheMapOrForHorizontalRays', () => {
     const map = buildHeightMap([], size);
     expect(pickCell(rayDown(-1, 1), map)).toBeNull();

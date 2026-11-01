@@ -4,8 +4,8 @@
  * componentes para ser testada em Node e compartilhada entre cena e editor.
  */
 import {
+  isInside,
   MAX_FLOOR_HEIGHT,
-  worldToCell,
   type Cell,
   type FloorTile,
   type GridSize,
@@ -146,23 +146,74 @@ export function distanceToNearestEdge(cell: Cell, point: { x: number; z: number 
 
 export type CellHit = { cell: Cell; point: { x: number; z: number }; surface: number };
 
+type RaySpan = { enter: number; exit: number };
+
 /**
- * Casa sob o raio do cursor, levando em conta os chãos empilhados: testa os
- * planos de cada degrau, do mais alto ao chão, e aceita a primeira casa cujo
- * topo está naquele degrau. São no máximo 11 interseções por movimento do
- * mouse, em vez de testar milhares de instâncias.
+ * Trecho do raio (em distância t) que passa por cima do tabuleiro, do topo do
+ * chão mais alto possível até o nível zero. Fora dele não há bloco para tocar,
+ * e cortar aqui limita a travessia ao tamanho do mapa mesmo com raio rasante.
+ */
+function spanOverBoard(ray: Ray, size: GridSize): RaySpan | null {
+  const { origin, direction } = ray;
+  if (direction.y >= 0) return null;
+  let enter = Math.max((floorTop(MAX_FLOOR_HEIGHT) - origin.y) / direction.y, 0);
+  let exit = -origin.y / direction.y;
+  const axes = [
+    { start: origin.x, step: direction.x, length: size.width },
+    { start: origin.z, step: direction.z, length: size.depth },
+  ];
+  for (const { start, step, length } of axes) {
+    if (step === 0) {
+      if (start < 0 || start > length) return null;
+      continue;
+    }
+    const near = -start / step;
+    const far = (length - start) / step;
+    enter = Math.max(enter, Math.min(near, far));
+    exit = Math.min(exit, Math.max(near, far));
+  }
+  return enter <= exit ? { enter, exit } : null;
+}
+
+type AxisWalk = { cell: number; step: number; next: number; delta: number };
+
+/** Travessia num eixo: casa atual e em que t o raio cruza a próxima borda de casa. */
+function axisWalk(origin: number, direction: number, start: number): AxisWalk {
+  const cell = Math.floor(start);
+  if (direction === 0) return { cell, step: 0, next: Infinity, delta: Infinity };
+  const step = Math.sign(direction);
+  const border = step > 0 ? cell + 1 : cell;
+  return { cell, step, next: (border - origin) / direction, delta: Math.abs(1 / direction) };
+}
+
+/**
+ * Casa sob o raio do cursor, levando em conta os chãos empilhados. Anda pelas
+ * casas que o raio atravessa, da mais perto à mais longe, e para na primeira
+ * cujo bloco ele toca, pelo topo ou pela lateral: sem a lateral, clicar no
+ * flanco de um bloco elevado pegaria o chão atrás dele. Custa uma conta por
+ * casa atravessada, em vez de testar milhares de instâncias.
  */
 export function pickCell(ray: Ray, map: HeightMap): CellHit | null {
+  const span = spanOverBoard(ray, map.size);
+  if (!span) return null;
   const { origin, direction } = ray;
-  if (direction.y === 0) return null;
-  for (let level = MAX_FLOOR_HEIGHT; level >= 0; level -= 1) {
-    const plane = floorTop(level);
-    const t = (plane - origin.y) / direction.y;
-    if (t <= 0) continue;
-    const point = { x: origin.x + direction.x * t, z: origin.z + direction.z * t };
-    const cell = worldToCell(map.size, point.x, point.z);
-    if (!cell) continue;
-    if (Math.max(heightAt(map, cell), 0) === level) return { cell, point, surface: plane };
+  const at = (t: number) => ({ x: origin.x + direction.x * t, z: origin.z + direction.z * t });
+  const start = at(span.enter);
+  const walkX = axisWalk(origin.x, direction.x, start.x);
+  const walkZ = axisWalk(origin.z, direction.z, start.z);
+  for (let enter = span.enter; enter <= span.exit;) {
+    const cell = { x: walkX.cell, z: walkZ.cell };
+    const exit = Math.min(walkX.next, walkZ.next, span.exit);
+    const surface = surfaceAt(map, cell);
+    // Momento em que o raio desce até o topo do bloco; antes da entrada na casa, ele bate na lateral.
+    const touch = (surface - origin.y) / direction.y;
+    if (isInside(map.size, cell) && touch <= exit) {
+      return { cell, point: at(Math.max(touch, enter)), surface };
+    }
+    const axis = walkX.next < walkZ.next ? walkX : walkZ;
+    enter = axis.next;
+    axis.cell += axis.step;
+    axis.next += axis.delta;
   }
   return null;
 }
