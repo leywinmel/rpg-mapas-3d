@@ -70,15 +70,15 @@ export const DIE_KINDS = [
 /** Raio do círculo que passa por todos os vértices (tamanho do dado na bandeja). */
 const CIRCUMRADIUS: Readonly<Record<Exclude<DieKind, 'd10' | 'd100-tens' | 'd100-units'>, number>> =
   {
-    d4: 0.9,
-    d6: 0.8,
-    d8: 0.8,
-    d12: 0.86,
-    d20: 0.9,
+    d4: 1.0,
+    d6: 0.95,
+    d8: 0.95,
+    d12: 1.0,
+    d20: 1.05,
   };
 /** O d10 é definido pelos dois raios abaixo (o anel do meio e as pontas). */
-const D10_RING_RADIUS = 0.76;
-const D10_APEX_HEIGHT = 0.88;
+const D10_RING_RADIUS = 0.88;
+const D10_APEX_HEIGHT = 1.02;
 
 // Tolerâncias do desenho (as formas têm raio perto de 1)
 const FACE_EPSILON = 1e-6;

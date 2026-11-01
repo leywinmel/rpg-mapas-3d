@@ -24,13 +24,15 @@ export const FLOATS_PER_BODY = 7;
 
 // ---------------------------------------------------------------- Bandeja
 /** Metade da largura (x) e da profundidade (z) do piso onde os dados rolam. */
-export const TRAY_HALF_WIDTH = 6;
-export const TRAY_HALF_DEPTH = 4;
+export const TRAY_HALF_WIDTH = 4.5;
+export const TRAY_HALF_DEPTH = 3.2;
 /** As paredes de colisão são altas para nenhum dado escapar; a borda desenhada é mais baixa. */
 export const TRAY_WALL_HEIGHT = 18;
 export const TRAY_WALL_THICKNESS = 1;
 export const TRAY_CEILING_HEIGHT = 16;
-export const TRAY_RIM_HEIGHT = 0.7;
+/** Altura da borda desenhada: a da frente (perto da câmera) é mais baixa para não tapar o piso. */
+export const TRAY_RIM_HEIGHT = 1.2;
+export const TRAY_FRONT_RIM_HEIGHT = 0.45;
 
 // ------------------------------------------------------------------ Física
 export const GRAVITY = 45;
@@ -54,16 +56,16 @@ export const MAX_THROW_ATTEMPTS = 8;
 export const SPEC_DECIMALS = 3;
 
 /** Onde os dados nascem: perto da borda de frente, espalhados em colunas, em camadas. */
-export const SPAWN_COLUMNS = 6;
+export const SPAWN_COLUMNS = 4;
 export const SPAWN_ROWS = 2;
-export const SPAWN_SPACING = 1.75;
+export const SPAWN_SPACING = 2;
 export const SPAWN_FRONT_MARGIN = 1.1;
-export const SPAWN_BASE_HEIGHT = 2.6;
-export const SPAWN_LAYER_HEIGHT = 1.7;
+export const SPAWN_BASE_HEIGHT = 2.8;
+export const SPAWN_LAYER_HEIGHT = 1.9;
 export const SPAWN_JITTER = 0.18;
 
-export const THROW_SPEED_MIN = 5;
-export const THROW_SPEED_MAX = 10;
+export const THROW_SPEED_MIN = 2.5;
+export const THROW_SPEED_MAX = 6.5;
 export const THROW_SIDEWAYS_SPEED = 1.6;
 /** Quanto da distância até o meio da bandeja vira empurrão lateral (por segundo). */
 export const THROW_CENTERING_FACTOR = 0.25;
@@ -83,10 +85,10 @@ export const LIMIT_ANGULAR_SPEED = 80;
  */
 export const DIE_SCALE_BY_COUNT: ReadonlyArray<{ readonly upTo: number; readonly scale: number }> =
   [
-    { upTo: 6, scale: 1 },
-    { upTo: 14, scale: 0.85 },
-    { upTo: 30, scale: 0.7 },
-    { upTo: Number.POSITIVE_INFINITY, scale: 0.58 },
+    { upTo: 4, scale: 1 },
+    { upTo: 10, scale: 0.85 },
+    { upTo: 24, scale: 0.7 },
+    { upTo: Number.POSITIVE_INFINITY, scale: 0.55 },
   ];
 
 export function scaleForDiceCount(count: number): number {
