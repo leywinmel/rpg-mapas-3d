@@ -12,6 +12,9 @@ export function getSupabase(): AppSupabaseClient {
   if (!envResult.ok) {
     throw new Error(`Configuração ausente: ${envResult.problems.join(' ')}`);
   }
-  client = createClient<Database>(envResult.env.VITE_SUPABASE_URL, envResult.env.VITE_SUPABASE_ANON_KEY);
+  client = createClient<Database>(
+    envResult.env.VITE_SUPABASE_URL,
+    envResult.env.VITE_SUPABASE_ANON_KEY,
+  );
   return client;
 }
