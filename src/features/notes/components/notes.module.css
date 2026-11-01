@@ -136,15 +136,16 @@
   border-color: var(--color-border-strong);
 }
 
+/* Altura fixa: o cartão não pula quando a imagem termina de carregar. */
 .thumb {
   display: block;
   width: 100%;
-  max-height: 10rem;
+  height: 10rem;
   object-fit: cover;
 }
 
 .imageLoading {
-  height: 6rem;
+  height: 10rem;
   border-radius: var(--radius-md);
   background: var(--color-surface-raised);
   animation: notes-pulse var(--duration-slow) ease-in-out infinite alternate;

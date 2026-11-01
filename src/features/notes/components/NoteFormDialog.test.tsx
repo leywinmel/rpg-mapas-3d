@@ -73,6 +73,29 @@ describe('nova anotação', () => {
     expect(context.sendNote).not.toHaveBeenCalled();
   });
 
+  it('shouldTakeTheFocusToTheInvalidFieldAfterARefusedSend', async () => {
+    renderForm(makeContext());
+    screen.getByLabelText('Texto').focus();
+    submit();
+    await screen.findByText('Dê um título para a anotação.');
+    expect(screen.getByLabelText('Título')).toHaveFocus();
+  });
+
+  it('shouldBringAGroupErrorIntoViewWhenNoFieldIsInvalid', async () => {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    try {
+      renderForm(makeContext());
+      type('Título', 'Segredo');
+      fireEvent.click(screen.getByRole('radio', { name: 'Jogadores escolhidos' }));
+      submit();
+      await screen.findByText('Escolha ao menos um jogador.');
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+    } finally {
+      Reflect.deleteProperty(Element.prototype, 'scrollIntoView');
+    }
+  });
+
   it('shouldSendToTheWholeTableAndCloseWithANotice', async () => {
     const context = makeContext();
     const { onClose } = renderForm(context);

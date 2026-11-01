@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { Save, Send } from 'lucide-react';
 import { Button, Dialog, notify, TextAreaField, TextField } from '@/components';
 import { FormNotice } from '@/features/auth';
@@ -10,6 +10,7 @@ import { reportNoteFailure } from '../services/report-note-failure';
 import type { Note, NoteRecipients } from '../types';
 import { ImageField } from './ImageField';
 import { RecipientsField } from './RecipientsField';
+import { revealFirstError } from './reveal-error';
 import styles from './notes.module.css';
 
 /** Nova anotação ou edição de uma que já foi enviada (só título e texto). */
@@ -40,12 +41,19 @@ export function NoteFormDialog({ open, target, onClose }: NoteFormDialogProps) {
   const [errors, setErrors] = useState<FieldErrors<FormFields>>({});
   const [failure, setFailure] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [refusals, setRefusals] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
   const players = members.filter((member) => member.role === 'player');
 
   // A janela nativa foca o primeiro botão; quem vai escrever quer cair direto no título.
   useEffect(() => {
     if (open) document.getElementById(titleId)?.focus();
   }, [open, titleId]);
+
+  // Depois de um envio recusado, leva a pessoa ao primeiro problema.
+  useEffect(() => {
+    if (refusals > 0) revealFirstError(formRef.current);
+  }, [refusals]);
 
   function handleClose() {
     if (pending) return;
@@ -71,6 +79,7 @@ export function NoteFormDialog({ open, target, onClose }: NoteFormDialogProps) {
     const result = validateForm(noteEditSchema, { title, body });
     if (!result.ok) {
       setErrors(result.errors);
+      setRefusals((count) => count + 1);
       return;
     }
     setErrors({});
@@ -87,6 +96,7 @@ export function NoteFormDialog({ open, target, onClose }: NoteFormDialogProps) {
     const result = validateForm(noteDraftSchema, { title, body, image, recipients: chosen });
     if (!result.ok) {
       setErrors(result.errors);
+      setRefusals((count) => count + 1);
       return;
     }
     setErrors({});
@@ -137,7 +147,7 @@ export function NoteFormDialog({ open, target, onClose }: NoteFormDialogProps) {
         </>
       }
     >
-      <form id={formId} className={styles.form} onSubmit={handleSubmit} noValidate>
+      <form ref={formRef} id={formId} className={styles.form} onSubmit={handleSubmit} noValidate>
         <TextField
           id={titleId}
           label="Título"
