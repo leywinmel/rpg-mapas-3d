@@ -55,7 +55,8 @@ function DeleteModelDialog({ asset, onCancel, onConfirm }: DeleteDialogProps) {
       }
     >
       <p className={styles.muted}>
-        Objetos que já usam este modelo nos mapas viram caixas marcadas até serem trocados.
+        Quem já está com o mapa aberto continua vendo o modelo até recarregar a página. Depois
+        disso, os objetos que usam este modelo viram caixas marcadas até serem trocados.
       </p>
       {failed && (
         <p className={styles.error} role="alert">
