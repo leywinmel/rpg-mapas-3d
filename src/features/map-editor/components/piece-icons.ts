@@ -1,0 +1,42 @@
+import {
+  Archive,
+  Armchair,
+  Box,
+  BrickWall,
+  Cylinder,
+  Fence,
+  Flame,
+  Grid3x3,
+  Hexagon,
+  Landmark,
+  Mountain,
+  PersonStanding,
+  Sprout,
+  Square,
+  Table,
+  TreePine,
+  WavesHorizontal,
+  type LucideIcon,
+} from 'lucide-react';
+import type { PieceIcon } from '@/features/scene';
+
+/** Ícone de cada peça enquanto a miniatura 3D não fica pronta (ou se o WebGL faltar). */
+export const PIECE_ICONS: Readonly<Record<PieceIcon, LucideIcon>> = {
+  square: Square,
+  waves: WavesHorizontal,
+  sprout: Sprout,
+  mountain: Mountain,
+  brick: BrickWall,
+  fence: Fence,
+  grid: Grid3x3,
+  cylinder: Cylinder,
+  box: Box,
+  table: Table,
+  armchair: Armchair,
+  chest: Archive,
+  pillar: Landmark,
+  statue: PersonStanding,
+  rock: Hexagon,
+  tree: TreePine,
+  flame: Flame,
+};
