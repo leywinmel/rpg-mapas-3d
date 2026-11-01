@@ -2,7 +2,7 @@
 -- Cada teste "vira" um usuário trocando o JWT da sessão e confere o que ele enxerga.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(20);
+select plan(28);
 
 -- Usuários: mestre (conta), jogador A (conta), jogador B (convidado anônimo), intruso (fora da mesa)
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, is_anonymous, created_at, updated_at)
@@ -28,7 +28,7 @@ $$;
 -- Mestre cria a mesa e um mapa
 select pg_temp.act_as('00000000-0000-0000-0000-0000000000a1');
 create temp table ctx as select r.id as room_id, r.slug from public.create_room('Mesa de teste', 'Mestre') r;
-grant select on ctx to authenticated;
+grant select on ctx to authenticated, anon;
 insert into public.maps (id, owner_id, room_id, name, width, depth)
 values ('00000000-0000-0000-0000-0000000000b1', '00000000-0000-0000-0000-0000000000a1',
         (select room_id from ctx), 'Taverna', 10, 10);
@@ -109,10 +109,31 @@ select is((select count(*)::int from public.rooms), 0, 'intruso não vê a mesa'
 select is((select count(*)::int from public.maps), 0, 'intruso não vê o mapa');
 select is((select count(*)::int from public.tokens), 0, 'intruso não vê tokens');
 
--- Sem login nenhum: nada
+-- Canal privado da mesa: só membros entram (o Realtime confere estas regras)
+select is(public.room_id_from_topic('room:' || (select room_id from ctx)), (select room_id from ctx),
+  'tópico do canal aponta para a mesa');
+select is(public.room_id_from_topic('room:nao-e-um-id'), null, 'tópico fora do padrão não aponta para mesa');
+select set_config('realtime.topic', 'room:' || (select room_id from ctx), true);
+select pg_temp.act_as('00000000-0000-0000-0000-0000000000a2');
+select lives_ok($$ insert into realtime.messages (topic, extension, event, payload, private)
+  values (realtime.topic(), 'broadcast', 'teste', '{}', true) $$, 'jogador da mesa envia no canal privado');
+select is((select count(*)::int from realtime.messages where topic = realtime.topic()), 1,
+  'jogador da mesa recebe no canal privado');
+select pg_temp.act_as('00000000-0000-0000-0000-0000000000a4');
+select throws_ok($$ insert into realtime.messages (topic, extension, event, payload, private)
+  values (realtime.topic(), 'broadcast', 'teste', '{}', true) $$, '42501', null,
+  'intruso não envia no canal da mesa');
+select is((select count(*)::int from realtime.messages where topic = realtime.topic()), 0,
+  'intruso não recebe nada do canal da mesa');
+
+-- Sem login nenhum: nada, a não ser a prévia do convite
 reset role;
 set local role anon;
 select throws_ok($$ select count(*) from public.rooms $$, '42501', null, 'visitante sem login não acessa tabelas');
+select is((select name from public.get_room_preview((select slug from ctx))), 'Mesa de teste',
+  'visitante sem login vê o nome da mesa no convite');
+select is((select count(*)::int from public.get_room_preview('nao-existe')), 0,
+  'link inválido não devolve mesa ao visitante');
 
 select * from finish();
 rollback;

@@ -94,7 +94,9 @@ function listenToPeers(entry: OpenChannel): void {
 function createEntry(options: RoomChannelOptions, client: AppSupabaseClient): OpenChannel {
   const { roomId, userId, nickname } = options;
   const channel = client.channel(roomChannelName(roomId), {
-    config: { presence: { key: userId } },
+    // Privado: o Realtime só deixa entrar e enviar quem o banco reconhece como membro
+    // (regras em realtime.messages); saber o id da mesa não basta.
+    config: { private: true, presence: { key: userId } },
   });
   const entry: OpenChannel = { channel, client, handlers: options.handlers, closeTimer: null };
   listenToPeers(entry);
@@ -114,8 +116,9 @@ function createEntry(options: RoomChannelOptions, client: AppSupabaseClient): Op
 }
 
 /**
- * Canal `room:<id>`: presença (quem está online), mudanças de membros e da mesa
- * vindas do banco (o Realtime respeita o RLS) e avisos entre os participantes.
+ * Canal privado `room:<id>`, só para membros: presença (quem está online), mudanças
+ * de membros e da mesa vindas do banco (o Realtime respeita o RLS) e avisos entre
+ * os participantes.
  */
 export function openRoomChannel(
   options: RoomChannelOptions,
