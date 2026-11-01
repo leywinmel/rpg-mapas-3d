@@ -14,7 +14,7 @@ Decisões de produto: [answers/2026_10_31 rpgmaps-requisitos 001.md](../answers/
 
 - [ ] **RPG-1** Modelagem do banco: perfis, mesas, membros, mapas, tokens, anotações, névoa, rolagens, com RLS.
 - [ ] **RPG-2** Contas: cadastro e login por e-mail e Google; perfil com nome e avatar.
-- [ ] **RPG-3** Salas: mestre cria a mesa, gera o link; jogador entra com apelido (conta opcional); presença online.
+- [ ] **RPG-3** Salas: mestre cria a mesa, gera o link; jogador entra com apelido (conta opcional); presença online; vários mapas por mesa com troca de cena.
 
 ## Épico 2: Mapa 3D
 
@@ -32,14 +32,20 @@ Decisões de produto: [answers/2026_10_31 rpgmaps-requisitos 001.md](../answers/
 
 ## Épico 4: Anotações e dados
 
-- [ ] **RPG-12** Anotações do mestre: enviar para a mesa toda ou para jogadores escolhidos; histórico salvo.
-- [ ] **RPG-13** Dados 3D com física (d4, d6, d8, d10, d12, d20, d100), notação tipo `2d6+3`, resultado sincronizado e histórico.
+- [ ] **RPG-12** Anotações do mestre: enviar para a mesa toda ou para jogadores escolhidos; texto + imagem; histórico salvo.
+- [ ] **RPG-13** Dados 3D com física (d4, d6, d8, d10, d12, d20, d100), notação tipo `2d6+3`, resultado sincronizado, rolagem escondida do mestre e histórico.
 
 ## Épico 5: Exportação
 
 - [ ] **RPG-14** Exportar e importar o mapa no formato próprio (JSON versionado).
 - [ ] **RPG-15** Exportar imagem PNG da vista atual.
 - [ ] **RPG-16** Exportar o mapa como modelo 3D `.glb`.
+
+## Épico 7: Ferramentas de mesa
+
+- [ ] **RPG-19** Régua de distância em casas.
+- [ ] **RPG-20** Ping no mapa visível para todos.
+- [ ] **RPG-21** Ordem de iniciativa (lista de turnos do combate).
 
 ## Épico 6: Acabamento e lançamento
 
