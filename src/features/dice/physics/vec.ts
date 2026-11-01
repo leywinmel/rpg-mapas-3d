@@ -10,7 +10,6 @@ export type Quat = readonly [number, number, number, number];
 
 export const ORIGIN: Vec3 = [0, 0, 0];
 export const WORLD_UP: Vec3 = [0, 1, 0];
-export const IDENTITY: Quat = [0, 0, 0, 1];
 
 /** Abaixo disto (produto escalar) dois vetores unitários contam como opostos. */
 const OPPOSITE_LIMIT = -1 + 1e-9;

@@ -34,7 +34,7 @@ export type PlayerAction =
 
 export const INITIAL_PLAYER: PlayerState = { current: null, queue: [], seen: [] };
 
-export function startPlay(item: PlayItem, now: number): CurrentPlay {
+function startPlay(item: PlayItem, now: number): CurrentPlay {
   return { ...item, startedAt: now, phase: 'playing' };
 }
 
