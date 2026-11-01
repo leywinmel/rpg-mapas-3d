@@ -1,0 +1,163 @@
+import { lazy, Suspense, useEffect, useMemo, useReducer, type ReactNode } from 'react';
+import { ErrorBoundary, LoadingState } from '@/components';
+import type { PerfSample } from '@/features/scene/components/PerfMeter';
+import {
+  createEditorState,
+  editorReducer,
+  type EditorAction,
+  type PointerHit,
+} from '../editor/editor-reducer';
+import { isTypingTarget, shortcutCommand, type EditorCommand } from '../editor/shortcuts';
+import { useAutosave } from '../hooks/useAutosave';
+import type { LoadedMap } from '../hooks/useMapDocument';
+import { uploadedAssetIds, useModelUrls } from '../hooks/useModelUrls';
+import { useMapEditorServices } from '../services/services-context';
+import { AmbienceControls } from './AmbienceControls';
+import { EditorSidebar } from './EditorSidebar';
+import { EditorToolbar } from './EditorToolbar';
+import type { EditorSceneActions, EditorViewState } from './EditorInteraction';
+import { LibraryPanel } from './LibraryPanel';
+import { SaveIndicator } from './SaveIndicator';
+import layout from './MapWorkspace.module.css';
+
+// three.js só é baixado quando a cena aparece: a tela inicial fica leve.
+const MapViewport = lazy(() => import('./MapViewport'));
+
+function commandToAction(command: EditorCommand): EditorAction {
+  switch (command.type) {
+    case 'tool':
+      return { type: 'set-tool', tool: command.tool };
+    case 'rotate':
+      return { type: 'rotate' };
+    case 'undo':
+      return { type: 'undo' };
+    case 'redo':
+      return { type: 'redo' };
+    case 'delete':
+      return { type: 'delete-selected' };
+    case 'escape':
+      return { type: 'set-tool', tool: 'select' };
+  }
+}
+
+/** Tecla dentro de um diálogo aberto (ex: renomear mapa) não é atalho do editor. */
+function isInsideDialog(target: EventTarget | null): boolean {
+  return (
+    typeof Element !== 'undefined' && target instanceof Element && target.closest('dialog') !== null
+  );
+}
+
+function useEditorShortcuts(dispatch: (action: EditorAction) => void) {
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (isTypingTarget(event.target) || isInsideDialog(event.target)) return;
+      const command = shortcutCommand(event);
+      if (!command) return;
+      event.preventDefault();
+      dispatch(commandToAction(command));
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [dispatch]);
+}
+
+export type MapEditorProps = {
+  map: LoadedMap;
+  /** Conteúdo da aba "Mapas" (a lista da mesa vive fora do editor). */
+  mapsPanel: ReactNode;
+  /** Nome atual vindo da lista da mesa (o documento carregado não acompanha renomeações). */
+  name?: string;
+  onPerfSample?: (sample: PerfSample) => void;
+};
+
+/**
+ * Editor de diorama do mestre: junta o redutor, o salvamento automático, os
+ * atalhos, os painéis e a cena. Monte com key = id do mapa: trocar de mapa
+ * recomeça o histórico e grava o que faltava do mapa anterior.
+ */
+export function MapEditor({ map, mapsPanel, name, onPerfSample }: MapEditorProps) {
+  const { maps: service } = useMapEditorServices();
+  const { summary } = map;
+  const title = name ?? summary.name;
+  const [state, dispatch] = useReducer(editorReducer, map, (loaded) =>
+    createEditorState(loaded.document, {
+      width: loaded.summary.width,
+      depth: loaded.summary.depth,
+    }),
+  );
+  const document = state.history.present;
+  const autosave = useAutosave({
+    mapId: summary.id,
+    size: state.size,
+    document,
+    baseline: map.document,
+    save: service.saveDocument,
+  });
+  useEditorShortcuts(dispatch);
+
+  const brushAssetId = state.brush.prop.source === 'upload' ? state.brush.prop.assetId : null;
+  const assetIds = useMemo(() => {
+    const ids = uploadedAssetIds(document);
+    return brushAssetId && !ids.includes(brushAssetId) ? [...ids, brushAssetId] : ids;
+  }, [document, brushAssetId]);
+  const modelUrls = useModelUrls(assetIds);
+
+  const actions = useMemo<EditorSceneActions>(
+    () => ({
+      onStrokeStart: (hit: PointerHit) =>
+        dispatch({ type: 'stroke-start', hit, newPropId: crypto.randomUUID() }),
+      onStrokeMove: (hit: PointerHit) => dispatch({ type: 'stroke-move', hit }),
+      onStrokeEnd: () => dispatch({ type: 'stroke-end' }),
+      onSelectAt: (hit: PointerHit) => dispatch({ type: 'select-at', hit }),
+    }),
+    [],
+  );
+  const view = useMemo<EditorViewState>(
+    () => ({
+      tool: state.tool,
+      brush: state.brush,
+      rotation: state.rotation,
+      wallHeight: state.wallHeight,
+      selectedPropId: state.selectedPropId,
+    }),
+    [state.tool, state.brush, state.rotation, state.wallHeight, state.selectedPropId],
+  );
+
+  const tabs = [
+    {
+      id: 'library',
+      label: 'Biblioteca',
+      content: <LibraryPanel brush={state.brush} tool={state.tool} dispatch={dispatch} />,
+    },
+    { id: 'maps', label: 'Mapas', content: mapsPanel },
+    {
+      id: 'ambience',
+      label: 'Ambiente',
+      content: <AmbienceControls ambience={document.ambience} dispatch={dispatch} />,
+    },
+  ];
+
+  return (
+    <>
+      <ErrorBoundary area="a cena 3D" fill>
+        <Suspense fallback={<LoadingState label="Montando a cena 3D…" fill />}>
+          <MapViewport
+            document={document}
+            size={state.size}
+            modelUrls={modelUrls}
+            label={`Mapa 3D: ${title}`}
+            editor={{ view, actions }}
+            onPerfSample={onPerfSample}
+          />
+        </Suspense>
+      </ErrorBoundary>
+      <EditorSidebar title={title} tabs={tabs} />
+      <div className={layout.bottomBar}>
+        <EditorToolbar state={state} dispatch={dispatch} />
+        <div className={layout.saveSlot}>
+          <SaveIndicator status={autosave.status} onRetry={() => void autosave.flush()} />
+        </div>
+      </div>
+    </>
+  );
+}

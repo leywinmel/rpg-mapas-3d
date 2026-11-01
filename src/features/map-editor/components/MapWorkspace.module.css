@@ -1,0 +1,73 @@
+/*
+ * Camadas da área do mapa. Os painéis começam abaixo do HUD da sala (barra do
+ * topo); quem monta a tela pode ajustar com --map-workspace-top.
+ */
+.workspace {
+  --map-workspace-top: calc(var(--space-4) * 2 + var(--control-lg));
+  --map-workspace-bottom: calc(var(--space-4) * 2 + var(--control-lg));
+
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.sidebar {
+  position: absolute;
+  top: var(--map-workspace-top);
+  bottom: var(--map-workspace-bottom);
+  left: var(--space-4);
+  z-index: var(--z-panel);
+  display: flex;
+  pointer-events: none;
+}
+
+.sidebarPanel {
+  max-height: 100%;
+  pointer-events: auto;
+}
+
+.bottomBar {
+  position: absolute;
+  bottom: var(--space-4);
+  left: calc(var(--panel-width) + var(--space-4) * 2);
+  right: var(--space-4);
+  z-index: var(--z-hud);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  pointer-events: none;
+}
+
+.bottomBar > * {
+  pointer-events: auto;
+}
+
+.saveSlot {
+  position: absolute;
+  right: 0;
+}
+
+.mapTag {
+  position: absolute;
+  bottom: var(--space-4);
+  left: var(--space-4);
+  z-index: var(--z-hud);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-glass);
+  backdrop-filter: blur(12px) saturate(1.2);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+}
+
+.center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+}
