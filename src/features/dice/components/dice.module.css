@@ -18,7 +18,8 @@
 
 .dock .panel {
   width: min(26rem, calc(100vw - var(--space-6)));
-  max-height: calc(100vh - var(--space-4) * 2 - var(--control-lg) - var(--space-3));
+  /* Para logo abaixo da barra do topo da sala, sem cobrir os botões dela. */
+  max-height: calc(100vh - (var(--space-4) + var(--control-lg) + var(--space-3)) * 2);
 }
 
 .stack {

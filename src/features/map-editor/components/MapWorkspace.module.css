@@ -1,10 +1,12 @@
 /*
  * Camadas da área do mapa. Os painéis começam abaixo do HUD da sala (barra do
- * topo); quem monta a tela pode ajustar com --map-workspace-top.
+ * topo); quem monta a tela pode ajustar com --map-workspace-top. O canto de baixo
+ * à direita é do botão dos dados da sala: a barra de ferramentas termina antes dele.
  */
 .workspace {
   --map-workspace-top: calc(var(--space-4) * 2 + var(--control-lg));
   --map-workspace-bottom: calc(var(--space-4) * 2 + var(--control-lg));
+  --map-workspace-corner: calc(var(--space-4) * 2 + var(--control-lg));
 
   position: absolute;
   inset: 0;
@@ -30,22 +32,37 @@
   position: absolute;
   bottom: var(--space-4);
   left: calc(var(--panel-width) + var(--space-4) * 2);
-  right: var(--space-4);
+  right: var(--map-workspace-corner);
   z-index: var(--z-hud);
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: var(--space-3);
   pointer-events: none;
+}
+
+/*
+ * As duas pontas dividem a sobra: as ferramentas ficam no centro e, se a janela estreitar,
+ * deslizam para a esquerda em vez de passar por baixo do aviso de salvamento.
+ */
+.bottomBar::before {
+  content: '';
+  flex: 1;
 }
 
 .bottomBar > * {
   pointer-events: auto;
 }
 
+/* A ponta é larga, mas só o aviso pega o mouse: no resto, o clique chega à cena. */
 .saveSlot {
-  position: absolute;
-  right: 0;
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.saveSlot > * {
+  pointer-events: auto;
 }
 
 .mapTag {
