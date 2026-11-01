@@ -127,6 +127,25 @@ describe('MapWorkspace', () => {
     expect(screen.queryByRole('toolbar')).not.toBeInTheDocument();
   });
 
+  it('shouldShowTheGameMasterHowToStartWhenTheRoomHasNoMaps', async () => {
+    const fake = createFakeServices({ activeMapId: null, maps: [] });
+    renderWorkspace(fake, true);
+    expect(await screen.findByText('Esta mesa ainda não tem mapas')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Novo mapa' })).toBeInTheDocument();
+  });
+
+  it('shouldOfferARetryWhenTheRoomMapsFailToLoad', async () => {
+    const fake = createFakeServices({ activeMapId: null, maps: [] });
+    const { maps } = fake.services;
+    maps.loadRoomMaps = vi.fn(maps.loadRoomMaps).mockRejectedValueOnce(new Error('sem conexão'));
+    renderWorkspace(fake, false);
+    expect(
+      await screen.findByText('Não conseguimos carregar os mapas da mesa.'),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar de novo' }));
+    expect(await screen.findByText('O mestre ainda não mostrou um mapa')).toBeInTheDocument();
+  });
+
   it('shouldFollowTheActiveMapForThePlayerWithoutTools', async () => {
     const fake = createFakeServices({
       activeMapId: 'a',
