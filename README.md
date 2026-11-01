@@ -58,6 +58,7 @@ em tempo real, com dados 3D, névoa e anotações enviadas pelo mestre.
 - `npm run lint` e `npm run typecheck`: verificam o código.
 - `npm run build`: gera a versão de produção em `dist/`.
 - `npm run db:reset`: recria o banco local do zero.
+- `npm run test:db`: testa as regras de acesso do banco (quem vê e altera o quê).
 
 ## 📝 Variáveis de Ambiente
 
