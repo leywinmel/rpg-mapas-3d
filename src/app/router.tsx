@@ -3,6 +3,7 @@ import { createBrowserRouter, type RouteObject } from 'react-router-dom';
 import { LoadingState } from '@/components';
 import { AUTH_PATHS } from '@/features/auth';
 import { LobbyPage } from '@/features/rooms/pages/LobbyPage';
+import { LOBBY_PATH, ROOM_ROUTE } from '@/features/rooms/paths';
 import { NotFoundPage } from './NotFoundPage';
 
 // Este arquivo é configuração de rotas, não componente de tela; recarga rápida não se aplica.
@@ -25,11 +26,11 @@ function withSuspense(node: ReactNode, label: string) {
 }
 
 const routes: RouteObject[] = [
-  { path: '/', element: <LobbyPage /> },
+  { path: LOBBY_PATH, element: <LobbyPage /> },
   { path: AUTH_PATHS.signIn, element: withSuspense(<SignInPage />, 'Carregando…') },
   { path: AUTH_PATHS.resetPassword, element: withSuspense(<ResetPasswordPage />, 'Carregando…') },
   { path: AUTH_PATHS.profile, element: withSuspense(<ProfilePage />, 'Carregando…') },
-  { path: '/sala/:roomId', element: withSuspense(<RoomPage />, 'Carregando a mesa…') },
+  { path: ROOM_ROUTE, element: withSuspense(<RoomPage />, 'Carregando a mesa…') },
 ];
 
 if (import.meta.env.DEV) {
