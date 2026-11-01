@@ -3,7 +3,7 @@
 -- Cada teste "vira" um usuário trocando o JWT da sessão e confere o que ele enxerga.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(35);
+select plan(38);
 
 -- Usuários: mestre, jogadora Ana, convidada Bia (anônima), jogador Caio e um intruso fora da mesa
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, is_anonymous, created_at, updated_at)
@@ -173,6 +173,20 @@ delete from public.notes where title = 'Segredo revisado';
 select is((select count(*)::int from public.notes where title = 'Segredo revisado'), 0, 'mestre apaga a anotação');
 select is((select count(*)::int from public.note_recipients where note_id in (select id from doomed)), 0,
   'apagar a anotação leva junto os destinatários');
+
+-- Sem a anotação, o arquivo só continua visível para o mestre: é ele quem precisa apagá-lo
+delete from public.notes where title = 'Com imagem';
+select is((select count(*)::int from storage.objects where bucket_id = 'note-images'), 1,
+  'mestre ainda enxerga a imagem depois de apagar a anotação');
+select pg_temp.act_as('00000000-0000-0000-0000-0000000000a2');
+select is((select count(*)::int from storage.objects where bucket_id = 'note-images'), 0,
+  'destinatária deixa de ver a imagem quando a anotação é apagada');
+select pg_temp.act_as('00000000-0000-0000-0000-0000000000a1');
+-- O gatilho do Storage só libera DELETE direto quando a API avisa; aqui o teste faz o mesmo aviso.
+select set_config('storage.allow_delete_query', 'true', true);
+delete from storage.objects where bucket_id = 'note-images';
+select is((select count(*)::int from storage.objects where bucket_id = 'note-images'), 0,
+  'mestre apaga o arquivo da imagem que ficou sem anotação');
 
 -- ---------------------------------------------------------------------------
 -- Sem login nenhum: não executa a função

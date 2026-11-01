@@ -1,6 +1,7 @@
 -- RPG-12: envio das anotações do mestre.
 -- 1) A imagem de uma anotação só pode morar na pasta da própria mesa.
 -- 2) send_note grava a anotação e os destinatários numa transação só.
+-- 3) O mestre enxerga os arquivos da pasta da própria mesa, para poder apagá-los.
 
 -- ---------------------------------------------------------------------------
 -- 1. Imagem sempre dentro da pasta da mesa
@@ -70,3 +71,33 @@ $$;
 
 revoke execute on function public.send_note(uuid, text, text, text, boolean, uuid[]) from public, anon;
 grant execute on function public.send_note(uuid, text, text, text, boolean, uuid[]) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 3. O mestre enxerga os arquivos da pasta da própria mesa
+-- ---------------------------------------------------------------------------
+-- A leitura da imagem dependia de existir uma anotação apontando para ela, e o Storage só
+-- apaga o que o RLS deixa ver. Ao apagar uma anotação (primeiro a linha, depois o arquivo),
+-- a imagem ficava invisível para todos, até para o mestre, e sobrava no bucket para sempre.
+-- Agora o mestre da mesa vê tudo o que está na pasta dela; os jogadores continuam vendo só
+-- a imagem das anotações que podem ler.
+-- O case só converte para uuid o que já tem o formato de um (pasta fora do padrão não derruba
+-- a consulta de ninguém).
+drop policy "imagens de anotação: destinatários leem" on storage.objects;
+
+create policy "imagens de anotação: mestre e destinatários leem" on storage.objects
+  for select to authenticated
+  using (
+    bucket_id = 'note-images'
+    and (
+      public.is_room_gm(
+        case
+          when (storage.foldername(name))[1] ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+            then ((storage.foldername(name))[1])::uuid
+        end
+      )
+      or exists (
+        select 1 from public.notes n
+        where n.image_path = storage.objects.name and public.can_read_note(n.id)
+      )
+    )
+  );
