@@ -286,7 +286,12 @@ const CAMERA_MIN_DISTANCE = 2.5;
 const CAMERA_MAX_DISTANCE_FACTOR = 2.2;
 const CAMERA_MAX_DISTANCE_PADDING = 12;
 
-/** Enquadramento inicial: vista de maquete em diagonal, o mapa inteiro cabendo na tela. */
+/**
+ * Enquadramento inicial: vista de maquete em diagonal, centrada no mapa. A
+ * distância cresce com o lado do mapa, mas fica perto o bastante para a maquete
+ * aparecer grande e a neblina (que também cresce com o mapa) só engolir o fundo.
+ * Por isso, em mapa grande, as pontas saem do quadro; a roda do mouse afasta.
+ */
 export function cameraFrame(size: GridSize): CameraFrame {
   const span = Math.max(size.width, size.depth);
   const distance = span * CAMERA_DISTANCE_FACTOR + CAMERA_DISTANCE_PADDING;
