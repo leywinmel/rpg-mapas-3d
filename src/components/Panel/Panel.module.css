@@ -1,0 +1,50 @@
+/* Painel flutuante sobre a cena 3D: vidro fosco para a cena continuar visível. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: var(--panel-width);
+  max-height: calc(100vh - var(--space-6));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-glass);
+  backdrop-filter: blur(12px) saturate(1.2);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-lg);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.icon {
+  display: inline-flex;
+  color: var(--color-ember);
+}
+
+.title {
+  flex: 1;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+}

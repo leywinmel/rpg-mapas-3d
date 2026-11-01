@@ -1,0 +1,27 @@
+.toolbar {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-glass);
+  backdrop-filter: blur(12px) saturate(1.2);
+  box-shadow: var(--shadow-md);
+}
+
+.vertical {
+  flex-direction: column;
+}
+
+.separator {
+  align-self: stretch;
+  width: 1px;
+  margin: var(--space-1) 0;
+  background: var(--color-border);
+}
+
+.vertical .separator {
+  width: auto;
+  height: 1px;
+  margin: 0 var(--space-1);
+}

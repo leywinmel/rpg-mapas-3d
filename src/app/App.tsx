@@ -1,6 +1,14 @@
 import { RouterProvider } from 'react-router-dom';
+import { ErrorBoundary, ToastViewport } from '@/components';
 import { router } from './router';
 
 export function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <ErrorBoundary area="esta página" fill>
+        <RouterProvider router={router} />
+      </ErrorBoundary>
+      <ToastViewport />
+    </>
+  );
 }

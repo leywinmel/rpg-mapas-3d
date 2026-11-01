@@ -57,6 +57,7 @@ em tempo real, com dados 3D, névoa e anotações enviadas pelo mestre.
 - `npm test`: roda os testes.
 - `npm run lint` e `npm run typecheck`: verificam o código.
 - `npm run build`: gera a versão de produção em `dist/`.
+- Com o site rodando, `http://localhost:5173/componentes` mostra todos os componentes visuais nos dois temas (só em desenvolvimento).
 - `npm run db:reset`: recria o banco local do zero.
 - `npm run test:db`: testa as regras de acesso do banco (quem vê e altera o quê).
 

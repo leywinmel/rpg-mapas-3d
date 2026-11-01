@@ -1,0 +1,170 @@
+/*
+ * Tokens de tema do rpgmaps. Nenhum componente usa cor solta: tudo vem daqui,
+ * para o tema escuro (padrão) e o claro ficarem sempre coerentes.
+ * Escuro: masmorra à luz de tocha (violeta frio + brasa quente).
+ */
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Fundos, do mais profundo ao mais elevado */
+  --color-bg: #0b0a10;
+  --color-bg-elevated: #110f18;
+  --color-surface: #18151f;
+  --color-surface-raised: #211d2b;
+  --color-surface-hover: #2a2537;
+  --color-overlay: rgb(5 4 9 / 72%);
+  --color-glass: rgb(24 21 31 / 86%);
+
+  /* Bordas */
+  --color-border: #2c2740;
+  --color-border-strong: #463e60;
+
+  /* Texto */
+  --color-text: #ece8f5;
+  --color-text-muted: #a69ebd;
+  --color-text-subtle: #776f90;
+
+  /* Marca e estados */
+  --color-accent: #7c5cff;
+  --color-accent-hover: #8f74ff;
+  --color-accent-soft: rgb(124 92 255 / 16%);
+  --color-on-accent: #ffffff;
+  --color-ember: #ff9a3c;
+  --color-ember-soft: rgb(255 154 60 / 14%);
+  --color-danger: #ff6b6b;
+  --color-danger-hover: #ff8585;
+  --color-danger-soft: rgb(255 107 107 / 14%);
+  --color-on-danger: #1a0606;
+  --color-success: #4ade80;
+  --color-success-soft: rgb(74 222 128 / 14%);
+  --color-warning: #fbbf24;
+  --color-warning-soft: rgb(251 191 36 / 14%);
+  --color-focus: #b7a6ff;
+
+  /* Cores de avatar (apelidos), escolhidas por apelido de forma estável */
+  --avatar-1: #7c5cff;
+  --avatar-2: #ff9a3c;
+  --avatar-3: #3fb6a8;
+  --avatar-4: #e0569b;
+  --avatar-5: #5b8def;
+  --avatar-6: #c0a440;
+  --avatar-7: #6dbb5a;
+  --avatar-8: #b06cf0;
+  --on-avatar: #0b0a10;
+
+  /* Cena 3D */
+  --scene-fog: #0d0b14;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 45%);
+  --shadow-lg: 0 20px 48px rgb(0 0 0 / 55%);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --color-bg: #f5f3fa;
+  --color-bg-elevated: #ece9f4;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f7f5fc;
+  --color-surface-hover: #efebf8;
+  --color-overlay: rgb(27 23 38 / 45%);
+  --color-glass: rgb(255 255 255 / 88%);
+
+  --color-border: #dcd6ea;
+  --color-border-strong: #bfb6d6;
+
+  --color-text: #1b1726;
+  --color-text-muted: #564f6b;
+  --color-text-subtle: #7d7594;
+
+  --color-accent: #6644ee;
+  --color-accent-hover: #5734e0;
+  --color-accent-soft: rgb(102 68 238 / 12%);
+  --color-on-accent: #ffffff;
+  --color-ember: #c25e00;
+  --color-ember-soft: rgb(194 94 0 / 12%);
+  --color-danger: #c62f2f;
+  --color-danger-hover: #ad2424;
+  --color-danger-soft: rgb(198 47 47 / 10%);
+  --color-on-danger: #ffffff;
+  --color-success: #1b8a4b;
+  --color-success-soft: rgb(27 138 75 / 12%);
+  --color-warning: #9a6408;
+  --color-warning-soft: rgb(154 100 8 / 12%);
+  --color-focus: #6644ee;
+
+  --on-avatar: #ffffff;
+
+  --scene-fog: #cfc8e0;
+
+  --shadow-sm: 0 1px 2px rgb(27 23 38 / 10%);
+  --shadow-md: 0 8px 24px rgb(27 23 38 / 14%);
+  --shadow-lg: 0 20px 48px rgb(27 23 38 / 20%);
+}
+
+:root {
+  /* Tipografia */
+  --font-ui: 'Inter Variable', Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-display: Cinzel, Georgia, 'Times New Roman', serif;
+  --font-mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-md: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2.25rem;
+  --text-hero: 3.5rem;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+
+  /* Espaçamento (escala de 4 px) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Formas */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 999px;
+
+  /* Tamanhos de controle */
+  --control-sm: 2rem;
+  --control-md: 2.5rem;
+  --control-lg: 3rem;
+  --panel-width: 22rem;
+
+  /* Camadas */
+  --z-scene: 0;
+  --z-hud: 10;
+  --z-panel: 20;
+  --z-overlay: 40;
+  --z-dialog: 50;
+  --z-toast: 60;
+
+  /* Movimento */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 320ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+  }
+}
