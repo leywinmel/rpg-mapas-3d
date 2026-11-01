@@ -3,6 +3,7 @@ import {
   cellsInRect,
   clampCell,
   distanceInCells,
+  isEdgeInside,
   isInside,
   isValidMapSize,
   worldToCell,
@@ -53,5 +54,14 @@ describe('grid', () => {
       { x: 1, z: 1 },
       { x: 2, z: 1 },
     ]);
+  });
+
+  it('shouldAcceptTheEastAndSouthBordersAsEdges', () => {
+    expect(isEdgeInside(size, { x: 9, z: 8, side: 'north' })).toBe(true);
+    expect(isEdgeInside(size, { x: 10, z: 7, side: 'west' })).toBe(true);
+    expect(isEdgeInside(size, { x: 10, z: 0, side: 'north' })).toBe(false);
+    expect(isEdgeInside(size, { x: 0, z: 8, side: 'west' })).toBe(false);
+    expect(isEdgeInside(size, { x: -1, z: 0, side: 'west' })).toBe(false);
+    expect(isEdgeInside(size, { x: 0.5, z: 0, side: 'west' })).toBe(false);
   });
 });

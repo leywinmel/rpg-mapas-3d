@@ -1,0 +1,205 @@
+import { lazy, Suspense, useMemo, useState, type ReactNode } from 'react';
+import { Map as MapIcon } from 'lucide-react';
+import { EmptyState, ErrorBoundary, ErrorState, LoadingState } from '@/components';
+import type { PerfSample } from '@/features/scene/components/PerfMeter';
+import { sortMaps } from '../editor/map-list';
+import { useMapActions } from '../hooks/useMapActions';
+import { useMapDocument } from '../hooks/useMapDocument';
+import { uploadedAssetIds, useModelUrls } from '../hooks/useModelUrls';
+import { useRoomMaps } from '../hooks/useRoomMaps';
+import { EditorSidebar } from './EditorSidebar';
+import { MapEditor } from './MapEditor';
+import { MapListPanel } from './MapListPanel';
+import layout from './MapWorkspace.module.css';
+
+const MapViewport = lazy(() => import('./MapViewport'));
+
+export type MapWorkspaceProps = {
+  roomId: string;
+  isGameMaster: boolean;
+  /** Recebe a medição de quadros por segundo da cena (página de desenvolvimento). */
+  onPerfSample?: (sample: PerfSample) => void;
+};
+
+type RoomMaps = ReturnType<typeof useRoomMaps>;
+
+function Centered({ children }: { children: ReactNode }) {
+  return <div className={layout.center}>{children}</div>;
+}
+
+const MAP_LOAD_ERROR = {
+  load: 'Não conseguimos abrir o mapa. Confira a conexão e tente de novo.',
+  invalid: 'Este mapa está num formato que não reconhecemos.',
+} as const;
+
+/** O jogador só vê o mapa que o mestre mostrou à mesa, sem ferramentas. */
+function PlayerView({
+  room,
+  onPerfSample,
+}: {
+  room: RoomMaps;
+  onPerfSample?: MapWorkspaceProps['onPerfSample'];
+}) {
+  const mapId = room.activeMapId;
+  const [attempt, setAttempt] = useState(0);
+  const state = useMapDocument(mapId, mapId ? (room.revisions[mapId] ?? 0) : 0, attempt);
+  const document = state.status === 'ready' ? state.map.document : null;
+  const assetIds = useMemo(() => uploadedAssetIds(document), [document]);
+  const modelUrls = useModelUrls(assetIds);
+  const name = room.maps.find((map) => map.id === mapId)?.name;
+
+  if (!mapId) {
+    return (
+      <Centered>
+        <EmptyState
+          icon={<MapIcon size={22} />}
+          title="O mestre ainda não mostrou um mapa"
+          description="Assim que ele abrir um mapa para a mesa, ele aparece aqui."
+        />
+      </Centered>
+    );
+  }
+  if (state.status === 'error') {
+    return (
+      <Centered>
+        <ErrorState
+          description={MAP_LOAD_ERROR[state.reason]}
+          onRetry={() => setAttempt((value) => value + 1)}
+        />
+      </Centered>
+    );
+  }
+  if (state.status !== 'ready') return <LoadingState label="Carregando o mapa…" fill />;
+
+  const { summary } = state.map;
+  return (
+    <>
+      <ErrorBoundary area="a cena 3D" fill>
+        <Suspense fallback={<LoadingState label="Montando a cena 3D…" fill />}>
+          <MapViewport
+            document={state.map.document}
+            size={{ width: summary.width, depth: summary.depth }}
+            modelUrls={modelUrls}
+            label={`Mapa 3D: ${name ?? summary.name}`}
+            onPerfSample={onPerfSample}
+          />
+        </Suspense>
+      </ErrorBoundary>
+      <span className={layout.mapTag}>{name ?? summary.name}</span>
+    </>
+  );
+}
+
+/** Mestre: lista de mapas da mesa e o editor do mapa escolhido (que pode não ser o da mesa). */
+function GameMasterView({
+  roomId,
+  room,
+  onPerfSample,
+}: {
+  roomId: string;
+  room: RoomMaps;
+  onPerfSample?: MapWorkspaceProps['onPerfSample'];
+}) {
+  const [chosenId, setChosenId] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const actions = useMapActions({
+    roomId,
+    activeMapId: room.activeMapId,
+    maps: room.maps,
+    patch: room.patch,
+  });
+  const exists = (id: string | null) => id !== null && room.maps.some((map) => map.id === id);
+  // Sem escolha (ou se o escolhido foi apagado), abre o mapa da mesa ou o primeiro da lista.
+  const selectedId = exists(chosenId)
+    ? chosenId
+    : exists(room.activeMapId)
+      ? room.activeMapId
+      : (sortMaps(room.maps)[0]?.id ?? null);
+  // O mestre ignora as revisões do tempo real: o eco das próprias gravações não pode reabrir o mapa.
+  const state = useMapDocument(selectedId, 0, attempt);
+  const selected = room.maps.find((map) => map.id === selectedId);
+
+  const mapsPanel = (
+    <MapListPanel
+      maps={room.maps}
+      activeMapId={room.activeMapId}
+      selectedMapId={selectedId}
+      onSelect={setChosenId}
+      actions={actions}
+    />
+  );
+
+  if (state.status === 'ready' && state.map.summary.id === selectedId) {
+    return (
+      <MapEditor
+        key={selectedId}
+        map={state.map}
+        name={selected?.name}
+        mapsPanel={mapsPanel}
+        onPerfSample={onPerfSample}
+      />
+    );
+  }
+
+  return (
+    <>
+      <EditorSidebar
+        title="Mapas da mesa"
+        tabs={[{ id: 'maps', label: 'Mapas', content: mapsPanel }]}
+      />
+      <Centered>
+        {!selectedId && (
+          <EmptyState
+            icon={<MapIcon size={22} />}
+            title="Esta mesa ainda não tem mapas"
+            description="Crie um mapa no painel ao lado para começar o diorama."
+          />
+        )}
+        {selectedId && state.status === 'error' && (
+          <ErrorState
+            description={MAP_LOAD_ERROR[state.reason]}
+            onRetry={() => setAttempt((value) => value + 1)}
+          />
+        )}
+        {selectedId && state.status !== 'error' && <LoadingState label="Abrindo o mapa…" />}
+      </Centered>
+    </>
+  );
+}
+
+/**
+ * Área do mapa da sala. O mestre edita e escolhe o mapa da mesa; o jogador vê
+ * só o mapa ativo. Trocas de mapa e gravações chegam pelo tempo real.
+ */
+export function MapWorkspace({ roomId, isGameMaster, onPerfSample }: MapWorkspaceProps) {
+  const room = useRoomMaps(roomId);
+
+  if (room.status === 'loading') {
+    return (
+      <div className={layout.workspace}>
+        <LoadingState label="Carregando os mapas da mesa…" fill />
+      </div>
+    );
+  }
+  if (room.status === 'error') {
+    return (
+      <div className={layout.workspace}>
+        <Centered>
+          <ErrorState
+            description="Não conseguimos carregar os mapas da mesa."
+            onRetry={room.retry}
+          />
+        </Centered>
+      </div>
+    );
+  }
+  return (
+    <div className={layout.workspace}>
+      {isGameMaster ? (
+        <GameMasterView roomId={roomId} room={room} onPerfSample={onPerfSample} />
+      ) : (
+        <PlayerView room={room} onPerfSample={onPerfSample} />
+      )}
+    </div>
+  );
+}

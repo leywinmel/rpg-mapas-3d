@@ -35,6 +35,13 @@ const routes: RouteObject[] = [
 
 if (import.meta.env.DEV) {
   routes.push({ path: '/componentes', element: withSuspense(<ShowcasePage />, 'Carregando…') });
+  // Editor de mapas isolado, para testar com as contas do seed. Declarado aqui dentro para
+  // o import nem entrar no build publicado.
+  const DevMapPage = lazy(() => import('@/features/map-editor/dev/DevMapPage'));
+  routes.push({
+    path: '/dev/mapa/:roomId',
+    element: withSuspense(<DevMapPage />, 'Carregando o editor…'),
+  });
 }
 
 routes.push({ path: '*', element: <NotFoundPage /> });

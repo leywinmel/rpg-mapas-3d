@@ -2,10 +2,10 @@ import { useParams } from 'react-router-dom';
 import { MapPinOff } from 'lucide-react';
 import { ButtonLink, EmptyState, ErrorBoundary, ErrorState, LoadingState } from '@/components';
 import { signInPath, useSession } from '@/features/auth';
-import { DioramaPreview } from '@/features/scene/components/DioramaPreview';
 import { JoinRoomScreen } from '../components/JoinRoomScreen';
 import { RoomEntryScreen } from '../components/RoomEntryScreen';
 import { RoomHud } from '../components/RoomHud';
+import { RoomMap } from '../components/RoomMap';
 import { RoomSessionProvider } from '../components/RoomSessionProvider';
 import { useRoomEntry } from '../hooks/useRoomEntry';
 import { LOBBY_PATH, roomPath } from '../paths';
@@ -73,8 +73,8 @@ export default function RoomPage() {
       user={session.user}
     >
       <main className="room">
-        <ErrorBoundary area="a cena 3D" fill>
-          <DioramaPreview />
+        <ErrorBoundary area="o mapa da mesa" fill>
+          <RoomMap />
         </ErrorBoundary>
         <RoomHud />
       </main>

@@ -4,16 +4,18 @@
  * porque cada versão antiga ganha uma função de atualização em MIGRATIONS.
  */
 import { z } from 'zod';
-import { MAX_MAP_SIZE, type GridSize } from './grid';
+import { isEdgeInside, MAX_MAP_SIZE, type GridSize } from './grid';
 
 export const MAP_DOCUMENT_VERSION = 1;
 export const EXPORT_FORMAT = 'rpgmaps.map';
 /** Mesmo limite do banco (2 MB), para o import falhar com mensagem clara e não no servidor. */
 export const MAX_EXPORT_BYTES = 2_000_000;
 
-const MAX_PROPS = 2000;
-const MAX_WALLS = 20_000;
-const MAX_FLOOR_HEIGHT = 10;
+export const MAX_PROPS = 2000;
+export const MAX_WALLS = 20_000;
+export const MAX_FLOOR_HEIGHT = 10;
+export const MIN_WALL_HEIGHT = 1;
+export const MAX_WALL_HEIGHT = 4;
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Cor inválida.');
 /** Chave de uma peça do catálogo embutido (ex: "piso-pedra"), definido na feature de cena. */
@@ -34,7 +36,7 @@ const wallSchema = z.object({
   /** "north" = aresta no lado de z menor da casa; "west" = lado de x menor. */
   side: z.enum(['north', 'west']),
   style: catalogKey,
-  height: z.number().int().min(1).max(4),
+  height: z.number().int().min(MIN_WALL_HEIGHT).max(MAX_WALL_HEIGHT),
 });
 
 const propAssetSchema = z.discriminatedUnion('source', [
@@ -153,12 +155,7 @@ function checkBounds(doc: MapDocument, size: GridSize): string[] {
     seenFloors.add(key);
   }
   for (const wall of doc.walls) {
-    // Paredes ficam nas arestas: a borda leste/sul usa x = largura ou z = profundidade.
-    const outside =
-      wall.side === 'north'
-        ? wall.x >= size.width || wall.z > size.depth
-        : wall.x > size.width || wall.z >= size.depth;
-    if (outside) errors.push(`Parede fora do mapa em (${wall.x}, ${wall.z}).`);
+    if (!isEdgeInside(size, wall)) errors.push(`Parede fora do mapa em (${wall.x}, ${wall.z}).`);
   }
   const propIds = new Set<string>();
   for (const prop of doc.props) {
