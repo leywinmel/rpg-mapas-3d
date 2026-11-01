@@ -29,6 +29,22 @@ export function isInside(size: GridSize, cell: Cell): boolean {
   );
 }
 
+/** Aresta da grade: "north" = lado de z menor da casa; "west" = lado de x menor. */
+export type GridEdge = { readonly x: number; readonly z: number; readonly side: 'north' | 'west' };
+
+/**
+ * A aresta existe no mapa? As bordas leste e sul não têm casa própria: usam
+ * x = largura (lado oeste da casa de fora) ou z = profundidade (lado norte).
+ */
+export function isEdgeInside(size: GridSize, edge: GridEdge): boolean {
+  if (!Number.isInteger(edge.x) || !Number.isInteger(edge.z) || edge.x < 0 || edge.z < 0) {
+    return false;
+  }
+  return edge.side === 'north'
+    ? edge.x < size.width && edge.z <= size.depth
+    : edge.x <= size.width && edge.z < size.depth;
+}
+
 /** Índice linear da casa: linha a linha, mesma convenção da névoa no banco (z * largura + x). */
 export function cellIndex(size: GridSize, cell: Cell): number {
   if (!isInside(size, cell)) {
