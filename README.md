@@ -65,6 +65,22 @@ em tempo real, com dados 3D, névoa e anotações enviadas pelo mestre.
   `supabase/seed.sql`.
 - **E-mails locais** (recuperação de senha): chegam no Mailpit, em http://127.0.0.1:54324.
 
+### Editor de mapas
+
+Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
+
+- **Criar mapas:** na aba "Mapas", o botão "Novo mapa" pede o nome, o tamanho (até 100 × 100 casas)
+  e o chão inicial. A mesa pode ter vários mapas; o botão com o olho mostra um deles aos jogadores.
+- **Montar:** escolha uma peça na aba "Biblioteca" e clique na grade; para pintar o chão, dá para
+  arrastar. A barra de baixo troca a ferramenta: chão, parede, objeto, apagar e elevar ou abaixar o
+  chão. A tecla `R` gira a peça, e o botão de atalhos mostra todas as teclas.
+- **Desfazer e refazer:** `Ctrl+Z` desfaz; `Ctrl+Y` (ou `Ctrl+Shift+Z`) refaz. O mapa se salva
+  sozinho, e o canto de baixo avisa quando está "Salvando…" e "Salvo".
+- **Modelos próprios:** em "Meus modelos", o botão "Enviar .glb" aceita modelos 3D `.glb` de até
+  10 MB. O modelo é ajustado ao tamanho de uma casa e entra no mapa como as outras peças.
+- **Jogadores:** veem só o mapa que o mestre mostrou, sem as ferramentas de edição. A troca de mapa e
+  cada alteração salva aparecem na hora, sem recarregar a página.
+
 ### Ligar o login com Google
 
 O login com Google vem desligado no ambiente local. Para ligar:
