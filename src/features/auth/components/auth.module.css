@@ -1,0 +1,171 @@
+/* Telas de conta: um cartão no centro, sobre o mesmo brilho de tocha da tela inicial. */
+.screen {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: var(--space-6) var(--space-4);
+  background:
+    radial-gradient(50rem 26rem at 50% 115%, var(--color-ember-soft), transparent 70%),
+    var(--color-bg);
+}
+
+.card {
+  display: grid;
+  gap: var(--space-5);
+  width: min(26rem, 100%);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.cardHeader {
+  display: grid;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.brandLink {
+  font-size: var(--text-xl);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+}
+
+.tab {
+  height: var(--control-sm);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.tab:hover {
+  color: var(--color-text);
+}
+
+.tab[aria-selected='true'] {
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--color-text-subtle);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.linkButton {
+  justify-self: end;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+.notice {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  text-align: left;
+}
+
+.error {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.success {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.info {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.profileHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.profileName {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.muted {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.account {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.accountLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
+  border-radius: var(--radius-full);
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+}
+
+.accountLink:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}

@@ -52,6 +52,34 @@ em tempo real, com dados 3D, névoa e anotações enviadas pelo mestre.
 > Para parar ou reiniciar: use `stop` ou `restart` no mesmo script. `status` mostra os endereços e chaves locais.
 > O painel do banco local fica em http://127.0.0.1:54323.
 
+### Contas e mesas
+
+- **Mestre:** crie uma conta com e-mail e senha (ou Google) na tela inicial. No início aparecem
+  "Minhas mesas"; o botão de nova mesa cria a mesa e já abre a sala.
+- **Convite:** dentro da mesa, "Copiar link de convite" copia o endereço `/sala/<código>`. Quem abre
+  o link vê o nome da mesa e entra com um apelido; a conta é opcional para o jogador.
+- **Na mesa:** a barra do topo mostra quem está online. O mestre renomeia ou apaga a mesa; o
+  jogador pode sair dela. O nome de exibição se troca em "Seu perfil".
+- **Dados de exemplo:** o banco local já vem com uma conta de mestre (`mestre@rpgmaps.test`), uma de
+  jogador (`jogador@rpgmaps.test`) e a mesa `/sala/demo`. A senha de teste está no comentário do
+  `supabase/seed.sql`.
+- **E-mails locais** (recuperação de senha): chegam no Mailpit, em http://127.0.0.1:54324.
+
+### Ligar o login com Google
+
+O login com Google vem desligado no ambiente local. Para ligar:
+
+1. No Google Cloud Console, crie uma credencial OAuth do tipo "Aplicativo da Web" e cadastre o
+   endereço de retorno `http://127.0.0.1:54321/auth/v1/callback`.
+2. Copie `.env.example` para `.env` e preencha `SUPABASE_AUTH_GOOGLE_CLIENT_ID` e
+   `SUPABASE_AUTH_GOOGLE_SECRET`.
+3. Em `supabase/config.toml`, na seção `[auth.external.google]`, troque `enabled = false` por
+   `enabled = true` (não commite essa troca).
+4. Reinicie: `scripts\dev.bat restart` (ou `./scripts/dev.sh restart`).
+
+Na nuvem, o Google se liga no painel do Supabase (Authentication → Providers → Google), com o
+endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
+
 ### Comandos úteis
 
 - `npm test`: roda os testes.
