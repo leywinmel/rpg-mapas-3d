@@ -405,6 +405,26 @@ isOneToOne: false
 "note_room_id":
 { Args: { "p_note": string }; Returns: string
                            },
+"room_id_from_topic":
+{ Args: { "p_topic": string }; Returns: string
+                           },
+"send_note":
+{ Args: { "p_body": string,"p_image_path"?: string,"p_recipient_ids"?: (string)[],"p_room_id": string,"p_title": string,"p_to_all"?: boolean }; Returns: {
+              "author_id": string | null,
+"body": string,
+"created_at": string,
+"id": string,
+"image_path": string | null,
+"room_id": string,
+"title": string,
+"to_all": boolean
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "notes"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "shares_room_with":
 { Args: { "p_user": string }; Returns: boolean
                            }

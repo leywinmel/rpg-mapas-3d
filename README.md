@@ -12,7 +12,7 @@ em tempo real, com dados 3D, névoa e anotações enviadas pelo mestre.
 - Editor de mapas 3D com peças prontas (uso livre) e envio de modelos `.glb` próprios.
 - Tokens com imagem ou boneco 3D, barra de vida e notas.
 - Névoa que o mestre pinta e revela.
-- Anotações do mestre para a mesa toda ou para jogadores escolhidos.
+- Anotações do mestre, com texto e imagem, para a mesa toda ou para jogadores escolhidos; chegam na hora e ficam salvas na mesa.
 - Dados 3D com física, que todos veem rolar; o mestre pode rolar escondido e a mesa guarda o histórico.
 - Exportar mapas como arquivo do site, imagem PNG ou modelo 3D `.glb`.
 - Contas com e-mail ou Google para salvar mapas e mesas.
@@ -100,6 +100,23 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
 - **Testar sozinho:** abra http://localhost:5173 com a conta de mestre e http://127.0.0.1:5173 com a
   de jogador (origens diferentes guardam sessões separadas), entre os dois em `/sala/demo` e role
   numa aba olhando a outra. Se o `127.0.0.1` não abrir, suba o site com `npm run dev -- --host 127.0.0.1`.
+
+### Anotações
+
+- **Abrir:** o botão de caderno na barra do topo da sala abre o painel "Anotações", no mesmo canto
+  do painel "Na mesa" (abrir um fecha o outro). Um selo no botão conta as anotações novas que você
+  ainda não leu, e um aviso aparece quando chega uma nova com o painel fechado. Abrir o painel marca
+  tudo como lido (o navegador guarda a última leitura por pessoa e por mesa).
+- **Mestre:** "Nova anotação" pede o título, o texto (até 5000 caracteres) e, se quiser, uma imagem
+  PNG, JPEG ou WebP de até 5 MB, e deixa escolher entre a mesa toda e jogadores escolhidos. Cada
+  cartão tem editar (título e texto) e apagar; para trocar a imagem ou os destinatários, apague e
+  mande de novo. O cartão mostra para quem foi, com o apelido dos escolhidos.
+- **Jogador:** vê só o que é para ele (a mesa toda ou o que o mestre mandou só para ele), ao vivo e
+  sem recarregar. Clicar na miniatura abre a imagem grande. A lista começa com as 20 mais novas, e
+  "Ver mais antigas" traz o resto. O texto é sempre texto puro: tags e links digitados pelo mestre
+  aparecem como estão.
+- **Testar sozinho:** como nos dados, entre em `/sala/demo` com o mestre e a jogadora em duas origens
+  diferentes e mande uma anotação olhando a outra aba.
 
 ### Ligar o login com Google
 

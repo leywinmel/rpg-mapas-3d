@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, DoorOpen, Link2, Pencil, Trash2, Users } from 'lucide-react';
 import { IconButton, notify, ThemeToggle, Toolbar, ToolbarSeparator } from '@/components';
 import { absoluteAppUrl } from '@/features/auth';
+import { NotesButton, NotesPanel, NotesProvider } from '@/features/notes';
 import { reportError } from '@/lib/report-error';
 import { useRoomSession } from '../hooks/room-session-context';
 import { LOBBY_PATH, roomPath } from '../paths';
@@ -11,6 +12,9 @@ import { DeleteRoomDialog, LeaveRoomDialog, RenameRoomDialog } from './RoomAdmin
 import styles from './rooms.module.css';
 
 type OpenDialog = 'rename' | 'delete' | 'leave' | null;
+
+/** O canto superior direito abre um painel por vez: quem está na mesa ou as anotações. */
+type SidePanel = 'presence' | 'notes' | null;
 
 async function copyInviteLink(slug: string): Promise<void> {
   const link = absoluteAppUrl(roomPath(slug));
@@ -28,16 +32,20 @@ async function copyInviteLink(slug: string): Promise<void> {
   }
 }
 
-/** Barra da sala sobre a cena: nome, convite, quem está na mesa e o menu do papel. */
+/** Barra da sala sobre a cena: nome, convite, quem está na mesa, as anotações e o menu do papel. */
 export function RoomHud() {
   const { room, isGameMaster } = useRoomSession();
   const navigate = useNavigate();
   const [dialog, setDialog] = useState<OpenDialog>(null);
-  const [presenceOpen, setPresenceOpen] = useState(true);
+  const [sidePanel, setSidePanel] = useState<SidePanel>('presence');
   const closeDialog = () => setDialog(null);
+  const closeSidePanel = () => setSidePanel(null);
+  const toggleSidePanel = (panel: Exclude<SidePanel, null>) =>
+    setSidePanel((current) => (current === panel ? null : panel));
 
   return (
-    <>
+    // O provider fica montado com o painel fechado: o aviso de anotação nova chega do mesmo jeito.
+    <NotesProvider panelOpen={sidePanel === 'notes'}>
       <div className="room__hud">
         <Toolbar label="Mesa" className={styles.hudGroup}>
           <IconButton
@@ -56,11 +64,14 @@ export function RoomHud() {
         </Toolbar>
         <Toolbar label={isGameMaster ? 'Menu do mestre' : 'Menu do jogador'}>
           <IconButton
-            label={presenceOpen ? 'Esconder quem está na mesa' : 'Mostrar quem está na mesa'}
+            label={
+              sidePanel === 'presence' ? 'Esconder quem está na mesa' : 'Mostrar quem está na mesa'
+            }
             icon={<Users size={18} />}
-            active={presenceOpen}
-            onClick={() => setPresenceOpen((open) => !open)}
+            active={sidePanel === 'presence'}
+            onClick={() => toggleSidePanel('presence')}
           />
+          <NotesButton active={sidePanel === 'notes'} onClick={() => toggleSidePanel('notes')} />
           <ToolbarSeparator />
           {isGameMaster ? (
             <>
@@ -86,9 +97,14 @@ export function RoomHud() {
           <ThemeToggle />
         </Toolbar>
       </div>
-      {presenceOpen && (
-        <div className={styles.presence}>
-          <PresencePanel onClose={() => setPresenceOpen(false)} />
+      {sidePanel === 'presence' && (
+        <div className={styles.sidePanel}>
+          <PresencePanel onClose={closeSidePanel} />
+        </div>
+      )}
+      {sidePanel === 'notes' && (
+        <div className={styles.sidePanel}>
+          <NotesPanel onClose={closeSidePanel} />
         </div>
       )}
       {isGameMaster ? (
@@ -99,6 +115,6 @@ export function RoomHud() {
       ) : (
         <LeaveRoomDialog open={dialog === 'leave'} onClose={closeDialog} />
       )}
-    </>
+    </NotesProvider>
   );
 }
