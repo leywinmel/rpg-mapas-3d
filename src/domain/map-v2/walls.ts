@@ -1,7 +1,6 @@
 /** Paredes do v2: de qual pedaço cada uma é e como ela é identificada. */
 import { type Cell, type GridEdge, type GridSize } from '../grid';
 import { chunkOfCell, type ChunkCoord } from './chunks';
-import type { MapWall } from './schema';
 
 /**
  * Uma parede é identificada pela aresta e pelo degrau da base: duas paredes na mesma aresta
@@ -32,9 +31,4 @@ export function wallOwnerChunk(size: GridSize, edge: GridEdge): ChunkCoord {
 
 export function sameWallKey(a: WallKey, b: WallKey): boolean {
   return a.x === b.x && a.z === b.z && a.side === b.side && a.level === b.level;
-}
-
-/** Só a identidade, sem estilo nem altura (útil para remover). */
-export function keyOfWall(wall: MapWall): WallKey {
-  return { x: wall.x, z: wall.z, side: wall.side, level: wall.level };
 }

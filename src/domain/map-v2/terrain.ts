@@ -5,7 +5,7 @@
  * as operações copiam o array do pedaço tocado, e é isso que deixa os outros pedaços compartilhados.
  */
 import type { MapResult } from '../map-document';
-import { MAX_TERRAIN_HEIGHT } from './constants';
+import { MAX_TERRAIN_HEIGHT, RUN_STRIDE } from './constants';
 import type { CellRect } from './rect';
 import { decodeRuns, encodeRuns } from './rle';
 import type { TerrainDocument } from './schema';
@@ -49,7 +49,7 @@ export function encodeTerrain(terrain: ChunkTerrain): TerrainDocument {
   const tiles = encodeRuns(terrain.tiles);
   const palette: string[] = [];
   const newIndexOf = new Map<number, number>();
-  for (let run = 0; run < tiles.length; run += 2) {
+  for (let run = 0; run < tiles.length; run += RUN_STRIDE) {
     const oldIndex = tiles[run]!;
     if (oldIndex === NO_FLOOR_INDEX) continue;
     let newIndex = newIndexOf.get(oldIndex);

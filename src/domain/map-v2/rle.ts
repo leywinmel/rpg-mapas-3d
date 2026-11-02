@@ -4,6 +4,7 @@
  * mapa de 1000×1000 em algumas centenas de KB em vez de dezenas de MB.
  */
 import type { MapResult } from '../map-document';
+import { RUN_STRIDE } from './constants';
 import { fail, ok } from './validation';
 
 /** Junta valores vizinhos iguais; é a forma canônica (duas corridas seguidas nunca têm o mesmo valor). */
@@ -36,11 +37,11 @@ export type RunsSpec = {
  */
 export function decodeRuns(runs: readonly number[], spec: RunsSpec): MapResult<number[]> {
   const { length, maxValue, label } = spec;
-  if (runs.length % 2 !== 0) {
+  if (runs.length % RUN_STRIDE !== 0) {
     return fail([`${label}: as corridas precisam vir em pares de valor e quantidade.`]);
   }
   const values: number[] = [];
-  for (let index = 0; index < runs.length; index += 2) {
+  for (let index = 0; index < runs.length; index += RUN_STRIDE) {
     const value = runs[index]!;
     const count = runs[index + 1]!;
     if (!Number.isInteger(value) || value < 0 || value > maxValue) {

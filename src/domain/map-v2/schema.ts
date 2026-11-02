@@ -20,6 +20,7 @@ import {
   MIN_PIECE_SCALE,
   MIN_WALL_HEIGHT_STEPS,
   QUARTER_TURNS,
+  RUN_STRIDE,
 } from './constants';
 
 // Chave do catálogo, modelo da peça e clima da cena vêm do schema do v1: assim o v2 aceita
@@ -48,7 +49,7 @@ export const mapHeaderSchema = z.object({
 });
 
 /** Corridas [valor, quantidade, ...]: no máximo uma corrida por casa do pedaço. */
-const runsSchema = z.array(z.number().int().min(0)).max(2 * CHUNK_CELLS);
+const runsSchema = z.array(z.number().int().min(0)).max(RUN_STRIDE * CHUNK_CELLS);
 
 const terrainDocumentSchema = z.object({
   /** Peças de chão usadas no pedaço. O índice 0 do RLE é "sem chão"; o índice i vale palette[i - 1]. */

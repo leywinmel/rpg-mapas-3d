@@ -17,6 +17,9 @@ export const MAX_MAP_SIZE_V2 = 1000;
 export const CHUNK_SIZE = 32;
 export const CHUNK_CELLS = CHUNK_SIZE * CHUNK_SIZE;
 
+/** Cada corrida do RLE ocupa dois números no documento: o valor e quantas vezes ele se repete. */
+export const RUN_STRIDE = 2;
+
 /**
  * Altura de um degrau, em unidades do mundo (uma casa = 1 unidade). Vale o mesmo que o
  * FLOOR_STEP_HEIGHT da cena v1: por isso o chão elevado do v1 converte sem mudar de altura.
