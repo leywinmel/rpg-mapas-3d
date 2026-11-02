@@ -1,5 +1,5 @@
 import { chunkBounds } from './chunks';
-import { MAX_REPORTED_ERRORS } from './constants';
+import { MAX_LEVEL, MAX_REPORTED_ERRORS } from './constants';
 import { parseChunk, parseMapHeader, serializeChunk } from './document';
 import type { ChunkDocument, MapPiece, MapWall } from './schema';
 import { createUniformTerrain } from './terrain';
@@ -145,6 +145,37 @@ describe('chunk document', () => {
     expect(errorsOf(doc)[0]).toMatch(
       /Pedaço \(0, 0\): Terreno.*somam 1000 casas, mas o pedaço tem 1024/,
     );
+  });
+});
+
+describe('level of walls and pieces', () => {
+  it('shouldKeepTheLevelOfStackedWallsAndPieces', () => {
+    const doc = chunkDoc({
+      walls: [wall({ level: 0 }), wall({ level: MAX_LEVEL, height: 4 })],
+      pieces: [piece({ level: 4 }), piece({ id: 'torre-1', x: 9, level: MAX_LEVEL })],
+    });
+    const result = parseChunk(doc, { size, coord: origin });
+    expect(result.ok && result.value.walls.map((item) => item.level)).toEqual([0, MAX_LEVEL]);
+    expect(result.ok && result.value.pieces.map((item) => item.level)).toEqual([4, MAX_LEVEL]);
+  });
+
+  it('shouldRejectLevelsOutsideTheLimitOrNotWhole', () => {
+    const levelError = (doc: ChunkDocument) => errorsOf(doc)[0];
+    expect(levelError(chunkDoc({ walls: [wall({ level: MAX_LEVEL + 1 })] }))).toMatch(
+      /walls\.0\.level: O degrau da base precisa ser um número inteiro de 0 a 255/,
+    );
+    expect(levelError(chunkDoc({ walls: [wall({ level: -1 })] }))).toMatch(/walls\.0\.level/);
+    expect(levelError(chunkDoc({ pieces: [piece({ level: 2.5 })] }))).toMatch(/pieces\.0\.level/);
+    expect(levelError(chunkDoc({ pieces: [piece({ level: MAX_LEVEL + 1 })] }))).toMatch(
+      /pieces\.0\.level/,
+    );
+  });
+
+  it('shouldRejectDocumentsWithoutALevel', () => {
+    // Uma parede no jeito do v1 (altura em metros, sem degrau da base) não é um documento v2.
+    const legacyWall = { x: 1, z: 1, side: 'north', style: 'parede-pedra', height: 2 };
+    const errors = errorsOf({ ...chunkDoc(), walls: [legacyWall] });
+    expect(errors[0]).toMatch(/walls\.0\.level/);
   });
 });
 
