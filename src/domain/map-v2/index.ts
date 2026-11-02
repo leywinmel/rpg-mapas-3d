@@ -10,6 +10,7 @@ export * from './document';
 export * from './footprint';
 export * from './height';
 export * from './model';
+export * from './operations';
 export * from './rect';
 export * from './rle';
 export {
@@ -25,6 +26,7 @@ export {
   type PieceAsset,
   type TerrainDocument,
 } from './schema';
+export * from './storage';
 export * from './terrain';
 export * from './types';
 export * from './walls';

@@ -83,3 +83,16 @@ export function piecesOccupyingCell(model: MapModel, cell: Cell): MapPiece[] {
   }
   return found.sort((a, b) => a.level - b.level);
 }
+
+/**
+ * Pedaços que mudaram de um modelo para o outro. Compara só referências (no máximo 1024), sem
+ * olhar as casas: as operações deixam intactos os pedaços que não tocam. O autosave regrava
+ * estes pedaços e a cena redesenha estes pedaços.
+ */
+export function changedChunks(before: MapModel, after: MapModel): ChunkCoord[] {
+  const changed: ChunkCoord[] = [];
+  for (const [key, chunk] of after.chunks) {
+    if (before.chunks.get(key) !== chunk) changed.push(chunk.coord);
+  }
+  return changed;
+}
