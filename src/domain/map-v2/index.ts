@@ -5,6 +5,7 @@
  */
 export * from './chunks';
 export * from './constants';
+export * from './convert-v1';
 export * from './cutaway';
 export * from './document';
 export * from './footprint';
