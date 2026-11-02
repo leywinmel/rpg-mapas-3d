@@ -7,6 +7,7 @@ import { isEdgeInside, type GridSize } from '../grid';
 import type { MapResult } from '../map-document';
 import { chunkBounds, isChunkInside, type ChunkCoord } from './chunks';
 import { MAP_V2_VERSION, MAX_REPORTED_ERRORS } from './constants';
+import { pieceFitsInMap, rotatedFootprint } from './footprint';
 import { rectContains, type CellRect } from './rect';
 import {
   chunkDocumentSchema,
@@ -75,13 +76,19 @@ function checkWalls(walls: readonly MapWall[], { size, coord }: ChunkContext): s
   return errors;
 }
 
-function checkPieces(pieces: readonly MapPiece[], bounds: CellRect): string[] {
+function checkPieces(pieces: readonly MapPiece[], size: GridSize, bounds: CellRect): string[] {
   const errors: string[] = [];
   const ids = new Set<string>();
   for (const piece of pieces) {
     if (errors.length >= MAX_REPORTED_ERRORS) break;
     if (!rectContains(bounds, piece)) {
       errors.push(`A peça "${piece.id}" tem a âncora fora deste pedaço.`);
+    } else if (!pieceFitsInMap(size, piece)) {
+      // Girar uma peça que cabia pode fazê-la passar da borda do mapa.
+      const { width, depth } = rotatedFootprint(piece.footprint, piece.rotation);
+      errors.push(
+        `A peça "${piece.id}" não cabe no mapa: ocupa ${width}×${depth} casas a partir de (${piece.x}, ${piece.z}).`,
+      );
     }
     if (ids.has(piece.id)) errors.push(`Peça repetida: "${piece.id}".`);
     ids.add(piece.id);
@@ -113,7 +120,7 @@ export function parseChunk(input: unknown, context: ChunkContext): MapResult<Map
   if (!terrain.ok) return withLabel(terrain.errors);
 
   const { walls, pieces } = parsed.value;
-  const errors = [...checkWalls(walls, context), ...checkPieces(pieces, bounds)];
+  const errors = [...checkWalls(walls, context), ...checkPieces(pieces, size, bounds)];
   if (errors.length > 0) return withLabel(errors);
   return ok({ coord, bounds, terrain: terrain.value, walls, pieces });
 }

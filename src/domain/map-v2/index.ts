@@ -7,6 +7,7 @@ export * from './chunks';
 export * from './constants';
 export * from './cutaway';
 export * from './document';
+export * from './footprint';
 export * from './height';
 export * from './model';
 export * from './rect';

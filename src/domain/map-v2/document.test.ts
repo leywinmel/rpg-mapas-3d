@@ -229,6 +229,21 @@ describe('piece placement in the document', () => {
     expect(errors[0]).toMatch(/Peça repetida: "barril-1"/);
   });
 
+  it('shouldRejectAPieceThatLeavesTheMapWhenRotated', () => {
+    // O pedaço (2, 0) do mapa de 70 casas vai de x = 64 a 69: 2 casas de largura cabem em x = 67.
+    const lastColumn = { cx: 2, cz: 0 };
+    const terrain = { palette: ['piso-pedra'], tiles: [1, 192], heights: [0, 192] };
+    const car = piece({ id: 'carro-1', x: 67, z: 4, footprint: { width: 2, depth: 4 } });
+    expect(errorsOf(chunkDoc({ terrain, pieces: [car] }), lastColumn)).toEqual([]);
+    const turned = errorsOf(chunkDoc({ terrain, pieces: [{ ...car, rotation: 1 }] }), lastColumn);
+    expect(turned[0]).toMatch(/"carro-1" não cabe no mapa: ocupa 4×2 casas a partir de \(67, 4\)/);
+  });
+
+  it('shouldAcceptAPieceThatAdvancesIntoTheNeighborChunk', () => {
+    const wagon = piece({ id: 'carroca-1', x: 31, z: 4, footprint: { width: 2, depth: 1 } });
+    expect(errorsOf(chunkDoc({ pieces: [wagon] }))).toEqual([]);
+  });
+
   it('shouldAllowOverlappingPiecesWithDifferentIds', () => {
     const overlapped = chunkDoc({ pieces: [piece(), piece({ id: 'barril-2' })] });
     expect(errorsOf(overlapped)).toEqual([]);

@@ -5,13 +5,16 @@ import {
   chunkBounds,
   chunkKey,
   chunkOfCell,
+  chunksTouchedByRect,
   isValidMapSizeV2,
   listChunks,
   localIndex,
   type ChunkCoord,
 } from './chunks';
 import { DEFAULT_FLOOR_TILE, MAP_V2_VERSION, MAX_MAP_SIZE_V2 } from './constants';
-import { catalogKeySchema } from './schema';
+import { anchorWindow, pieceRect } from './footprint';
+import { rectContains } from './rect';
+import { catalogKeySchema, type MapPiece } from './schema';
 import { createUniformTerrain, tileAtIndex } from './terrain';
 import type { MapChunk, MapModel } from './types';
 
@@ -63,4 +66,20 @@ export function terrainAt(model: MapModel, cell: Cell): TerrainCell | null {
   if (!chunk) return null;
   const index = localIndex(chunk.bounds, cell);
   return { tile: tileAtIndex(chunk.terrain, index), height: chunk.terrain.heights[index] ?? 0 };
+}
+
+/**
+ * Peças que ocupam a casa, de baixo para cima (por degrau da base; empate pela ordem em que
+ * foram postas), contando as que vêm de pedaços vizinhos: a peça fica no pedaço da âncora e
+ * pode avançar para o vizinho. Custa o número de peças de até quatro pedaços, nunca o do mapa todo.
+ */
+export function piecesOccupyingCell(model: MapModel, cell: Cell): MapPiece[] {
+  if (!isInside(model.size, cell)) return [];
+  const found: MapPiece[] = [];
+  for (const coord of chunksTouchedByRect(model.size, anchorWindow(cell))) {
+    for (const piece of getChunk(model, coord).pieces) {
+      if (rectContains(pieceRect(piece), cell)) found.push(piece);
+    }
+  }
+  return found.sort((a, b) => a.level - b.level);
 }
