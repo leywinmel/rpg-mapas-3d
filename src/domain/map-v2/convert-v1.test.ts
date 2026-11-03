@@ -5,7 +5,7 @@ import {
   type Prop,
   type Wall,
 } from '../map-document';
-import { convertMapV1ToV2 } from './convert-v1';
+import { convertCheckedMapV1, convertMapV1ToV2 } from './convert-v1';
 import { createEmptyMap, getChunk, piecesOccupyingCell, terrainAt } from './model';
 import { stepsToWorld } from './height';
 import { loadMapModel, serializeMapModel } from './storage';
@@ -16,7 +16,7 @@ import { wallOwnerChunk } from './walls';
 
 // 70×40 casas: 3 colunas de pedaços (32, 32 e 6 casas) e 2 linhas (32 e 8 casas).
 const size = { width: 70, depth: 40 };
-/** Altura de um degrau de chão do v1 (FLOOR_STEP_HEIGHT da cena), em unidades do mundo. */
+/** Degrau de chão do v1 (o antigo FLOOR_STEP_HEIGHT da cena), em unidades do mundo. */
 const V1_STEP = 0.5;
 const UPLOAD_ID = '123e4567-e89b-42d3-a456-426614174000';
 
@@ -216,6 +216,13 @@ describe('converting a v1 map with walls, turned objects and raised floors', () 
     const loaded = loadMapModel({ size, header: stored.header, chunks: stored.chunks });
     expect(loaded.ok).toBe(true);
     expect(loaded.ok && serializeMapModel(loaded.value)).toEqual(serializeMapModel(converted));
+  });
+
+  it('shouldGiveTheSameMapWhenTheDocumentWasAlreadyChecked', () => {
+    const checked = unwrap(parseMapDocument(document, size));
+    expect(serializeMapModel(convertCheckedMapV1(checked, size))).toEqual(
+      serializeMapModel(converted),
+    );
   });
 
   it('shouldNotChangeTheV1Document', () => {

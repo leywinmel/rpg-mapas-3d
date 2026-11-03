@@ -19,12 +19,8 @@ import {
   type Prop,
   type Wall,
 } from '@/domain';
-import {
-  distanceToNearestEdge,
-  FLOOR_STEP_HEIGHT,
-  nearestEdge,
-  type PropAsset,
-} from '@/features/scene';
+import { stepsToWorld } from '@/domain/map-v2';
+import { distanceToNearestEdge, nearestEdge, type PropAsset } from '@/features/scene';
 
 /** Até esta distância da aresta, a borracha prefere apagar a parede em vez do chão. */
 export const WALL_ERASE_RANGE = 0.22;
@@ -95,7 +91,7 @@ export function adjustFloorHeight(document: MapDocument, cell: Cell, delta: numb
   if (height === current.height) return document;
   const floors = document.floors.slice();
   floors[index] = { ...current, height };
-  const lift = (height - current.height) * FLOOR_STEP_HEIGHT;
+  const lift = stepsToWorld(height - current.height);
   const props = document.props.map((prop) =>
     sameCell(propCell(prop), cell)
       ? { ...prop, elevation: Math.max(prop.elevation + lift, 0) }
@@ -144,7 +140,7 @@ export function placeProp(
     asset: placement.asset,
     x: cell.x + 0.5,
     z: cell.z + 0.5,
-    elevation: (floor?.height ?? 0) * FLOOR_STEP_HEIGHT,
+    elevation: stepsToWorld(floor?.height ?? 0),
     rotation: normalizeRotation(placement.rotation),
     scale: 1,
   };

@@ -10,7 +10,7 @@ import {
 
 describe('height', () => {
   it('shouldKeepTheStepEqualToTheV1FloorStep', () => {
-    // 0,5 é o FLOOR_STEP_HEIGHT da cena v1: é isso que faz o chão elevado converter sem mudar.
+    // 0,5 é o degrau de chão do v1: é isso que faz o chão elevado converter sem mudar.
     expect(HEIGHT_STEP).toBe(0.5);
     expect(STORY_HEIGHT_STEPS * HEIGHT_STEP).toBe(2);
   });
