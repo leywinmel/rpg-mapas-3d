@@ -6,6 +6,7 @@ import { z } from 'zod';
 import type { MapDocument } from '@/domain';
 import type { AppSupabaseClient } from '@/lib/supabase';
 import type { MapRecord, MapSummary, RoomChange, RoomMaps } from '../types';
+import { currentUserId } from './current-user';
 import { check, unwrap } from './service-result';
 
 export type CreateMapInput = {
@@ -30,7 +31,8 @@ export type MapsService = {
   subscribeRoom: (roomId: string, onChange: (change: RoomChange) => void) => () => void;
 };
 
-const SUMMARY_COLUMNS = 'id, name, width, depth, sort_order, updated_at';
+/** Colunas do resumo do mapa (sem o documento); o serviço do v2 usa as mesmas. */
+export const SUMMARY_COLUMNS = 'id, name, width, depth, sort_order, updated_at';
 
 type SummaryRow = {
   id: string;
@@ -41,7 +43,7 @@ type SummaryRow = {
   updated_at: string;
 };
 
-function toSummary(row: SummaryRow): MapSummary {
+export function toSummary(row: SummaryRow): MapSummary {
   return {
     id: row.id,
     name: row.name,
@@ -87,8 +89,7 @@ export function createSupabaseMapsService(client: AppSupabaseClient): MapsServic
     },
 
     async createMap(input) {
-      const { data: auth } = await client.auth.getSession();
-      const ownerId = auth.session?.user.id;
+      const ownerId = await currentUserId(client);
       if (!ownerId) throw new Error('Sessão expirada: entre de novo para criar mapas.');
       const row = unwrap(
         await client

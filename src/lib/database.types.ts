@@ -95,6 +95,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"map_chunks": {
+                  Row: {
+                    "cx": number,"cz": number,"document": NonNullable<Json>,"map_id": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cx": number,"cz": number,"document": NonNullable<Json>,"map_id": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "cx"?: number,"cz"?: number,"document"?: NonNullable<Json>,"map_id"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "map_chunks_map_id_fkey"
+      columns: ["map_id"]
+isOneToOne: false
+      referencedRelation: "maps"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"map_fog": {
                   Row: {
                     "covered": string,"enabled": boolean,"map_id": string,"updated_at": string
@@ -407,6 +427,9 @@ isOneToOne: false
                            },
 "room_id_from_topic":
 { Args: { "p_topic": string }; Returns: string
+                           },
+"save_map_v2":
+{ Args: { "p_deletes"?: Json,"p_header": Json,"p_map_id": string,"p_upserts"?: Json }; Returns: string
                            },
 "send_note":
 { Args: { "p_body": string,"p_image_path"?: string,"p_recipient_ids"?: (string)[],"p_room_id": string,"p_title": string,"p_to_all"?: boolean }; Returns: {

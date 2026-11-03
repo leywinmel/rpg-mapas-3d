@@ -1,0 +1,227 @@
+/**
+ * Mapas no formato v2: o cabeçalho mora em maps.document e cada pedaço mexido numa linha de
+ * map_chunks (pedaço sem linha é o chão liso padrão). O editor só conhece MapsV2Service; a
+ * implementação com Supabase fica aqui e os testes passam um cliente falso.
+ *
+ * Mapa ainda no v1 abre convertido na memória e só vira v2 no banco ao primeiro salvar, que
+ * grava tudo de uma vez (save_map_v2 troca pedaços, cabeçalho e versão numa transação só).
+ */
+import { z } from 'zod';
+import type { GridSize } from '@/domain';
+import {
+  chunkDocumentSchema,
+  chunkGridSize,
+  convertMapV1ToV2,
+  createDefaultHeader,
+  isEmptySavePlan,
+  loadMapModel,
+  mapHeaderSchema,
+  MAP_V2_VERSION,
+  MAX_MAP_SIZE_V2,
+  planMapSave,
+  type MapHeader,
+  type MapModel,
+  type MapSavePlan,
+  type StoredChunk,
+} from '@/domain/map-v2';
+import type { AppSupabaseClient } from '@/lib/supabase';
+import type { MapSummary } from '../types';
+import { currentUserId } from './current-user';
+import { MapError, toMapError } from './map-errors';
+import { SUMMARY_COLUMNS, toSummary } from './maps-service';
+
+/** Versão do v1 na coluna maps.schema_version (o MAP_DOCUMENT_VERSION do domínio). */
+const LEGACY_SCHEMA_VERSION = 1;
+
+/**
+ * Pedaços por página ao carregar. O PostgREST corta a resposta em max_rows (1000, no
+ * supabase/config.toml), e o maior mapa tem 1024 pedaços: sem paginar, o fim do mapa sumiria.
+ */
+export const CHUNK_PAGE_SIZE = 256;
+const LARGEST_GRID = chunkGridSize({ width: MAX_MAP_SIZE_V2, depth: MAX_MAP_SIZE_V2 });
+/**
+ * Teto de páginas: os pedaços do maior mapa, mais uma página que volta vazia quando a conta
+ * fecha certinho. Passar disso é resposta errada do servidor, e não um laço sem fim.
+ */
+const MAX_CHUNK_PAGES = Math.ceil((LARGEST_GRID.columns * LARGEST_GRID.rows) / CHUNK_PAGE_SIZE) + 1;
+
+export type LoadedMapV2 = {
+  summary: MapSummary;
+  model: MapModel;
+  /**
+   * O que o banco guarda hoje no v2, para a próxima gravação mandar só a diferença. Nulo quando
+   * o mapa ainda está no v1: a primeira gravação manda tudo.
+   */
+  saved: MapModel | null;
+};
+
+export type SaveMapV2Input = {
+  mapId: string;
+  /** O `saved` do carregamento (ou o `current` da última gravação que deu certo). */
+  saved: MapModel | null;
+  current: MapModel;
+};
+
+export type CreateMapV2Input = {
+  roomId: string;
+  name: string;
+  size: GridSize;
+  sortOrder: number;
+  /** Clima da cena; sem ele, o padrão. */
+  header?: MapHeader;
+};
+
+export type MapsV2Service = {
+  loadMapV2: (mapId: string) => Promise<LoadedMapV2>;
+  /** Grava só o que mudou. Devolve a hora da gravação, ou null quando não havia nada a gravar. */
+  saveMapV2: (input: SaveMapV2Input) => Promise<string | null>;
+  /** Cria o mapa só com o cabeçalho: todo pedaço começa como o chão liso padrão. */
+  createMapV2: (input: CreateMapV2Input) => Promise<MapSummary>;
+};
+
+const mapIdSchema = z.uuid();
+
+const createInputSchema = z.object({
+  roomId: z.uuid(),
+  name: z.string().trim().min(1).max(80),
+  size: z.object({
+    width: z.number().int().min(1).max(MAX_MAP_SIZE_V2),
+    depth: z.number().int().min(1).max(MAX_MAP_SIZE_V2),
+  }),
+  sortOrder: z.number().int(),
+  header: mapHeaderSchema.optional(),
+});
+
+const chunkRowSchema = z.object({
+  cx: z.number().int(),
+  cz: z.number().int(),
+  document: z.unknown(),
+});
+
+/** Dados da resposta, ou o erro já traduzido para uma categoria que a tela explica. */
+function dataOf<R extends { data: unknown; error: unknown }>(result: R): NonNullable<R['data']> {
+  if (result.error) throw toMapError(result.error);
+  const { data } = result;
+  if (data === null || data === undefined) throw new MapError('unknown', null);
+  return data as NonNullable<R['data']>;
+}
+
+/** Problemas do domínio ao ler o mapa: vão inteiros para o log, a tela mostra a frase curta. */
+function unreadable(errors: readonly string[]): MapError {
+  return new MapError('unreadable', null, { cause: new Error(errors.join(' | ')) });
+}
+
+/** Confere o que vai ao banco com os mesmos schemas da leitura: nada inválido é gravado [#51]. */
+function validatePlan(plan: MapSavePlan): void {
+  mapHeaderSchema.parse(plan.header);
+  for (const { document } of plan.upserts) chunkDocumentSchema.parse(document);
+}
+
+function toRpcArgs(mapId: string, plan: MapSavePlan) {
+  return {
+    p_map_id: mapId,
+    p_header: plan.header,
+    p_upserts: plan.upserts.map(({ coord, document }) => ({
+      cx: coord.cx,
+      cz: coord.cz,
+      document,
+    })),
+    p_deletes: plan.deletes.map(({ cx, cz }) => ({ cx, cz })),
+  };
+}
+
+export function createSupabaseMapsV2Service(client: AppSupabaseClient): MapsV2Service {
+  async function loadChunks(mapId: string): Promise<StoredChunk[]> {
+    const chunks: StoredChunk[] = [];
+    for (let page = 0; page < MAX_CHUNK_PAGES; page += 1) {
+      const from = page * CHUNK_PAGE_SIZE;
+      const rows = dataOf(
+        await client
+          .from('map_chunks')
+          .select('cx, cz, document')
+          .eq('map_id', mapId)
+          .order('cz')
+          .order('cx')
+          .range(from, from + CHUNK_PAGE_SIZE - 1),
+      );
+      for (const row of z.array(chunkRowSchema).parse(rows)) {
+        chunks.push({ coord: { cx: row.cx, cz: row.cz }, document: row.document });
+      }
+      if (rows.length < CHUNK_PAGE_SIZE) return chunks;
+    }
+    throw new MapError('unknown', null, { cause: new Error('Pedaços demais na resposta.') });
+  }
+
+  async function loadV2(mapId: string, summary: MapSummary, header: unknown) {
+    const size = { width: summary.width, depth: summary.depth };
+    const loaded = loadMapModel({ size, header, chunks: await loadChunks(mapId) });
+    if (!loaded.ok) throw unreadable(loaded.errors);
+    return { summary, model: loaded.value, saved: loaded.value };
+  }
+
+  return {
+    async loadMapV2(mapId) {
+      try {
+        mapIdSchema.parse(mapId);
+        const row = dataOf(
+          await client
+            .from('maps')
+            .select(`${SUMMARY_COLUMNS}, schema_version, document`)
+            .eq('id', mapId)
+            .single(),
+        );
+        const summary = toSummary(row);
+        if (row.schema_version === MAP_V2_VERSION)
+          return await loadV2(mapId, summary, row.document);
+        if (row.schema_version !== LEGACY_SCHEMA_VERSION) {
+          throw unreadable([`Versão ${row.schema_version} do mapa não é conhecida.`]);
+        }
+        const size = { width: summary.width, depth: summary.depth };
+        const converted = convertMapV1ToV2(row.document, size);
+        if (!converted.ok) throw unreadable(converted.errors);
+        return { summary, model: converted.value, saved: null };
+      } catch (error) {
+        throw toMapError(error);
+      }
+    },
+
+    async saveMapV2({ mapId, saved, current }) {
+      try {
+        mapIdSchema.parse(mapId);
+        const plan = planMapSave(saved, current);
+        if (isEmptySavePlan(plan)) return null;
+        validatePlan(plan);
+        return dataOf(await client.rpc('save_map_v2', toRpcArgs(mapId, plan)));
+      } catch (error) {
+        throw toMapError(error);
+      }
+    },
+
+    async createMapV2(input) {
+      try {
+        const { roomId, name, size, sortOrder, header } = createInputSchema.parse(input);
+        const ownerId = await currentUserId(client);
+        if (!ownerId) throw new MapError('session', null);
+        const row = dataOf(
+          await client
+            .from('maps')
+            .insert({
+              owner_id: ownerId,
+              room_id: roomId,
+              name,
+              width: size.width,
+              depth: size.depth,
+              schema_version: MAP_V2_VERSION,
+              document: header ?? createDefaultHeader(),
+              sort_order: sortOrder,
+            })
+            .select(SUMMARY_COLUMNS)
+            .single(),
+        );
+        return toSummary(row);
+      } catch (error) {
+        throw toMapError(error);
+      }
+    },
+  };
+}
