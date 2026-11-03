@@ -33,8 +33,10 @@ alter table public.maps
 -- confere de novo ao ler (loadMapModel).
 --
 -- Limite do documento: o pior pedaço que o domínio aceita (1024 peças de chão diferentes, 4096
--- paredes e 2048 peças, todas com os textos mais longos) dá ~1 MB de JSON; em jsonb ele cresce
--- um pouco. 1,5 MB deixa esse caso passar e ainda barra quem tentar encher o banco gratuito [#65].
+-- paredes e 2048 peças, todas com os textos mais longos) mede 1.017.853 caracteres de JSON e
+-- 1.446.032 bytes em jsonb (medido no Postgres local em 03/11). 1,5 MB deixa esse caso passar e
+-- ainda barra quem tentar encher o banco gratuito [#65]. Se os limites por pedaço do domínio
+-- (constants.ts) subirem, este número precisa subir junto.
 create table public.map_chunks (
   map_id     uuid not null references public.maps (id) on delete cascade,
   cx         integer not null check (cx between 0 and 31),
