@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { createEmptyDocument, type MapDocument } from '@/domain';
+import { createEmptyMap, type MapModel } from '@/domain/map-v2';
 import { setLogSink } from '@/lib/logger';
 import type { AssetsService } from '../services/assets-service';
+import type { MapsV2Service, SaveMapV2Input } from '../services/map-v2-service';
 import type { MapsService } from '../services/maps-service';
 import { MapEditorServicesProvider } from '../services/MapEditorServicesProvider';
-import type { MapRecord, MapSummary, RoomChange } from '../types';
+import type { MapSummary, RoomChange } from '../types';
 import { MapWorkspace } from './MapWorkspace';
 import type { MapViewportProps } from './MapViewport';
 
@@ -26,46 +27,38 @@ const SLOW = { timeout: 5000 };
 const ROOM_ID = 'room-1';
 const SIZE = { width: 6, depth: 4 };
 
-function record(id: string, name: string, sortOrder: number): MapRecord {
+type StoredMap = MapSummary & { model: MapModel };
+
+function record(id: string, name: string, sortOrder: number): StoredMap {
   return {
     id,
     name,
     ...SIZE,
     sortOrder,
     updatedAt: '2026-11-01T00:00:00Z',
-    document: createEmptyDocument(SIZE),
+    model: createEmptyMap(SIZE),
   };
 }
 
-function toSummary({ id, name, width, depth, sortOrder, updatedAt }: MapRecord): MapSummary {
+function toSummary({ id, name, width, depth, sortOrder, updatedAt }: StoredMap): MapSummary {
   return { id, name, width, depth, sortOrder, updatedAt };
 }
 
 /** Banco em memória com o mesmo contrato do serviço real. */
-function createFakeServices(initial: { activeMapId: string | null; maps: MapRecord[] }) {
+function createFakeServices(initial: { activeMapId: string | null; maps: StoredMap[] }) {
   const db = { activeMapId: initial.activeMapId, maps: [...initial.maps] };
   let listener: ((change: RoomChange) => void) | null = null;
-  const saved: MapDocument[] = [];
+  const saved: SaveMapV2Input[] = [];
+  const find = (id: string) => {
+    const found = db.maps.find((map) => map.id === id);
+    if (!found) throw new Error('não achou');
+    return found;
+  };
   const maps: MapsService = {
     loadRoomMaps: async () => ({
       activeMapId: db.activeMapId,
       maps: db.maps.map(toSummary),
     }),
-    loadMap: async (id) => {
-      const found = db.maps.find((map) => map.id === id);
-      if (!found) throw new Error('não achou');
-      return found;
-    },
-    createMap: async (input) => {
-      const created = {
-        ...record(`map-${db.maps.length + 1}`, input.name, input.sortOrder),
-        width: input.width,
-        depth: input.depth,
-        document: input.document,
-      };
-      db.maps.push(created);
-      return toSummary(created);
-    },
     renameMap: async () => undefined,
     deleteMap: vi.fn(async () => {
       throw new Error('falha de rede');
@@ -73,15 +66,32 @@ function createFakeServices(initial: { activeMapId: string | null; maps: MapReco
     setActiveMap: async (_roomId, mapId) => {
       db.activeMapId = mapId;
     },
-    saveDocument: async (_id, document) => {
-      saved.push(document);
-    },
     reorderMaps: async () => undefined,
     subscribeRoom: (_roomId, onChange) => {
       listener = onChange;
       return () => {
         listener = null;
       };
+    },
+  };
+  const mapsV2: MapsV2Service = {
+    loadMapV2: async (id) => {
+      const found = find(id);
+      return { summary: toSummary(found), model: found.model, saved: found.model };
+    },
+    saveMapV2: async (input) => {
+      saved.push(input);
+      find(input.mapId).model = input.current;
+      return '2026-11-03T00:00:00Z';
+    },
+    createMapV2: async (input) => {
+      const created = {
+        ...record(`map-${db.maps.length + 1}`, input.name, input.sortOrder),
+        ...input.size,
+        model: createEmptyMap(input.size),
+      };
+      db.maps.push(created);
+      return toSummary(created);
     },
   };
   const assets: AssetsService = {
@@ -93,7 +103,7 @@ function createFakeServices(initial: { activeMapId: string | null; maps: MapReco
     signModelUrls: async () => ({}),
   };
   return {
-    services: { maps, assets },
+    services: { maps, mapsV2, assets },
     db,
     saved,
     emit: (change: RoomChange) => act(() => listener?.(change)),
@@ -185,6 +195,8 @@ describe('MapWorkspace', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Criar mapa' }));
     expect(await screen.findByTestId('viewport', {}, SLOW)).toHaveTextContent('Mapa 3D: Torre');
     expect(fake.db.maps).toHaveLength(1);
+    // Chão padrão: o mapa nasce pronto, sem gravação extra.
+    expect(fake.saved).toEqual([]);
   });
 
   it('shouldShowADeleteFailureInsideTheDialog', async () => {

@@ -7,24 +7,34 @@ import {
   RingGeometry,
   MeshBasicMaterial,
 } from 'three';
-import type { GridSize, MapDocument } from '@/domain';
+import { isInside } from '@/domain';
 import {
-  buildHeightMap,
+  pieceRect,
+  stepsToWorld,
+  terrainAt,
+  type Footprint,
+  type MapModel,
+  type MapPiece,
+  type PieceRef,
+} from '@/domain/map-v2';
+import {
+  modelHeightMap,
   nearestEdge,
   pickCell,
   SCENE_PALETTE,
+  stackedWallSegments,
   surfaceAt,
-  wallSegmentTransforms,
   type CellHit,
   type HeightMap,
 } from '@/features/scene';
+import { pieceTransform } from '@/features/scene/chunks/chunk-instances';
 import {
   AssetPieces,
   CatalogPieces,
   type ModelUrls,
 } from '@/features/scene/components/AssetPieces';
-import { eraseTargetAt, floorAt } from '../editor/document-ops';
 import type { Brush, PointerHit, Tool } from '../editor/editor-reducer';
+import { eraseTargetAt, findPiece, pieceFor, wallFor } from '../editor/model-ops';
 
 /** Arrasto menor que isto (px) ainda conta como clique de seleção, não como giro de câmera. */
 const CLICK_TOLERANCE_PX = 4;
@@ -33,15 +43,20 @@ const MARKER_LIFT = 0.03;
 const GHOST_LIFT = 0.012;
 const MARKER_HEIGHT = 0.06;
 const SELECTION_RADIUS = { inner: 0.38, outer: 0.46 };
+/** Id da peça fantasma: nunca é gravada, só serve para calcular onde a peça nova ficaria. */
+const GHOST_PIECE_ID = 'fantasma';
 /** Plano invisível bem maior que o mapa: o cursor nunca "cai" fora dele perto da borda. */
 const CATCH_PLANE_MARGIN = 200;
 
 export type EditorViewState = {
   tool: Tool;
   brush: Brush;
+  /** Giro do próximo objeto, em quartos de volta. */
   rotation: number;
+  footprint: Footprint;
+  /** Altura da próxima parede, em degraus. */
   wallHeight: number;
-  selectedPropId: string | null;
+  selectedPiece: PieceRef | null;
 };
 
 export type EditorSceneActions = {
@@ -89,16 +104,59 @@ function CellMarker({ hit, heights, danger }: MarkerProps) {
   );
 }
 
+/** Contorno das casas que a peça ocupa; vermelho quando ela sai do mapa (o clique é recusado). */
+function FootprintMarker({ piece, model }: { piece: MapPiece; model: MapModel }) {
+  const rect = pieceRect(piece);
+  const fits =
+    isInside(model.size, piece) &&
+    rect.x + rect.width <= model.size.width &&
+    rect.z + rect.depth <= model.size.depth;
+  return (
+    <lineSegments
+      geometry={markerGeometry}
+      material={fits ? markerMaterials.normal : markerMaterials.danger}
+      position={[
+        rect.x + rect.width / 2,
+        stepsToWorld(piece.level) + MARKER_LIFT,
+        rect.z + rect.depth / 2,
+      ]}
+      scale={[rect.width, 1, rect.depth]}
+      dispose={null}
+    />
+  );
+}
+
 type GhostProps = {
   hit: CellHit;
   view: EditorViewState;
-  document: MapDocument;
+  model: MapModel;
   heights: HeightMap;
   modelUrls: ModelUrls;
 };
 
+function PieceGhost({ hit, view, model, modelUrls }: Omit<GhostProps, 'heights'>) {
+  const piece = pieceFor(model, {
+    id: GHOST_PIECE_ID,
+    asset: view.brush.prop,
+    anchor: hit.cell,
+    rotation: view.rotation,
+    footprint: view.footprint,
+  });
+  return (
+    <>
+      <AssetPieces
+        asset={view.brush.prop}
+        transforms={[pieceTransform(piece)]}
+        modelUrls={modelUrls}
+        ghost
+      />
+      <FootprintMarker piece={piece} model={model} />
+    </>
+  );
+}
+
 /** Pré-visualização translúcida do que o clique vai fazer, na casa sob o cursor. */
-function Ghost({ hit, view, document, heights, modelUrls }: GhostProps) {
+function Ghost({ hit, view, model, heights, modelUrls }: GhostProps) {
   const { cell } = hit;
   switch (view.tool) {
     case 'floor': {
@@ -114,68 +172,50 @@ function Ghost({ hit, view, document, heights, modelUrls }: GhostProps) {
       return <CatalogPieces pieceKey={view.brush.floor} transforms={transforms} ghost />;
     }
     case 'wall': {
-      const wall = {
-        ...nearestEdge(cell, hit.point),
+      const wall = wallFor(model, {
+        edge: nearestEdge(cell, hit.point),
         style: view.brush.wall,
         height: view.wallHeight,
-      };
-      return (
-        <CatalogPieces
-          pieceKey={view.brush.wall}
-          transforms={wallSegmentTransforms(heights, wall)}
-          ghost
-        />
+      });
+      const transforms = stackedWallSegments(
+        wall,
+        stepsToWorld(wall.level),
+        stepsToWorld(wall.height),
       );
+      return <CatalogPieces pieceKey={view.brush.wall} transforms={transforms} ghost />;
     }
-    case 'prop': {
-      const transforms = [
-        {
-          x: cell.x + 0.5,
-          y: surfaceAt(heights, cell),
-          z: cell.z + 0.5,
-          rotationY: view.rotation,
-          scale: 1,
-        },
-      ];
-      return (
-        <AssetPieces asset={view.brush.prop} transforms={transforms} modelUrls={modelUrls} ghost />
-      );
-    }
+    case 'prop':
+      return <PieceGhost hit={hit} view={view} model={model} modelUrls={modelUrls} />;
     case 'erase':
-      return eraseTargetAt(document, hit) ? (
-        <CellMarker hit={hit} heights={heights} danger />
-      ) : null;
+      return eraseTargetAt(model, hit) ? <CellMarker hit={hit} heights={heights} danger /> : null;
     case 'raise':
     case 'lower':
-      return floorAt(document, cell) ? <CellMarker hit={hit} heights={heights} /> : null;
+      return terrainAt(model, cell)?.tile ? <CellMarker hit={hit} heights={heights} /> : null;
     case 'select':
       return <CellMarker hit={hit} heights={heights} />;
   }
 }
 
-function SelectionRing({
-  document,
-  selectedPropId,
-}: {
-  document: MapDocument;
-  selectedPropId: string;
-}) {
-  const prop = document.props.find((item) => item.id === selectedPropId);
-  if (!prop) return null;
+function SelectionRing({ model, selected }: { model: MapModel; selected: PieceRef }) {
+  const piece = findPiece(model, selected);
+  if (!piece) return null;
+  const { x, y, z } = pieceTransform(piece);
+  const rect = pieceRect(piece);
+  // O anel abraça a peça inteira: numa peça de várias casas ele cresce com o lado maior.
+  const scale = Math.max(rect.width, rect.depth) * piece.scale;
   return (
     <mesh
       geometry={ringGeometry}
       material={selectionMaterial}
-      position={[prop.x, prop.elevation + MARKER_LIFT, prop.z]}
-      scale={prop.scale}
+      position={[x, y + MARKER_LIFT, z]}
+      scale={scale}
       dispose={null}
     />
   );
 }
 
 export type EditorInteractionProps = EditorSceneBinding & {
-  document: MapDocument;
-  size: GridSize;
+  model: MapModel;
   modelUrls: ModelUrls;
 };
 
@@ -184,18 +224,9 @@ export type EditorInteractionProps = EditorSceneBinding & {
  * alturas, sem testar instância por instância), desenha o fantasma e repassa
  * apertar/arrastar/soltar para o editor.
  */
-export function EditorInteraction({
-  document,
-  size,
-  modelUrls,
-  view,
-  actions,
-}: EditorInteractionProps) {
-  const { width, depth } = size;
-  const heights = useMemo(
-    () => buildHeightMap(document.floors, { width, depth }),
-    [document.floors, width, depth],
-  );
+export function EditorInteraction({ model, modelUrls, view, actions }: EditorInteractionProps) {
+  const { width, depth } = model.size;
+  const heights = useMemo(() => modelHeightMap(model), [model]);
   const [hover, setHover] = useState<CellHit | null>(null);
   const [dragging, setDragging] = useState(false);
   const currentKey = useRef('');
@@ -256,17 +287,9 @@ export function EditorInteraction({
         <planeGeometry args={[width + CATCH_PLANE_MARGIN, depth + CATCH_PLANE_MARGIN]} />
       </mesh>
       {hover && (
-        <Ghost
-          hit={hover}
-          view={view}
-          document={document}
-          heights={heights}
-          modelUrls={modelUrls}
-        />
+        <Ghost hit={hover} view={view} model={model} heights={heights} modelUrls={modelUrls} />
       )}
-      {view.selectedPropId && (
-        <SelectionRing document={document} selectedPropId={view.selectedPropId} />
-      )}
+      {view.selectedPiece && <SelectionRing model={model} selected={view.selectedPiece} />}
     </>
   );
 }

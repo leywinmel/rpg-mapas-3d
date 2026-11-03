@@ -1,10 +1,9 @@
 import { useCallback } from 'react';
-import { parseMapDocument } from '@/domain';
+import { createEmptyMap, DEFAULT_FLOOR_TILE } from '@/domain/map-v2';
 import { reportError } from '@/lib/report-error';
 import {
   copyName,
   moveMap,
-  newMapDocument,
   nextSortOrder,
   type MoveDirection,
   type NewMapInput,
@@ -41,30 +40,32 @@ async function attempt<T>(action: () => Promise<T>, context: Context, userMessag
  * mensagem no próprio diálogo.
  */
 export function useMapActions(snapshot: RoomMapsSnapshot) {
-  const { maps: service } = useMapEditorServices();
+  const { maps: service, mapsV2 } = useMapEditorServices();
   const { roomId, activeMapId, maps, patch } = snapshot;
 
   const create = useCallback(
     (input: NewMapInput) =>
       attempt(
         async () => {
-          const document = newMapDocument(input);
-          if (!document.ok) throw new Error(document.errors.join(' | '));
-          const summary = await service.createMap({
+          const size = { width: input.width, depth: input.depth };
+          const summary = await mapsV2.createMapV2({
             roomId,
             name: input.name,
-            width: input.width,
-            depth: input.depth,
-            document: document.value,
+            size,
             sortOrder: nextSortOrder(maps),
           });
+          // O mapa nasce com o chão padrão em todo pedaço; outro chão é gravado logo em seguida.
+          if (input.floor !== DEFAULT_FLOOR_TILE) {
+            const current = createEmptyMap(size, input.floor);
+            await mapsV2.saveMapV2({ mapId: summary.id, saved: null, current });
+          }
           patch({ maps: [...maps, summary] });
           return summary;
         },
         { action: 'create-map' },
         'Não conseguimos criar o mapa.',
       ),
-    [service, roomId, maps, patch],
+    [mapsV2, roomId, maps, patch],
   );
 
   const rename = useCallback(
@@ -84,24 +85,22 @@ export function useMapActions(snapshot: RoomMapsSnapshot) {
     (source: MapSummary) =>
       attempt(
         async () => {
-          const record = await service.loadMap(source.id);
-          const parsed = parseMapDocument(record.document, source);
-          if (!parsed.ok) throw new Error(parsed.errors.join(' | '));
-          const summary = await service.createMap({
+          const { model } = await mapsV2.loadMapV2(source.id);
+          const summary = await mapsV2.createMapV2({
             roomId,
             name: copyName(source.name),
-            width: source.width,
-            depth: source.depth,
-            document: parsed.value,
+            size: model.size,
             sortOrder: nextSortOrder(maps),
+            header: model.header,
           });
+          await mapsV2.saveMapV2({ mapId: summary.id, saved: null, current: model });
           patch({ maps: [...maps, summary] });
           return summary;
         },
         { action: 'duplicate-map', mapId: source.id },
         'Não conseguimos duplicar o mapa.',
       ),
-    [service, roomId, maps, patch],
+    [mapsV2, roomId, maps, patch],
   );
 
   const remove = useCallback(

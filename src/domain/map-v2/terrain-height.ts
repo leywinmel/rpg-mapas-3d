@@ -9,12 +9,12 @@
  * recusar o traço) e nunca fica enterrada nem flutuando. O que não estava apoiado (peça
  * empilhada, andar de cima) fica onde está: quem o segura é a peça de baixo, não o chão.
  */
-import type { Cell } from '../grid';
+import type { Cell, GridEdge } from '../grid';
 import type { MapResult } from '../map-document';
 import { chunkKey, chunksTouchedByRect } from './chunks';
 import { editArea, forEachIndex, resolveArea, withChunks } from './chunk-edit';
 import { MAX_FOOTPRINT, MAX_TERRAIN_HEIGHT } from './constants';
-import { pieceRect } from './footprint';
+import { pieceRect, type PiecePlacement } from './footprint';
 import { getChunk, terrainAt } from './model';
 import { intersectRects, rectCells, type CellRect } from './rect';
 import type { MapPiece, MapWall } from './schema';
@@ -67,9 +67,19 @@ function restingLevel(model: MapModel, cells: readonly Cell[]): number {
 }
 
 /** As duas casas que a aresta separa: a parede apoia na mais alta delas. */
-function cellsBesideEdge(wall: MapWall): Cell[] {
-  const other = wall.side === 'north' ? { x: wall.x, z: wall.z - 1 } : { x: wall.x - 1, z: wall.z };
-  return [other, { x: wall.x, z: wall.z }];
+function cellsBesideEdge(edge: GridEdge): Cell[] {
+  const other = edge.side === 'north' ? { x: edge.x, z: edge.z - 1 } : { x: edge.x - 1, z: edge.z };
+  return [other, { x: edge.x, z: edge.z }];
+}
+
+/** Degrau em que uma peça fica apoiada no chão: o topo da casa mais alta que ela ocupa. */
+export function pieceRestingLevel(model: MapModel, piece: PiecePlacement): number {
+  return restingLevel(model, rectCells(pieceRect(piece)));
+}
+
+/** Degrau em que uma parede fica apoiada no chão: o topo da mais alta das duas casas da aresta. */
+export function wallRestingLevel(model: MapModel, edge: GridEdge): number {
+  return restingLevel(model, cellsBesideEdge(edge));
 }
 
 function touchesArea(cells: readonly Cell[], area: CellRect): boolean {

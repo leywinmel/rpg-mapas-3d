@@ -3,16 +3,8 @@
  * documento fica no mundo 3D e qual casa está sob o cursor. Fica fora dos
  * componentes para ser testada em Node e compartilhada entre cena e editor.
  */
-import {
-  isInside,
-  MAX_FLOOR_HEIGHT,
-  type Cell,
-  type FloorTile,
-  type GridSize,
-  type Prop,
-  type Wall,
-} from '@/domain';
-import { stepsToWorld } from '@/domain/map-v2';
+import { isInside, type Cell, type FloorTile, type GridSize, type Prop, type Wall } from '@/domain';
+import { MAX_TERRAIN_HEIGHT, stepsToWorld, terrainAt, type MapModel } from '@/domain/map-v2';
 
 /** Profundidade do bloco abaixo do nível zero: dá a cara de maquete recortada. */
 export const FLOOR_BASE_DEPTH = 0.3;
@@ -27,7 +19,8 @@ export const NO_FLOOR = -1;
 
 export type Vec3 = { x: number; y: number; z: number };
 export type Ray = { origin: Vec3; direction: Vec3 };
-export type HeightMap = { size: GridSize; heights: Int8Array };
+/** Altura (em degraus) de cada casa do mapa, ou NO_FLOOR; quem chama já conferiu a borda. */
+export type HeightMap = { readonly size: GridSize; readonly lookup: (cell: Cell) => number };
 
 /** Posição, giro (graus) e escala de uma instância de peça. */
 export type InstanceTransform = {
@@ -56,14 +49,28 @@ export function buildHeightMap(floors: readonly FloorTile[], size: GridSize): He
     if (floor.x >= size.width || floor.z >= size.depth) continue;
     heights[floor.z * size.width + floor.x] = floor.height;
   }
-  return { size, heights };
+  return { size, lookup: (cell) => heights[cell.z * size.width + cell.x] ?? NO_FLOOR };
+}
+
+/**
+ * Alturas lidas direto do mapa v2, sem copiar nada: montar um vetor do mapa inteiro a cada
+ * passo do pincel custaria um milhão de casas num mapa de 1000×1000.
+ */
+export function modelHeightMap(model: MapModel): HeightMap {
+  return {
+    size: model.size,
+    lookup: (cell) => {
+      const terrain = terrainAt(model, cell);
+      return terrain && terrain.tile !== null ? terrain.height : NO_FLOOR;
+    },
+  };
 }
 
 export function heightAt(map: HeightMap, cell: Cell): number {
   if (cell.x < 0 || cell.z < 0 || cell.x >= map.size.width || cell.z >= map.size.depth) {
     return NO_FLOOR;
   }
-  return map.heights[cell.z * map.size.width + cell.x] ?? NO_FLOOR;
+  return map.lookup(cell);
 }
 
 /** Altura do topo da casa no mundo; casa vazia fica no nível zero. */
@@ -180,7 +187,7 @@ type RaySpan = { enter: number; exit: number };
 function spanOverBoard(ray: Ray, size: GridSize): RaySpan | null {
   const { origin, direction } = ray;
   if (direction.y >= 0) return null;
-  let enter = Math.max((floorTop(MAX_FLOOR_HEIGHT) - origin.y) / direction.y, 0);
+  let enter = Math.max((floorTop(MAX_TERRAIN_HEIGHT) - origin.y) / direction.y, 0);
   let exit = -origin.y / direction.y;
   const axes = [
     { start: origin.x, step: direction.x, length: size.width },

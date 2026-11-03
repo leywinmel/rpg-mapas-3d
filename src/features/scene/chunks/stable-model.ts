@@ -1,8 +1,7 @@
 /**
- * Enquanto o editor ainda edita o documento v1 (a troca é a F13), cada mudança vira uma
- * conversão nova para o v2, com todos os pedaços novos. Aqui o pedaço cujo conteúdo não
- * mudou volta a ser o objeto anterior: a cena compara pedaços pela referência e só
- * redesenha o que de fato mudou, como fará quando o editor operar direto no v2.
+ * O jogador recebe o mapa inteiro de novo do banco a cada gravação do mestre, com todos os
+ * pedaços novos. Aqui o pedaço cujo conteúdo não mudou volta a ser o objeto anterior: a cena
+ * compara pedaços pela referência e só redesenha o que de fato mudou.
  */
 import {
   chunkKey,

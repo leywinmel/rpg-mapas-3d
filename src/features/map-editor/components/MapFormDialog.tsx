@@ -1,6 +1,6 @@
 import { useId, useState, type FormEvent } from 'react';
 import { Button, Dialog, TextField } from '@/components';
-import { MAX_MAP_SIZE } from '@/domain';
+import { MAX_MAP_SIZE_V2 } from '@/domain/map-v2';
 import { DEFAULT_FLOOR_TILE, pieceCatalog } from '@/features/scene';
 import {
   MAX_MAP_NAME_LENGTH,
@@ -72,7 +72,7 @@ export function CreateMapDialog({ open, onClose, onCreate }: CreateProps) {
       open={open}
       onClose={close}
       title="Novo mapa"
-      description={`Até ${MAX_MAP_SIZE} × ${MAX_MAP_SIZE} casas. Dá para mudar o chão depois, casa por casa.`}
+      description={`Até ${MAX_MAP_SIZE_V2} × ${MAX_MAP_SIZE_V2} casas. Dá para mudar o chão depois, casa por casa.`}
       footer={
         <>
           <Button variant="ghost" onClick={close} disabled={feedback.busy}>
@@ -98,7 +98,7 @@ export function CreateMapDialog({ open, onClose, onCreate }: CreateProps) {
             label="Largura (casas)"
             type="number"
             min={1}
-            max={MAX_MAP_SIZE}
+            max={MAX_MAP_SIZE_V2}
             value={values.width}
             error={feedback.errors.width}
             onChange={(event) => set('width')(event.target.value)}
@@ -107,7 +107,7 @@ export function CreateMapDialog({ open, onClose, onCreate }: CreateProps) {
             label="Profundidade (casas)"
             type="number"
             min={1}
-            max={MAX_MAP_SIZE}
+            max={MAX_MAP_SIZE_V2}
             value={values.depth}
             error={feedback.errors.depth}
             onChange={(event) => set('depth')(event.target.value)}

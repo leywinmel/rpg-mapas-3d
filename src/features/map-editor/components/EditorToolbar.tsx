@@ -15,7 +15,12 @@ import {
   Undo2,
 } from 'lucide-react';
 import { IconButton, Toolbar, ToolbarSeparator } from '@/components';
-import { MAX_WALL_HEIGHT, MIN_WALL_HEIGHT } from '@/domain';
+import {
+  MAX_FOOTPRINT,
+  MAX_WALL_HEIGHT_STEPS,
+  MIN_WALL_HEIGHT_STEPS,
+  stepsToWorld,
+} from '@/domain/map-v2';
 import type { EditorAction, EditorState, Tool } from '../editor/editor-reducer';
 import { canRedo, canUndo } from '../editor/history';
 import { SHORTCUT_HELP, TOOL_KEYS, TOOL_LABELS } from '../editor/shortcuts';
@@ -41,28 +46,101 @@ function toolLabel(tool: Tool): string {
 
 type Props = { state: EditorState; dispatch: Dispatch<EditorAction> };
 
-function WallHeight({ state, dispatch }: Props) {
-  const setHeight = (height: number) => dispatch({ type: 'set-wall-height', height });
+const STEPPER_ICON_SIZE = 14;
+const MIN_FOOTPRINT_SIDE = 1;
+const worldUnits = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
+
+type StepperProps = {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  /** Texto do valor na tela (ex: "Altura 2"). */
+  display: string;
+  lowerLabel: string;
+  raiseLabel: string;
+  onChange: (value: number) => void;
+};
+
+function Stepper({
+  label,
+  value,
+  min,
+  max,
+  display,
+  lowerLabel,
+  raiseLabel,
+  onChange,
+}: StepperProps) {
   return (
-    <div className={styles.stepper} role="group" aria-label="Altura da parede">
+    <div className={styles.stepper} role="group" aria-label={label}>
       <IconButton
-        label="Parede mais baixa"
-        icon={<Minus size={14} />}
+        label={lowerLabel}
+        icon={<Minus size={STEPPER_ICON_SIZE} />}
         size="sm"
-        disabled={state.wallHeight <= MIN_WALL_HEIGHT}
-        onClick={() => setHeight(state.wallHeight - 1)}
+        disabled={value <= min}
+        onClick={() => onChange(value - 1)}
       />
       <span className={styles.stepperValue} aria-live="polite">
-        Altura {state.wallHeight}
+        {display}
       </span>
       <IconButton
-        label="Parede mais alta"
-        icon={<Plus size={14} />}
+        label={raiseLabel}
+        icon={<Plus size={STEPPER_ICON_SIZE} />}
         size="sm"
-        disabled={state.wallHeight >= MAX_WALL_HEIGHT}
-        onClick={() => setHeight(state.wallHeight + 1)}
+        disabled={value >= max}
+        onClick={() => onChange(value + 1)}
       />
     </div>
+  );
+}
+
+/** Altura em degraus de meia unidade; a tela mostra em unidades, como o mestre já via no v1. */
+function WallHeight({ state, dispatch }: Props) {
+  return (
+    <Stepper
+      label="Altura da parede"
+      value={state.wallHeight}
+      min={MIN_WALL_HEIGHT_STEPS}
+      max={MAX_WALL_HEIGHT_STEPS}
+      display={`Altura ${worldUnits.format(stepsToWorld(state.wallHeight))}`}
+      lowerLabel="Parede mais baixa"
+      raiseLabel="Parede mais alta"
+      onChange={(height) => dispatch({ type: 'set-wall-height', height })}
+    />
+  );
+}
+
+/** Quantas casas o próximo objeto ocupa (antes de girar). */
+function PieceFootprint({ state, dispatch }: Props) {
+  const { footprint } = state;
+  return (
+    <>
+      <Stepper
+        label="Largura do objeto"
+        value={footprint.width}
+        min={MIN_FOOTPRINT_SIDE}
+        max={MAX_FOOTPRINT}
+        display={`Largura ${footprint.width}`}
+        lowerLabel="Objeto mais estreito"
+        raiseLabel="Objeto mais largo"
+        onChange={(width) =>
+          dispatch({ type: 'set-footprint', footprint: { ...footprint, width } })
+        }
+      />
+      <Stepper
+        label="Profundidade do objeto"
+        value={footprint.depth}
+        min={MIN_FOOTPRINT_SIDE}
+        max={MAX_FOOTPRINT}
+        display={`Fundo ${footprint.depth}`}
+        lowerLabel="Objeto mais raso"
+        raiseLabel="Objeto mais fundo"
+        onChange={(depth) =>
+          dispatch({ type: 'set-footprint', footprint: { ...footprint, depth } })
+        }
+      />
+    </>
   );
 }
 
@@ -99,7 +177,7 @@ function ShortcutsHelp() {
 
 /** Ferramentas do mestre: pincéis, girar, desfazer/refazer e a ajuda de atalhos. */
 export function EditorToolbar({ state, dispatch }: Props) {
-  const selectedRotates = state.tool === 'select' && state.selectedPropId !== null;
+  const selectedRotates = state.tool === 'select' && state.selectedPiece !== null;
   return (
     <div className={styles.wrapper}>
       <Toolbar label="Ferramentas do editor">
@@ -136,6 +214,11 @@ export function EditorToolbar({ state, dispatch }: Props) {
       {state.tool === 'wall' && (
         <Toolbar label="Opções da parede">
           <WallHeight state={state} dispatch={dispatch} />
+        </Toolbar>
+      )}
+      {state.tool === 'prop' && (
+        <Toolbar label="Tamanho do objeto">
+          <PieceFootprint state={state} dispatch={dispatch} />
         </Toolbar>
       )}
     </div>
