@@ -178,12 +178,8 @@ export function convertMapV1ToV2(document: unknown, size: GridSize): MapResult<M
   return ok(convertCheckedMapV1(parsed.value, size));
 }
 
-/**
- * A mesma conversão, para um documento que JÁ passou pelo parseMapDocument (o do editor, que
- * só muda por operações conferidas). Pula a conferência, que num 100×100 cheio custa ~9 ms dos
- * ~11 ms da conversão: a cena converte a cada passo do pincel enquanto o editor for v1.
- */
-export function convertCheckedMapV1(legacy: MapDocument, size: GridSize): MapModel {
+/** A conversão de um documento que já passou pelo parseMapDocument. */
+function convertCheckedMapV1(legacy: MapDocument, size: GridSize): MapModel {
   const drafts = createDrafts(size);
   // O chão vai primeiro: a base de cada parede sai da altura dele.
   addFloors(drafts, legacy.floors);

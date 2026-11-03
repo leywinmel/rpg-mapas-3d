@@ -8,13 +8,13 @@ import {
   type MapModel,
   type MapPiece,
 } from '@/domain/map-v2';
+import type { FloorTile, Prop, Wall } from '@/domain';
 import {
   assetGroupKey,
-  buildHeightMap,
   floorCapTransform,
   floorColumnTransform,
-  propTransform,
-  wallSegmentTransforms,
+  floorTop,
+  stackedWallSegments,
   type InstanceTransform,
 } from '../layout';
 import { SCENE_PALETTE } from '../catalog/palette';
@@ -109,17 +109,34 @@ function sorted(drawn: Drawn): Drawn {
   );
 }
 
-/** O que a cena v1 desenhava, montado com as funções da cena v1. */
+/**
+ * Regras da cena v1 (já removida), congeladas aqui como referência: um mapa v1 aberto hoje
+ * (convertido) precisa sair na tela igual ao que o mestre via antes. A parede nascia no topo
+ * do chão mais alto dos dois lados da aresta; o objeto ficava em (x, elevation, z).
+ */
+function v1WallBase(floors: readonly FloorTile[], wall: Wall): number {
+  const neighbor =
+    wall.side === 'north' ? { x: wall.x, z: wall.z - 1 } : { x: wall.x - 1, z: wall.z };
+  const heightOf = (cell: { x: number; z: number }) =>
+    floors.find((floor) => floor.x === cell.x && floor.z === cell.z)?.height ?? 0;
+  return Math.max(floorTop(heightOf(wall)), floorTop(heightOf(neighbor)));
+}
+
+function v1PropTransform(prop: Prop): InstanceTransform {
+  return { x: prop.x, y: prop.elevation, z: prop.z, rotationY: prop.rotation, scale: prop.scale };
+}
+
+/** O que a cena v1 desenhava. */
 function drawnByV1(document: MapDocument): Drawn {
   const drawn: Drawn = {};
-  const heights = buildHeightMap(document.floors, size);
   add(drawn, 'column', document.floors.map(floorColumnTransform));
   for (const floor of document.floors) add(drawn, `cap:${floor.tile}`, [floorCapTransform(floor)]);
   for (const wall of document.walls) {
-    add(drawn, `wall:${wall.style}`, wallSegmentTransforms(heights, wall));
+    const base = v1WallBase(document.floors, wall);
+    add(drawn, `wall:${wall.style}`, stackedWallSegments(wall, base, wall.height));
   }
   for (const prop of document.props) {
-    add(drawn, `piece:${assetGroupKey(prop.asset)}`, [propTransform(prop)]);
+    add(drawn, `piece:${assetGroupKey(prop.asset)}`, [v1PropTransform(prop)]);
   }
   return sorted(drawn);
 }

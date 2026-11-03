@@ -1,6 +1,6 @@
 /**
  * Geometria do tabuleiro em TypeScript puro (sem three.js): onde cada peça do
- * documento fica no mundo 3D e qual casa está sob o cursor. Fica fora dos
+ * mapa fica no mundo 3D e qual casa está sob o cursor. Fica fora dos
  * componentes para ser testada em Node e compartilhada entre cena e editor.
  */
 import { isInside, type Cell, type FloorTile, type GridSize, type Prop, type Wall } from '@/domain';
@@ -40,16 +40,6 @@ export const RIGHT_ANGLE_DEGREES = 90;
 /** Topo do chão no mundo. O degrau é o HEIGHT_STEP do domínio, o mesmo do v1 e do v2. */
 export function floorTop(height: number): number {
   return stepsToWorld(height);
-}
-
-/** Altura de cada casa num vetor (z * largura + x), para consultas O(1) no laço de quadros. */
-export function buildHeightMap(floors: readonly FloorTile[], size: GridSize): HeightMap {
-  const heights = new Int8Array(size.width * size.depth).fill(NO_FLOOR);
-  for (const floor of floors) {
-    if (floor.x >= size.width || floor.z >= size.depth) continue;
-    heights[floor.z * size.width + floor.x] = floor.height;
-  }
-  return { size, lookup: (cell) => heights[cell.z * size.width + cell.x] ?? NO_FLOOR };
 }
 
 /**
@@ -95,22 +85,11 @@ export function floorCapTransform(floor: FloorTile): InstanceTransform {
   return { x: floor.x + 0.5, y: floorTop(floor.height), z: floor.z + 0.5, rotationY: 0, scale: 1 };
 }
 
-export function propTransform(prop: Prop): InstanceTransform {
-  return { x: prop.x, y: prop.elevation, z: prop.z, rotationY: prop.rotation, scale: prop.scale };
-}
-
 export type PropAsset = Prop['asset'];
 
 /** Chave do grupo de instâncias: mesmo modelo = mesmo InstancedMesh. */
 export function assetGroupKey(asset: PropAsset): string {
   return asset.source === 'catalog' ? `catalog:${asset.key}` : `upload:${asset.assetId}`;
-}
-
-/** As duas casas que a aresta separa; a parede nasce no chão mais alto das duas. */
-export function wallBase(map: HeightMap, edge: WallEdge): number {
-  const neighbor =
-    edge.side === 'north' ? { x: edge.x, z: edge.z - 1 } : { x: edge.x - 1, z: edge.z };
-  return Math.max(surfaceAt(map, edge), surfaceAt(map, neighbor));
 }
 
 /** Meio da aresta e o giro da parede: norte corre em x, oeste corre em z. */
@@ -147,11 +126,6 @@ export function stackedWallSegments(
     segments.push({ x, y: base + fullSegments, z, rotationY, scale: 1, scaleY: remainder });
   }
   return segments;
-}
-
-/** Parede do documento v1: a base sai do mapa de alturas e a altura já vem em unidades. */
-export function wallSegmentTransforms(map: HeightMap, wall: Wall): InstanceTransform[] {
-  return stackedWallSegments(wall, wallBase(map, wall), wall.height);
 }
 
 /** Aresta da casa mais perto do ponto: é onde a ferramenta de parede encaixa. */
