@@ -2,9 +2,8 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { Object3D, type DirectionalLight } from 'three';
 import type { Ambience, GridSize } from '@/domain';
 import { resolvePreset } from '../ambience';
+import { useQualitySettings } from '../quality/quality-store';
 
-/** Resolução da sombra: 2048 cobre bem até 100×100 sem pesar em placa de vídeo integrada. */
-const SHADOW_MAP_SIZE = 2048;
 /** Luz principal baixa (fim de tarde / tocha distante): sombras longas dão o ar dramático. */
 const KEY_LIGHT_HEIGHT = 0.55;
 const KEY_LIGHT_OFFSET = { x: -0.6, z: 0.35 };
@@ -18,7 +17,13 @@ const SHADOW_NORMAL_BIAS = 0.02;
  */
 const PHYSICAL_LIGHT_SCALE = Math.PI;
 
+/**
+ * A sombra e a resolução dela vêm do nível de qualidade. Trocar a resolução remonta a luz (o
+ * three não refaz o mapa de sombra sozinho); ligar e desligar a sombra recompila os materiais
+ * uma vez, o que só acontece quando o nível muda.
+ */
 export function SceneLights({ ambience, size }: { ambience: Ambience; size: GridSize }) {
+  const { shadows, shadowMapSize } = useQualitySettings();
   const preset = resolvePreset(ambience.preset);
   const strength = ambience.light * PHYSICAL_LIGHT_SCALE;
   const span = Math.max(size.width, size.depth);
@@ -31,7 +36,7 @@ export function SceneLights({ ambience, size }: { ambience: Ambience; size: Grid
   // O three não recalcula a projeção da câmera de sombra sozinho quando o mapa muda de tamanho.
   useLayoutEffect(() => {
     keyLight.current?.shadow.camera.updateProjectionMatrix();
-  }, [shadowExtent]);
+  }, [shadowExtent, shadowMapSize]);
 
   return (
     <>
@@ -42,8 +47,9 @@ export function SceneLights({ ambience, size }: { ambience: Ambience; size: Grid
         intensity={preset.fillIntensity * strength}
       />
       <directionalLight
+        key={shadowMapSize}
         ref={keyLight}
-        castShadow
+        castShadow={shadows}
         target={target}
         color={preset.keyColor}
         intensity={preset.keyIntensity * strength}
@@ -52,7 +58,7 @@ export function SceneLights({ ambience, size }: { ambience: Ambience; size: Grid
           span * KEY_LIGHT_HEIGHT + 4,
           center.z + span * KEY_LIGHT_OFFSET.z,
         ]}
-        shadow-mapSize={[SHADOW_MAP_SIZE, SHADOW_MAP_SIZE]}
+        shadow-mapSize={[shadowMapSize, shadowMapSize]}
         shadow-bias={SHADOW_BIAS}
         shadow-normalBias={SHADOW_NORMAL_BIAS}
         shadow-camera-left={-shadowExtent}
