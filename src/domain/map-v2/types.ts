@@ -23,8 +23,8 @@ export type MapChunk = {
 
 /**
  * O mapa v2 em memória: tamanho (que mora nas colunas width e depth da tabela maps),
- * cabeçalho e TODOS os pedaços do mapa. Um mapa sempre tem os 32×32 pedaços do seu tamanho,
- * por isso um pedaço que falta ao carregar é erro, e não um buraco silencioso.
+ * cabeçalho e TODOS os pedaços do mapa. Em memória o mapa sempre tem os 32×32 pedaços do seu
+ * tamanho; no banco, só os que fogem do chão liso padrão (loadMapModel completa o resto).
  */
 export type MapModel = {
   readonly size: GridSize;

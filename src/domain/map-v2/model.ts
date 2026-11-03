@@ -14,9 +14,43 @@ import {
 import { DEFAULT_FLOOR_TILE, MAP_V2_VERSION, MAX_MAP_SIZE_V2 } from './constants';
 import { anchorWindow, pieceRect } from './footprint';
 import { rectContains } from './rect';
-import { catalogKeySchema, type MapPiece } from './schema';
+import { catalogKeySchema, type MapHeader, type MapPiece } from './schema';
 import { createUniformTerrain, tileAtIndex } from './terrain';
 import type { MapChunk, MapModel } from './types';
+
+/** Cabeçalho de um mapa novo: versão 2 e o clima padrão. */
+export function createDefaultHeader(): MapHeader {
+  return { version: MAP_V2_VERSION, ambience: { ...DEFAULT_AMBIENCE } };
+}
+
+/**
+ * Pedaço liso: a peça de chão em todas as casas, no nível zero, sem paredes nem peças. Com a
+ * peça padrão é o pedaço que vale quando o banco não tem linha para ele (decisão 14, de 03/11).
+ */
+export function createUniformChunk(
+  size: GridSize,
+  coord: ChunkCoord,
+  floorTile: string = DEFAULT_FLOOR_TILE,
+): MapChunk {
+  const bounds = chunkBounds(size, coord);
+  const terrain = createUniformTerrain(bounds.width * bounds.depth, floorTile);
+  return { coord, bounds, terrain, walls: [], pieces: [] };
+}
+
+/**
+ * O pedaço é o chão liso padrão? É o que decide se ele precisa de linha no banco: o que nunca
+ * foi mexido (ou voltou a ser liso) não é gravado. Olha o que aparece, e não a paleta: uma peça
+ * que sobrou na paleta sem casa nenhuma não faz o pedaço diferente.
+ */
+export function isDefaultChunk(chunk: MapChunk): boolean {
+  if (chunk.walls.length > 0 || chunk.pieces.length > 0) return false;
+  const { terrain } = chunk;
+  for (let index = 0; index < terrain.tiles.length; index += 1) {
+    if (terrain.heights[index] !== 0) return false;
+    if (tileAtIndex(terrain, index) !== DEFAULT_FLOOR_TILE) return false;
+  }
+  return true;
+}
 
 /**
  * Mapa novo: chão inteiro com a peça escolhida, no nível zero, sem paredes nem peças. Tamanho
@@ -33,13 +67,11 @@ export function createEmptyMap(size: GridSize, floorTile: string = DEFAULT_FLOOR
   }
   const chunks = new Map<string, MapChunk>();
   for (const coord of listChunks(size)) {
-    const bounds = chunkBounds(size, coord);
-    const terrain = createUniformTerrain(bounds.width * bounds.depth, floorTile);
-    chunks.set(chunkKey(coord), { coord, bounds, terrain, walls: [], pieces: [] });
+    chunks.set(chunkKey(coord), createUniformChunk(size, coord, floorTile));
   }
   return {
     size: { width: size.width, depth: size.depth },
-    header: { version: MAP_V2_VERSION, ambience: { ...DEFAULT_AMBIENCE } },
+    header: createDefaultHeader(),
     chunks,
   };
 }

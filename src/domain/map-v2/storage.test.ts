@@ -1,8 +1,22 @@
-import { MAX_REPORTED_ERRORS } from './constants';
-import { createEmptyMap, getChunk, piecesOccupyingCell, terrainAt } from './model';
-import { paintTerrainRect, placePiece, placeWall, setTerrainHeight } from './operations';
-import { loadMapModel, serializeMapModel, type StoredChunk } from './storage';
-import { errorsOf, makePiece, makeWall, unwrap } from './test-fixtures';
+import { chunkKey } from './chunks';
+import { DEFAULT_FLOOR_TILE, MAX_REPORTED_ERRORS } from './constants';
+import { createEmptyMap, getChunk, isDefaultChunk, piecesOccupyingCell, terrainAt } from './model';
+import {
+  paintTerrainRect,
+  placePiece,
+  placeWall,
+  removePiece,
+  removeWall,
+  setTerrainHeight,
+} from './operations';
+import {
+  isEmptySavePlan,
+  loadMapModel,
+  planMapSave,
+  serializeMapModel,
+  type StoredChunk,
+} from './storage';
+import { changedKeys, errorsOf, makePiece, makeWall, unwrap } from './test-fixtures';
 import type { MapModel } from './types';
 
 // 70×40 casas: 3 colunas de pedaços (32, 32 e 6 casas) e 2 linhas (32 e 8 casas).
@@ -54,10 +68,13 @@ describe('loading and serializing a map', () => {
     expect(getChunk(loaded, { cx: 0, cz: 1 }).walls).toHaveLength(1);
   });
 
-  it('shouldReadTheLargestMapWithAllItsChunks', () => {
+  it('shouldReadTheLargestMapWithAllItsChunksFromNoRowAtAll', () => {
     const model = createEmptyMap({ width: 1000, depth: 1000 });
-    const loaded = unwrap(load(model, storedChunks(model)));
+    const chunks = storedChunks(model);
+    expect(chunks).toEqual([]);
+    const loaded = unwrap(load(model, chunks));
     expect(loaded.chunks.size).toBe(1024);
+    expect(terrainAt(loaded, { x: 999, z: 999 })).toEqual({ tile: DEFAULT_FLOOR_TILE, height: 0 });
   });
 
   it('shouldRejectAnInvalidSizeOrHeader', () => {
@@ -73,12 +90,24 @@ describe('loading and serializing a map', () => {
     expect(errorsOf(load(model, chunks, null))[0]).toMatch(/formato reconhecido/);
   });
 
-  it('shouldRejectAMissingChunk', () => {
+  it('shouldFillAMissingChunkWithTheDefaultFloor', () => {
     const model = editedMap();
-    const chunks = storedChunks(model).filter(({ coord }) => coord.cx !== 1 || coord.cz !== 1);
-    expect(errorsOf(load(model, chunks))[0]).toMatch(
-      /Falta 1 pedaço do mapa, a começar pelo \(1, 1\)/,
-    );
+    const chunks = storedChunks(model).filter(({ coord }) => coord.cx !== 0 || coord.cz !== 0);
+    const loaded = unwrap(load(model, chunks));
+    const filled = getChunk(loaded, { cx: 0, cz: 0 });
+    expect(isDefaultChunk(filled)).toBe(true);
+    expect(filled.bounds).toEqual({ x: 0, z: 0, width: 32, depth: 32 });
+    expect(piecesOccupyingCell(loaded, { x: 30, z: 20 })).toEqual([]);
+    // O pedaço da borda que falta também nasce cortado no tamanho certo.
+    const border = getChunk(unwrap(load(model, [])), { cx: 2, cz: 1 });
+    expect(border.bounds).toEqual({ x: 64, z: 32, width: 6, depth: 8 });
+  });
+
+  it('shouldStoreOnlyTheChunksThatDifferFromTheDefault', () => {
+    const model = editedMap();
+    const keys = serializeMapModel(model).chunks.map(({ coord }) => chunkKey(coord));
+    // (1, 1) nunca foi mexido: não vira linha no banco.
+    expect(keys.sort()).toEqual(['0,0', '0,1', '1,0', '2,0', '2,1']);
   });
 
   it('shouldRejectARepeatedChunk', () => {
@@ -121,5 +150,68 @@ describe('loading and serializing a map', () => {
     const broken = storedChunks(model).map((chunk) => ({ ...chunk, document: null }));
     const errors = errorsOf(load(model, broken));
     expect(errors).toHaveLength(MAX_REPORTED_ERRORS);
+  });
+});
+
+describe('planning a save', () => {
+  const keysOf = (coords: ReadonlyArray<{ cx: number; cz: number }>) => coords.map(chunkKey);
+
+  it('shouldWriteEverythingThatDiffersWhenTheBankHasNothingYet', () => {
+    const model = editedMap();
+    const plan = planMapSave(null, model);
+    expect(plan.headerChanged).toBe(true);
+    expect(plan.header).toBe(model.header);
+    expect(plan.deletes).toEqual([]);
+    expect(plan.upserts).toEqual(serializeMapModel(model).chunks);
+  });
+
+  it('shouldWriteOnlyTheHeaderOfABrandNewEmptyMap', () => {
+    const plan = planMapSave(null, createEmptyMap({ width: 1000, depth: 1000 }));
+    expect(plan.upserts).toEqual([]);
+    expect(isEmptySavePlan(plan)).toBe(false);
+  });
+
+  it('shouldPlanNothingWhenNothingChanged', () => {
+    const model = editedMap();
+    expect(isEmptySavePlan(planMapSave(model, model))).toBe(true);
+  });
+
+  it('shouldWriteOnlyTheTouchedChunks', () => {
+    const saved = editedMap();
+    const current = unwrap(placePiece(saved, makePiece({ id: 'barril-9', x: 40, z: 35 })));
+    const plan = planMapSave(saved, current);
+    expect(plan.headerChanged).toBe(false);
+    expect(keysOf(plan.upserts.map(({ coord }) => coord))).toEqual(['1,1']);
+    expect(plan.upserts[0]?.document.pieces.map((piece) => piece.id)).toEqual(['barril-9']);
+    expect(plan.deletes).toEqual([]);
+  });
+
+  it('shouldDeleteAChunkThatWentBackToTheDefaultFloor', () => {
+    const saved = editedMap();
+    let current = unwrap(removePiece(saved, { id: 'sobrado', x: 66, z: 36 }));
+    current = unwrap(placePiece(current, makePiece({ id: 'barril-9', x: 40, z: 35 })));
+    const plan = planMapSave(saved, current);
+    expect(changedKeys(saved, current).sort()).toEqual(['1,1', '2,1']);
+    expect(keysOf(plan.deletes)).toEqual(['2,1']);
+    expect(keysOf(plan.upserts.map(({ coord }) => coord))).toEqual(['1,1']);
+  });
+
+  it('shouldDeleteAChunkWhoseOnlyWallWasRemoved', () => {
+    const saved = editedMap();
+    const current = unwrap(removeWall(saved, { x: 5, z: 40, side: 'north', level: 0 }));
+    expect(keysOf(planMapSave(saved, current).deletes)).toEqual(['0,1']);
+  });
+
+  it('shouldNoticeANewHeader', () => {
+    const saved = editedMap();
+    const current = { ...saved, header: { ...saved.header } };
+    const plan = planMapSave(saved, current);
+    expect(plan.headerChanged).toBe(true);
+    expect(isEmptySavePlan(plan)).toBe(false);
+  });
+
+  it('shouldRefuseToResizeTheMap', () => {
+    const saved = createEmptyMap({ width: 40, depth: 40 });
+    expect(() => planMapSave(saved, createEmptyMap({ width: 64, depth: 40 }))).toThrow(RangeError);
   });
 });
