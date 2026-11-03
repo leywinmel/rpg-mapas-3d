@@ -429,7 +429,7 @@ isOneToOne: false
 { Args: { "p_topic": string }; Returns: string
                            },
 "save_map_v2":
-{ Args: { "p_deletes"?: Json,"p_header": Json,"p_map_id": string,"p_upserts"?: Json }; Returns: string
+{ Args: { "p_deletes"?: Json,"p_depth"?: number,"p_header": Json,"p_map_id": string,"p_upserts"?: Json,"p_width"?: number }; Returns: string
                            },
 "send_note":
 { Args: { "p_body": string,"p_image_path"?: string,"p_recipient_ids"?: (string)[],"p_room_id": string,"p_title": string,"p_to_all"?: boolean }; Returns: {

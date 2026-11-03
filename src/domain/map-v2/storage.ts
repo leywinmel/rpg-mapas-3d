@@ -38,6 +38,10 @@ export type SerializedMap = {
 export type MapSavePlan = {
   readonly header: MapHeader;
   readonly headerChanged: boolean;
+  /** Tamanho do mapa depois da gravação (vai para maps.width e maps.depth). */
+  readonly size: GridSize;
+  /** O tamanho mudou: o banco também apaga as linhas dos pedaços que saíram do mapa. */
+  readonly sizeChanged: boolean;
   /** Pedaços mexidos que continuam diferentes do padrão: gravar (inserir ou trocar). */
   readonly upserts: SerializedChunk[];
   /** Pedaços mexidos que voltaram a ser o chão liso padrão: apagar a linha. */
@@ -128,19 +132,14 @@ export function serializeMapModel(model: MapModel): SerializedMap {
  * padrão. Senão, só os pedaços trocados (por referência, como em changedChunks), e o pedaço
  * trocado que voltou a ser liso é apagado. O cabeçalho também é comparado por referência.
  *
- * Os dois modelos precisam ter o mesmo tamanho: mudar o tamanho é outra conta (o banco guarda o
- * tamanho em maps.width e maps.depth), e pedir isso aqui é erro de programação.
+ * Se o tamanho mudou (resizeMap), os pedaços que saíram do mapa não entram no plano: o banco
+ * apaga sozinho as linhas de fora do tamanho novo, na mesma transação.
  */
 export function planMapSave(saved: MapModel | null, current: MapModel): MapSavePlan {
+  const size = { width: current.size.width, depth: current.size.depth };
   if (!saved) {
     const { header, chunks } = serializeMapModel(current);
-    return { header, headerChanged: true, upserts: chunks, deletes: [] };
-  }
-  if (saved.size.width !== current.size.width || saved.size.depth !== current.size.depth) {
-    throw new RangeError(
-      `O mapa mudou de ${saved.size.width}×${saved.size.depth} para ` +
-        `${current.size.width}×${current.size.depth}: a gravação por pedaços não troca o tamanho.`,
-    );
+    return { header, headerChanged: true, size, sizeChanged: true, upserts: chunks, deletes: [] };
   }
   const upserts: SerializedChunk[] = [];
   const deletes: ChunkCoord[] = [];
@@ -152,12 +151,19 @@ export function planMapSave(saved: MapModel | null, current: MapModel): MapSaveP
   return {
     header: current.header,
     headerChanged: saved.header !== current.header,
+    size,
+    sizeChanged: saved.size.width !== size.width || saved.size.depth !== size.depth,
     upserts,
     deletes,
   };
 }
 
-/** Nada a gravar: nem pedaço nem cabeçalho mudaram. */
+/** Nada a gravar: nem pedaço, nem cabeçalho, nem tamanho mudaram. */
 export function isEmptySavePlan(plan: MapSavePlan): boolean {
-  return !plan.headerChanged && plan.upserts.length === 0 && plan.deletes.length === 0;
+  return (
+    !plan.headerChanged &&
+    !plan.sizeChanged &&
+    plan.upserts.length === 0 &&
+    plan.deletes.length === 0
+  );
 }

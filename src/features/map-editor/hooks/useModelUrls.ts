@@ -1,14 +1,31 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { MapDocument } from '@/domain';
+import type { MapChunk, MapModel } from '@/domain/map-v2';
 import { reportError } from '@/lib/report-error';
 import { useMapEditorServices } from '../services/services-context';
 
+/**
+ * Ids enviados por pedaço. O pedaço que não mudou é o mesmo objeto, então a conta de cada traço
+ * do pincel olha só o pedaço mexido, e não as peças do mapa inteiro.
+ */
+const idsByChunk = new WeakMap<MapChunk, readonly string[]>();
+
+function chunkAssetIds(chunk: MapChunk): readonly string[] {
+  const cached = idsByChunk.get(chunk);
+  if (cached) return cached;
+  const ids: string[] = [];
+  for (const piece of chunk.pieces) {
+    if (piece.asset.source === 'upload') ids.push(piece.asset.assetId);
+  }
+  idsByChunk.set(chunk, ids);
+  return ids;
+}
+
 /** Ids dos modelos enviados que o mapa usa, sem repetição e em ordem estável. */
-export function uploadedAssetIds(document: MapDocument | null): string[] {
-  if (!document) return [];
+export function uploadedAssetIds(model: MapModel | null): string[] {
+  if (!model) return [];
   const ids = new Set<string>();
-  for (const prop of document.props) {
-    if (prop.asset.source === 'upload') ids.add(prop.asset.assetId);
+  for (const chunk of model.chunks.values()) {
+    for (const id of chunkAssetIds(chunk)) ids.add(id);
   }
   return [...ids].sort();
 }

@@ -2,15 +2,23 @@
  * Estado do editor de diorama como redutor puro: ferramenta, peça escolhida,
  * histórico e traço do pincel. A cena só informa "o cursor apertou/passou nesta
  * casa"; quem decide o que muda no mapa é este arquivo (testável sem WebGL).
+ *
+ * O mapa é o MapModel do v2: cada operação troca só os pedaços tocados, então o
+ * histórico guarda referências baratas e o autosave grava só o que mudou.
  */
+import type { Ambience, GridSize, MapResult } from '@/domain';
 import {
-  MAX_WALL_HEIGHT,
-  MIN_WALL_HEIGHT,
-  type Ambience,
-  type Cell,
-  type GridSize,
-  type MapDocument,
-} from '@/domain';
+  MAX_FOOTPRINT,
+  MAX_WALL_HEIGHT_STEPS,
+  MIN_WALL_HEIGHT_STEPS,
+  paintTerrainCell,
+  resizeMap,
+  stepTerrainHeight,
+  STORY_HEIGHT_STEPS,
+  type Footprint,
+  type MapModel,
+  type PieceRef,
+} from '@/domain/map-v2';
 import {
   DEFAULT_FLOOR_TILE,
   DEFAULT_PROP_KEY,
@@ -18,20 +26,6 @@ import {
   nearestEdge,
   type PropAsset,
 } from '@/features/scene';
-import {
-  adjustFloorHeight,
-  eraseTarget,
-  eraseTargetAt,
-  normalizeRotation,
-  placeProp,
-  propsInCell,
-  removeProp,
-  rotateProp,
-  ROTATION_STEP,
-  setAmbience,
-  setFloorTile,
-  setWall,
-} from './document-ops';
 import {
   commitFrom,
   createHistory,
@@ -41,43 +35,60 @@ import {
   undo,
   type History,
 } from './history';
+import {
+  eraseTarget,
+  eraseTargetAt,
+  normalizeQuarterTurns,
+  placePieceAt,
+  placeWallAt,
+  rotatePiece,
+  setAmbience,
+  topPieceAt,
+  type PointerHit,
+} from './model-ops';
 import { cellsOnLine } from './stroke-line';
+
+export type { PointerHit } from './model-ops';
 
 export type Tool = 'select' | 'floor' | 'wall' | 'prop' | 'erase' | 'raise' | 'lower';
 
 export type Brush = { floor: string; wall: string; prop: PropAsset };
 
-export type PointerHit = { cell: Cell; point: { x: number; z: number } };
-
 type Stroke = {
-  before: MapDocument;
+  before: MapModel;
   visited: ReadonlySet<string>;
   /** Última casa pintada: o próximo movimento preenche a linha até a casa nova. */
   last: PointerHit | null;
 };
 
+/** Aviso de uma jogada recusada (ex: a peça não cabe no mapa), para a tela mostrar uma vez. */
+export type EditorNotice = { readonly message: string };
+
 export type EditorState = {
-  size: GridSize;
-  history: History<MapDocument>;
+  history: History<MapModel>;
   tool: Tool;
   brush: Brush;
-  /** Giro (graus) do próximo objeto colocado. */
+  /** Giro do próximo objeto colocado, em quartos de volta (0 a 3). */
   rotation: number;
+  /** Tamanho em casas do próximo objeto colocado, antes de girar. */
+  footprint: Footprint;
+  /** Altura da próxima parede, em degraus. */
   wallHeight: number;
-  selectedPropId: string | null;
+  selectedPiece: PieceRef | null;
   stroke: Stroke | null;
   /** Ajustes contínuos (ex: arrastar o controle de luz) viram um passo só no histórico. */
   coalesceKey: string | null;
+  notice: EditorNotice | null;
 };
 
 export type EditorAction =
-  | { type: 'load'; document: MapDocument; size: GridSize }
   | { type: 'set-tool'; tool: Tool }
   | { type: 'choose-floor'; key: string }
   | { type: 'choose-wall'; key: string }
   | { type: 'choose-prop'; asset: PropAsset }
   | { type: 'rotate' }
   | { type: 'set-wall-height'; height: number }
+  | { type: 'set-footprint'; footprint: Footprint }
   | { type: 'stroke-start'; hit: PointerHit; newPropId: string }
   | { type: 'stroke-move'; hit: PointerHit }
   | { type: 'stroke-end' }
@@ -85,27 +96,31 @@ export type EditorAction =
   | { type: 'delete-selected' }
   | { type: 'undo' }
   | { type: 'redo' }
-  | { type: 'set-ambience'; patch: Partial<Ambience>; coalesceKey?: string };
+  | { type: 'set-ambience'; patch: Partial<Ambience>; coalesceKey?: string }
+  | { type: 'resize'; size: GridSize };
 
 export const DEFAULT_BRUSH: Brush = {
   floor: DEFAULT_FLOOR_TILE,
   wall: DEFAULT_WALL_STYLE,
   prop: { source: 'catalog', key: DEFAULT_PROP_KEY },
 };
-const DEFAULT_WALL_HEIGHT = 2;
+/** Uma parede nova tem um andar de altura: a mesma parede de 2 unidades do v1. */
+export const DEFAULT_WALL_HEIGHT = STORY_HEIGHT_STEPS;
+const SINGLE_CELL: Footprint = { width: 1, depth: 1 };
 const RAISE_STEP = 1;
 
-export function createEditorState(document: MapDocument, size: GridSize): EditorState {
+export function createEditorState(model: MapModel): EditorState {
   return {
-    size,
-    history: createHistory(document),
+    history: createHistory(model),
     tool: 'select',
     brush: DEFAULT_BRUSH,
     rotation: 0,
+    footprint: SINGLE_CELL,
     wallHeight: DEFAULT_WALL_HEIGHT,
-    selectedPropId: null,
+    selectedPiece: null,
     stroke: null,
     coalesceKey: null,
+    notice: null,
   };
 }
 
@@ -123,36 +138,52 @@ function strokeKey(tool: Tool, hit: PointerHit): string {
   return `${hit.cell.x}:${hit.cell.z}`;
 }
 
-function applyTool(state: EditorState, hit: PointerHit, newPropId: string | null): MapDocument {
-  const document = state.history.present;
+function clampSide(value: number, max: number): number {
+  return Math.min(Math.max(Math.round(value), 1), max);
+}
+
+function applyTool(
+  state: EditorState,
+  hit: PointerHit,
+  newPropId: string | null,
+): MapResult<MapModel> {
+  const model = state.history.present;
+  const unchanged: MapResult<MapModel> = { ok: true, value: model };
   switch (state.tool) {
     case 'floor':
-      return setFloorTile(document, state.size, { cell: hit.cell, tile: state.brush.floor });
+      return paintTerrainCell(model, { cell: hit.cell, tile: state.brush.floor });
     case 'wall':
-      return setWall(document, state.size, {
-        ...nearestEdge(hit.cell, hit.point),
+      return placeWallAt(model, {
+        edge: nearestEdge(hit.cell, hit.point),
         style: state.brush.wall,
         height: state.wallHeight,
       });
     case 'prop':
-      if (!newPropId) return document;
-      return placeProp(document, state.size, {
+      if (!newPropId) return unchanged;
+      return placePieceAt(model, {
         id: newPropId,
         asset: state.brush.prop,
-        cell: hit.cell,
+        anchor: hit.cell,
         rotation: state.rotation,
+        footprint: state.footprint,
       });
     case 'erase': {
-      const target = eraseTargetAt(document, hit);
-      return target ? eraseTarget(document, target) : document;
+      const target = eraseTargetAt(model, hit);
+      return target ? eraseTarget(model, target) : unchanged;
     }
     case 'raise':
-      return adjustFloorHeight(document, hit.cell, RAISE_STEP);
+      return stepTerrainHeight(model, { from: hit.cell, to: hit.cell, delta: RAISE_STEP });
     case 'lower':
-      return adjustFloorHeight(document, hit.cell, -RAISE_STEP);
+      return stepTerrainHeight(model, { from: hit.cell, to: hit.cell, delta: -RAISE_STEP });
     case 'select':
-      return document;
+      return unchanged;
   }
+}
+
+/** O aviso da recusa; o mesmo objeto quando a mensagem se repete (não avisa de novo no arraste). */
+function noticeFor(state: EditorState, errors: readonly string[]): EditorNotice {
+  const message = errors[0] ?? 'Essa mudança não coube no mapa.';
+  return state.notice?.message === message ? state.notice : { message };
 }
 
 function paint(state: EditorState, hit: PointerHit, newPropId: string | null): EditorState {
@@ -164,16 +195,14 @@ function paint(state: EditorState, hit: PointerHit, newPropId: string | null): E
     return sameCell ? state : { ...state, stroke: { ...state.stroke, last: hit } };
   }
   const visited = new Set(state.stroke.visited).add(key);
-  const next = applyTool(state, hit, newPropId);
-  return {
-    ...state,
-    history: replacePresent(state.history, next),
-    stroke: { ...state.stroke, visited, last: hit },
-  };
+  const stroke = { ...state.stroke, visited, last: hit };
+  const result = applyTool(state, hit, newPropId);
+  if (!result.ok) return { ...state, stroke, notice: noticeFor(state, result.errors) };
+  return { ...state, history: replacePresent(state.history, result.value), stroke };
 }
 
 /** Centro da casa: ponto usado para as casas preenchidas no meio do arraste. */
-function cellCenter(cell: Cell): PointerHit {
+function cellCenter(cell: PointerHit['cell']): PointerHit {
   return { cell, point: { x: cell.x + 0.5, z: cell.z + 0.5 } };
 }
 
@@ -196,19 +225,20 @@ function finishStroke(state: EditorState): EditorState {
   return { ...state, history: commitFrom(state.history, state.stroke.before), stroke: null };
 }
 
-/** Mudança de documento que vira um passo próprio no histórico. */
-function commit(state: EditorState, next: MapDocument): EditorState {
-  return { ...state, history: pushHistory(state.history, next), coalesceKey: null };
+/** Mudança de mapa que vira um passo próprio no histórico; recusada, vira aviso. */
+function commit(state: EditorState, result: MapResult<MapModel>): EditorState {
+  if (!result.ok) return { ...state, notice: noticeFor(state, result.errors) };
+  return { ...state, history: pushHistory(state.history, result.value), coalesceKey: null };
+}
+
+function rotate(state: EditorState): EditorState {
+  const selected = state.tool === 'select' ? state.selectedPiece : null;
+  if (selected) return commit(state, rotatePiece(state.history.present, selected));
+  return { ...state, rotation: normalizeQuarterTurns(state.rotation + 1) };
 }
 
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
   switch (action.type) {
-    case 'load':
-      return {
-        ...createEditorState(action.document, action.size),
-        tool: state.tool,
-        brush: state.brush,
-      };
     case 'set-tool':
       return { ...finishStroke(state), tool: action.tool };
     case 'choose-floor':
@@ -217,15 +247,23 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return { ...state, brush: { ...state.brush, wall: action.key }, tool: 'wall' };
     case 'choose-prop':
       return { ...state, brush: { ...state.brush, prop: action.asset }, tool: 'prop' };
-    case 'rotate': {
-      const selected = state.tool === 'select' ? state.selectedPropId : null;
-      if (selected) return commit(state, rotateProp(state.history.present, selected));
-      return { ...state, rotation: normalizeRotation(state.rotation + ROTATION_STEP) };
-    }
+    case 'rotate':
+      return rotate(state);
     case 'set-wall-height':
       return {
         ...state,
-        wallHeight: Math.min(Math.max(Math.round(action.height), MIN_WALL_HEIGHT), MAX_WALL_HEIGHT),
+        wallHeight: Math.min(
+          Math.max(Math.round(action.height), MIN_WALL_HEIGHT_STEPS),
+          MAX_WALL_HEIGHT_STEPS,
+        ),
+      };
+    case 'set-footprint':
+      return {
+        ...state,
+        footprint: {
+          width: clampSide(action.footprint.width, MAX_FOOTPRINT),
+          depth: clampSide(action.footprint.depth, MAX_FOOTPRINT),
+        },
       };
     case 'stroke-start': {
       if (state.tool === 'select') return state;
@@ -241,15 +279,16 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case 'stroke-end':
       return finishStroke(state);
     case 'select-at': {
-      const top = propsInCell(state.history.present, action.hit.cell).at(-1);
-      return { ...state, selectedPropId: top?.id ?? null };
+      const top = topPieceAt(state.history.present, action.hit.cell);
+      return { ...state, selectedPiece: top ? { id: top.id, x: top.x, z: top.z } : null };
     }
     case 'delete-selected': {
-      if (!state.selectedPropId) return state;
-      return {
-        ...commit(state, removeProp(state.history.present, state.selectedPropId)),
-        selectedPropId: null,
-      };
+      if (!state.selectedPiece) return state;
+      const removed = eraseTarget(state.history.present, {
+        layer: 'piece',
+        piece: state.selectedPiece,
+      });
+      return { ...commit(state, removed), selectedPiece: null };
     }
     case 'undo': {
       const settled = finishStroke(state);
@@ -268,5 +307,7 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         coalesceKey: action.coalesceKey ?? null,
       };
     }
+    case 'resize':
+      return commit(finishStroke(state), resizeMap(state.history.present, action.size));
   }
 }

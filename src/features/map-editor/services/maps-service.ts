@@ -1,31 +1,18 @@
 /**
- * Acesso aos mapas da mesa. O editor só conhece a interface MapsService; a
- * implementação com Supabase fica aqui e os testes passam uma versão falsa.
+ * Acesso à lista de mapas da mesa (nome, ordem, mapa ativo). O conteúdo do mapa (criar,
+ * abrir e gravar) é do MapsV2Service. O editor só conhece as interfaces; a implementação com
+ * Supabase fica aqui e os testes passam uma versão falsa.
  */
 import { z } from 'zod';
-import type { MapDocument } from '@/domain';
 import type { AppSupabaseClient } from '@/lib/supabase';
-import type { MapRecord, MapSummary, RoomChange, RoomMaps } from '../types';
-import { currentUserId } from './current-user';
+import type { MapSummary, RoomChange, RoomMaps } from '../types';
 import { check, unwrap } from './service-result';
-
-export type CreateMapInput = {
-  roomId: string;
-  name: string;
-  width: number;
-  depth: number;
-  document: MapDocument;
-  sortOrder: number;
-};
 
 export type MapsService = {
   loadRoomMaps: (roomId: string) => Promise<RoomMaps>;
-  loadMap: (mapId: string) => Promise<MapRecord>;
-  createMap: (input: CreateMapInput) => Promise<MapSummary>;
   renameMap: (mapId: string, name: string) => Promise<void>;
   deleteMap: (mapId: string) => Promise<void>;
   setActiveMap: (roomId: string, mapId: string | null) => Promise<void>;
-  saveDocument: (mapId: string, document: MapDocument) => Promise<void>;
   reorderMaps: (order: ReadonlyArray<{ id: string; sortOrder: number }>) => Promise<void>;
   /** Assina as mudanças da mesa; devolve a função que cancela a assinatura. */
   subscribeRoom: (roomId: string, onChange: (change: RoomChange) => void) => () => void;
@@ -81,34 +68,6 @@ export function createSupabaseMapsService(client: AppSupabaseClient): MapsServic
       };
     },
 
-    async loadMap(mapId) {
-      const row = unwrap(
-        await client.from('maps').select(`${SUMMARY_COLUMNS}, document`).eq('id', mapId).single(),
-      );
-      return { ...toSummary(row), document: row.document };
-    },
-
-    async createMap(input) {
-      const ownerId = await currentUserId(client);
-      if (!ownerId) throw new Error('Sessão expirada: entre de novo para criar mapas.');
-      const row = unwrap(
-        await client
-          .from('maps')
-          .insert({
-            owner_id: ownerId,
-            room_id: input.roomId,
-            name: input.name,
-            width: input.width,
-            depth: input.depth,
-            document: input.document,
-            sort_order: input.sortOrder,
-          })
-          .select(SUMMARY_COLUMNS)
-          .single(),
-      );
-      return toSummary(row);
-    },
-
     async renameMap(mapId, name) {
       check(await client.from('maps').update({ name }).eq('id', mapId));
     },
@@ -119,10 +78,6 @@ export function createSupabaseMapsService(client: AppSupabaseClient): MapsServic
 
     async setActiveMap(roomId, mapId) {
       check(await client.from('rooms').update({ active_map_id: mapId }).eq('id', roomId));
-    },
-
-    async saveDocument(mapId, document) {
-      check(await client.from('maps').update({ document }).eq('id', mapId));
     },
 
     async reorderMaps(order) {

@@ -13,6 +13,7 @@ export * from './height';
 export * from './model';
 export * from './operations';
 export * from './rect';
+export * from './resize';
 export * from './rle';
 export {
   catalogKeySchema,
@@ -29,5 +30,6 @@ export {
 } from './schema';
 export * from './storage';
 export * from './terrain';
+export * from './terrain-height';
 export * from './types';
 export * from './walls';

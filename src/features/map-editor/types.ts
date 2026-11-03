@@ -8,9 +8,6 @@ export type MapSummary = {
   updatedAt: string;
 };
 
-/** Mapa completo. O documento chega como `unknown` e só vira MapDocument após o parse do domínio. */
-export type MapRecord = MapSummary & { document: unknown };
-
 export type RoomMaps = { activeMapId: string | null; maps: MapSummary[] };
 
 /** Modelo .glb enviado pelo mestre (tabela map_assets). */

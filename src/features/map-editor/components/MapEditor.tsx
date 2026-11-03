@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useReducer, type ReactNode } from 'react';
-import { ErrorBoundary, LoadingState } from '@/components';
+import { ErrorBoundary, LoadingState, notify } from '@/components';
 import type { PerfSample } from '@/features/scene/components/PerfMeter';
 import {
   createEditorState,
@@ -9,7 +9,7 @@ import {
 } from '../editor/editor-reducer';
 import { isTypingTarget, shortcutCommand, type EditorCommand } from '../editor/shortcuts';
 import { useAutosave } from '../hooks/useAutosave';
-import type { LoadedMap } from '../hooks/useMapDocument';
+import type { LoadedMap } from '../hooks/useMapModel';
 import { uploadedAssetIds, useModelUrls } from '../hooks/useModelUrls';
 import { useMapEditorServices } from '../services/services-context';
 import { AmbienceControls } from './AmbienceControls';
@@ -17,8 +17,10 @@ import { EditorSidebar } from './EditorSidebar';
 import { EditorToolbar } from './EditorToolbar';
 import type { EditorSceneActions, EditorViewState } from './EditorInteraction';
 import { LibraryPanel } from './LibraryPanel';
+import { MapSizeControls } from './MapSizeControls';
 import { SaveIndicator } from './SaveIndicator';
 import layout from './MapWorkspace.module.css';
+import panel from './SidePanel.module.css';
 
 // three.js só é baixado quando a cena aparece: a tela inicial fica leve.
 const MapViewport = lazy(() => import('./MapViewport'));
@@ -65,7 +67,7 @@ export type MapEditorProps = {
   map: LoadedMap;
   /** Conteúdo da aba "Mapas" (a lista da mesa vive fora do editor). */
   mapsPanel: ReactNode;
-  /** Nome atual vindo da lista da mesa (o documento carregado não acompanha renomeações). */
+  /** Nome atual vindo da lista da mesa (o mapa carregado não acompanha renomeações). */
   name?: string;
   onPerfSample?: (sample: PerfSample) => void;
 };
@@ -76,30 +78,30 @@ export type MapEditorProps = {
  * recomeça o histórico e grava o que faltava do mapa anterior.
  */
 export function MapEditor({ map, mapsPanel, name, onPerfSample }: MapEditorProps) {
-  const { maps: service } = useMapEditorServices();
+  const { mapsV2 } = useMapEditorServices();
   const { summary } = map;
   const title = name ?? summary.name;
-  const [state, dispatch] = useReducer(editorReducer, map, (loaded) =>
-    createEditorState(loaded.document, {
-      width: loaded.summary.width,
-      depth: loaded.summary.depth,
-    }),
-  );
-  const document = state.history.present;
+  const [state, dispatch] = useReducer(editorReducer, map.model, createEditorState);
+  const model = state.history.present;
   const autosave = useAutosave({
     mapId: summary.id,
-    size: state.size,
-    document,
-    baseline: map.document,
-    save: service.saveDocument,
+    model,
+    loaded: map.model,
+    stored: map.saved,
+    save: mapsV2.saveMapV2,
   });
   useEditorShortcuts(dispatch);
 
+  // Jogada recusada (ex: a peça não cabe): avisa uma vez; o mesmo aviso repetido no arraste não.
+  useEffect(() => {
+    if (state.notice) notify.warning(state.notice.message);
+  }, [state.notice]);
+
   const brushAssetId = state.brush.prop.source === 'upload' ? state.brush.prop.assetId : null;
   const assetIds = useMemo(() => {
-    const ids = uploadedAssetIds(document);
+    const ids = uploadedAssetIds(model);
     return brushAssetId && !ids.includes(brushAssetId) ? [...ids, brushAssetId] : ids;
-  }, [document, brushAssetId]);
+  }, [model, brushAssetId]);
   const modelUrls = useModelUrls(assetIds);
 
   const actions = useMemo<EditorSceneActions>(
@@ -117,10 +119,18 @@ export function MapEditor({ map, mapsPanel, name, onPerfSample }: MapEditorProps
       tool: state.tool,
       brush: state.brush,
       rotation: state.rotation,
+      footprint: state.footprint,
       wallHeight: state.wallHeight,
-      selectedPropId: state.selectedPropId,
+      selectedPiece: state.selectedPiece,
     }),
-    [state.tool, state.brush, state.rotation, state.wallHeight, state.selectedPropId],
+    [
+      state.tool,
+      state.brush,
+      state.rotation,
+      state.footprint,
+      state.wallHeight,
+      state.selectedPiece,
+    ],
   );
 
   const tabs = [
@@ -133,7 +143,16 @@ export function MapEditor({ map, mapsPanel, name, onPerfSample }: MapEditorProps
     {
       id: 'ambience',
       label: 'Ambiente',
-      content: <AmbienceControls ambience={document.ambience} dispatch={dispatch} />,
+      content: (
+        <div className={panel.stack}>
+          <AmbienceControls ambience={model.header.ambience} dispatch={dispatch} />
+          <MapSizeControls
+            key={`${model.size.width}x${model.size.depth}`}
+            size={model.size}
+            dispatch={dispatch}
+          />
+        </div>
+      ),
     },
   ];
 
@@ -142,8 +161,7 @@ export function MapEditor({ map, mapsPanel, name, onPerfSample }: MapEditorProps
       <ErrorBoundary area="a cena 3D" fill>
         <Suspense fallback={<LoadingState label="Montando a cena 3D…" fill />}>
           <MapViewport
-            document={document}
-            size={state.size}
+            model={model}
             modelUrls={modelUrls}
             label={`Mapa 3D: ${title}`}
             editor={{ view, actions }}

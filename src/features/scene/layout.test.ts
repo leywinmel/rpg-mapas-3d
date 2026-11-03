@@ -1,6 +1,7 @@
 import { resolvePreset, fogRange, AMBIENCE_PRESETS } from './ambience';
+import type { Cell, MapResult } from '@/domain';
+import { createEmptyMap, paintTerrainCell, setTerrainHeight, type MapModel } from '@/domain/map-v2';
 import {
-  buildHeightMap,
   cameraFrame,
   clampToBoard,
   distanceToNearestEdge,
@@ -14,12 +15,31 @@ import {
   MODEL_FOOTPRINT,
   nearestEdge,
   NO_FLOOR,
+  modelHeightMap,
   pickCell,
-  wallSegmentTransforms,
+  stackedWallSegments,
+  type HeightMap,
   type Ray,
 } from './layout';
 
 const size = { width: 4, depth: 3 };
+
+type Raised = { x: number; z: number; height: number };
+
+function unwrap(result: MapResult<MapModel>): MapModel {
+  if (!result.ok) throw new Error(result.errors.join(' | '));
+  return result.value;
+}
+
+/** Alturas de um mapa liso com algumas casas erguidas e, se pedir, casas sem chão. */
+function heightsOf(raised: readonly Raised[], holes: readonly Cell[] = []): HeightMap {
+  let model = createEmptyMap(size);
+  for (const { x, z, height } of raised) {
+    model = unwrap(setTerrainHeight(model, { from: { x, z }, to: { x, z }, height }));
+  }
+  for (const cell of holes) model = unwrap(paintTerrainCell(model, { cell, tile: null }));
+  return modelHeightMap(model);
+}
 
 function rayDown(x: number, z: number): Ray {
   return { origin: { x, y: 20, z }, direction: { x: 0, y: -1, z: 0 } };
@@ -27,7 +47,7 @@ function rayDown(x: number, z: number): Ray {
 
 describe('height map', () => {
   it('shouldMarkEmptyCellsAndReadHeights', () => {
-    const map = buildHeightMap([{ x: 1, z: 2, tile: 'terra', height: 3 }], size);
+    const map = heightsOf([{ x: 1, z: 2, height: 3 }], [{ x: 0, z: 0 }]);
     expect(heightAt(map, { x: 1, z: 2 })).toBe(3);
     expect(heightAt(map, { x: 0, z: 0 })).toBe(NO_FLOOR);
     expect(heightAt(map, { x: 9, z: 9 })).toBe(NO_FLOOR);
@@ -36,12 +56,12 @@ describe('height map', () => {
 
 describe('pickCell', () => {
   it('shouldPickTheCellStraightBelow', () => {
-    const map = buildHeightMap([], size);
+    const map = heightsOf([]);
     expect(pickCell(rayDown(2.4, 1.7), map)?.cell).toEqual({ x: 2, z: 1 });
   });
 
   it('shouldHitTheTopOfARaisedCellBeforeTheGroundBehindIt', () => {
-    const map = buildHeightMap([{ x: 1, z: 0, tile: 'terra', height: 4 }], size);
+    const map = heightsOf([{ x: 1, z: 0, height: 4 }]);
     // Raio inclinado que passa sobre a casa (1,0) na altura do topo dela (y = 2).
     const ray: Ray = { origin: { x: -0.5, y: 4, z: 0.5 }, direction: { x: 1, y: -1, z: 0 } };
     const hit = pickCell(ray, map);
@@ -50,7 +70,7 @@ describe('pickCell', () => {
   });
 
   it('shouldPickARaisedCellWhenTheRayHitsItsSideInsteadOfTheGroundBehind', () => {
-    const map = buildHeightMap([{ x: 2, z: 1, tile: 'terra', height: 2 }], size);
+    const map = heightsOf([{ x: 2, z: 1, height: 2 }]);
     // Chega em x = 2 na altura 0,75, abaixo do topo (y = 1): bate na lateral oeste da casa (2,1).
     const ray: Ray = { origin: { x: 0.5, y: 1.5, z: 1.5 }, direction: { x: 1, y: -0.5, z: 0 } };
     const hit = pickCell(ray, map);
@@ -60,13 +80,13 @@ describe('pickCell', () => {
   });
 
   it('shouldHitTheOuterSideOfABorderBlockWhenTheRayComesFromOutsideTheBoard', () => {
-    const map = buildHeightMap([{ x: 0, z: 1, tile: 'terra', height: 4 }], size);
+    const map = heightsOf([{ x: 0, z: 1, height: 4 }]);
     const ray: Ray = { origin: { x: -3, y: 2.5, z: 1.5 }, direction: { x: 1, y: -0.5, z: 0 } };
     expect(pickCell(ray, map)?.cell).toEqual({ x: 0, z: 1 });
   });
 
   it('shouldReturnNullOutsideTheMapOrForHorizontalRays', () => {
-    const map = buildHeightMap([], size);
+    const map = heightsOf([]);
     expect(pickCell(rayDown(-1, 1), map)).toBeNull();
     expect(
       pickCell({ origin: { x: 0, y: 1, z: 0 }, direction: { x: 1, y: 0, z: 0 } }, map),
@@ -92,31 +112,13 @@ describe('transforms', () => {
     expect(column.scaleY).toBeCloseTo(floorTop(2) - FLOOR_CAP_DEPTH + FLOOR_BASE_DEPTH);
   });
 
-  it('shouldStackOneSegmentPerWallLevelOnTheHigherNeighbor', () => {
-    const map = buildHeightMap(
-      [
-        { x: 1, z: 1, tile: 'terra', height: 0 },
-        { x: 1, z: 0, tile: 'terra', height: 2 },
-      ],
-      size,
-    );
-    const segments = wallSegmentTransforms(map, {
-      x: 1,
-      z: 1,
-      side: 'north',
-      style: 'parede-pedra',
-      height: 3,
-    });
+  it('shouldStackOneSegmentPerWorldUnitAndFlattenTheRemainder', () => {
+    const segments = stackedWallSegments({ x: 1, z: 1, side: 'north' }, 1, 2.5);
     expect(segments.map((segment) => segment.y)).toEqual([1, 2, 3]);
-    expect(segments[0]).toMatchObject({ x: 1.5, z: 1, rotationY: 0 });
-    const west = wallSegmentTransforms(map, {
-      x: 0,
-      z: 2,
-      side: 'west',
-      style: 'grade',
-      height: 1,
-    });
-    expect(west[0]).toMatchObject({ x: 0, z: 2.5, rotationY: 90, y: 0 });
+    expect(segments[0]).toMatchObject({ x: 1.5, z: 1, rotationY: 0, scale: 1 });
+    expect(segments[2]?.scaleY).toBeCloseTo(0.5);
+    const west = stackedWallSegments({ x: 0, z: 2, side: 'west' }, 0, 1);
+    expect(west).toEqual([{ x: 0, z: 2.5, rotationY: 90, y: 0, scale: 1 }]);
   });
 });
 

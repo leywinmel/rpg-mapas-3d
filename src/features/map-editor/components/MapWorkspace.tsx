@@ -1,10 +1,11 @@
 import { lazy, Suspense, useMemo, useState, type ReactNode } from 'react';
 import { Map as MapIcon } from 'lucide-react';
 import { EmptyState, ErrorBoundary, ErrorState, LoadingState } from '@/components';
+import { reuseUnchangedChunks } from '@/features/scene/chunks/stable-model';
 import type { PerfSample } from '@/features/scene/components/PerfMeter';
 import { sortMaps } from '../editor/map-list';
 import { useMapActions } from '../hooks/useMapActions';
-import { useMapDocument } from '../hooks/useMapDocument';
+import { useMapModel } from '../hooks/useMapModel';
 import { uploadedAssetIds, useModelUrls } from '../hooks/useModelUrls';
 import { useRoomMaps } from '../hooks/useRoomMaps';
 import { EditorSidebar } from './EditorSidebar';
@@ -42,9 +43,15 @@ function PlayerView({
 }) {
   const mapId = room.activeMapId;
   const [attempt, setAttempt] = useState(0);
-  const state = useMapDocument(mapId, mapId ? (room.revisions[mapId] ?? 0) : 0, attempt);
-  const document = state.status === 'ready' ? state.map.document : null;
-  const assetIds = useMemo(() => uploadedAssetIds(document), [document]);
+  // A cada gravação do mestre o mapa volta inteiro do banco; os pedaços iguais reaproveitam o
+  // objeto de antes, e a cena redesenha só o que mudou.
+  const state = useMapModel(mapId, {
+    revision: mapId ? (room.revisions[mapId] ?? 0) : 0,
+    attempt,
+    settle: reuseUnchangedChunks,
+  });
+  const model = state.status === 'ready' ? state.map.model : null;
+  const assetIds = useMemo(() => uploadedAssetIds(model), [model]);
   const modelUrls = useModelUrls(assetIds);
   const name = room.maps.find((map) => map.id === mapId)?.name;
 
@@ -77,8 +84,7 @@ function PlayerView({
       <ErrorBoundary area="a cena 3D" fill>
         <Suspense fallback={<LoadingState label="Montando a cena 3D…" fill />}>
           <MapViewport
-            document={state.map.document}
-            size={{ width: summary.width, depth: summary.depth }}
+            model={state.map.model}
             modelUrls={modelUrls}
             label={`Mapa 3D: ${name ?? summary.name}`}
             onPerfSample={onPerfSample}
@@ -116,7 +122,7 @@ function GameMasterView({
       ? room.activeMapId
       : (sortMaps(room.maps)[0]?.id ?? null);
   // O mestre ignora as revisões do tempo real: o eco das próprias gravações não pode reabrir o mapa.
-  const state = useMapDocument(selectedId, 0, attempt);
+  const state = useMapModel(selectedId, { attempt });
   const selected = room.maps.find((map) => map.id === selectedId);
 
   const mapsPanel = (

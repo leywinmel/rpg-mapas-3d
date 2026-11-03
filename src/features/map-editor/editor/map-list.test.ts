@@ -4,8 +4,8 @@ import {
   copyName,
   MAX_MAP_NAME_LENGTH,
   moveMap,
-  newMapDocument,
   nextSortOrder,
+  parseMapSize,
   parseNewMap,
 } from './map-list';
 
@@ -23,24 +23,23 @@ describe('map-list', () => {
   });
 
   it('shouldExplainEachInvalidField', () => {
-    const result = parseNewMap({ name: ' ', width: '0', depth: '101', floor: 'barril' });
+    const result = parseNewMap({ name: ' ', width: '0', depth: '1001', floor: 'barril' });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(Object.keys(result.errors).sort()).toEqual(['depth', 'floor', 'name', 'width']);
     expect(result.errors.width).toMatch(/mínimo/);
   });
 
-  it('shouldBuildANewMapDocumentThatPassesTheDomainValidation', () => {
-    const result = newMapDocument({ name: 'Cripta', width: 3, depth: 2, floor: 'piso-madeira' });
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.value.floors).toHaveLength(6);
-    expect(result.value.floors.every((floor) => floor.tile === 'piso-madeira')).toBe(true);
-  });
-
-  it('shouldRefuseANewMapDocumentThatTheDomainRejects', () => {
-    const result = newMapDocument({ name: 'Cripta', width: 3, depth: 2, floor: 'Piso Torto' });
-    expect(result.ok).toBe(false);
+  it('shouldAcceptMapsUpToTheV2Limit', () => {
+    expect(parseMapSize({ width: '1000', depth: '1' })).toEqual({
+      ok: true,
+      value: { width: 1000, depth: 1 },
+    });
+    const tooBig = parseMapSize({ width: '1001', depth: 'abc' });
+    expect(tooBig.ok).toBe(false);
+    if (tooBig.ok) return;
+    expect(tooBig.errors.width).toMatch(/1000 casas/);
+    expect(tooBig.errors.depth).toMatch(/número/);
   });
 
   it('shouldKeepTheCopyNameWithinTheLimit', () => {

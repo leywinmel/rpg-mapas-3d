@@ -1,18 +1,26 @@
 // @vitest-environment jsdom
 import { act, renderHook } from '@testing-library/react';
-import { createEmptyDocument, type MapDocument } from '@/domain';
+import { createEmptyMap, paintTerrainCell, type MapModel } from '@/domain/map-v2';
 import { setLogSink } from '@/lib/logger';
-import { setFloorTile } from '../editor/document-ops';
+import type { SaveMapV2Input } from '../services/map-v2-service';
 import { AUTOSAVE_DELAY_MS, useAutosave } from './useAutosave';
 
 const SIZE = { width: 3, depth: 3 };
-const BASELINE = createEmptyDocument(SIZE);
+const LOADED = createEmptyMap(SIZE);
 
-function setup(save: (mapId: string, document: MapDocument) => Promise<void>) {
+type Save = (input: SaveMapV2Input) => Promise<unknown>;
+
+function paint(model: MapModel, x: number, tile: string): MapModel {
+  const result = paintTerrainCell(model, { cell: { x, z: 0 }, tile });
+  if (!result.ok) throw new Error(result.errors.join(' | '));
+  return result.value;
+}
+
+function setup(save: Save, stored: MapModel | null = LOADED) {
   return renderHook(
-    ({ document }: { document: MapDocument }) =>
-      useAutosave({ mapId: 'm1', size: SIZE, document, baseline: BASELINE, save }),
-    { initialProps: { document: BASELINE } },
+    ({ model }: { model: MapModel }) =>
+      useAutosave({ mapId: 'm1', model, loaded: LOADED, stored, save }),
+    { initialProps: { model: LOADED } },
   );
 }
 
@@ -25,47 +33,61 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+async function waitForSave() {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(AUTOSAVE_DELAY_MS);
+  });
+}
+
 describe('useAutosave', () => {
-  it('shouldWaitForAPauseAndSaveOnlyTheLatestDocument', async () => {
-    const save = vi.fn(async () => undefined);
+  it('shouldWaitForAPauseAndSaveOnlyTheLatestMapAgainstTheStoredOne', async () => {
+    const save = vi.fn<Save>(async () => '2026-11-03T00:00:00Z');
     const { result, rerender } = setup(save);
     expect(result.current.status).toBe('saved');
 
-    const first = setFloorTile(BASELINE, SIZE, { cell: { x: 0, z: 0 }, tile: 'grama' });
-    rerender({ document: first });
+    const first = paint(LOADED, 0, 'grama');
+    rerender({ model: first });
     expect(result.current.status).toBe('dirty');
-    const second = setFloorTile(first, SIZE, { cell: { x: 1, z: 0 }, tile: 'grama' });
-    rerender({ document: second });
+    const second = paint(first, 1, 'grama');
+    rerender({ model: second });
 
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(AUTOSAVE_DELAY_MS);
-    });
+    await waitForSave();
     expect(save).toHaveBeenCalledTimes(1);
-    expect(save).toHaveBeenCalledWith('m1', second);
+    expect(save).toHaveBeenCalledWith({ mapId: 'm1', saved: LOADED, current: second });
     expect(result.current.status).toBe('saved');
+
+    // A próxima gravação parte do que acabou de ir ao banco: só o pedaço novo vai.
+    const third = paint(second, 2, 'agua');
+    rerender({ model: third });
+    await waitForSave();
+    expect(save).toHaveBeenLastCalledWith({ mapId: 'm1', saved: second, current: third });
+  });
+
+  it('shouldSendTheWholeMapWhenItIsStillStoredAsV1', async () => {
+    const save = vi.fn<Save>(async () => null);
+    const { rerender } = setup(save, null);
+    const changed = paint(LOADED, 0, 'terra');
+    rerender({ model: changed });
+    await waitForSave();
+    expect(save).toHaveBeenCalledWith({ mapId: 'm1', saved: null, current: changed });
   });
 
   it('shouldReportAnErrorWhenTheSaveFails', async () => {
-    const save = vi.fn(async () => {
+    const save = vi.fn<Save>(async () => {
       throw new Error('offline');
     });
     const { result, rerender } = setup(save);
-    rerender({ document: setFloorTile(BASELINE, SIZE, { cell: { x: 2, z: 2 }, tile: 'agua' }) });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(AUTOSAVE_DELAY_MS);
-    });
+    rerender({ model: paint(LOADED, 2, 'agua') });
+    await waitForSave();
     expect(result.current.status).toBe('error');
   });
 
-  it('shouldNeverSaveADocumentThatFailsValidation', async () => {
-    const save = vi.fn(async () => undefined);
+  it('shouldShowSavedAfterUndoingBackToTheLoadedMap', () => {
+    const save = vi.fn<Save>(async () => null);
     const { result, rerender } = setup(save);
-    const broken = { ...BASELINE, floors: [{ x: 99, z: 99, tile: 'grama', height: 0 }] };
-    rerender({ document: broken });
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(AUTOSAVE_DELAY_MS);
-    });
-    expect(save).not.toHaveBeenCalled();
-    expect(result.current.status).toBe('error');
+    rerender({ model: paint(LOADED, 0, 'grama') });
+    expect(result.current.status).toBe('dirty');
+    rerender({ model: LOADED });
+    expect(result.current.status).toBe('saved');
   });
 });

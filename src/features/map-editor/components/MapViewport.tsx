@@ -2,15 +2,14 @@
  * Ponto de entrada da cena 3D do editor e do jogador. É carregado com
  * React.lazy: three.js e companhia ficam num pedaço separado do build.
  */
-import type { GridSize, MapDocument } from '@/domain';
+import type { MapModel } from '@/domain/map-v2';
 import type { ModelUrls } from '@/features/scene/components/AssetPieces';
 import type { PerfSample } from '@/features/scene/components/PerfMeter';
 import { MapScene } from '@/features/scene/components/SceneCanvas';
 import { EditorInteraction, type EditorSceneBinding } from './EditorInteraction';
 
 export type MapViewportProps = {
-  document: MapDocument;
-  size: GridSize;
+  model: MapModel;
   modelUrls: ModelUrls;
   label: string;
   /** Presente só para o mestre: liga as ferramentas de edição na cena. */
@@ -24,8 +23,7 @@ export default function MapViewport({ editor, ...scene }: MapViewportProps) {
     <MapScene {...scene} mode={editing ? 'edit' : 'view'}>
       {editor && (
         <EditorInteraction
-          document={scene.document}
-          size={scene.size}
+          model={scene.model}
           modelUrls={scene.modelUrls}
           view={editor.view}
           actions={editor.actions}

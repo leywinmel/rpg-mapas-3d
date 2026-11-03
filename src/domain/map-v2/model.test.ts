@@ -9,7 +9,8 @@ import {
   isDefaultChunk,
   terrainAt,
 } from './model';
-import { paintTerrainRect, placePiece, placeWall, setTerrainHeight } from './operations';
+import { paintTerrainRect, placePiece, placeWall } from './operations';
+import { setTerrainHeight } from './terrain-height';
 import { makePiece, makeWall, unwrap } from './test-fixtures';
 
 describe('empty map', () => {

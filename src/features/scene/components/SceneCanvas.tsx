@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
-import type { Ambience, GridSize, MapDocument } from '@/domain';
-import type { Cutaway } from '@/domain/map-v2';
+import type { Ambience, GridSize } from '@/domain';
+import type { Cutaway, MapModel } from '@/domain/map-v2';
 import { cx } from '@/lib/cx';
 import { fogRange } from '../ambience';
-import { useMapModelFromV1 } from '../hooks/useMapModelFromV1';
 import { cameraFrame } from '../layout';
 import { useQualitySettings } from '../quality/quality-store';
 import type { ModelUrls } from './AssetPieces';
@@ -72,29 +71,25 @@ export function SceneCanvas({
   );
 }
 
-export type MapSceneProps = Omit<SceneCanvasProps, 'ambience'> & {
-  document: MapDocument;
+export type MapSceneProps = Omit<SceneCanvasProps, 'ambience' | 'size'> & {
+  model: MapModel;
   modelUrls?: ModelUrls;
   showGrid?: boolean;
   /** Corte de andares (degrau absoluto); sem ele, nada é escondido. */
   cutaway?: Cutaway;
 };
 
-/**
- * Cena pronta de um mapa salvo no formato v1: o documento vira mapa v2 e é desenhado em
- * pedaços, com a mesma aparência de antes.
- */
+/** Cena pronta de um mapa v2: o palco com o clima do mapa e o mapa desenhado em pedaços. */
 export function MapScene({
-  document,
+  model,
   modelUrls,
   showGrid,
   cutaway,
   children,
   ...canvas
 }: MapSceneProps) {
-  const model = useMapModelFromV1(document, canvas.size);
   return (
-    <SceneCanvas {...canvas} ambience={document.ambience}>
+    <SceneCanvas {...canvas} size={model.size} ambience={model.header.ambience}>
       <MapRenderer model={model} cutaway={cutaway} modelUrls={modelUrls} showGrid={showGrid} />
       {children}
     </SceneCanvas>

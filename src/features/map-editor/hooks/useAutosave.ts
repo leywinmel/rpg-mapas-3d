@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { parseMapDocument, type GridSize, type MapDocument } from '@/domain';
-import { reportError } from '@/lib/report-error';
+import type { MapModel } from '@/domain/map-v2';
+import type { SaveMapV2Input } from '../services/map-v2-service';
+import { reportMapFailure } from '../services/map-errors';
 
 /** Espera o mestre parar de pintar por um instante antes de gravar (menos escrita no banco). */
 export const AUTOSAVE_DELAY_MS = 1200;
@@ -9,61 +10,61 @@ export type SaveStatus = 'saved' | 'dirty' | 'saving' | 'error';
 
 export type AutosaveOptions = {
   mapId: string;
-  size: GridSize;
-  document: MapDocument;
-  /** Documento como veio do banco: é o ponto de partida do "Salvo". */
-  baseline: MapDocument;
-  save: (mapId: string, document: MapDocument) => Promise<void>;
+  /** O mapa na tela agora. */
+  model: MapModel;
+  /** O mapa como veio do banco: é o ponto de partida do "Salvo". */
+  loaded: MapModel;
+  /** O que o banco guarda hoje no v2 (nulo quando o mapa ainda está no v1). */
+  stored: MapModel | null;
+  save: (input: SaveMapV2Input) => Promise<unknown>;
   delayMs?: number;
 };
 
-type Snapshot = Omit<AutosaveOptions, 'baseline' | 'delayMs'> & { saved: MapDocument };
+/** O banco depois da última gravação que deu certo. */
+type Persisted = {
+  /** Igual ao mapa na tela = nada pendente. */
+  clean: MapModel;
+  /** Base da próxima gravação: só vão os pedaços que mudaram desde ela. */
+  stored: MapModel | null;
+};
+
+type Snapshot = { mapId: string; model: MapModel; save: AutosaveOptions['save'] } & Persisted;
 
 /**
- * Salvamento automático com espera. Só grava documento que passa no
- * parseMapDocument (o mesmo validador da leitura), e avisa antes de sair da
+ * Salvamento automático com espera. Grava pelo serviço do v2, que manda só os pedaços que
+ * mudaram desde a última gravação (o mapa v1 vira v2 na primeira). Avisa antes de sair da
  * página com alteração pendente. Monte uma instância por mapa (key = id).
  */
 export function useAutosave(options: AutosaveOptions) {
-  const { mapId, size, document, baseline, save, delayMs = AUTOSAVE_DELAY_MS } = options;
-  const [saved, setSaved] = useState(baseline);
+  const { mapId, model, loaded, stored, save, delayMs = AUTOSAVE_DELAY_MS } = options;
+  const [persisted, setPersisted] = useState<Persisted>({ clean: loaded, stored });
   const [phase, setPhase] = useState<'idle' | 'saving' | 'error'>('idle');
-  const latest = useRef<Snapshot>({ mapId, size, document, save, saved });
+  const latest = useRef<Snapshot>({ mapId, model, save, ...persisted });
   const inFlight = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useLayoutEffect(() => {
-    latest.current = { mapId, size, document, save, saved };
+    latest.current = { mapId, model, save, ...persisted };
   });
 
   const flush = useCallback(async () => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = null;
     const snapshot = latest.current;
-    if (snapshot.document === snapshot.saved || inFlight.current) return;
-    const parsed = parseMapDocument(snapshot.document, snapshot.size);
-    if (!parsed.ok) {
-      setPhase('error');
-      reportError(new Error(parsed.errors.join(' | ')), {
-        userMessage: 'O mapa tem um problema e não foi salvo.',
-        hint: 'Desfaça a última alteração e tente de novo.',
-        context: { feature: 'map-editor', action: 'validate-map', mapId: snapshot.mapId },
-      });
-      return;
-    }
+    if (snapshot.model === snapshot.clean || inFlight.current) return;
     inFlight.current = true;
     setPhase('saving');
     try {
-      await snapshot.save(snapshot.mapId, parsed.value);
-      setSaved(snapshot.document);
+      await snapshot.save({
+        mapId: snapshot.mapId,
+        saved: snapshot.stored,
+        current: snapshot.model,
+      });
+      setPersisted({ clean: snapshot.model, stored: snapshot.model });
       setPhase('idle');
     } catch (error) {
       setPhase('error');
-      reportError(error, {
-        userMessage: 'Erro ao salvar o mapa.',
-        hint: 'Confira a conexão; tentaremos de novo na próxima alteração.',
-        context: { feature: 'map-editor', action: 'save-map', mapId: snapshot.mapId },
-      });
+      reportMapFailure(error, { action: 'save-map', mapId: snapshot.mapId });
     } finally {
       inFlight.current = false;
     }
@@ -71,17 +72,17 @@ export function useAutosave(options: AutosaveOptions) {
 
   // Cada alteração reinicia a espera; se ainda estiver gravando, a próxima rodada pega o resto.
   useEffect(() => {
-    if (document === saved) return;
+    if (model === persisted.clean) return;
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => void flush(), delayMs);
-  }, [document, saved, delayMs, flush]);
+  }, [model, persisted, delayMs, flush]);
 
   const status: SaveStatus =
     phase === 'saving'
       ? 'saving'
       : phase === 'error'
         ? 'error'
-        : document === saved
+        : model === persisted.clean
           ? 'saved'
           : 'dirty';
 
@@ -99,15 +100,12 @@ export function useAutosave(options: AutosaveOptions) {
     () => () => {
       if (timer.current) clearTimeout(timer.current);
       const snapshot = latest.current;
-      if (snapshot.document === snapshot.saved) return;
-      const parsed = parseMapDocument(snapshot.document, snapshot.size);
-      if (!parsed.ok) return;
-      snapshot.save(snapshot.mapId, parsed.value).catch((error: unknown) =>
-        reportError(error, {
-          userMessage: 'A última alteração do mapa não foi salva.',
-          context: { feature: 'map-editor', action: 'save-on-leave', mapId: snapshot.mapId },
-        }),
-      );
+      if (snapshot.model === snapshot.clean) return;
+      snapshot
+        .save({ mapId: snapshot.mapId, saved: snapshot.stored, current: snapshot.model })
+        .catch((error: unknown) =>
+          reportMapFailure(error, { action: 'save-on-leave', mapId: snapshot.mapId }),
+        );
     },
     [],
   );
