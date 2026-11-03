@@ -38,7 +38,6 @@ function sessionAs(role: 'gm' | 'player'): RoomSessionValue {
 const controls: RoomControls = {
   membersState: { status: 'ready', data: [...TABLE_MEMBERS] },
   reloadMembers: vi.fn(),
-  announce: vi.fn(async () => undefined),
   replaceRoom: vi.fn(),
 };
 

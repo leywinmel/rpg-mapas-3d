@@ -7,19 +7,9 @@ import { toRoom } from './rooms-service';
 type RoomRow = Database['public']['Tables']['rooms']['Row'];
 type MemberRow = Database['public']['Tables']['room_members']['Row'];
 
-/**
- * Avisos entre quem está na mesa. Existem porque o Realtime não entrega DELETE
- * filtrado por mesa: quem sai ou apaga avisa os outros antes.
- */
-export const ROOM_ANNOUNCEMENTS = {
-  membersChanged: 'members-changed',
-  roomDeleted: 'room-deleted',
-} as const;
-export type RoomAnnouncement = (typeof ROOM_ANNOUNCEMENTS)[keyof typeof ROOM_ANNOUNCEMENTS];
-
 export type RoomChannelHandlers = {
   onOnlineChange: (userIds: ReadonlySet<string>) => void;
-  /** Alguém entrou, saiu ou trocou de apelido: hora de recarregar a lista de membros. */
+  /** Alguém entrou, saiu, foi removido ou trocou de apelido: hora de recarregar a lista de membros. */
   onMembersChanged: () => void;
   onRoomUpdated: (room: Room) => void;
   onRoomDeleted: () => void;
@@ -34,7 +24,6 @@ export type RoomChannelOptions = {
 };
 
 export type RoomChannel = {
-  announce: (event: RoomAnnouncement) => Promise<void>;
   close: () => void;
 };
 
@@ -58,37 +47,49 @@ type OpenChannel = {
  */
 const openChannels = new Map<string, OpenChannel>();
 
+/**
+ * O DELETE chega só com a chave primária da linha, e o filtro vale para colunas dela:
+ * room_members tem (room_id, user_id) e rooms tem id, então os dois se filtram por mesa.
+ * Quem sai ou apaga a mesa já não é membro quando o aviso por broadcast sairia, e o
+ * Realtime não entrega o que ex-membro envia; por isso a saída vem do banco.
+ */
 function listenToDatabase(entry: OpenChannel, roomId: string): void {
+  const membersFilter = `room_id=eq.${roomId}`;
+  const roomFilter = `id=eq.${roomId}`;
+  const onMembersChanged = () => entry.handlers.onMembersChanged();
   entry.channel
     .on<MemberRow>(
       'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'room_members', filter: `room_id=eq.${roomId}` },
-      () => entry.handlers.onMembersChanged(),
+      { event: 'INSERT', schema: 'public', table: 'room_members', filter: membersFilter },
+      onMembersChanged,
     )
     .on<MemberRow>(
       'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'room_members', filter: `room_id=eq.${roomId}` },
-      () => entry.handlers.onMembersChanged(),
+      { event: 'UPDATE', schema: 'public', table: 'room_members', filter: membersFilter },
+      onMembersChanged,
+    )
+    .on<MemberRow>(
+      'postgres_changes',
+      { event: 'DELETE', schema: 'public', table: 'room_members', filter: membersFilter },
+      onMembersChanged,
     )
     .on<RoomRow>(
       'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'rooms', filter: `id=eq.${roomId}` },
+      { event: 'UPDATE', schema: 'public', table: 'rooms', filter: roomFilter },
       (payload) => entry.handlers.onRoomUpdated(toRoom(payload.new)),
+    )
+    .on<RoomRow>(
+      'postgres_changes',
+      { event: 'DELETE', schema: 'public', table: 'rooms', filter: roomFilter },
+      () => entry.handlers.onRoomDeleted(),
     );
 }
 
 function listenToPeers(entry: OpenChannel): void {
   const { channel } = entry;
-  channel
-    .on('presence', { event: 'sync' }, () => {
-      entry.handlers.onOnlineChange(new Set(Object.keys(channel.presenceState())));
-    })
-    .on('broadcast', { event: ROOM_ANNOUNCEMENTS.membersChanged }, () =>
-      entry.handlers.onMembersChanged(),
-    )
-    .on('broadcast', { event: ROOM_ANNOUNCEMENTS.roomDeleted }, () =>
-      entry.handlers.onRoomDeleted(),
-    );
+  channel.on('presence', { event: 'sync' }, () => {
+    entry.handlers.onOnlineChange(new Set(Object.keys(channel.presenceState())));
+  });
 }
 
 function createEntry(options: RoomChannelOptions, client: AppSupabaseClient): OpenChannel {
@@ -117,8 +118,7 @@ function createEntry(options: RoomChannelOptions, client: AppSupabaseClient): Op
 
 /**
  * Canal privado `room:<id>`, só para membros: presença (quem está online), mudanças
- * de membros e da mesa vindas do banco (o Realtime respeita o RLS) e avisos entre
- * os participantes.
+ * de membros e da mesa vindas do banco (o Realtime respeita o RLS).
  */
 export function openRoomChannel(
   options: RoomChannelOptions,
@@ -133,9 +133,6 @@ export function openRoomChannel(
   openChannels.set(name, entry);
 
   return {
-    async announce(event) {
-      await entry.channel.send({ type: 'broadcast', event, payload: {} });
-    },
     close() {
       entry.closeTimer = setTimeout(() => {
         openChannels.delete(name);
