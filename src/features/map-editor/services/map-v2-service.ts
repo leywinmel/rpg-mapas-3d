@@ -73,7 +73,10 @@ export type CreateMapV2Input = {
 
 export type MapsV2Service = {
   loadMapV2: (mapId: string) => Promise<LoadedMapV2>;
-  /** Grava só o que mudou. Devolve a hora da gravação, ou null quando não havia nada a gravar. */
+  /**
+   * Grava só o que mudou, inclusive o tamanho (resizeMap): o banco apaga sozinho os pedaços que
+   * saíram do mapa. Devolve a hora da gravação, ou null quando não havia nada a gravar.
+   */
   saveMapV2: (input: SaveMapV2Input) => Promise<string | null>;
   /** Cria o mapa só com o cabeçalho: todo pedaço começa como o chão liso padrão. */
   createMapV2: (input: CreateMapV2Input) => Promise<MapSummary>;
@@ -127,6 +130,8 @@ function toRpcArgs(mapId: string, plan: MapSavePlan) {
       document,
     })),
     p_deletes: plan.deletes.map(({ cx, cz }) => ({ cx, cz })),
+    // O tamanho só vai quando muda: assim a gravação comum não depende dele.
+    ...(plan.sizeChanged ? { p_width: plan.size.width, p_depth: plan.size.depth } : {}),
   };
 }
 

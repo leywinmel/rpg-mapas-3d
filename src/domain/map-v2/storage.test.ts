@@ -1,14 +1,9 @@
 import { chunkKey } from './chunks';
 import { DEFAULT_FLOOR_TILE, MAX_REPORTED_ERRORS } from './constants';
 import { createEmptyMap, getChunk, isDefaultChunk, piecesOccupyingCell, terrainAt } from './model';
-import {
-  paintTerrainRect,
-  placePiece,
-  placeWall,
-  removePiece,
-  removeWall,
-  setTerrainHeight,
-} from './operations';
+import { paintTerrainRect, placePiece, placeWall, removePiece, removeWall } from './operations';
+import { resizeMap } from './resize';
+import { setTerrainHeight } from './terrain-height';
 import {
   isEmptySavePlan,
   loadMapModel,
@@ -210,8 +205,24 @@ describe('planning a save', () => {
     expect(isEmptySavePlan(plan)).toBe(false);
   });
 
-  it('shouldRefuseToResizeTheMap', () => {
-    const saved = createEmptyMap({ width: 40, depth: 40 });
-    expect(() => planMapSave(saved, createEmptyMap({ width: 64, depth: 40 }))).toThrow(RangeError);
+  it('shouldCarryTheNewSizeAndOnlyTheChunksThatChanged', () => {
+    const saved = editedMap();
+    expect(planMapSave(saved, saved)).toMatchObject({ size, sizeChanged: false });
+    // 70 → 64 casas de largura: some a terceira coluna de pedaços, que o banco apaga sozinho.
+    const current = unwrap(resizeMap(saved, { width: 64, depth: 40 }));
+    const plan = planMapSave(saved, current);
+    expect(plan).toMatchObject({ size: { width: 64, depth: 40 }, sizeChanged: true });
+    expect(isEmptySavePlan(plan)).toBe(false);
+    expect(keysOf([...plan.upserts.map((chunk) => chunk.coord), ...plan.deletes])).toEqual([]);
+  });
+
+  it('shouldWriteBackTheChunksThatAnUndoBringsBack', () => {
+    const before = editedMap();
+    const shrunk = unwrap(resizeMap(before, { width: 30, depth: 40 }));
+    const plan = planMapSave(shrunk, before);
+    expect(plan.sizeChanged).toBe(true);
+    expect(keysOf(plan.upserts.map((chunk) => chunk.coord)).sort()).toEqual(
+      keysOf(serializeMapModel(before).chunks.map((chunk) => chunk.coord)).sort(),
+    );
   });
 });

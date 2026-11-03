@@ -9,8 +9,8 @@ import {
   placeWall,
   removePiece,
   removeWall,
-  setTerrainHeight,
 } from './operations';
+import { setTerrainHeight } from './terrain-height';
 import { changedKeys, errorsOf, makePiece, makeWall, unwrap, withChunk } from './test-fixtures';
 
 // 100×100 casas: 4×4 pedaços (a última coluna e a última linha têm 4 casas).
@@ -289,6 +289,34 @@ describe('wall operations', () => {
     const ground = unwrap(placeWall(base, makeWall({ level: 0 })));
     const stacked = unwrap(placeWall(ground, makeWall({ level: 8, height: 4 })));
     expect(getChunk(stacked, { cx: 0, cz: 0 }).walls.map((wall) => wall.level)).toEqual([0, 8]);
+  });
+
+  it('shouldReplaceTheWallsItOverlapsOnTheSameEdge', () => {
+    // Térreo [0, 8) e andar de cima [8, 12); a nova [6, 10) encosta nas duas e tira as duas.
+    const ground = unwrap(placeWall(base, makeWall({ level: 0 })));
+    const stacked = unwrap(placeWall(ground, makeWall({ level: 8, height: 4 })));
+    const replaced = unwrap(placeWall(stacked, makeWall({ level: 6, height: 4, style: 'x-y' })));
+    const walls = getChunk(replaced, { cx: 0, cz: 0 }).walls;
+    expect(walls).toEqual([makeWall({ level: 6, height: 4, style: 'x-y' })]);
+    // Só encostar (o topo de uma é a base da outra) não é sobrepor.
+    const touching = unwrap(placeWall(ground, makeWall({ level: 8, height: 2 })));
+    expect(getChunk(touching, { cx: 0, cz: 0 }).walls).toHaveLength(2);
+    // Outra aresta da mesma casa não conta.
+    const west = unwrap(placeWall(ground, makeWall({ side: 'west' })));
+    expect(getChunk(west, { cx: 0, cz: 0 }).walls).toHaveLength(2);
+  });
+
+  it('shouldKeepTheOrderOfTheOtherWallsWhenReplacing', () => {
+    let model = unwrap(placeWall(base, makeWall({ x: 0 })));
+    model = unwrap(placeWall(model, makeWall({ x: 1 })));
+    model = unwrap(placeWall(model, makeWall({ x: 2 })));
+    model = unwrap(placeWall(model, makeWall({ x: 1, level: 2, height: 2 })));
+    const walls = getChunk(model, { cx: 0, cz: 0 }).walls;
+    expect(walls.map((wall) => [wall.x, wall.level])).toEqual([
+      [0, 0],
+      [1, 2],
+      [2, 0],
+    ]);
   });
 
   it('shouldReplaceAWallOnTheSameEdgeAndLevel', () => {

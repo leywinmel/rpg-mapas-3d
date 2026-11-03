@@ -6,6 +6,7 @@ import {
   paintTerrainRect,
   placePiece,
   removePiece,
+  resizeMap,
   serializeChunk,
   serializeMapModel,
   terrainAt,
@@ -77,6 +78,8 @@ type RpcParams = {
   p_header: unknown;
   p_upserts: Array<{ cx: number; cz: number; document: unknown }>;
   p_deletes: Array<{ cx: number; cz: number }>;
+  p_width?: number;
+  p_depth?: number;
 };
 
 function rpcParams(calls: Call[]): RpcParams {
@@ -239,6 +242,16 @@ describe('saveMapV2', () => {
     expect(params.p_header).toBe(current.header);
     expect(params.p_upserts.map(({ cx, cz }) => [cx, cz])).toEqual([[1, 1]]);
     expect(params.p_deletes).toEqual([]);
+    // Sem mudar de tamanho, o pedido nem fala de tamanho.
+    expect(params).not.toHaveProperty('p_width');
+  });
+
+  it('shouldSendTheNewSizeWhenTheMapWasResized', async () => {
+    const saved = editedMap();
+    const current = ok(resizeMap(saved, { width: 40, depth: 33 }));
+    const { client, calls } = fakeClient();
+    await createSupabaseMapsV2Service(client).saveMapV2({ mapId: MAP_ID, saved, current });
+    expect(rpcParams(calls)).toMatchObject({ p_width: 40, p_depth: 33 });
   });
 
   it('shouldDeleteTheChunkThatWentBackToTheDefault', async () => {
