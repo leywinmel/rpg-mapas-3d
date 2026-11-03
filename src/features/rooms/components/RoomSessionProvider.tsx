@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { DoorClosed } from 'lucide-react';
 import { ButtonLink, EmptyState } from '@/components';
 import { isGameMaster, type Viewer } from '@/domain';
@@ -13,7 +13,7 @@ import {
 } from '../hooks/room-session-context';
 import { LOBBY_PATH } from '../paths';
 import { logAndRethrow } from '../services/report-room-failure';
-import { openRoomChannel, type RoomChannel } from '../services/room-channel';
+import { openRoomChannel } from '../services/room-channel';
 import { getRoomsService } from '../services/rooms-service';
 import type { Membership, Room, RoomMember } from '../types';
 
@@ -38,7 +38,6 @@ export function RoomSessionProvider({
   const [room, setRoom] = useState(initialRoom);
   const [onlineUserIds, setOnlineUserIds] = useState(NOBODY_ONLINE);
   const [deleted, setDeleted] = useState(false);
-  const channelRef = useRef<RoomChannel | null>(null);
   const membersState = useAsyncData(`members:${roomId}`, () =>
     getRoomsService().listMembers(roomId).catch(logAndRethrow('list-members')),
   );
@@ -68,10 +67,8 @@ export function RoomSessionProvider({
         },
       },
     });
-    channelRef.current = channel;
     return () => {
       channel.close();
-      channelRef.current = null;
     };
   }, [roomId, user.id, initialMembership.nickname, reloadMembers]);
 
@@ -97,9 +94,6 @@ export function RoomSessionProvider({
       membersState,
       reloadMembers,
       replaceRoom: setRoom,
-      announce: async (event) => {
-        await channelRef.current?.announce(event);
-      },
     }),
     [membersState, reloadMembers],
   );

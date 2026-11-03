@@ -1,7 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { Viewer } from '@/domain';
 import type { AsyncData } from '@/lib/use-async-data';
-import type { RoomAnnouncement } from '../services/room-channel';
 import type { Membership, Room, RoomMember } from '../types';
 
 /**
@@ -26,7 +25,6 @@ export type RoomSessionValue = {
 export type RoomControls = {
   membersState: AsyncData<RoomMember[]>;
   reloadMembers: () => void;
-  announce: (event: RoomAnnouncement) => Promise<void>;
   replaceRoom: (room: Room) => void;
 };
 

@@ -1,3 +1,4 @@
+import { classifySupabaseError, type SupabaseErrorTable } from '@/lib/supabase-error';
 import { NOTE_IMAGE_MAX_MEGABYTES } from '../constants';
 
 /** Falhas das anotações em categorias que a tela sabe explicar. O detalhe técnico vai para o log. */
@@ -26,26 +27,28 @@ export const NOTE_ERROR_MESSAGES: Record<NoteErrorKind, string> = {
   unknown: 'Não deu para concluir agora. Tente de novo em instantes.',
 };
 
-/** Códigos do Postgres/PostgREST que o banco usa nas anotações (ver migrations). */
-const KIND_BY_POSTGRES_CODE: Record<string, NoteErrorKind> = {
-  '42501': 'forbidden',
-  '22023': 'invalid',
-  '22P02': 'invalid',
-  '23502': 'invalid',
-  '23514': 'invalid',
-  PGRST116: 'not-found',
-};
-
-/** O Storage responde com o status HTTP em `statusCode`. */
-const KIND_BY_STORAGE_STATUS: Record<string, NoteErrorKind> = {
-  '401': 'forbidden',
-  '403': 'forbidden',
-  '413': 'image-too-large',
-  '415': 'image-type',
-};
-
-const NETWORK_FAILURE_MARKERS = ['failed to fetch', 'networkerror', 'load failed', 'fetch failed'];
 const RECIPIENTS_TABLE = 'note_recipients';
+
+const ERROR_TABLE: SupabaseErrorTable<NoteErrorKind> = {
+  byPostgresCode: {
+    '42501': 'forbidden',
+    '22023': 'invalid',
+    '22P02': 'invalid',
+    '23502': 'invalid',
+    '23514': 'invalid',
+    PGRST116: 'not-found',
+  },
+  byStorageStatus: {
+    '401': 'forbidden',
+    '403': 'forbidden',
+    '413': 'image-too-large',
+    '415': 'image-type',
+  },
+  network: 'network',
+  // A política de note_recipients é a que recusa quem não é mais membro da mesa.
+  refine: (kind, { message }) =>
+    kind === 'forbidden' && message.includes(RECIPIENTS_TABLE) ? 'recipient' : kind,
+};
 
 export class NoteError extends Error {
   readonly kind: NoteErrorKind;
@@ -60,44 +63,14 @@ export class NoteError extends Error {
   }
 }
 
-type ErrorLike = { code?: unknown; statusCode?: unknown; message?: unknown };
-
-function asText(value: unknown): string | null {
-  return typeof value === 'string' ? value : null;
-}
-
-function kindOfPostgresCode(code: string, message: string): NoteErrorKind | null {
-  const kind = KIND_BY_POSTGRES_CODE[code];
-  if (!kind) return null;
-  // A política de note_recipients é a que recusa quem não é mais membro da mesa.
-  if (kind === 'forbidden' && message.includes(RECIPIENTS_TABLE)) return 'recipient';
-  return kind;
-}
-
 /**
  * Traduz o erro do Supabase (banco ou Storage) para uma categoria. `fallback` é o que
  * vale quando nada reconhece o erro: o envio da imagem pede 'image-upload', por exemplo.
  */
 export function toNoteError(error: unknown, fallback: NoteErrorKind = 'unknown'): NoteError {
   if (error instanceof NoteError) return error;
-  const { code, statusCode, message } = (
-    error && typeof error === 'object' ? error : {}
-  ) as ErrorLike;
-  const messageText = asText(message) ?? '';
-  const storageStatus = asText(statusCode);
-  const postgresCode = asText(code);
-
-  const storageKind = storageStatus ? KIND_BY_STORAGE_STATUS[storageStatus] : undefined;
-  if (storageKind) return new NoteError(storageKind, storageStatus, { cause: error });
-
-  const postgresKind = postgresCode ? kindOfPostgresCode(postgresCode, messageText) : null;
-  if (postgresKind) return new NoteError(postgresKind, postgresCode, { cause: error });
-
-  const lowered = messageText.toLowerCase();
-  if (NETWORK_FAILURE_MARKERS.some((marker) => lowered.includes(marker))) {
-    return new NoteError('network', postgresCode ?? storageStatus, { cause: error });
-  }
-  return new NoteError(fallback, postgresCode ?? storageStatus, { cause: error });
+  const { kind, code } = classifySupabaseError(error, ERROR_TABLE, fallback);
+  return new NoteError(kind, code, { cause: error });
 }
 
 export function noteErrorMessage(error: unknown): string {

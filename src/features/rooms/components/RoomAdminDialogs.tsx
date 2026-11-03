@@ -4,36 +4,17 @@ import { DoorOpen, Save, Trash2 } from 'lucide-react';
 import { Button, Dialog, notify, TextField } from '@/components';
 import { FormNotice } from '@/features/auth';
 import { readForm } from '@/lib/form-data';
-import { reportError } from '@/lib/report-error';
 import { validateForm } from '@/lib/validation';
 import { useRoomControls, useRoomSession } from '../hooks/room-session-context';
 import { LOBBY_PATH } from '../paths';
 import { renameRoomSchema, ROOM_NAME_MAX_LENGTH } from '../schemas';
 import { reportRoomFailure } from '../services/report-room-failure';
-import { ROOM_ANNOUNCEMENTS, type RoomAnnouncement } from '../services/room-channel';
 import { getRoomsService } from '../services/rooms-service';
 import styles from './rooms.module.css';
 
 type DialogProps = { open: boolean; onClose: () => void };
 
 const RENAME_FORM_ID = 'rename-room-form';
-
-/** O aviso aos outros é cortesia: se falhar, a ação principal já deu certo. */
-async function announceQuietly(
-  announce: (event: RoomAnnouncement) => Promise<void>,
-  event: RoomAnnouncement,
-) {
-  try {
-    await announce(event);
-  } catch (error) {
-    reportError(error, {
-      userMessage: 'Não deu para avisar os outros participantes.',
-      context: { feature: 'rooms', action: 'announce', event },
-      severity: 'warn',
-      toast: false,
-    });
-  }
-}
 
 export function RenameRoomDialog({ open, onClose }: DialogProps) {
   const { room } = useRoomSession();
@@ -108,7 +89,6 @@ export function RenameRoomDialog({ open, onClose }: DialogProps) {
 
 export function DeleteRoomDialog({ open, onClose }: DialogProps) {
   const { room } = useRoomSession();
-  const { announce } = useRoomControls();
   const navigate = useNavigate();
   const [failure, setFailure] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -128,7 +108,6 @@ export function DeleteRoomDialog({ open, onClose }: DialogProps) {
       setPending(false);
       return;
     }
-    await announceQuietly(announce, ROOM_ANNOUNCEMENTS.roomDeleted);
     notify.success('Mesa apagada.');
     navigate(LOBBY_PATH, { replace: true });
   }
@@ -165,7 +144,6 @@ export function DeleteRoomDialog({ open, onClose }: DialogProps) {
 
 export function LeaveRoomDialog({ open, onClose }: DialogProps) {
   const { room, viewer } = useRoomSession();
-  const { announce } = useRoomControls();
   const navigate = useNavigate();
   const [failure, setFailure] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -185,7 +163,6 @@ export function LeaveRoomDialog({ open, onClose }: DialogProps) {
       setPending(false);
       return;
     }
-    await announceQuietly(announce, ROOM_ANNOUNCEMENTS.membersChanged);
     notify.info('Você saiu da mesa.', 'Para voltar, use o link de convite de novo.');
     navigate(LOBBY_PATH, { replace: true });
   }
