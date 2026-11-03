@@ -1,4 +1,9 @@
-import type { RealtimeChannel } from '@supabase/supabase-js';
+import {
+  createChannelRegistry,
+  isChannelFailure,
+  sendBroadcast,
+  type SharedChannelEntry,
+} from '@/lib/realtime-channel';
 import { getSupabase, type AppSupabaseClient } from '@/lib/supabase';
 import { NOTES_ANNOUNCEMENT } from '../constants';
 
@@ -26,29 +31,12 @@ export function notesChannelName(roomId: string): string {
   return `notes:${roomId}`;
 }
 
-type OpenChannel = {
-  channel: RealtimeChannel;
-  client: AppSupabaseClient;
-  /** Trocável: quem reabre o canal passa a receber os eventos sem assinar de novo. */
-  handlers: NotesChannelHandlers;
-  closeTimer: ReturnType<typeof setTimeout> | null;
-};
+type OpenChannel = SharedChannelEntry<NotesChannelHandlers>;
 
-/**
- * O Supabase devolve o MESMO canal para o mesmo nome e só o desmonta depois de uma ida
- * ao servidor. Fechar e reabrir em seguida (o modo estrito do React faz isso) pegaria um
- * canal morrendo. Por isso o fechamento espera um instante e é cancelado se a mesa for
- * reaberta. (Mesma técnica do canal da mesa, em features/rooms.)
- */
-const openChannels = new Map<string, OpenChannel>();
+const channels = createChannelRegistry<NotesChannelHandlers>();
 
-function createEntry(options: NotesChannelOptions, client: AppSupabaseClient): OpenChannel {
-  const { roomId } = options;
-  const channel = client.channel(notesChannelName(roomId), {
-    // Privado: só membros da mesa entram e enviam (regras em realtime.messages).
-    config: { private: true },
-  });
-  const entry: OpenChannel = { channel, client, handlers: options.handlers, closeTimer: null };
+function subscribeToNotes(entry: OpenChannel, roomId: string): void {
+  const { channel } = entry;
   const signal = () => entry.handlers.onSignal();
   const filter = `room_id=eq.${roomId}`;
 
@@ -65,11 +53,10 @@ function createEntry(options: NotesChannelOptions, client: AppSupabaseClient): O
       signal();
       return;
     }
-    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+    if (isChannelFailure(status)) {
       entry.handlers.onConnectionProblem(error ?? new Error(`Canal das anotações: ${status}`));
     }
   });
-  return entry;
 }
 
 /** Canal privado `notes:<id da mesa>`, só para membros: avisa quando as anotações mudam. */
@@ -77,28 +64,17 @@ export function openNotesChannel(
   options: NotesChannelOptions,
   client: AppSupabaseClient = getSupabase(),
 ): NotesChannel {
-  const name = notesChannelName(options.roomId);
-  const reused = openChannels.get(name);
-  if (reused?.closeTimer) clearTimeout(reused.closeTimer);
-  const entry = reused ?? createEntry(options, client);
-  entry.handlers = options.handlers;
-  entry.closeTimer = null;
-  openChannels.set(name, entry);
+  const { entry, close } = channels.acquire({
+    name: notesChannelName(options.roomId),
+    client,
+    handlers: options.handlers,
+    // Privado: só membros da mesa entram e enviam (regras em realtime.messages).
+    config: { private: true },
+    setup: (created) => subscribeToNotes(created, options.roomId),
+  });
 
   return {
-    async announce() {
-      const result = await entry.channel.send({
-        type: 'broadcast',
-        event: NOTES_ANNOUNCEMENT,
-        payload: {},
-      });
-      if (result !== 'ok') throw new Error(`Aviso das anotações não entregue: ${result}`);
-    },
-    close() {
-      entry.closeTimer = setTimeout(() => {
-        openChannels.delete(name);
-        void entry.client.removeChannel(entry.channel);
-      }, 0);
-    },
+    announce: () => sendBroadcast(entry.channel, NOTES_ANNOUNCEMENT, {}),
+    close,
   };
 }

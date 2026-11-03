@@ -1,5 +1,10 @@
-import type { RealtimeChannel } from '@supabase/supabase-js';
 import { logger } from '@/lib/logger';
+import {
+  createChannelRegistry,
+  isChannelFailure,
+  sendBroadcast,
+  type SharedChannelEntry,
+} from '@/lib/realtime-channel';
 import { getSupabase, type AppSupabaseClient } from '@/lib/supabase';
 import { DICE_EVENTS } from '../constants';
 import { throwMessageSchema, type ThrowMessage } from '../schemas';
@@ -35,21 +40,9 @@ export function diceChannelName(roomId: string): string {
   return `dice:${roomId}`;
 }
 
-type OpenChannel = {
-  channel: RealtimeChannel;
-  client: AppSupabaseClient;
-  /** Trocável: quem reabre o canal passa a receber os eventos sem assinar de novo. */
-  handlers: DiceChannelHandlers;
-  closeTimer: ReturnType<typeof setTimeout> | null;
-};
+type OpenChannel = SharedChannelEntry<DiceChannelHandlers>;
 
-/**
- * O Supabase devolve o MESMO canal para o mesmo nome e só o desmonta depois de uma ida
- * ao servidor. Fechar e reabrir em seguida (o modo estrito do React faz isso) pegaria um
- * canal morrendo. Por isso o fechamento espera um instante e é cancelado se a mesa for
- * reaberta. (Mesmo cuidado de `openRoomChannel`.)
- */
-const openChannels = new Map<string, OpenChannel>();
+const channels = createChannelRegistry<DiceChannelHandlers>();
 
 function receiveThrow(entry: OpenChannel, payload: unknown): void {
   const parsed = throwMessageSchema.safeParse(payload);
@@ -72,29 +65,17 @@ function listenToChannel(entry: OpenChannel, roomId: string): void {
     );
 }
 
-function createEntry(options: DiceChannelOptions, client: AppSupabaseClient): OpenChannel {
-  const channel = client.channel(diceChannelName(options.roomId), {
-    // Privado: o Realtime só deixa entrar e enviar quem o banco reconhece como membro da
-    // mesa (regras em realtime.messages); saber o id da mesa não basta.
-    config: { private: true },
-  });
-  const entry: OpenChannel = { channel, client, handlers: options.handlers, closeTimer: null };
-  listenToChannel(entry, options.roomId);
-  channel.subscribe((status, error) => {
+function subscribeToDice(entry: OpenChannel, roomId: string): void {
+  listenToChannel(entry, roomId);
+  entry.channel.subscribe((status, error) => {
     if (status === 'SUBSCRIBED') {
       entry.handlers.onConnected();
       return;
     }
-    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+    if (isChannelFailure(status)) {
       entry.handlers.onConnectionProblem(error ?? new Error(`Canal dos dados: ${status}`));
     }
   });
-  return entry;
-}
-
-async function broadcast(entry: OpenChannel, event: string, payload: unknown): Promise<void> {
-  const response = await entry.channel.send({ type: 'broadcast', event, payload });
-  if (response !== 'ok') throw new Error(`Aviso "${event}" não entregue: ${response}.`);
 }
 
 /**
@@ -105,22 +86,19 @@ export function openDiceChannel(
   options: DiceChannelOptions,
   client: AppSupabaseClient = getSupabase(),
 ): DiceChannel {
-  const name = diceChannelName(options.roomId);
-  const reused = openChannels.get(name);
-  if (reused?.closeTimer) clearTimeout(reused.closeTimer);
-  const entry = reused ?? createEntry(options, client);
-  entry.handlers = options.handlers;
-  entry.closeTimer = null;
-  openChannels.set(name, entry);
+  const { entry, close } = channels.acquire({
+    name: diceChannelName(options.roomId),
+    client,
+    handlers: options.handlers,
+    // Privado: o Realtime só deixa entrar e enviar quem o banco reconhece como membro da
+    // mesa (regras em realtime.messages); saber o id da mesa não basta.
+    config: { private: true },
+    setup: (created) => subscribeToDice(created, options.roomId),
+  });
 
   return {
-    sendThrow: (message) => broadcast(entry, DICE_EVENTS.throw, message),
-    announceCleared: () => broadcast(entry, DICE_EVENTS.historyCleared, {}),
-    close() {
-      entry.closeTimer = setTimeout(() => {
-        openChannels.delete(name);
-        void entry.client.removeChannel(entry.channel);
-      }, 0);
-    },
+    sendThrow: (message) => sendBroadcast(entry.channel, DICE_EVENTS.throw, message),
+    announceCleared: () => sendBroadcast(entry.channel, DICE_EVENTS.historyCleared, {}),
+    close,
   };
 }

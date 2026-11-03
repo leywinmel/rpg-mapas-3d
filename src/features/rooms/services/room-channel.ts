@@ -1,5 +1,9 @@
-import type { RealtimeChannel } from '@supabase/supabase-js';
 import type { Database } from '@/lib/database.types';
+import {
+  createChannelRegistry,
+  isChannelFailure,
+  type SharedChannelEntry,
+} from '@/lib/realtime-channel';
 import { getSupabase, type AppSupabaseClient } from '@/lib/supabase';
 import type { Room } from '../types';
 import { toRoom } from './rooms-service';
@@ -31,21 +35,9 @@ export function roomChannelName(roomId: string): string {
   return `room:${roomId}`;
 }
 
-type OpenChannel = {
-  channel: RealtimeChannel;
-  client: AppSupabaseClient;
-  /** Trocável: quem reabre o canal passa a receber os eventos sem assinar de novo. */
-  handlers: RoomChannelHandlers;
-  closeTimer: ReturnType<typeof setTimeout> | null;
-};
+type OpenChannel = SharedChannelEntry<RoomChannelHandlers>;
 
-/**
- * O Supabase devolve o MESMO canal para o mesmo nome e só o desmonta depois de uma
- * ida ao servidor. Fechar e reabrir em seguida (o modo estrito do React faz isso)
- * pegaria um canal morrendo. Por isso o fechamento espera um instante e é
- * cancelado se a mesa for reaberta.
- */
-const openChannels = new Map<string, OpenChannel>();
+const channels = createChannelRegistry<RoomChannelHandlers>();
 
 /**
  * O DELETE chega só com a chave primária da linha, e o filtro vale para colunas dela:
@@ -92,28 +84,21 @@ function listenToPeers(entry: OpenChannel): void {
   });
 }
 
-function createEntry(options: RoomChannelOptions, client: AppSupabaseClient): OpenChannel {
+function subscribeToRoom(entry: OpenChannel, options: RoomChannelOptions): void {
   const { roomId, userId, nickname } = options;
-  const channel = client.channel(roomChannelName(roomId), {
-    // Privado: o Realtime só deixa entrar e enviar quem o banco reconhece como membro
-    // (regras em realtime.messages); saber o id da mesa não basta.
-    config: { private: true, presence: { key: userId } },
-  });
-  const entry: OpenChannel = { channel, client, handlers: options.handlers, closeTimer: null };
   listenToPeers(entry);
   listenToDatabase(entry, roomId);
-  channel.subscribe((status, error) => {
+  entry.channel.subscribe((status, error) => {
     if (status === 'SUBSCRIBED') {
-      channel.track({ userId, nickname }).catch((cause: unknown) => {
+      entry.channel.track({ userId, nickname }).catch((cause: unknown) => {
         entry.handlers.onConnectionProblem(cause);
       });
       return;
     }
-    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+    if (isChannelFailure(status)) {
       entry.handlers.onConnectionProblem(error ?? new Error(`Canal da mesa: ${status}`));
     }
   });
-  return entry;
 }
 
 /**
@@ -124,20 +109,14 @@ export function openRoomChannel(
   options: RoomChannelOptions,
   client: AppSupabaseClient = getSupabase(),
 ): RoomChannel {
-  const name = roomChannelName(options.roomId);
-  const reused = openChannels.get(name);
-  if (reused?.closeTimer) clearTimeout(reused.closeTimer);
-  const entry = reused ?? createEntry(options, client);
-  entry.handlers = options.handlers;
-  entry.closeTimer = null;
-  openChannels.set(name, entry);
-
-  return {
-    close() {
-      entry.closeTimer = setTimeout(() => {
-        openChannels.delete(name);
-        void entry.client.removeChannel(entry.channel);
-      }, 0);
-    },
-  };
+  const { close } = channels.acquire({
+    name: roomChannelName(options.roomId),
+    client,
+    handlers: options.handlers,
+    // Privado: o Realtime só deixa entrar e enviar quem o banco reconhece como membro
+    // (regras em realtime.messages); saber o id da mesa não basta.
+    config: { private: true, presence: { key: options.userId } },
+    setup: (entry) => subscribeToRoom(entry, options),
+  });
+  return { close };
 }
