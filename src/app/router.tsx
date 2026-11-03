@@ -42,6 +42,12 @@ if (import.meta.env.DEV) {
     path: '/dev/mapa/:roomId',
     element: withSuspense(<DevMapPage />, 'Carregando o editor…'),
   });
+  // Medição da cena em pedaços: gera uma cidade de até 1000×1000 sem banco nem conta [#99].
+  const ScenePerfPage = lazy(() => import('@/features/scene/dev/ScenePerfPage'));
+  routes.push({
+    path: '/dev/cena',
+    element: withSuspense(<ScenePerfPage />, 'Gerando a cidade de teste…'),
+  });
 }
 
 routes.push({ path: '*', element: <NotFoundPage /> });
