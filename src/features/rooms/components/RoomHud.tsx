@@ -4,6 +4,7 @@ import { ArrowLeft, DoorOpen, Link2, Pencil, Trash2, Users } from 'lucide-react'
 import { IconButton, notify, ThemeToggle, Toolbar, ToolbarSeparator } from '@/components';
 import { absoluteAppUrl } from '@/features/auth';
 import { NotesButton, NotesPanel, NotesProvider } from '@/features/notes';
+import { QualityButton } from '@/features/scene';
 import { reportError } from '@/lib/report-error';
 import { useRoomSession } from '../hooks/room-session-context';
 import { LOBBY_PATH, roomPath } from '../paths';
@@ -94,6 +95,7 @@ export function RoomHud() {
             />
           )}
           <ToolbarSeparator />
+          <QualityButton />
           <ThemeToggle />
         </Toolbar>
       </div>

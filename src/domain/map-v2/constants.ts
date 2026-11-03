@@ -21,8 +21,8 @@ export const CHUNK_CELLS = CHUNK_SIZE * CHUNK_SIZE;
 export const RUN_STRIDE = 2;
 
 /**
- * Altura de um degrau, em unidades do mundo (uma casa = 1 unidade). Vale o mesmo que o
- * FLOOR_STEP_HEIGHT da cena v1: por isso o chão elevado do v1 converte sem mudar de altura.
+ * Altura de um degrau, em unidades do mundo (uma casa = 1 unidade). Vale o mesmo que o degrau
+ * de chão do v1, e a cena usa esta mesma constante: o chão elevado do v1 converte sem mudar.
  */
 export const HEIGHT_STEP = 0.5;
 

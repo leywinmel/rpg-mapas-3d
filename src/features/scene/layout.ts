@@ -12,9 +12,8 @@ import {
   type Prop,
   type Wall,
 } from '@/domain';
+import { stepsToWorld } from '@/domain/map-v2';
 
-/** Altura de cada degrau de chão empilhado, em unidades do mundo (1 casa = 1 unidade). */
-export const FLOOR_STEP_HEIGHT = 0.5;
 /** Profundidade do bloco abaixo do nível zero: dá a cara de maquete recortada. */
 export const FLOOR_BASE_DEPTH = 0.3;
 /** Espessura da tampa detalhada do chão; abaixo dela vem a coluna lisa. */
@@ -42,8 +41,12 @@ export type InstanceTransform = {
 
 export type WallEdge = Pick<Wall, 'x' | 'z' | 'side'>;
 
+/** Parede do lado oeste fica girada um quarto de volta em relação à do norte. */
+export const RIGHT_ANGLE_DEGREES = 90;
+
+/** Topo do chão no mundo. O degrau é o HEIGHT_STEP do domínio, o mesmo do v1 e do v2. */
 export function floorTop(height: number): number {
-  return height * FLOOR_STEP_HEIGHT;
+  return stepsToWorld(height);
 }
 
 /** Altura de cada casa num vetor (z * largura + x), para consultas O(1) no laço de quadros. */
@@ -103,24 +106,45 @@ export function wallBase(map: HeightMap, edge: WallEdge): number {
   return Math.max(surfaceAt(map, edge), surfaceAt(map, neighbor));
 }
 
+/** Meio da aresta e o giro da parede: norte corre em x, oeste corre em z. */
+export function wallEdgePlacement(
+  edge: WallEdge,
+): Pick<InstanceTransform, 'x' | 'z' | 'rotationY'> {
+  const isNorth = edge.side === 'north';
+  return {
+    x: isNorth ? edge.x + 0.5 : edge.x,
+    z: isNorth ? edge.z : edge.z + 0.5,
+    rotationY: isNorth ? 0 : RIGHT_ANGLE_DEGREES,
+  };
+}
+
 /**
- * Cada metro de parede vira uma instância empilhada: a geometria detalhada não
- * deforma ao esticar e continua cabendo num único InstancedMesh por estilo.
+ * Cada unidade de altura de parede vira uma instância empilhada: a geometria detalhada não
+ * deforma ao esticar e continua cabendo num único InstancedMesh por estilo. Uma sobra menor
+ * que uma unidade (parede de degrau ímpar, ou cortada no meio pelo corte de andares) vira um
+ * último segmento achatado.
  */
-export function wallSegmentTransforms(map: HeightMap, wall: Wall): InstanceTransform[] {
-  const base = wallBase(map, wall);
-  const isNorth = wall.side === 'north';
+export function stackedWallSegments(
+  edge: WallEdge,
+  base: number,
+  height: number,
+): InstanceTransform[] {
+  const { x, z, rotationY } = wallEdgePlacement(edge);
+  const fullSegments = Math.floor(height);
   const segments: InstanceTransform[] = [];
-  for (let level = 0; level < wall.height; level += 1) {
-    segments.push({
-      x: isNorth ? wall.x + 0.5 : wall.x,
-      y: base + level,
-      z: isNorth ? wall.z : wall.z + 0.5,
-      rotationY: isNorth ? 0 : 90,
-      scale: 1,
-    });
+  for (let level = 0; level < fullSegments; level += 1) {
+    segments.push({ x, y: base + level, z, rotationY, scale: 1 });
+  }
+  const remainder = height - fullSegments;
+  if (remainder > 0) {
+    segments.push({ x, y: base + fullSegments, z, rotationY, scale: 1, scaleY: remainder });
   }
   return segments;
+}
+
+/** Parede do documento v1: a base sai do mapa de alturas e a altura já vem em unidades. */
+export function wallSegmentTransforms(map: HeightMap, wall: Wall): InstanceTransform[] {
+  return stackedWallSegments(wall, wallBase(map, wall), wall.height);
 }
 
 /** Aresta da casa mais perto do ponto: é onde a ferramenta de parede encaixa. */
@@ -276,6 +300,8 @@ export type CameraFrame = {
   target: Vec3;
   minDistance: number;
   maxDistance: number;
+  /** Plano de fundo da câmera: alcança a ponta oposta do mapa com a câmera no mais afastado. */
+  far: number;
 };
 
 const CAMERA_POLAR = (50 * Math.PI) / 180;
@@ -285,6 +311,11 @@ const CAMERA_DISTANCE_PADDING = 6;
 const CAMERA_MIN_DISTANCE = 2.5;
 const CAMERA_MAX_DISTANCE_FACTOR = 2.2;
 const CAMERA_MAX_DISTANCE_PADDING = 12;
+/**
+ * O plano de fundo de sempre. Só mapa grande (acima de ~300 casas) passa dele; em mapa pequeno
+ * o fundo mais perto daria mais precisão de profundidade, mas mudaria a cena de quem já tinha mapa.
+ */
+const MIN_CAMERA_FAR = 1000;
 
 /**
  * Enquadramento inicial: vista de maquete em diagonal, centrada no mapa. A
@@ -297,6 +328,7 @@ export function cameraFrame(size: GridSize): CameraFrame {
   const distance = span * CAMERA_DISTANCE_FACTOR + CAMERA_DISTANCE_PADDING;
   const target = { x: size.width / 2, y: 0, z: size.depth / 2 };
   const horizontal = Math.sin(CAMERA_POLAR) * distance;
+  const maxDistance = span * CAMERA_MAX_DISTANCE_FACTOR + CAMERA_MAX_DISTANCE_PADDING;
   return {
     target,
     position: {
@@ -305,7 +337,8 @@ export function cameraFrame(size: GridSize): CameraFrame {
       z: target.z + horizontal * Math.cos(CAMERA_AZIMUTH),
     },
     minDistance: CAMERA_MIN_DISTANCE,
-    maxDistance: span * CAMERA_MAX_DISTANCE_FACTOR + CAMERA_MAX_DISTANCE_PADDING,
+    maxDistance,
+    far: Math.max(MIN_CAMERA_FAR, maxDistance + span * Math.SQRT2),
   };
 }
 

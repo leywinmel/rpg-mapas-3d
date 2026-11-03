@@ -1,20 +1,22 @@
 import type { ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import type { Ambience, GridSize, MapDocument } from '@/domain';
+import type { Cutaway } from '@/domain/map-v2';
 import { cx } from '@/lib/cx';
 import { fogRange } from '../ambience';
+import { useMapModelFromV1 } from '../hooks/useMapModelFromV1';
 import { cameraFrame } from '../layout';
+import { useQualitySettings } from '../quality/quality-store';
 import type { ModelUrls } from './AssetPieces';
 import { CameraRig, type CameraMode } from './CameraRig';
 import { MapRenderer } from './MapRenderer';
 import { PerfMeter, type PerfSample } from './PerfMeter';
+import { QualityMonitor } from './QualityMonitor';
 import { SceneLights } from './SceneLights';
 
-/** Telas de alta densidade a 1,5×: acima disso o custo sobe muito e o low-poly não ganha nada. */
-const MAX_PIXEL_RATIO = 1.5;
+const MIN_PIXEL_RATIO = 1;
 const CAMERA_FOV = 45;
 const CAMERA_NEAR = 0.1;
-const CAMERA_FAR = 1000;
 
 export type SceneCanvasProps = {
   size: GridSize;
@@ -27,7 +29,11 @@ export type SceneCanvasProps = {
   children?: ReactNode;
 };
 
-/** Palco 3D: câmera orbital com limites, luz baixa e quente, neblina na cor da ambientação. */
+/**
+ * Palco 3D: câmera orbital com limites, luz baixa e quente, neblina na cor da ambientação. A
+ * densidade de pixels e as sombras seguem o nível de qualidade, que o monitor ajusta sozinho
+ * no modo automático.
+ */
 export function SceneCanvas({
   size,
   ambience,
@@ -37,20 +43,21 @@ export function SceneCanvas({
   label = 'Mapa 3D',
   children,
 }: SceneCanvasProps) {
+  const { maxPixelRatio } = useQualitySettings();
   const fog = fogRange(ambience, Math.max(size.width, size.depth));
-  const { position } = cameraFrame(size);
+  const { position, far } = cameraFrame(size);
   return (
     <Canvas
       className={cx('scene', className)}
       aria-label={label}
       role="img"
       shadows
-      dpr={[1, MAX_PIXEL_RATIO]}
+      dpr={[MIN_PIXEL_RATIO, maxPixelRatio]}
       camera={{
         position: [position.x, position.y, position.z],
         fov: CAMERA_FOV,
         near: CAMERA_NEAR,
-        far: CAMERA_FAR,
+        far,
       }}
       gl={{ antialias: true, powerPreference: 'high-performance' }}
     >
@@ -58,6 +65,7 @@ export function SceneCanvas({
       <fog attach="fog" args={[ambience.fogColor, fog.near, fog.far]} />
       <SceneLights ambience={ambience} size={size} />
       <CameraRig size={size} mode={mode} />
+      <QualityMonitor />
       {children}
       {onPerfSample && <PerfMeter onSample={onPerfSample} />}
     </Canvas>
@@ -68,18 +76,26 @@ export type MapSceneProps = Omit<SceneCanvasProps, 'ambience'> & {
   document: MapDocument;
   modelUrls?: ModelUrls;
   showGrid?: boolean;
+  /** Corte de andares (degrau absoluto); sem ele, nada é escondido. */
+  cutaway?: Cutaway;
 };
 
-/** Cena pronta de um mapa: o palco mais o diorama do documento. */
-export function MapScene({ document, modelUrls, showGrid, children, ...canvas }: MapSceneProps) {
+/**
+ * Cena pronta de um mapa salvo no formato v1: o documento vira mapa v2 e é desenhado em
+ * pedaços, com a mesma aparência de antes.
+ */
+export function MapScene({
+  document,
+  modelUrls,
+  showGrid,
+  cutaway,
+  children,
+  ...canvas
+}: MapSceneProps) {
+  const model = useMapModelFromV1(document, canvas.size);
   return (
     <SceneCanvas {...canvas} ambience={document.ambience}>
-      <MapRenderer
-        document={document}
-        size={canvas.size}
-        modelUrls={modelUrls}
-        showGrid={showGrid}
-      />
+      <MapRenderer model={model} cutaway={cutaway} modelUrls={modelUrls} showGrid={showGrid} />
       {children}
     </SceneCanvas>
   );

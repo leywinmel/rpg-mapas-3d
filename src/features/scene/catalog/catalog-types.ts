@@ -57,5 +57,10 @@ export type CatalogEntry = {
   visual: PieceVisual;
   /** Cor da lateral do bloco de chão (só para kind "floor"). */
   sideColor?: string;
+  /**
+   * Cor única do desenho de longe (chão e paredes): de longe o bloco liso com essa cor
+   * substitui a peça detalhada, que custa de 7 a 10 vezes mais triângulos.
+   */
+  farColor?: string;
   light?: PieceLight;
 };

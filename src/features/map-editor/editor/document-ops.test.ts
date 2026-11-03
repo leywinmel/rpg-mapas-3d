@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createEmptyDocument, MAX_FLOOR_HEIGHT, parseMapDocument } from '@/domain';
-import { FLOOR_STEP_HEIGHT } from '@/features/scene';
+import { HEIGHT_STEP } from '@/domain/map-v2';
 import { uploadedAssetIds } from '../hooks/useModelUrls';
 import {
   adjustFloorHeight,
@@ -45,7 +45,7 @@ describe('document-ops', () => {
     let document = placeProp(emptyMap(), SIZE, { id: 'p1', asset: BARREL, cell, rotation: 0 });
     document = adjustFloorHeight(document, cell, 1);
     expect(floorAt(document, cell)?.height).toBe(1);
-    expect(document.props[0]?.elevation).toBe(FLOOR_STEP_HEIGHT);
+    expect(document.props[0]?.elevation).toBe(HEIGHT_STEP);
     for (let step = 0; step < 20; step += 1) document = adjustFloorHeight(document, cell, 1);
     expect(floorAt(document, cell)?.height).toBe(MAX_FLOOR_HEIGHT);
     expect(adjustFloorHeight(document, cell, 1)).toBe(document);
@@ -60,7 +60,7 @@ describe('document-ops', () => {
     expect(document.props[0]).toMatchObject({
       x: 0.5,
       z: 0.5,
-      elevation: 2 * FLOOR_STEP_HEIGHT,
+      elevation: 2 * HEIGHT_STEP,
       rotation: 90,
     });
   });

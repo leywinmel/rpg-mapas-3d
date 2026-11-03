@@ -1,8 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3, type PointLight } from 'three';
-import type { Prop } from '@/domain';
-import { pieceCatalog } from '../catalog/catalog';
+import type { LightSource } from '../chunks/chunk-instances';
 
 /**
  * Teto de luzes pontuais reais. Cada luz a mais pesa em TODO pixel de todo
@@ -17,7 +16,7 @@ const FLICKER_AMOUNT = 0.12;
 /** Defasagem entre tochas vizinhas, para não piscarem em uníssono. */
 const FLICKER_PHASE_STEP = 1.7;
 
-type LightSource = {
+type Flame = {
   position: Vector3;
   color: string;
   intensity: number;
@@ -25,21 +24,14 @@ type LightSource = {
   phase: number;
 };
 
-function collectSources(props: readonly Prop[]): LightSource[] {
-  const sources: LightSource[] = [];
-  props.forEach((prop, index) => {
-    if (prop.asset.source !== 'catalog') return;
-    const light = pieceCatalog.get(prop.asset.key)?.light;
-    if (!light) return;
-    sources.push({
-      position: new Vector3(prop.x, prop.elevation + light.offsetY * prop.scale, prop.z),
-      color: light.color,
-      intensity: light.intensity,
-      distance: light.distance * prop.scale,
-      phase: index * FLICKER_PHASE_STEP,
-    });
-  });
-  return sources;
+function toFlames(sources: readonly LightSource[]): Flame[] {
+  return sources.map((source, index) => ({
+    position: new Vector3(source.x, source.y, source.z),
+    color: source.color,
+    intensity: source.intensity,
+    distance: source.distance,
+    phase: index * FLICKER_PHASE_STEP,
+  }));
 }
 
 function hasTarget(value: unknown): value is { target: Vector3 } {
@@ -51,10 +43,10 @@ function hasTarget(value: unknown): value is { target: Vector3 } {
  * intensidade 0): mudar a quantidade de luzes faria o three.js recompilar todos
  * os shaders, um engasgo visível a cada tocha colocada.
  */
-export function TorchLights({ props }: { props: readonly Prop[] }) {
-  const sources = useMemo(() => collectSources(props), [props]);
+export function TorchLights({ sources }: { sources: readonly LightSource[] }) {
+  const flames = useMemo(() => toFlames(sources), [sources]);
   const lights = useRef<Array<PointLight | null>>([]);
-  const assigned = useRef<LightSource[]>([]);
+  const assigned = useRef<Flame[]>([]);
   const sinceReassign = useRef(Infinity);
   const controls = useThree((state) => state.controls);
 
@@ -63,7 +55,7 @@ export function TorchLights({ props }: { props: readonly Prop[] }) {
     if (sinceReassign.current >= REASSIGN_INTERVAL_S) {
       sinceReassign.current = 0;
       const focus = hasTarget(controls) ? controls.target : state.camera.position;
-      assigned.current = [...sources]
+      assigned.current = [...flames]
         .sort((a, b) => a.position.distanceToSquared(focus) - b.position.distanceToSquared(focus))
         .slice(0, MAX_REAL_LIGHTS);
     }

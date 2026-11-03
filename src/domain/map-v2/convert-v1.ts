@@ -2,7 +2,7 @@
  * Conversão do mapa v1 para o v2 sem mudar o que aparece na tela. As unidades do v1, conferidas
  * em features/scene/layout.ts, nos componentes da cena e em features/map-editor/editor/document-ops.ts:
  *
- * - `floors.height` é em degraus de 0,5 unidade (FLOOR_STEP_HEIGHT): o v2 usa os mesmos degraus.
+ * - `floors.height` é em degraus de 0,5 unidade (o HEIGHT_STEP): o v2 usa os mesmos degraus.
  * - `walls.height` é em unidades do mundo (cada unidade é uma instância empilhada): vale 2 degraus.
  *   E a base da parede o v1 calcula na hora de desenhar, como o chão mais alto das duas casas da
  *   aresta (wallBase); o v2 grava essa base no `level` da parede.
@@ -22,6 +22,7 @@ import { isInside, type Cell, type GridSize } from '../grid';
 import {
   parseMapDocument,
   type FloorTile,
+  type MapDocument,
   type MapResult,
   type Prop,
   type Wall,
@@ -174,8 +175,15 @@ export function convertMapV1ToV2(document: unknown, size: GridSize): MapResult<M
   }
   const parsed = parseMapDocument(document, size);
   if (!parsed.ok) return parsed;
-  const legacy = parsed.value;
+  return ok(convertCheckedMapV1(parsed.value, size));
+}
 
+/**
+ * A mesma conversão, para um documento que JÁ passou pelo parseMapDocument (o do editor, que
+ * só muda por operações conferidas). Pula a conferência, que num 100×100 cheio custa ~9 ms dos
+ * ~11 ms da conversão: a cena converte a cada passo do pincel enquanto o editor for v1.
+ */
+export function convertCheckedMapV1(legacy: MapDocument, size: GridSize): MapModel {
   const drafts = createDrafts(size);
   // O chão vai primeiro: a base de cada parede sai da altura dele.
   addFloors(drafts, legacy.floors);
@@ -184,9 +192,9 @@ export function convertMapV1ToV2(document: unknown, size: GridSize): MapResult<M
 
   const chunks = new Map<string, MapChunk>();
   for (const [key, draft] of drafts) chunks.set(key, finishChunk(draft));
-  return ok({
+  return {
     size: { width: size.width, depth: size.depth },
     header: { version: MAP_V2_VERSION, ambience: { ...legacy.ambience } },
     chunks,
-  });
+  };
 }

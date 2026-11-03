@@ -1,0 +1,41 @@
+.page {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--scene-fog);
+}
+
+.panel {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: var(--z-hud);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3) 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  padding: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.stats dt {
+  color: var(--color-text-subtle);
+}
+
+.stats dd {
+  margin: 0;
+  color: var(--color-text);
+}

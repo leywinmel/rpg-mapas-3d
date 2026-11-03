@@ -80,6 +80,10 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   10 MB. O modelo é ajustado ao tamanho de uma casa e entra no mapa como as outras peças.
 - **Jogadores:** veem só o mapa que o mestre mostrou, sem as ferramentas de edição. A troca de mapa e
   cada alteração salva aparecem na hora, sem recarregar a página.
+- **Qualidade da cena:** o botão com o velocímetro, no alto da mesa, troca entre automática, alta,
+  média e baixa. Na automática, a cena baixa sozinha as sombras, a nitidez e a distância dos
+  detalhes quando o computador não dá conta, e volta a subir quando sobra fôlego. A escolha fica
+  guardada no navegador.
 
 ### Dados 3D
 
@@ -139,6 +143,8 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
 - `npm run lint` e `npm run typecheck`: verificam o código.
 - `npm run build`: gera a versão de produção em `dist/`.
 - Com o site rodando, `http://localhost:5173/componentes` mostra todos os componentes visuais nos dois temas (só em desenvolvimento).
+- Com o site rodando, `http://localhost:5173/dev/cena` gera uma cidade de teste de até 1000 × 1000
+  casas e mostra quadros por segundo e tempo de montagem da cena (só em desenvolvimento, sem conta).
 - `npm run db:reset`: recria o banco local do zero.
 - `npm run test:db`: testa as regras de acesso do banco (quem vê e altera o quê).
 
