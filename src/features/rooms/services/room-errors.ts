@@ -1,3 +1,5 @@
+import { classifySupabaseError, type SupabaseErrorTable } from '@/lib/supabase-error';
+
 /** Falhas das mesas em categorias que a tela sabe explicar. O detalhe técnico vai para o log. */
 export type RoomErrorKind = 'not-found' | 'forbidden' | 'invalid' | 'network' | 'unknown';
 
@@ -9,14 +11,16 @@ export const ROOM_ERROR_MESSAGES: Record<RoomErrorKind, string> = {
   unknown: 'Não deu para concluir agora. Tente de novo em instantes.',
 };
 
-/** Códigos do Postgres/PostgREST que as funções e regras do banco usam (ver migrations). */
-const KIND_BY_CODE: Record<string, RoomErrorKind> = {
-  '42501': 'forbidden',
-  P0002: 'not-found',
-  PGRST116: 'not-found',
-  '22023': 'invalid',
-  '23502': 'invalid',
-  '23514': 'invalid',
+const ERROR_TABLE: SupabaseErrorTable<RoomErrorKind> = {
+  byPostgresCode: {
+    '42501': 'forbidden',
+    P0002: 'not-found',
+    PGRST116: 'not-found',
+    '22023': 'invalid',
+    '23502': 'invalid',
+    '23514': 'invalid',
+  },
+  network: 'network',
 };
 
 export class RoomError extends Error {
@@ -32,18 +36,10 @@ export class RoomError extends Error {
   }
 }
 
-type PostgrestLike = { code?: unknown; message?: unknown };
-
 export function toRoomError(error: unknown): RoomError {
   if (error instanceof RoomError) return error;
-  const { code, message } = (error && typeof error === 'object' ? error : {}) as PostgrestLike;
-  const codeText = typeof code === 'string' ? code : null;
-  const kindFromCode = codeText ? KIND_BY_CODE[codeText] : undefined;
-  if (kindFromCode) return new RoomError(kindFromCode, codeText, { cause: error });
-  if (typeof message === 'string' && message.toLowerCase().includes('failed to fetch')) {
-    return new RoomError('network', codeText, { cause: error });
-  }
-  return new RoomError('unknown', codeText, { cause: error });
+  const { kind, code } = classifySupabaseError(error, ERROR_TABLE, 'unknown');
+  return new RoomError(kind, code, { cause: error });
 }
 
 export function roomErrorMessage(error: unknown): string {
