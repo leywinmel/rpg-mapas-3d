@@ -582,3 +582,12 @@ export function getColumnGeometry(): BufferGeometry {
   columnGeometry = new BoxGeometry(1, 1, 1).translate(0, -0.5, 0);
   return columnGeometry;
 }
+
+let farWallGeometry: BufferGeometry | null = null;
+
+/** Placa lisa da parede vista de longe: base em y = 0, esticada em y até a altura da parede. */
+export function getFarWallGeometry(): BufferGeometry {
+  if (farWallGeometry) return farWallGeometry;
+  farWallGeometry = new BoxGeometry(1, 1, WALL_THICKNESS).translate(0, 0.5, 0);
+  return farWallGeometry;
+}

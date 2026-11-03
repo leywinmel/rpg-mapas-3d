@@ -27,6 +27,7 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
     icon: 'square',
     visual: PROCEDURAL,
     sideColor: SCENE_PALETTE.stoneSide,
+    farColor: SCENE_PALETTE.stoneTop,
   },
   {
     key: 'piso-madeira',
@@ -36,6 +37,7 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
     icon: 'square',
     visual: PROCEDURAL,
     sideColor: SCENE_PALETTE.woodSide,
+    farColor: SCENE_PALETTE.woodTop,
   },
   {
     key: 'terra',
@@ -45,6 +47,7 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
     icon: 'mountain',
     visual: PROCEDURAL,
     sideColor: SCENE_PALETTE.dirtSide,
+    farColor: SCENE_PALETTE.dirtTop,
   },
   {
     key: 'grama',
@@ -54,6 +57,7 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
     icon: 'sprout',
     visual: PROCEDURAL,
     sideColor: SCENE_PALETTE.grassSide,
+    farColor: SCENE_PALETTE.grassTop,
   },
   {
     key: 'agua',
@@ -63,6 +67,7 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
     icon: 'waves',
     visual: PROCEDURAL,
     sideColor: SCENE_PALETTE.waterSide,
+    farColor: SCENE_PALETTE.waterTop,
   },
   // Paredes
   {
@@ -72,6 +77,7 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
     keywords: ['muro', 'tijolo', 'masmorra'],
     icon: 'brick',
     visual: PROCEDURAL,
+    farColor: SCENE_PALETTE.wallStone,
   },
   {
     key: 'parede-madeira',
@@ -80,6 +86,7 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
     keywords: ['tábua', 'cabana', 'paliçada'],
     icon: 'fence',
     visual: PROCEDURAL,
+    farColor: SCENE_PALETTE.wallWood,
   },
   {
     key: 'grade',
@@ -88,6 +95,7 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
     keywords: ['cela', 'prisão', 'portão', 'barras'],
     icon: 'grid',
     visual: PROCEDURAL,
+    farColor: SCENE_PALETTE.iron,
   },
   // Objetos
   {

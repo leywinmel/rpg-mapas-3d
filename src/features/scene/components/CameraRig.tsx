@@ -27,6 +27,11 @@ export function CameraRig({ size, mode }: { size: GridSize; mode: CameraMode }) 
     if (!current) return;
     current.object.position.set(frame.position.x, frame.position.y, frame.position.z);
     current.target.set(frame.target.x, frame.target.y, frame.target.z);
+    // Mapa grande pede um fundo de câmera mais longe; sem isto a ponta do mapa some.
+    if (current.object.far !== frame.far) {
+      current.object.far = frame.far;
+      current.object.updateProjectionMatrix();
+    }
     current.update();
   }, [frame]);
 
