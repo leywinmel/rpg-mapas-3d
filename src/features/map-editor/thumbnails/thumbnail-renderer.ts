@@ -18,6 +18,7 @@ import {
   WebGLRenderer,
 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { FLOOR_CAP_DEPTH, pieceCatalog, SCENE_PALETTE } from '@/features/scene';
 import { bakeModel } from '@/features/scene/catalog/model-layers';
 import {
@@ -124,12 +125,14 @@ function pieceGroup(key: string): Group {
 export function renderPieceThumbnail(key: string): Promise<string> {
   return cached(`piece:${key}`, async () => {
     const entry = pieceCatalog.get(key);
+    if (entry?.thumbnail) return entry.thumbnail;
     if (entry?.visual.type === 'model') return renderModelThumbnail(entry.visual.url);
     return snapshot(pieceGroup(key));
   });
 }
 
-const loader = new GLTFLoader();
+// O meshopt vem embutido no three (sem download): os modelos dos pacotes usam essa compressão.
+const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
 
 /** Miniatura de um .glb (enviado pelo mestre ou de um pacote), já encaixado numa casa. */
 export function renderModelThumbnail(url: string): Promise<string> {

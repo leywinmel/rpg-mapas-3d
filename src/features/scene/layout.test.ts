@@ -17,6 +17,7 @@ import {
   NO_FLOOR,
   modelHeightMap,
   pickCell,
+  regroupWallSegments,
   stackedWallSegments,
   type HeightMap,
   type Ray,
@@ -186,5 +187,45 @@ describe('ambience', () => {
     const big = fogRange({ preset: 'masmorra', fogColor: '#000000', light: 1 }, 100);
     expect(big.far).toBeGreaterThan(small.far);
     expect(small.near).toBeLessThan(small.far);
+  });
+});
+
+describe('regroupWallSegments', () => {
+  const edge = { x: 2, z: 3, side: 'north' } as const;
+
+  it('shouldTurnOneStoryOfUnitSegmentsIntoOneStoryPiece', () => {
+    const regrouped = regroupWallSegments(stackedWallSegments(edge, 0, 2), 2);
+    expect(regrouped).toEqual([{ x: 2.5, y: 0, z: 3, rotationY: 0, scale: 1 }]);
+  });
+
+  it('shouldSquashTheLeftoverAboveTheLastFullStory', () => {
+    const regrouped = regroupWallSegments(stackedWallSegments(edge, 1, 3), 2);
+    expect(regrouped.map((segment) => [segment.y, segment.scaleY])).toEqual([
+      [1, undefined],
+      [3, 0.5],
+    ]);
+  });
+
+  it('shouldKeepSeparateEdgesAndGapsApart', () => {
+    const other = { x: 2, z: 3, side: 'west' } as const;
+    const segments = [
+      ...stackedWallSegments(edge, 0, 2),
+      ...stackedWallSegments(edge, 4, 2),
+      ...stackedWallSegments(other, 0, 2),
+    ];
+    expect(regroupWallSegments(segments, 2)).toHaveLength(3);
+  });
+
+  it('shouldLeaveUnitSegmentsAloneForSpanOne', () => {
+    const segments = stackedWallSegments(edge, 0, 2);
+    expect(regroupWallSegments(segments, 1)).toEqual(segments);
+  });
+});
+
+describe('floorColumnTransform with a model cap', () => {
+  it('shouldRiseUpToTheBaseOfAThinCap', () => {
+    const column = floorColumnTransform({ x: 0, z: 0, tile: 'x', height: 0 }, 0.01);
+    expect(column.y).toBeCloseTo(-0.01);
+    expect(column.scaleY).toBeCloseTo(FLOOR_BASE_DEPTH - 0.01);
   });
 });

@@ -129,7 +129,11 @@ function v1PropTransform(prop: Prop): InstanceTransform {
 /** O que a cena v1 desenhava. */
 function drawnByV1(document: MapDocument): Drawn {
   const drawn: Drawn = {};
-  add(drawn, 'column', document.floors.map(floorColumnTransform));
+  add(
+    drawn,
+    'column',
+    document.floors.map((floor) => floorColumnTransform(floor)),
+  );
   for (const floor of document.floors) add(drawn, `cap:${floor.tile}`, [floorCapTransform(floor)]);
   for (const wall of document.walls) {
     const base = v1WallBase(document.floors, wall);

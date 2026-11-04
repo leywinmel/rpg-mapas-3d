@@ -28,24 +28,30 @@ describe('pieceCatalog', () => {
   });
 
   it('shouldUseKeysTheMapDocumentAccepts', () => {
-    const size = { width: 4, depth: 4 };
+    // Uma casa por peça: o lado do mapa cresce com o catálogo.
+    const side = Math.ceil(Math.sqrt(pieceCatalog.list().length)) + 1;
+    const size = { width: side, depth: side };
     const base = createEmptyDocument(size);
     const document: MapDocument = {
       ...base,
       floors: pieceCatalog.list('floor').map((entry, index) => ({
-        x: index % 4,
-        z: Math.floor(index / 4),
+        x: index % side,
+        z: Math.floor(index / side),
         tile: entry.key,
         height: 0,
       })),
-      walls: pieceCatalog
-        .list('wall')
-        .map((entry, index) => ({ x: index, z: 0, side: 'north', style: entry.key, height: 1 })),
+      walls: pieceCatalog.list('wall').map((entry, index) => ({
+        x: index % side,
+        z: Math.floor(index / side),
+        side: 'north',
+        style: entry.key,
+        height: 1,
+      })),
       props: pieceCatalog.list('prop').map((entry, index) => ({
         id: entry.key,
         asset: { source: 'catalog', key: entry.key },
-        x: (index % 4) + 0.5,
-        z: 0.5,
+        x: (index % side) + 0.5,
+        z: Math.floor(index / side) + 0.5,
         elevation: 0,
         rotation: 0,
         scale: 1,
@@ -72,14 +78,34 @@ describe('pieceCatalog', () => {
 describe('search', () => {
   it('shouldIgnoreAccentsAndCase', () => {
     expect(normalizeSearchText('  Baú ')).toBe('bau');
-    expect(pieceCatalog.search('BAÚ').map((entry) => entry.key)).toEqual(['bau']);
+    expect(pieceCatalog.search('BAÚ', { style: 'medieval' }).map((entry) => entry.key)).toEqual([
+      'bau',
+    ]);
   });
 
   it('shouldMatchKeywordsAndFilterByKind', () => {
-    expect(pieceCatalog.search('masmorra', 'wall').map((entry) => entry.key)).toEqual([
+    expect(pieceCatalog.search('masmorra', { kind: 'wall' }).map((entry) => entry.key)).toEqual([
       'parede-pedra',
     ]);
-    expect(pieceCatalog.search('', 'floor')).toHaveLength(REQUIRED_KEYS.floor.length);
+    expect(pieceCatalog.search('', { kind: 'floor' })).toEqual(pieceCatalog.list('floor'));
+  });
+
+  it('shouldFilterByStyleKeepingGenericPiecesInEveryStyle', () => {
+    const modern = pieceCatalog.search('', { style: 'modern' });
+    expect(modern.every((entry) => entry.style === 'modern' || entry.style === 'generic')).toBe(
+      true,
+    );
+    expect(modern.map((entry) => entry.key)).toEqual(
+      expect.arrayContaining(['mod-carro', 'arvore']),
+    );
+    expect(modern.map((entry) => entry.key)).not.toContain('med-carroca');
+    expect(pieceCatalog.search('', { style: 'all' })).toEqual(pieceCatalog.list());
+  });
+
+  it('shouldCombineStyleAndText', () => {
+    expect(pieceCatalog.search('carro', { style: 'futurist' }).map((entry) => entry.key)).toEqual([
+      'fut-carro',
+    ]);
   });
 });
 
@@ -90,6 +116,8 @@ describe('createCatalog', () => {
     label: 'Altar (pacote CC0)',
     keywords: [],
     icon: 'statue',
+    style: 'medieval',
+    category: 'structure',
     visual: { type: 'model', url: '/assets/altar.glb' },
   };
 
@@ -124,8 +152,8 @@ describe('piece geometry', () => {
     expect(getPieceLayers('peca-que-nao-existe')).toBe(getFallbackLayers());
   });
 
-  it('shouldKeepPropsInsideOneCell', () => {
-    for (const entry of pieceCatalog.list('prop')) {
+  it('shouldKeepProceduralPropsInsideOneCell', () => {
+    for (const entry of BUILTIN_PIECES.filter((piece) => piece.kind === 'prop')) {
       for (const layer of getPieceLayers(entry.key)) {
         const box = layer.geometry.boundingBox!;
         expect(box.min.y).toBeGreaterThanOrEqual(-0.001);

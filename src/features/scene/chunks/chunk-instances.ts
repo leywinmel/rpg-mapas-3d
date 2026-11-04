@@ -70,8 +70,9 @@ export function terrainInstances(chunk: MapChunk): TerrainInstances {
   const caps = new Map<string, InstanceTransform[]>();
   for (const floor of chunkFloors(chunk)) {
     const { tile } = floor;
-    columns.push(floorColumnTransform(floor));
-    colors.push(pieceCatalog.get(tile)?.sideColor ?? SCENE_PALETTE.stoneSide);
+    const entry = pieceCatalog.get(tile);
+    columns.push(floorColumnTransform(floor, entry?.floorDepth));
+    colors.push(entry?.sideColor ?? SCENE_PALETTE.stoneSide);
     const group = caps.get(tile);
     if (group) group.push(floorCapTransform(floor));
     else caps.set(tile, [floorCapTransform(floor)]);

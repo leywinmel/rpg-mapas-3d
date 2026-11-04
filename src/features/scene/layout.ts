@@ -68,9 +68,15 @@ export function surfaceAt(map: HeightMap, cell: Cell): number {
   return floorTop(Math.max(heightAt(map, cell), 0));
 }
 
-/** Transformação da coluna lisa sob a tampa: estica do fundo do bloco até a tampa. */
-export function floorColumnTransform(floor: FloorTile): InstanceTransform {
-  const top = floorTop(floor.height) - FLOOR_CAP_DEPTH;
+/**
+ * Transformação da coluna lisa sob a tampa: estica do fundo do bloco até a tampa. A tampa de
+ * um chão de modelo tem a espessura do próprio modelo (`capDepth`).
+ */
+export function floorColumnTransform(
+  floor: FloorTile,
+  capDepth: number = FLOOR_CAP_DEPTH,
+): InstanceTransform {
+  const top = floorTop(floor.height) - capDepth;
   return {
     x: floor.x + 0.5,
     y: top,
@@ -126,6 +132,54 @@ export function stackedWallSegments(
     segments.push({ x, y: base + fullSegments, z, rotationY, scale: 1, scaleY: remainder });
   }
   return segments;
+}
+
+const SEGMENT_EPSILON = 1e-6;
+
+/**
+ * Junta os segmentos de 1 unidade de cada aresta em pedaços de `span` unidades: o modelo de
+ * parede de um pacote cobre um andar inteiro (com porta ou janela), e empilhar de 1 em 1
+ * repetiria a porta. Só junta segmentos encostados; a sobra vira um último pedaço achatado.
+ */
+export function regroupWallSegments(
+  segments: readonly InstanceTransform[],
+  span: number,
+): InstanceTransform[] {
+  if (span <= 1) return [...segments];
+  const runs = new Map<string, InstanceTransform[]>();
+  for (const segment of segments) {
+    const edge = `${segment.x}:${segment.z}:${segment.rotationY}`;
+    const run = runs.get(edge);
+    if (run) run.push(segment);
+    else runs.set(edge, [segment]);
+  }
+  const regrouped: InstanceTransform[] = [];
+  const emit = ({ x, z, rotationY, scale }: InstanceTransform, base: number, height: number) => {
+    let level = 0;
+    for (; level + span <= height + SEGMENT_EPSILON; level += span) {
+      regrouped.push({ x, y: base + level, z, rotationY, scale });
+    }
+    const remainder = height - level;
+    if (remainder > SEGMENT_EPSILON) {
+      regrouped.push({ x, y: base + level, z, rotationY, scale, scaleY: remainder / span });
+    }
+  };
+  for (const run of runs.values()) {
+    run.sort((a, b) => a.y - b.y);
+    let start = run[0]!;
+    let end = start.y + (start.scaleY ?? 1);
+    for (const segment of run.slice(1)) {
+      if (Math.abs(segment.y - end) < SEGMENT_EPSILON) {
+        end = segment.y + (segment.scaleY ?? 1);
+        continue;
+      }
+      emit(start, start.y, end - start.y);
+      start = segment;
+      end = segment.y + (segment.scaleY ?? 1);
+    }
+    emit(start, start.y, end - start.y);
+  }
+  return regrouped;
 }
 
 /** Aresta da casa mais perto do ponto: é onde a ferramenta de parede encaixa. */

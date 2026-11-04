@@ -51,8 +51,9 @@ type LoadedProps = {
 };
 
 function LoadedModelPieces({ url, fitToCell, transforms, ghost }: LoadedProps) {
-  // Draco e meshopt desligados: eles baixariam decodificadores de outro site.
-  const gltf = useGLTF(url, false, false);
+  // Draco desligado (baixaria o decodificador de outro site). O meshopt das peças dos pacotes
+  // vem embutido no three-stdlib, sem download nem dependência nova.
+  const gltf = useGLTF(url, false, true);
   const layers = useMemo(() => bakeModel(gltf.scene, { fitToCell }), [gltf, fitToCell]);
   return <PieceInstances layers={layers} transforms={transforms} ghost={ghost} />;
 }

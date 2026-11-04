@@ -8,6 +8,7 @@ export { Dialog } from './Dialog/Dialog';
 export { ErrorBoundary } from './ErrorBoundary';
 export { IconButton } from './IconButton/IconButton';
 export { Panel } from './Panel/Panel';
+export { SegmentedControl, type SegmentOption } from './SegmentedControl/SegmentedControl';
 export { Spinner } from './Spinner/Spinner';
 export { EmptyState, ErrorState, LoadingState } from './States/States';
 export { TextAreaField, TextField } from './TextField/TextField';
