@@ -79,6 +79,7 @@ function createFakeServices(initial: { activeMapId: string | null; maps: StoredM
       const found = find(id);
       return { summary: toSummary(found), model: found.model, saved: found.model };
     },
+    refreshMapV2: async (id) => mapsV2.loadMapV2(id),
     saveMapV2: async (input) => {
       saved.push(input);
       find(input.mapId).model = input.current;

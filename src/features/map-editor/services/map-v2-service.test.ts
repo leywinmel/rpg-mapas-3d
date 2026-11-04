@@ -1,8 +1,10 @@
 import { createEmptyDocument, DEFAULT_AMBIENCE } from '@/domain';
 import {
+  chunkKey,
   createEmptyMap,
   DEFAULT_FLOOR_TILE,
   getChunk,
+  isDefaultChunk,
   paintTerrainRect,
   placePiece,
   removePiece,
@@ -44,7 +46,7 @@ function fakeClient(queries: Result[] = [], rpc: Result = { data: SAVED_AT, erro
   const pending = [...queries];
 
   const builder: Record<string, unknown> = {};
-  for (const method of ['select', 'eq', 'order', 'range', 'insert', 'single']) {
+  for (const method of ['select', 'eq', 'gte', 'order', 'range', 'insert', 'single']) {
     builder[method] = (...args: unknown[]) => {
       record(method, ...args);
       return builder;
@@ -119,6 +121,82 @@ function chunkRows(model: MapModel) {
     document: JSON.parse(JSON.stringify(document)) as unknown,
   }));
 }
+
+const BEFORE = '2026-11-04T10:00:00.000001+00:00';
+const AFTER = '2026-11-04T10:05:00.000002+00:00';
+
+function versioned(rows: ReturnType<typeof chunkRows>, time: string) {
+  return rows.map((row) => ({ ...row, updated_at: time }));
+}
+
+describe('refreshMapV2', () => {
+  const v2Row = (model: MapModel) => ({
+    data: { ...SUMMARY_ROW, schema_version: 2, document: model.header },
+    error: null,
+  });
+
+  async function loadedWithVersions(model: MapModel) {
+    const { client } = fakeClient([
+      v2Row(model),
+      { data: versioned(chunkRows(model), BEFORE), error: null },
+    ]);
+    return createSupabaseMapsV2Service(client).loadMapV2(MAP_ID);
+  }
+
+  it('shouldFetchOnlyTheChunksSavedSinceTheLastReadAndClearTheDeletedOnes', async () => {
+    const previous = await loadedWithVersions(editedMap());
+    expect(previous.chunkVersions?.get(chunkKey({ cx: 0, cz: 0 }))).toBe(BEFORE);
+    // O mestre pôs um barril no pedaço (0, 0), pintou o (1, 0) e o (2, 1) voltou a ser liso.
+    const withBarrel = ok(placePiece(previous.model, barrel({ id: 'barril-2', x: 5, z: 5 })));
+    const painted = ok(
+      paintTerrainRect(withBarrel, { from: { x: 40, z: 2 }, to: { x: 41, z: 3 }, tile: 'terra' }),
+    );
+    const changed = chunkRows(painted).filter((row) => row.cz === 0);
+    const { client, calls } = fakeClient([
+      v2Row(painted),
+      { data: changed.map(({ cx, cz }) => ({ cx, cz, updated_at: AFTER })), error: null },
+      { data: versioned(changed, AFTER), error: null },
+    ]);
+    const next = await createSupabaseMapsV2Service(client).refreshMapV2(MAP_ID, previous);
+    expect(calls).toContainEqual({ method: 'gte', args: ['updated_at', AFTER] });
+    expect(getChunk(next.model, { cx: 0, cz: 0 }).pieces.map((piece) => piece.id)).toEqual([
+      'barril-1',
+      'barril-2',
+    ]);
+    expect(terrainAt(next.model, { x: 40, z: 2 })?.tile).toBe('terra');
+    expect(isDefaultChunk(getChunk(next.model, { cx: 2, cz: 1 }))).toBe(true);
+    // O que não mudou é o mesmo objeto: a cena não redesenha.
+    expect(getChunk(next.model, { cx: 1, cz: 1 })).toBe(getChunk(previous.model, { cx: 1, cz: 1 }));
+    expect(next.chunkVersions?.get(chunkKey({ cx: 1, cz: 0 }))).toBe(AFTER);
+    expect(next.chunkVersions?.has(chunkKey({ cx: 2, cz: 1 }))).toBe(false);
+  });
+
+  it('shouldSkipTheDocumentsWhenNoChunkChanged', async () => {
+    const model = editedMap();
+    const previous = await loadedWithVersions(model);
+    const listed = chunkRows(model).map(({ cx, cz }) => ({ cx, cz, updated_at: BEFORE }));
+    const { client, calls } = fakeClient([v2Row(model), { data: listed, error: null }]);
+    const next = await createSupabaseMapsV2Service(client).refreshMapV2(MAP_ID, previous);
+    expect(argsOf(calls, 'from')).toEqual([['maps'], ['map_chunks']]);
+    expect(argsOf(calls, 'gte')).toEqual([]);
+    expect(getChunk(next.model, { cx: 0, cz: 0 })).toBe(getChunk(previous.model, { cx: 0, cz: 0 }));
+  });
+
+  it('shouldLoadEverythingAgainWhenTheSizeChanged', async () => {
+    const previous = await loadedWithVersions(editedMap());
+    const grown = ok(resizeMap(previous.model, { width: 80, depth: 40 }));
+    const { client, calls } = fakeClient([
+      {
+        data: { ...SUMMARY_ROW, width: 80, schema_version: 2, document: grown.header },
+        error: null,
+      },
+      { data: versioned(chunkRows(grown), AFTER), error: null },
+    ]);
+    const next = await createSupabaseMapsV2Service(client).refreshMapV2(MAP_ID, previous);
+    expect(next.model.size.width).toBe(80);
+    expect(argsOf(calls, 'gte')).toEqual([]);
+  });
+});
 
 describe('loadMapV2', () => {
   it('shouldLoadAV2MapFillingTheChunksThatHaveNoRow', async () => {

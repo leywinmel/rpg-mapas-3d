@@ -5,6 +5,7 @@ import { paintTerrainRect, placePiece, placeWall, removePiece, removeWall } from
 import { resizeMap } from './resize';
 import { setTerrainHeight } from './terrain-height';
 import {
+  applyStoredChanges,
   isEmptySavePlan,
   loadMapModel,
   planMapSave,
@@ -224,5 +225,49 @@ describe('planning a save', () => {
     expect(keysOf(plan.upserts.map((chunk) => chunk.coord)).sort()).toEqual(
       keysOf(serializeMapModel(before).chunks.map((chunk) => chunk.coord)).sort(),
     );
+  });
+});
+
+describe('applying only the chunks that changed', () => {
+  it('shouldSwapTheChangedChunksAndKeepEveryOtherOneAsTheSameObject', () => {
+    const shown = editedMap();
+    const edited = unwrap(placePiece(shown, makePiece({ id: 'novo', x: 2, z: 2 })));
+    const changed = storedChunks(edited).filter(
+      (chunk) => chunk.coord.cx === 0 && chunk.coord.cz === 0,
+    );
+    const next = unwrap(applyStoredChanges(shown, { header: edited.header, changed, removed: [] }));
+    expect(changedKeys(shown, next)).toEqual([chunkKey({ cx: 0, cz: 0 })]);
+    expect(piecesOccupyingCell(next, { x: 2, z: 2 }).map((piece) => piece.id)).toEqual(['novo']);
+  });
+
+  it('shouldTurnARemovedRowBackIntoThePlainFloor', () => {
+    const shown = editedMap();
+    const coord = { cx: 2, cz: 1 };
+    const next = unwrap(
+      applyStoredChanges(shown, { header: shown.header, changed: [], removed: [coord] }),
+    );
+    expect(isDefaultChunk(getChunk(next, coord))).toBe(true);
+    expect(changedKeys(shown, next)).toEqual([chunkKey(coord)]);
+    // Pedaço de fora do mapa (de antes de encolher) não entra.
+    const outside = unwrap(
+      applyStoredChanges(shown, { header: shown.header, changed: [], removed: [{ cx: 9, cz: 9 }] }),
+    );
+    expect(outside.chunks.size).toBe(shown.chunks.size);
+  });
+
+  it('shouldRefuseABrokenDocumentOrAPieceIdThatNowAppearsTwice', () => {
+    const shown = editedMap();
+    const broken = [{ coord: { cx: 0, cz: 0 }, document: { version: 2, terrain: 'x' } }];
+    expect(
+      errorsOf(applyStoredChanges(shown, { header: shown.header, changed: broken, removed: [] })),
+    ).not.toEqual([]);
+    // O sobrado (pedaço 2,1) reaparece no pedaço 0,0, mas a linha velha dele não foi apagada.
+    const moved = unwrap(
+      placePiece(createEmptyMap(size), makePiece({ id: 'sobrado', x: 1, z: 1 })),
+    );
+    const twice = storedChunks(moved);
+    expect(
+      errorsOf(applyStoredChanges(shown, { header: shown.header, changed: twice, removed: [] }))[0],
+    ).toMatch(/sobrado/);
   });
 });

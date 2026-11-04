@@ -62,6 +62,7 @@ function PlayerView({
     revision: mapId ? (room.revisions[mapId] ?? 0) : 0,
     attempt,
     settle: reuseUnchangedChunks,
+    incremental: true,
   });
   const model = state.status === 'ready' ? state.map.model : null;
   const assetIds = useMemo(() => uploadedAssetIds(model), [model]);
