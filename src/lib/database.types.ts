@@ -117,14 +117,14 @@ isOneToOne: false
                   ]
                 },"map_fog": {
                   Row: {
-                    "covered": string,"enabled": boolean,"map_id": string,"updated_at": string
+                    "default_covered": boolean,"enabled": boolean,"map_id": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "covered"?: string,"enabled"?: boolean,"map_id": string,"updated_at"?: string
+                    "default_covered"?: boolean,"enabled"?: boolean,"map_id": string,"updated_at"?: string
                   }
                   Update: {
-                    "covered"?: string,"enabled"?: boolean,"map_id"?: string,"updated_at"?: string
+                    "default_covered"?: boolean,"enabled"?: boolean,"map_id"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -133,6 +133,26 @@ isOneToOne: false
 isOneToOne: true
       referencedRelation: "maps"
       referencedColumns: ["id"]
+    }
+                  ]
+                },"map_fog_chunks": {
+                  Row: {
+                    "covered": unknown,"cx": number,"cz": number,"map_id": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "covered": unknown,"cx": number,"cz": number,"map_id": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "covered"?: unknown,"cx"?: number,"cz"?: number,"map_id"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "map_fog_chunks_map_id_fkey"
+      columns: ["map_id"]
+isOneToOne: false
+      referencedRelation: "map_fog"
+      referencedColumns: ["map_id"]
     }
                   ]
                 },"maps": {
@@ -313,6 +333,20 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"token_models": {
+                  Row: {
+                    "code": string,"label": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "code": string,"label": string
+                  }
+                  Update: {
+                    "code"?: string,"label"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"token_templates": {
                   Row: {
                     "color_primary": string | null,"color_secondary": string | null,"created_at": string,"hp_max": number | null,"id": string,"image_path": string | null,"kind": string,"model_key": string | null,"name": string,"owner_id": string,"updated_at": string
@@ -332,6 +366,12 @@ isOneToOne: false
       referencedRelation: "token_kinds"
       referencedColumns: ["code"]
     },{
+      foreignKeyName: "token_templates_model_fk"
+      columns: ["model_key"]
+isOneToOne: false
+      referencedRelation: "token_models"
+      referencedColumns: ["code"]
+    },{
       foreignKeyName: "token_templates_owner_id_fkey"
       columns: ["owner_id"]
 isOneToOne: false
@@ -341,14 +381,14 @@ isOneToOne: false
                   ]
                 },"tokens": {
                   Row: {
-                    "color_primary": string | null,"color_secondary": string | null,"created_at": string,"elevation": number,"hidden": boolean,"hp_current": number | null,"hp_max": number | null,"id": string,"image_path": string | null,"kind": string,"map_id": string,"model_key": string | null,"name": string,"notes": string,"owner_id": string | null,"rotation": number,"scale": number,"updated_at": string,"x": number,"z": number
+                    "color_primary": string | null,"color_secondary": string | null,"created_at": string,"hidden": boolean,"hp_current": number | null,"hp_max": number | null,"id": string,"image_path": string | null,"kind": string,"level": number,"map_id": string,"model_key": string | null,"name": string,"notes": string,"owner_id": string | null,"rotation": number,"size": number,"updated_at": string,"x": number,"z": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "color_primary"?: string | null,"color_secondary"?: string | null,"created_at"?: string,"elevation"?: number,"hidden"?: boolean,"hp_current"?: number | null,"hp_max"?: number | null,"id"?: string,"image_path"?: string | null,"kind": string,"map_id": string,"model_key"?: string | null,"name": string,"notes"?: string,"owner_id"?: string | null,"rotation"?: number,"scale"?: number,"updated_at"?: string,"x": number,"z": number
+                    "color_primary"?: string | null,"color_secondary"?: string | null,"created_at"?: string,"hidden"?: boolean,"hp_current"?: number | null,"hp_max"?: number | null,"id"?: string,"image_path"?: string | null,"kind": string,"level"?: number,"map_id": string,"model_key"?: string | null,"name": string,"notes"?: string,"owner_id"?: string | null,"rotation"?: number,"size"?: number,"updated_at"?: string,"x": number,"z": number
                   }
                   Update: {
-                    "color_primary"?: string | null,"color_secondary"?: string | null,"created_at"?: string,"elevation"?: number,"hidden"?: boolean,"hp_current"?: number | null,"hp_max"?: number | null,"id"?: string,"image_path"?: string | null,"kind"?: string,"map_id"?: string,"model_key"?: string | null,"name"?: string,"notes"?: string,"owner_id"?: string | null,"rotation"?: number,"scale"?: number,"updated_at"?: string,"x"?: number,"z"?: number
+                    "color_primary"?: string | null,"color_secondary"?: string | null,"created_at"?: string,"hidden"?: boolean,"hp_current"?: number | null,"hp_max"?: number | null,"id"?: string,"image_path"?: string | null,"kind"?: string,"level"?: number,"map_id"?: string,"model_key"?: string | null,"name"?: string,"notes"?: string,"owner_id"?: string | null,"rotation"?: number,"size"?: number,"updated_at"?: string,"x"?: number,"z"?: number
                   }
                   Relationships: [
                     {
@@ -363,6 +403,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "maps"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tokens_model_fk"
+      columns: ["model_key"]
+isOneToOne: false
+      referencedRelation: "token_models"
+      referencedColumns: ["code"]
     },{
       foreignKeyName: "tokens_owner_id_fkey"
       columns: ["owner_id"]
@@ -403,10 +449,36 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"fog_cell_covered_near":
+{ Args: { "p_bits": unknown,"p_bounds": (number)[],"p_map": string,"p_x": number,"p_z": number }; Returns: boolean
+                           },
+"fog_chunk_bits":
+{ Args: { "p_cx": number,"p_cz": number,"p_map": string }; Returns: unknown
+                           },
+"fog_chunk_mask":
+{ Args: { "p_depth": number,"p_width": number }; Returns: unknown
+                           },
+"fog_chunk_state":
+{ Args: { "p_cx": number,"p_cz": number,"p_map": string }; Returns: string
+                           },
+"fog_encode_runs":
+{ Args: { "p_values": (number)[] }; Returns: Json
+                           },
+"fog_expand_runs":
+{ Args: { "p_runs": Json }; Returns: (number)[]
+                           },
+"get_fogged_map_chunks":
+{ Args: { "p_map_id": string }; Returns: {
+              "cx": number,"cz": number,"document": Json
+            }[]
+                           },
 "get_room_preview":
 { Args: { "p_slug": string }; Returns: {
               "id": string,"name": string
             }[]
+                           },
+"is_area_covered":
+{ Args: { "p_map": string,"p_size": number,"p_x": number,"p_z": number }; Returns: boolean
                            },
 "is_cell_covered":
 { Args: { "p_map": string,"p_x": number,"p_z": number }; Returns: boolean
@@ -426,8 +498,14 @@ isOneToOne: false
 "note_room_id":
 { Args: { "p_note": string }; Returns: string
                            },
+"redact_fogged_chunk":
+{ Args: { "p_bits": unknown,"p_cx": number,"p_cz": number,"p_document": Json,"p_map": string }; Returns: Json
+                           },
 "room_id_from_topic":
 { Args: { "p_topic": string }; Returns: string
+                           },
+"save_map_fog":
+{ Args: { "p_default_covered": boolean,"p_deletes"?: Json,"p_enabled": boolean,"p_map_id": string,"p_reset"?: boolean,"p_upserts"?: Json }; Returns: string
                            },
 "save_map_v2":
 { Args: { "p_deletes"?: Json,"p_depth"?: number,"p_header": Json,"p_map_id": string,"p_upserts"?: Json,"p_width"?: number }; Returns: string

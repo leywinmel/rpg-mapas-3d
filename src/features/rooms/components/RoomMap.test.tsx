@@ -19,6 +19,18 @@ vi.mock('@/features/map-editor', () => ({
   ),
 }));
 
+vi.mock('@/features/fog', () => ({
+  FogSync: () => null,
+  FogSceneLayer: () => null,
+  useFogStore: (select: (state: { revision: number }) => unknown) => select({ revision: 0 }),
+}));
+
+vi.mock('@/features/tokens', () => ({
+  TokensSync: () => null,
+  TokensSceneLayer: () => null,
+  useTokensStore: { getState: () => ({ setView: () => undefined }) },
+}));
+
 const CONTROLS: RoomControls = {
   membersState: { status: 'loading' },
   reloadMembers: () => undefined,

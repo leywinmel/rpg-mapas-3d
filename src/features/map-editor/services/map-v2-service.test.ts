@@ -61,6 +61,8 @@ function fakeClient(queries: Result[] = [], rpc: Result = { data: SAVED_AT, erro
       return builder;
     },
     rpc: async (name: string, params: unknown) => {
+      // A leitura dos pedaços meio cobertos pela névoa: sem névoa, nenhum.
+      if (name === 'get_fogged_map_chunks') return { data: [], error: null };
       record('rpc', name, params);
       return rpc;
     },

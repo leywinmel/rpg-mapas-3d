@@ -1,4 +1,4 @@
-import { createFog, paintRect } from './fog';
+import { createFogState, fillFog, paintFogRect } from './fog';
 import {
   canCreateRoom,
   canEditTokenField,
@@ -12,8 +12,8 @@ const gm: Viewer = { userId: 'mestre', role: 'gm', isGuest: false };
 const ana: Viewer = { userId: 'ana', role: 'player', isGuest: false };
 const guest: Viewer = { userId: 'bia', role: 'player', isGuest: true };
 
-const anaToken = { ownerId: 'ana', x: 1, z: 1, hidden: false };
-const monster = { ownerId: null, x: 5, z: 5, hidden: false };
+const anaToken = { ownerId: 'ana', x: 1, z: 1, size: 1, hidden: false };
+const monster = { ownerId: null, x: 5, z: 5, size: 1, hidden: false };
 
 describe('permissions', () => {
   it('shouldLetPlayersMoveOnlyTheirOwnTokens', () => {
@@ -30,20 +30,20 @@ describe('permissions', () => {
   });
 
   it('shouldHideTokensUnderFogOrHiddenFromPlayers', () => {
-    const fog = paintRect(
-      createFog({ width: 10, depth: 10 }, false),
-      { x: 5, z: 5 },
-      { x: 5, z: 5 },
+    const fog = paintFogRect(
+      createFogState({ width: 10, depth: 10 }, true),
+      { x: 5, z: 5, width: 1, depth: 1 },
       true,
     );
     expect(canSeeToken(ana, monster, fog)).toBe(false);
     expect(canSeeToken(ana, monster, null)).toBe(true);
     expect(canSeeToken(ana, { ...monster, x: 0, hidden: true }, null)).toBe(false);
     expect(canSeeToken(gm, monster, fog)).toBe(true);
+    expect(canSeeToken(ana, { ...monster, x: 4, z: 4, size: 2 }, fog)).toBe(true);
   });
 
   it('shouldAlwaysShowPlayersTheirOwnToken', () => {
-    const fog = createFog({ width: 10, depth: 10 }, true);
+    const fog = fillFog(createFogState({ width: 10, depth: 10 }, true), true);
     expect(canSeeToken(ana, anaToken, fog)).toBe(true);
   });
 

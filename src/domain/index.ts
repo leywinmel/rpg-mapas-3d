@@ -4,4 +4,5 @@ export * from './fog';
 export * from './dice';
 export * from './map-document';
 export * from './permissions';
+export * from './tokens';
 export * from './initiative';

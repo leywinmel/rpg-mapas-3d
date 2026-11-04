@@ -126,6 +126,33 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
 - **Testar sozinho:** como nos dados, entre em `/sala/demo` com o mestre e a jogadora em duas origens
   diferentes e mande uma anotação olhando a outra aba.
 
+### Tokens
+
+- **Abrir:** o botão de pessoa na barra do topo da sala abre o painel "Tokens", com a lista do mapa
+  na tela. Clicar num token (na lista ou na cena) mostra os detalhes dele.
+- **Mestre:** "Novo" cria um boneco 3D (aventureiro ou criatura, com duas cores) ou uma imagem PNG,
+  JPEG ou WebP (até 5 MB) em pé numa base de papel-cartão. O token nasce no ponto que a câmera olha, com nome,
+  tamanho (1×1 a 4×4 casas), vida opcional e dono: só o mestre (NPC, monstro) ou um jogador. "Esconder
+  dos jogadores" deixa o token só para o mestre (aparece meio apagado para ele).
+- **Jogador:** move só os próprios tokens e mexe na vida e nas notas curtas deles; os outros ele só vê.
+- **Mover:** arraste o token na cena; ele anda casa a casa e os outros veem o movimento ao vivo. Ao
+  soltar, a posição é gravada (quem entra depois já vê o token no lugar novo). Se o banco recusar, o
+  token volta para onde estava.
+
+### Névoa
+
+- **Abrir (só o mestre):** o botão de nuvem na barra do topo abre o painel "Névoa". Ligue "Névoa ligada
+  neste mapa" e use "Cobrir tudo" para começar com o mapa todo escondido.
+- **Pintar:** "Pintar no mapa" troca o clique na cena pelo pincel (de 1×1 a 21×21 casas) ou pelo
+  retângulo, cobrindo ou revelando. Enquanto pinta, a câmera não gira com o botão esquerdo; fechar o
+  painel larga o pincel.
+- **O que cada um vê:** o mestre vê a névoa translúcida por cima de tudo. O jogador vê escuridão, e o
+  banco nem manda o que está embaixo: peças, paredes e tokens cobertos não chegam ao navegador dele
+  (o próprio token do jogador continua visível). A mudança chega ao vivo para a mesa toda.
+- **Antes de usar:** o mapa precisa estar salvo no formato novo (salve no editor uma vez).
+- **Testar sozinho:** como nos dados, entre em `/sala/demo` com o mestre e a jogadora em duas origens
+  diferentes, cubra tudo numa aba e revele um pedaço olhando a outra.
+
 ### Ligar o login com Google
 
 O login com Google vem desligado no ambiente local. Para ligar:
