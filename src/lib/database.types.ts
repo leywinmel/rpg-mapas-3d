@@ -275,14 +275,14 @@ isOneToOne: false
                   ]
                 },"rooms": {
                   Row: {
-                    "active_map_id": string | null,"created_at": string,"id": string,"name": string,"owner_id": string,"slug": string,"updated_at": string
+                    "active_map_id": string | null,"created_at": string,"cutaway_lock": number | null,"id": string,"name": string,"owner_id": string,"slug": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "active_map_id"?: string | null,"created_at"?: string,"id"?: string,"name": string,"owner_id": string,"slug"?: string,"updated_at"?: string
+                    "active_map_id"?: string | null,"created_at"?: string,"cutaway_lock"?: number | null,"id"?: string,"name": string,"owner_id": string,"slug"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "active_map_id"?: string | null,"created_at"?: string,"id"?: string,"name"?: string,"owner_id"?: string,"slug"?: string,"updated_at"?: string
+                    "active_map_id"?: string | null,"created_at"?: string,"cutaway_lock"?: number | null,"id"?: string,"name"?: string,"owner_id"?: string,"slug"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -390,6 +390,7 @@ isOneToOne: false
 { Args: { "p_name": string,"p_nickname": string }; Returns: {
               "active_map_id": string | null,
 "created_at": string,
+"cutaway_lock": number | null,
 "id": string,
 "name": string,
 "owner_id": string,

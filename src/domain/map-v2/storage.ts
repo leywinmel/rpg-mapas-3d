@@ -8,7 +8,7 @@
  */
 import type { GridSize } from '../grid';
 import type { MapResult } from '../map-document';
-import { chunkKey, isValidMapSizeV2, listChunks, type ChunkCoord } from './chunks';
+import { chunkKey, isChunkInside, isValidMapSizeV2, listChunks, type ChunkCoord } from './chunks';
 import { MAX_MAP_SIZE_V2, MAX_REPORTED_ERRORS } from './constants';
 import { chunkLabel, parseChunk, parseMapHeader, serializeChunk } from './document';
 import { changedChunks, createUniformChunk, getChunk, isDefaultChunk } from './model';
@@ -107,6 +107,42 @@ export function loadMapModel(stored: StoredMap): MapResult<MapModel> {
   if (problem) return fail([problem]);
   fillMissingChunks(size, chunks);
   return ok({ size: { width: size.width, depth: size.depth }, header: header.value, chunks });
+}
+
+export type StoredChanges = {
+  /** O cabeçalho atual (ele é pequeno e vem sempre). */
+  readonly header: unknown;
+  /** Pedaços cuja linha mudou desde a última leitura, como vieram do banco. */
+  readonly changed: Iterable<StoredChunk>;
+  /** Pedaços cuja linha sumiu: voltaram a ser o chão liso padrão. */
+  readonly removed: Iterable<ChunkCoord>;
+};
+
+/**
+ * Atualiza um mapa já carregado só com o que mudou no banco (o jogador, a cada gravação do
+ * mestre). Os pedaços de fora do pacote continuam sendo os MESMOS objetos: a cena só redesenha
+ * os que chegaram. Confere os documentos novos como loadMapModel, e o tamanho fica o mesmo
+ * (mudou o tamanho, carregue de novo).
+ */
+export function applyStoredChanges(model: MapModel, changes: StoredChanges): MapResult<MapModel> {
+  const header = parseMapHeader(changes.header);
+  if (!header.ok) return header;
+  const { size } = model;
+  const chunks = new Map(model.chunks);
+  const errors: string[] = [];
+  for (const { coord, document } of changes.changed) {
+    if (errors.length >= MAX_REPORTED_ERRORS) break;
+    const parsed = parseChunk(document, { size, coord });
+    if (!parsed.ok) errors.push(...parsed.errors);
+    else chunks.set(chunkKey(coord), parsed.value);
+  }
+  if (errors.length > 0) return fail(errors);
+  for (const coord of changes.removed) {
+    if (isChunkInside(size, coord)) chunks.set(chunkKey(coord), createUniformChunk(size, coord));
+  }
+  const problem = repeatedPieceError(chunks);
+  if (problem) return fail([problem]);
+  return ok({ size: model.size, header: header.value, chunks });
 }
 
 function serializeStored(chunk: MapChunk): SerializedChunk {

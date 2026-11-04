@@ -1,7 +1,8 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, type ComponentRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, type ComponentRef } from 'react';
 import { OrbitControls } from '@react-three/drei';
 import { MOUSE } from 'three';
 import type { GridSize } from '@/domain';
+import { useCameraFocus, type GroundPoint } from '../camera/camera-focus';
 import { cameraFrame, clampToBoard } from '../layout';
 
 /** "view": botão esquerdo gira a câmera. "edit": o esquerdo fica livre para pintar. */
@@ -15,6 +16,17 @@ const MAX_POLAR = 1.35;
 const DAMPING = 0.12;
 
 type Controls = ComponentRef<typeof OrbitControls>;
+
+/** Leva o alvo até o ponto (preso ao mapa), com a câmera junto: o ângulo e a distância ficam. */
+function moveTargetTo(current: Controls, point: GroundPoint, size: GridSize): void {
+  const clamped = clampToBoard({ x: point.x, y: current.target.y, z: point.z }, size);
+  const dx = clamped.x - current.target.x;
+  const dz = clamped.z - current.target.z;
+  if (dx === 0 && dz === 0) return;
+  current.target.set(clamped.x, clamped.y, clamped.z);
+  current.object.position.x += dx;
+  current.object.position.z += dz;
+}
 
 export function CameraRig({ size, mode }: { size: GridSize; mode: CameraMode }) {
   const controls = useRef<Controls>(null);
@@ -33,19 +45,29 @@ export function CameraRig({ size, mode }: { size: GridSize; mode: CameraMode }) 
       current.object.updateProjectionMatrix();
     }
     current.update();
+    useCameraFocus.getState().reportView(current.target);
   }, [frame]);
+
+  // O minimapa pede para a câmera ir a outro ponto do mapa.
+  useEffect(() => {
+    const unsubscribe = useCameraFocus.subscribe((state, previous) => {
+      const current = controls.current;
+      if (!current || !state.request || state.request === previous.request) return;
+      moveTargetTo(current, state.request, { width, depth });
+      current.update();
+    });
+    return () => {
+      unsubscribe();
+      useCameraFocus.getState().reportView(null);
+    };
+  }, [width, depth]);
 
   const keepOnBoard = useCallback(() => {
     const current = controls.current;
     if (!current) return;
-    const clamped = clampToBoard(current.target, { width, depth });
-    const dx = clamped.x - current.target.x;
-    const dz = clamped.z - current.target.z;
-    if (dx === 0 && dz === 0) return;
     // Move câmera e alvo juntos: só o alvo daria um tranco no ângulo.
-    current.target.set(clamped.x, clamped.y, clamped.z);
-    current.object.position.x += dx;
-    current.object.position.z += dz;
+    moveTargetTo(current, current.target, { width, depth });
+    useCameraFocus.getState().reportView(current.target);
   }, [width, depth]);
 
   return (

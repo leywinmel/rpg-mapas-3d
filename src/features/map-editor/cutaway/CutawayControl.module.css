@@ -1,0 +1,16 @@
+.badge {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: var(--space-1) 0;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.lockedNotice {
+  display: grid;
+  place-items: center;
+  height: var(--control-sm);
+  color: var(--color-warning);
+}

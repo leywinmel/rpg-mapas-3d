@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { MapModel } from '@/domain/map-v2';
 import { reportError } from '@/lib/report-error';
 import { MapError } from '../services/map-errors';
@@ -31,6 +31,11 @@ export type UseMapModelOptions = {
    * trocá-la busca o mapa de novo.
    */
   settle?: (previous: MapModel | null, next: MapModel) => MapModel;
+  /**
+   * A cada `revision`, busca só os pedaços gravados desde a leitura anterior (o jogador), em vez
+   * do mapa inteiro: num mapa de 1000×1000 são até 1024 pedaços a cada pincelada do mestre.
+   */
+  incremental?: boolean;
 };
 
 /**
@@ -38,10 +43,16 @@ export type UseMapModelOptions = {
  * sem piscar a tela: o mapa antigo fica até o novo chegar.
  */
 export function useMapModel(mapId: string | null, options: UseMapModelOptions = {}): MapModelState {
-  const { revision = 0, attempt = 0, settle: adjust } = options;
+  const { revision = 0, attempt = 0, settle: adjust, incremental = false } = options;
   const { mapsV2: service } = useMapEditorServices();
   const [settled, setSettled] = useState<Settled | null>(null);
   const requestKey = `${mapId}:${revision}:${attempt}`;
+  // O mapa na tela, para a leitura incremental partir dele (ref: não deve disparar a busca).
+  const shown = useRef<{ mapId: string; map: LoadedMap } | null>(null);
+  useEffect(() => {
+    if (settled?.result.status === 'ready')
+      shown.current = { mapId: settled.mapId, map: settled.result.map };
+  }, [settled]);
 
   useEffect(() => {
     if (!mapId) return;
@@ -58,8 +69,9 @@ export function useMapModel(mapId: string | null, options: UseMapModelOptions = 
         return { mapId, requestKey, result: { status: 'ready', map: { ...result.map, model } } };
       });
     };
-    service
-      .loadMapV2(mapId)
+    const previous = incremental && shown.current?.mapId === mapId ? shown.current.map : null;
+    const request = previous ? service.refreshMapV2(mapId, previous) : service.loadMapV2(mapId);
+    request
       .then((map) => finish({ status: 'ready', map }))
       .catch((error: unknown) => {
         const invalid = error instanceof MapError && error.kind === 'unreadable';
@@ -75,7 +87,7 @@ export function useMapModel(mapId: string | null, options: UseMapModelOptions = 
     return () => {
       cancelled = true;
     };
-  }, [service, mapId, requestKey, adjust]);
+  }, [service, mapId, requestKey, adjust, incremental]);
 
   if (!mapId) return { status: 'idle' };
   if (!settled || settled.mapId !== mapId) return { status: 'loading' };

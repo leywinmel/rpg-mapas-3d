@@ -9,13 +9,14 @@ import {
   getChunk,
   paintTerrainCell,
   pieceOwnerChunk,
-  pieceRestingLevel,
   piecesOccupyingCell,
   placePiece,
   placeWall,
+  MAX_LEVEL,
   QUARTER_TURNS,
   removePiece,
   removeWall,
+  stackedPieceLevel,
   terrainAt,
   wallOwnerChunk,
   wallRestingLevel,
@@ -27,6 +28,7 @@ import {
   type PieceRef,
 } from '@/domain/map-v2';
 import { distanceToNearestEdge, nearestEdge } from '@/features/scene';
+import { heightOfPiece } from './piece-heights';
 
 /** Até esta distância da aresta, a borracha prefere apagar a parede em vez do chão. */
 export const WALL_ERASE_RANGE = 0.22;
@@ -73,7 +75,7 @@ export type PieceDraft = {
   footprint: Footprint;
 };
 
-/** A peça nova, apoiada no topo da casa mais alta que ela ocupa. */
+/** A peça nova, pousada no topo do que já está embaixo dela (chão, peça ou parede). */
 export function pieceFor(model: MapModel, draft: PieceDraft): MapPiece {
   const placement = {
     x: draft.anchor.x,
@@ -85,7 +87,7 @@ export function pieceFor(model: MapModel, draft: PieceDraft): MapPiece {
     id: draft.id,
     asset: draft.asset,
     ...placement,
-    level: pieceRestingLevel(model, placement),
+    level: stackedPieceLevel(model, { placement, heightOf: heightOfPiece }),
     scale: DEFAULT_PIECE_SCALE,
   };
 }
@@ -108,9 +110,37 @@ export function rotatePiece(model: MapModel, ref: PieceRef): MapResult<MapModel>
   const removed = removePiece(model, piece);
   if (!removed.ok) return removed;
   const turned = { ...piece, rotation: normalizeQuarterTurns(piece.rotation + 1) };
-  const wasResting = piece.level === pieceRestingLevel(model, piece);
-  const level = wasResting ? pieceRestingLevel(removed.value, turned) : piece.level;
+  const wasResting = piece.level === restingLevelOf(removed.value, piece);
+  const level = wasResting ? restingLevelOf(removed.value, turned) : piece.level;
   return placePiece(removed.value, { ...turned, level });
+}
+
+/** Onde a peça pousaria ali, sem contar ela mesma. */
+function restingLevelOf(model: MapModel, piece: MapPiece): number {
+  return stackedPieceLevel(model, {
+    placement: piece,
+    heightOf: heightOfPiece,
+    ignoreId: piece.id,
+  });
+}
+
+/**
+ * Sobe ou desce a peça `delta` degraus, à mão: para o que o empilhamento automático não acerta
+ * (modelo do mestre de altura desconhecida, peça pendurada na parede). Fica entre 0 e o
+ * máximo; o MESMO modelo quando nada muda, para o histórico não ganhar passo vazio.
+ */
+export function shiftPieceLevel(
+  model: MapModel,
+  ref: PieceRef,
+  delta: number,
+): MapResult<MapModel> {
+  const piece = findPiece(model, ref);
+  if (!piece) return { ok: true, value: model };
+  const level = Math.min(Math.max(piece.level + delta, 0), MAX_LEVEL);
+  if (level === piece.level) return { ok: true, value: model };
+  const removed = removePiece(model, piece);
+  if (!removed.ok) return removed;
+  return placePiece(removed.value, { ...piece, level });
 }
 
 export type EraseTarget =

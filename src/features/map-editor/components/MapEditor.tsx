@@ -1,13 +1,19 @@
 import { lazy, Suspense, useEffect, useMemo, useReducer, type ReactNode } from 'react';
 import { ErrorBoundary, LoadingState, notify } from '@/components';
+import { topStory } from '@/domain/map-v2';
 import type { PerfSample } from '@/features/scene/components/PerfMeter';
+import { visibleCutaway, type CutawayBinding } from '../cutaway/cutaway-binding';
+import { CutawayControl } from '../cutaway/CutawayControl';
+import { Minimap } from '../minimap/Minimap';
+import { showsMinimap } from '../minimap/minimap-image';
+import { MapCornerHud } from './MapCornerHud';
 import {
   createEditorState,
   editorReducer,
   type EditorAction,
   type PointerHit,
 } from '../editor/editor-reducer';
-import { isTypingTarget, shortcutCommand, type EditorCommand } from '../editor/shortcuts';
+import { isSceneKey, shortcutCommand, type EditorCommand } from '../editor/shortcuts';
 import { useAutosave } from '../hooks/useAutosave';
 import type { LoadedMap } from '../hooks/useMapModel';
 import { uploadedAssetIds, useModelUrls } from '../hooks/useModelUrls';
@@ -37,22 +43,17 @@ function commandToAction(command: EditorCommand): EditorAction {
       return { type: 'redo' };
     case 'delete':
       return { type: 'delete-selected' };
+    case 'level':
+      return { type: 'shift-level', delta: command.delta };
     case 'escape':
       return { type: 'set-tool', tool: 'select' };
   }
 }
 
-/** Tecla dentro de um diálogo aberto (ex: renomear mapa) não é atalho do editor. */
-function isInsideDialog(target: EventTarget | null): boolean {
-  return (
-    typeof Element !== 'undefined' && target instanceof Element && target.closest('dialog') !== null
-  );
-}
-
 function useEditorShortcuts(dispatch: (action: EditorAction) => void) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (isTypingTarget(event.target) || isInsideDialog(event.target)) return;
+      if (!isSceneKey(event)) return;
       const command = shortcutCommand(event);
       if (!command) return;
       event.preventDefault();
@@ -69,6 +70,8 @@ export type MapEditorProps = {
   mapsPanel: ReactNode;
   /** Nome atual vindo da lista da mesa (o mapa carregado não acompanha renomeações). */
   name?: string;
+  /** Corte de andares do mestre (a trava dos jogadores não o alcança). */
+  cutaway: CutawayBinding;
   onPerfSample?: (sample: PerfSample) => void;
 };
 
@@ -77,7 +80,7 @@ export type MapEditorProps = {
  * atalhos, os painéis e a cena. Monte com key = id do mapa: trocar de mapa
  * recomeça o histórico e grava o que faltava do mapa anterior.
  */
-export function MapEditor({ map, mapsPanel, name, onPerfSample }: MapEditorProps) {
+export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample }: MapEditorProps) {
   const { mapsV2 } = useMapEditorServices();
   const { summary } = map;
   const title = name ?? summary.name;
@@ -103,6 +106,7 @@ export function MapEditor({ map, mapsPanel, name, onPerfSample }: MapEditorProps
     return brushAssetId && !ids.includes(brushAssetId) ? [...ids, brushAssetId] : ids;
   }, [model, brushAssetId]);
   const modelUrls = useModelUrls(assetIds);
+  const top = useMemo(() => topStory(model), [model]);
 
   const actions = useMemo<EditorSceneActions>(
     () => ({
@@ -165,11 +169,16 @@ export function MapEditor({ map, mapsPanel, name, onPerfSample }: MapEditorProps
             modelUrls={modelUrls}
             label={`Mapa 3D: ${title}`}
             editor={{ view, actions }}
+            cutaway={visibleCutaway(cutaway)}
             onPerfSample={onPerfSample}
           />
         </Suspense>
       </ErrorBoundary>
       <EditorSidebar title={title} tabs={tabs} />
+      <MapCornerHud>
+        {showsMinimap(model) && <Minimap model={model} />}
+        <CutawayControl binding={cutaway} top={top} />
+      </MapCornerHud>
       <div className={layout.bottomBar}>
         <EditorToolbar state={state} dispatch={dispatch} />
         <div className={layout.saveSlot}>

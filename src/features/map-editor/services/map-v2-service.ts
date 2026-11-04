@@ -9,7 +9,9 @@
 import { z } from 'zod';
 import type { GridSize } from '@/domain';
 import {
+  applyStoredChanges,
   chunkDocumentSchema,
+  chunkKey,
   chunkGridSize,
   convertMapV1ToV2,
   createDefaultHeader,
@@ -21,6 +23,7 @@ import {
   planMapSave,
   type MapHeader,
   type MapModel,
+  type ChunkCoord,
   type MapSavePlan,
   type StoredChunk,
 } from '@/domain/map-v2';
@@ -53,6 +56,11 @@ export type LoadedMapV2 = {
    * o mapa ainda está no v1: a primeira gravação manda tudo.
    */
   saved: MapModel | null;
+  /**
+   * Hora da última gravação de cada pedaço com linha no banco (chave de chunkKey), para a
+   * próxima leitura buscar só os que mudaram. Ausente no mapa ainda no v1.
+   */
+  chunkVersions?: ReadonlyMap<string, string>;
 };
 
 export type SaveMapV2Input = {
@@ -73,6 +81,12 @@ export type CreateMapV2Input = {
 
 export type MapsV2Service = {
   loadMapV2: (mapId: string) => Promise<LoadedMapV2>;
+  /**
+   * Lê de novo um mapa já carregado buscando só os pedaços gravados depois de `previous` (e
+   * trocando pelo chão liso os que perderam a linha). Se o tamanho ou a versão mudou, ou se
+   * faltam as horas dos pedaços, carrega tudo, como loadMapV2.
+   */
+  refreshMapV2: (mapId: string, previous: LoadedMapV2) => Promise<LoadedMapV2>;
   /**
    * Grava só o que mudou, inclusive o tamanho (resizeMap): o banco apaga sozinho os pedaços que
    * saíram do mapa. Devolve a hora da gravação, ou null quando não havia nada a gravar.
@@ -95,11 +109,57 @@ const createInputSchema = z.object({
   header: mapHeaderSchema.optional(),
 });
 
-const chunkRowSchema = z.object({
+const chunkVersionSchema = z.object({
   cx: z.number().int(),
   cz: z.number().int(),
-  document: z.unknown(),
+  updated_at: z.string().optional(),
 });
+const chunkRowSchema = chunkVersionSchema.extend({ document: z.unknown() });
+
+type ChunkVersionRow = z.infer<typeof chunkVersionSchema>;
+type ChunkRow = z.infer<typeof chunkRowSchema>;
+type ChunkQuery = { columns: string; since?: string };
+
+const VERSION_COLUMNS = 'cx, cz, updated_at';
+const DOCUMENT_COLUMNS = 'cx, cz, updated_at, document';
+
+function toStored(row: ChunkRow): StoredChunk {
+  return { coord: { cx: row.cx, cz: row.cz }, document: row.document };
+}
+
+/** Hora de cada pedaço; se faltar a de algum, nada (a próxima leitura vai inteira). */
+function versionsOf(rows: readonly ChunkVersionRow[]): Map<string, string> | undefined {
+  const versions = new Map<string, string>();
+  for (const row of rows) {
+    if (!row.updated_at) return undefined;
+    versions.set(chunkKey(row), row.updated_at);
+  }
+  return versions;
+}
+
+/**
+ * A hora mais antiga. O banco devolve todas no mesmo formato (UTC, com microssegundos), então
+ * comparar o texto ordena certo sem perder os microssegundos que um Date jogaria fora.
+ */
+function oldest(times: readonly string[]): string | null {
+  let found: string | null = null;
+  for (const time of times) if (found === null || time < found) found = time;
+  return found;
+}
+
+/** O mapa na tela e as horas dos pedaços dele. */
+type Versioned = { model: MapModel; versions: ReadonlyMap<string, string> };
+
+function compareVersions(previous: Versioned, now: ReadonlyMap<string, string>) {
+  const changed: string[] = [];
+  for (const [key, time] of now) if (previous.versions.get(key) !== time) changed.push(key);
+  const removed: ChunkCoord[] = [];
+  for (const key of previous.versions.keys()) {
+    const coord = previous.model.chunks.get(key)?.coord;
+    if (!now.has(key) && coord) removed.push(coord);
+  }
+  return { changed, removed };
+}
 
 /** Dados da resposta, ou o erro já traduzido para uma categoria que a tela explica. */
 function dataOf<R extends { data: unknown; error: unknown }>(result: R): NonNullable<R['data']> {
@@ -136,55 +196,110 @@ function toRpcArgs(mapId: string, plan: MapSavePlan) {
 }
 
 export function createSupabaseMapsV2Service(client: AppSupabaseClient): MapsV2Service {
-  async function loadChunks(mapId: string): Promise<StoredChunk[]> {
-    const chunks: StoredChunk[] = [];
+  /** Linhas de map_chunks do mapa, página a página (ver CHUNK_PAGE_SIZE). */
+  async function chunkPages<T>(mapId: string, query: ChunkQuery, schema: z.ZodType<T>) {
+    const found: T[] = [];
     for (let page = 0; page < MAX_CHUNK_PAGES; page += 1) {
       const from = page * CHUNK_PAGE_SIZE;
+      const base = client.from('map_chunks').select(query.columns).eq('map_id', mapId);
+      const filtered = query.since ? base.gte('updated_at', query.since) : base;
       const rows = dataOf(
-        await client
-          .from('map_chunks')
-          .select('cx, cz, document')
-          .eq('map_id', mapId)
+        await filtered
           .order('cz')
           .order('cx')
           .range(from, from + CHUNK_PAGE_SIZE - 1),
       );
-      for (const row of z.array(chunkRowSchema).parse(rows)) {
-        chunks.push({ coord: { cx: row.cx, cz: row.cz }, document: row.document });
-      }
-      if (rows.length < CHUNK_PAGE_SIZE) return chunks;
+      found.push(...z.array(schema).parse(rows));
+      if (rows.length < CHUNK_PAGE_SIZE) return found;
     }
     throw new MapError('unknown', null, { cause: new Error('Pedaços demais na resposta.') });
   }
 
   async function loadV2(mapId: string, summary: MapSummary, header: unknown) {
     const size = { width: summary.width, depth: summary.depth };
-    const loaded = loadMapModel({ size, header, chunks: await loadChunks(mapId) });
+    const rows = await chunkPages(mapId, { columns: DOCUMENT_COLUMNS }, chunkRowSchema);
+    const loaded = loadMapModel({ size, header, chunks: rows.map(toStored) });
     if (!loaded.ok) throw unreadable(loaded.errors);
-    return { summary, model: loaded.value, saved: loaded.value };
+    const chunkVersions = versionsOf(rows);
+    return {
+      summary,
+      model: loaded.value,
+      saved: loaded.value,
+      ...(chunkVersions && { chunkVersions }),
+    };
+  }
+
+  async function mapRow(mapId: string) {
+    mapIdSchema.parse(mapId);
+    return dataOf(
+      await client
+        .from('maps')
+        .select(`${SUMMARY_COLUMNS}, schema_version, document`)
+        .eq('id', mapId)
+        .single(),
+    );
+  }
+
+  type MapRow = Awaited<ReturnType<typeof mapRow>>;
+
+  async function loadMap(mapId: string, row: MapRow): Promise<LoadedMapV2> {
+    const summary = toSummary(row);
+    if (row.schema_version === MAP_V2_VERSION) return await loadV2(mapId, summary, row.document);
+    if (row.schema_version !== LEGACY_SCHEMA_VERSION) {
+      throw unreadable([`Versão ${row.schema_version} do mapa não é conhecida.`]);
+    }
+    const size = { width: summary.width, depth: summary.depth };
+    const converted = convertMapV1ToV2(row.document, size);
+    if (!converted.ok) throw unreadable(converted.errors);
+    return { summary, model: converted.value, saved: null };
+  }
+
+  /** Só os pedaços gravados depois da leitura anterior; o resto do mapa fica como estava. */
+  async function refreshChunks(mapId: string, row: MapRow, previous: Versioned) {
+    const listed = await chunkPages(mapId, { columns: VERSION_COLUMNS }, chunkVersionSchema);
+    const now = versionsOf(listed);
+    if (!now) return await loadMap(mapId, row);
+    const { changed, removed } = compareVersions(previous, now);
+    const since = oldest(changed.map((key) => now.get(key) ?? ''));
+    const fetched = since
+      ? await chunkPages(mapId, { columns: DOCUMENT_COLUMNS, since }, chunkRowSchema)
+      : [];
+    // Pedaço gravado entre a lista e a busca chega com hora nova: entra também.
+    const fresh = fetched.filter(
+      (chunk) => chunk.updated_at !== previous.versions.get(chunkKey(chunk)),
+    );
+    const applied = applyStoredChanges(previous.model, {
+      header: row.document,
+      changed: fresh.map(toStored),
+      removed,
+    });
+    if (!applied.ok) throw unreadable(applied.errors);
+    const chunkVersions = new Map(now);
+    for (const chunk of fresh)
+      if (chunk.updated_at) chunkVersions.set(chunkKey(chunk), chunk.updated_at);
+    const model = applied.value;
+    return { summary: toSummary(row), model, saved: model, chunkVersions };
   }
 
   return {
+    async refreshMapV2(mapId, previous) {
+      try {
+        const row = await mapRow(mapId);
+        const { chunkVersions } = previous;
+        const sameShape =
+          row.schema_version === MAP_V2_VERSION &&
+          row.width === previous.model.size.width &&
+          row.depth === previous.model.size.depth;
+        if (!sameShape || !chunkVersions) return await loadMap(mapId, row);
+        return await refreshChunks(mapId, row, { model: previous.model, versions: chunkVersions });
+      } catch (error) {
+        throw toMapError(error);
+      }
+    },
+
     async loadMapV2(mapId) {
       try {
-        mapIdSchema.parse(mapId);
-        const row = dataOf(
-          await client
-            .from('maps')
-            .select(`${SUMMARY_COLUMNS}, schema_version, document`)
-            .eq('id', mapId)
-            .single(),
-        );
-        const summary = toSummary(row);
-        if (row.schema_version === MAP_V2_VERSION)
-          return await loadV2(mapId, summary, row.document);
-        if (row.schema_version !== LEGACY_SCHEMA_VERSION) {
-          throw unreadable([`Versão ${row.schema_version} do mapa não é conhecida.`]);
-        }
-        const size = { width: summary.width, depth: summary.depth };
-        const converted = convertMapV1ToV2(row.document, size);
-        if (!converted.ok) throw unreadable(converted.errors);
-        return { summary, model: converted.value, saved: null };
+        return await loadMap(mapId, await mapRow(mapId));
       } catch (error) {
         throw toMapError(error);
       }

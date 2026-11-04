@@ -1,0 +1,9 @@
+.corner {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--map-workspace-corner);
+  z-index: var(--z-hud);
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
