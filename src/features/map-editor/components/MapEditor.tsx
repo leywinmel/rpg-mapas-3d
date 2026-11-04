@@ -1,6 +1,7 @@
-import { lazy, Suspense, useEffect, useMemo, useReducer, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
 import { ErrorBoundary, LoadingState, notify } from '@/components';
 import { topStory } from '@/domain/map-v2';
+import type { StyleFilter } from '@/features/scene';
 import type { PerfSample } from '@/features/scene/components/PerfMeter';
 import { visibleCutaway, type CutawayBinding } from '../cutaway/cutaway-binding';
 import { CutawayControl } from '../cutaway/CutawayControl';
@@ -88,6 +89,7 @@ export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample, table }
   const { summary } = map;
   const title = name ?? summary.name;
   const [state, dispatch] = useReducer(editorReducer, map.model, createEditorState);
+  const [libraryStyle, setLibraryStyle] = useState<StyleFilter>('all');
   const model = state.history.present;
   const autosave = useAutosave({
     mapId: summary.id,
@@ -152,12 +154,27 @@ export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample, table }
     {
       id: 'library',
       label: 'Biblioteca',
-      content: <LibraryPanel brush={state.brush} tool={state.tool} dispatch={dispatch} />,
+      content: (
+        <LibraryPanel
+          brush={state.brush}
+          tool={state.tool}
+          dispatch={dispatch}
+          style={libraryStyle}
+          onStyleChange={setLibraryStyle}
+        />
+      ),
     },
     {
       id: 'prefabs',
       label: 'Casas',
-      content: <PrefabPanel brush={state.brush} tool={state.tool} dispatch={dispatch} />,
+      content: (
+        <PrefabPanel
+          brush={state.brush}
+          tool={state.tool}
+          dispatch={dispatch}
+          libraryStyle={libraryStyle}
+        />
+      ),
     },
     { id: 'maps', label: 'Mapas', content: mapsPanel },
     {
