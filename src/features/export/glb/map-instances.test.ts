@@ -8,7 +8,7 @@ import {
   type MapModel,
 } from '@/domain/map-v2';
 import { makePiece, makeWall, unwrap } from '@/domain/map-v2/test-fixtures';
-import { GLB_BASE_BYTES, GLB_BYTES_PER_INSTANCE } from '../constants';
+import { GLB_BASE_BYTES, GLB_BYTES_PER_FLOOR_CELL, GLB_BYTES_PER_OBJECT } from '../constants';
 import { collectMapInstances, estimateGlbBytes } from './map-instances';
 
 const CHUNK_CELLS = 32 * 32;
@@ -44,10 +44,11 @@ describe('collectMapInstances', () => {
 describe('estimateGlbBytes', () => {
   it('shouldGrowWithTheFloorWallsAndPieces', () => {
     const model = sample();
-    const instances = 2 * CHUNK_CELLS * 2 + 1 + 2;
+    const floors = 2 * CHUNK_CELLS;
+    const objects = 1 + 2;
 
     expect(estimateGlbBytes(chunksOf(model))).toBe(
-      GLB_BASE_BYTES + instances * GLB_BYTES_PER_INSTANCE,
+      GLB_BASE_BYTES + floors * GLB_BYTES_PER_FLOOR_CELL + objects * GLB_BYTES_PER_OBJECT,
     );
     expect(estimateGlbBytes([])).toBe(GLB_BASE_BYTES);
   });

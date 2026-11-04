@@ -18,12 +18,15 @@ export const MAX_FILE_NAME_LENGTH = 60;
 export const CELL_METERS = 1.5;
 
 /**
- * Estimativa do .glb, só para o aviso antes de exportar: cada cópia de peça custa uns bytes de
- * posição, giro, escala e cor (EXT_mesh_gpu_instancing), mais as geometrias, que vão uma vez só.
- * Calibrada medindo mapas densos (ver o PR do RPG-16).
+ * Estimativa do .glb, só para o aviso antes de exportar. Medido com cidades geradas (128 a
+ * 1000 casas de lado): cada casa com chão custa ~92 bytes (coluna e tampa, com posição, giro,
+ * escala e cor no EXT_mesh_gpu_instancing) e cada parede ou peça ~85 bytes (algumas têm várias
+ * camadas). A base cobre as geometrias, que vão uma vez só; modelos enviados muito detalhados
+ * podem passar dela.
  */
-export const GLB_BYTES_PER_INSTANCE = 44;
-export const GLB_BASE_BYTES = 1_500_000;
+export const GLB_BYTES_PER_FLOOR_CELL = 92;
+export const GLB_BYTES_PER_OBJECT = 85;
+export const GLB_BASE_BYTES = 1_000_000;
 
 /** Acima disto o painel avisa que o arquivo vai ser grande e pode demorar. */
 export const GLB_WARNING_BYTES = 30 * 1024 * 1024;

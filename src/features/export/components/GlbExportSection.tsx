@@ -10,7 +10,7 @@ import {
 } from '@/components';
 import { isCellCovered, type Cell, type FogState } from '@/domain';
 import { cropMapChunks } from '@/domain/map-export';
-import { intersectRects, mapRect, type CellRect } from '@/domain/map-v2';
+import { intersectRects, mapRect, type CellRect, type MapChunk } from '@/domain/map-v2';
 import type { TableView } from '@/features/tokens';
 import { logger } from '@/lib/logger';
 import { reportError } from '@/lib/report-error';
@@ -63,7 +63,9 @@ type GlbExportSectionProps = {
 };
 
 type ExportState =
-  { kind: 'idle' } | { kind: 'busy' } | { kind: 'done'; bytes: number; milliseconds: number };
+  | { kind: 'idle' }
+  | { kind: 'busy' }
+  | { kind: 'done'; bytes: number; milliseconds: number; chunks: readonly MapChunk[] };
 
 /** O mapa (ou um pedaço dele) como modelo 3D .glb, para abrir no Blender ou imprimir. */
 export function GlbExportSection({
@@ -121,7 +123,8 @@ export function GlbExportSection({
         estimate,
         milliseconds: Math.round(result.milliseconds),
       });
-      setState({ kind: 'done', bytes: result.bytes, milliseconds: result.milliseconds });
+      // O resultado vale para esta área: mudou a área, ele some.
+      setState({ kind: 'done', bytes: result.bytes, milliseconds: result.milliseconds, chunks });
       if (result.missingModels > 0) {
         notify.warning(
           'Alguns modelos 3D não carregaram.',
@@ -201,7 +204,7 @@ export function GlbExportSection({
       >
         Baixar o modelo 3D (.glb)
       </Button>
-      {state.kind === 'done' && (
+      {state.kind === 'done' && state.chunks === chunks && (
         <p className={styles.result} role="status">
           Arquivo de {formatBytes(state.bytes)} gerado em {formatSeconds(state.milliseconds)}.
         </p>

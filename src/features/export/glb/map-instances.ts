@@ -12,7 +12,7 @@ import {
   wallGroups,
   type ColoredInstances,
 } from '@/features/scene/chunks/chunk-instances';
-import { GLB_BASE_BYTES, GLB_BYTES_PER_INSTANCE } from '../constants';
+import { GLB_BASE_BYTES, GLB_BYTES_PER_FLOOR_CELL, GLB_BYTES_PER_OBJECT } from '../constants';
 
 export type MapInstances = {
   /** Colunas sob as casas com chão: uma camada lisa, colorida pela lateral do piso. */
@@ -58,16 +58,17 @@ export function collectMapInstances(chunks: readonly MapChunk[], cutaway: Cutawa
 }
 
 /**
- * Tamanho aproximado do .glb, para avisar antes de exportar. Conta casas com chão (coluna e
- * tampa), paredes e peças sem montar as instâncias: precisa ser rápido no mapa 1000×1000.
+ * Tamanho aproximado do .glb, para avisar antes de exportar. Conta casas com chão, paredes e
+ * peças sem montar as instâncias: precisa ser rápido no mapa 1000×1000.
  */
 export function estimateGlbBytes(chunks: readonly MapChunk[]): number {
-  let instances = 0;
+  let floors = 0;
+  let objects = 0;
   for (const chunk of chunks) {
     for (const tile of chunk.terrain.tiles) {
-      if (tile !== NO_FLOOR_INDEX) instances += 2;
+      if (tile !== NO_FLOOR_INDEX) floors += 1;
     }
-    instances += chunk.walls.length + chunk.pieces.length;
+    objects += chunk.walls.length + chunk.pieces.length;
   }
-  return GLB_BASE_BYTES + instances * GLB_BYTES_PER_INSTANCE;
+  return GLB_BASE_BYTES + floors * GLB_BYTES_PER_FLOOR_CELL + objects * GLB_BYTES_PER_OBJECT;
 }
