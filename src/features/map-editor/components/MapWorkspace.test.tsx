@@ -85,7 +85,6 @@ function createFakeServices(initial: { activeMapId: string | null; maps: StoredM
       find(input.mapId).model = input.current;
       return '2026-11-03T00:00:00Z';
     },
-    saveChunksV2: async () => '2026-11-03T00:00:00Z',
     createMapV2: async (input) => {
       const created = {
         ...record(`map-${db.maps.length + 1}`, input.name, input.sortOrder),

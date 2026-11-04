@@ -1,8 +1,20 @@
 import { useState } from 'react';
-import { ArrowDown, ArrowUp, Copy, Eye, PencilLine, Plus, Radio, Trash } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  Copy,
+  Eye,
+  FileUp,
+  PencilLine,
+  Plus,
+  Radio,
+  Trash,
+} from 'lucide-react';
 import { Button, EmptyState, IconButton } from '@/components';
+import { ImportMapDialog } from '@/features/export';
 import { cx } from '@/lib/cx';
 import { sortMaps, type MoveDirection, type NewMapInput } from '../editor/map-list';
+import { createMapImportTarget } from '../hooks/map-import-target';
 import type { MapActions } from '../hooks/useMapActions';
 import type { MapSummary } from '../types';
 import { CreateMapDialog, DeleteMapDialog, RenameMapDialog } from './MapFormDialog';
@@ -28,6 +40,7 @@ export function MapListPanel({
   actions,
 }: MapListPanelProps) {
   const [creating, setCreating] = useState(0);
+  const [importing, setImporting] = useState(0);
   const [renaming, setRenaming] = useState<MapSummary | null>(null);
   const [deleting, setDeleting] = useState<MapSummary | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -74,6 +87,14 @@ export function MapListPanel({
     <div className={styles.stack}>
       <Button icon={<Plus size={16} />} block onClick={() => setCreating((value) => value + 1)}>
         Novo mapa
+      </Button>
+      <Button
+        variant="secondary"
+        icon={<FileUp size={16} />}
+        block
+        onClick={() => setImporting((value) => value + 1)}
+      >
+        Importar mapa
       </Button>
       {ordered.length === 0 && (
         <EmptyState
@@ -166,6 +187,13 @@ export function MapListPanel({
           {failure}
         </p>
       )}
+      <ImportMapDialog
+        key={`import-${importing}`}
+        open={importing > 0}
+        onClose={() => setImporting(0)}
+        createMapTarget={() => createMapImportTarget(actions)}
+        onImported={onSelect}
+      />
       <CreateMapDialog
         key={creating}
         open={creating > 0}

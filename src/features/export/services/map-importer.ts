@@ -1,26 +1,31 @@
 /**
- * A importação de um arquivo como mapa NOVO na mesa, em passos: criar o mapa, mandar os pedaços
- * em lotes, gravar a névoa e criar os tokens. Se um passo falha, o trabalho para nele; "tentar de
- * novo" continua dali (os lotes já gravados não vão outra vez). Cancelar apaga o mapa incompleto.
+ * A importação de um arquivo como mapa NOVO na mesa, em passos: o mapa (criado e gravado em
+ * lotes), a névoa e os tokens. Se um passo falha, o trabalho para nele; "tentar de novo"
+ * continua dali (os lotes e tokens já gravados não vão outra vez). Cancelar apaga o mapa
+ * incompleto.
  *
  * As dependências (banco do mapa, da névoa e dos tokens) chegam por interface, para o teste
  * passar versões falsas [#20][#45].
  */
-import type { FogState, GridSize } from '@/domain';
-import { planChunkBatches, type FileToken, type ImportedMap } from '@/domain/map-export';
-import { serializeMapModel, type MapHeader, type SerializedChunk } from '@/domain/map-v2';
+import type { FogState } from '@/domain';
+import type { FileToken, ImportedMap } from '@/domain/map-export';
+import type { MapModel } from '@/domain/map-v2';
 
-/** O lado do mapa: criar, gravar lotes de pedaços e apagar (no cancelamento). */
+/** Lotes gravados do mapa, para a barra de progresso. */
+export type BatchProgress = { readonly done: number; readonly total: number };
+
+/**
+ * O lado do mapa, um por importação: guarda até onde a gravação chegou. `saveMap` cria o mapa
+ * e grava os pedaços em lotes; chamado de novo depois de uma falha, continua do lote que caiu
+ * (sem criar outro mapa). `discard` apaga o mapa, se ele chegou a ser criado.
+ */
 export type MapImportTarget = {
-  createMap: (input: { name: string; size: GridSize; header: MapHeader }) => Promise<{
-    id: string;
-  }>;
-  saveChunks: (input: {
-    mapId: string;
-    header: MapHeader;
-    chunks: readonly SerializedChunk[];
-  }) => Promise<unknown>;
-  deleteMap: (mapId: string) => Promise<void>;
+  saveMap: (input: {
+    name: string;
+    model: MapModel;
+    onProgress: (progress: BatchProgress) => void;
+  }) => Promise<string>;
+  discard: () => Promise<void>;
 };
 
 /** Resultado de criar um token: "fallback" quando a imagem não veio e ele virou boneco. */
@@ -41,16 +46,13 @@ export type TableImportTarget = {
   }) => Promise<TokenImportResult>;
 };
 
-export type ImportStage = 'map' | 'chunks' | 'fog' | 'tokens' | 'done';
+export type ImportStage = 'map' | 'fog' | 'tokens' | 'done';
 
 export type ImportProgress = {
   readonly stage: ImportStage;
-  /** Passos prontos e total, para a barra. */
+  /** Lote ou token da vez (prontos) e quantos há na etapa; 0 de 0 quando ainda não se sabe. */
   readonly done: number;
   readonly total: number;
-  /** Lote ou token da vez, contado a partir de 1, e quantos há na etapa. */
-  readonly item: number;
-  readonly items: number;
 };
 
 export type ImportOutcome = {
@@ -65,44 +67,11 @@ export type ImportChoice = {
   readonly includeFog: boolean;
 };
 
-type Step =
-  | { stage: 'map' }
-  | { stage: 'chunks'; chunks: readonly SerializedChunk[]; item: number; items: number }
-  | { stage: 'fog'; fog: FogState }
-  | { stage: 'tokens'; token: FileToken; item: number; items: number };
-
-function planSteps(
-  chunks: readonly SerializedChunk[],
-  imported: ImportedMap,
-  choice: ImportChoice,
-): Step[] {
-  const batches = planChunkBatches(chunks);
-  const tokens = choice.includeTokens ? imported.tokens : [];
-  return [
-    { stage: 'map' },
-    ...batches.map((chunks, index): Step => ({
-      stage: 'chunks',
-      chunks,
-      item: index + 1,
-      items: batches.length,
-    })),
-    ...(choice.includeFog && imported.fog ? [{ stage: 'fog', fog: imported.fog } as const] : []),
-    ...tokens.map((token, index): Step => ({
-      stage: 'tokens',
-      token,
-      item: index + 1,
-      items: tokens.length,
-    })),
-  ];
-}
-
 export type ImportJob = {
   /** Roda do passo atual até o fim; numa falha, para e lança o erro (o passo fica para depois). */
   run: (onProgress: (progress: ImportProgress) => void) => Promise<ImportOutcome>;
   /** Apaga o mapa incompleto, se ele já foi criado. */
   discard: () => Promise<void>;
-  /** Quantos lotes de pedaços a importação manda (para a tela contar antes). */
-  readonly batchCount: number;
 };
 
 export type ImportJobInput = {
@@ -113,70 +82,58 @@ export type ImportJobInput = {
 };
 
 export function createImportJob({ imported, choice, map, table }: ImportJobInput): ImportJob {
-  const { header, chunks } = serializeMapModel(imported.model);
-  const { size } = imported.model;
-  const steps = planSteps(chunks, imported, choice);
-  let cursor = 0;
+  const fog = choice.includeFog ? imported.fog : null;
+  const tokens = choice.includeTokens ? imported.tokens : [];
   let mapId: string | null = null;
+  let fogSaved = false;
+  let tokensDone = 0;
   let fallbackTokens = 0;
-  /** Id do token criado no passo da vez, se ele caiu depois de criar. */
+  /** Id do token da vez, se ele caiu depois de criar (a nova tentativa só completa). */
   let pendingTokenId: string | null = null;
 
-  const progressOf = (step: Step | undefined): ImportProgress => ({
-    stage: step?.stage ?? 'done',
-    done: cursor,
-    total: steps.length,
-    item: step && 'item' in step ? step.item : 0,
-    items: step && 'items' in step ? step.items : 0,
-  });
-
-  async function runStep(step: Step, id: string | null): Promise<void> {
-    if (step.stage === 'map') {
-      mapId = (await map.createMap({ name: choice.name, size, header })).id;
-      return;
+  async function saveTokens(id: string, onProgress: (progress: ImportProgress) => void) {
+    while (tokensDone < tokens.length) {
+      onProgress({ stage: 'tokens', done: tokensDone, total: tokens.length });
+      const result = await table.createToken({
+        mapId: id,
+        token: tokens[tokensDone]!,
+        previousId: pendingTokenId,
+        onCreated: (tokenId) => {
+          pendingTokenId = tokenId;
+        },
+      });
+      if (result === 'fallback') fallbackTokens += 1;
+      pendingTokenId = null;
+      tokensDone += 1;
     }
-    if (!id) throw new Error('O mapa novo ainda não existe.');
-    if (step.stage === 'chunks') {
-      await map.saveChunks({ mapId: id, header, chunks: step.chunks });
-      return;
-    }
-    if (step.stage === 'fog') {
-      await table.saveFog(id, step.fog);
-      return;
-    }
-    const result = await table.createToken({
-      mapId: id,
-      token: step.token,
-      previousId: pendingTokenId,
-      onCreated: (tokenId) => {
-        pendingTokenId = tokenId;
-      },
-    });
-    if (result === 'fallback') fallbackTokens += 1;
   }
 
   return {
-    batchCount: steps.filter((step) => step.stage === 'chunks').length,
-
     async run(onProgress) {
-      while (cursor < steps.length) {
-        const step = steps[cursor]!;
-        onProgress(progressOf(step));
-        await runStep(step, mapId);
-        pendingTokenId = null;
-        cursor += 1;
+      if (!mapId) {
+        onProgress({ stage: 'map', done: 0, total: 0 });
+        mapId = await map.saveMap({
+          name: choice.name,
+          model: imported.model,
+          onProgress: ({ done, total }) => onProgress({ stage: 'map', done, total }),
+        });
       }
-      onProgress(progressOf(undefined));
-      if (!mapId) throw new Error('A importação terminou sem criar o mapa.');
+      if (fog && !fogSaved) {
+        onProgress({ stage: 'fog', done: 0, total: 1 });
+        await table.saveFog(mapId, fog);
+        fogSaved = true;
+      }
+      await saveTokens(mapId, onProgress);
+      onProgress({ stage: 'done', done: tokens.length, total: tokens.length });
       return { mapId, fallbackTokens };
     },
 
     async discard() {
-      if (!mapId) return;
-      const id = mapId;
-      await map.deleteMap(id);
+      await map.discard();
       mapId = null;
-      cursor = 0;
+      fogSaved = false;
+      tokensDone = 0;
+      pendingTokenId = null;
     },
   };
 }

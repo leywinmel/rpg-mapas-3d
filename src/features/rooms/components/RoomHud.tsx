@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   CloudFog,
   DoorOpen,
+  Download,
   Link2,
   Pencil,
   Trash2,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 import { IconButton, notify, ThemeToggle, Toolbar, ToolbarSeparator } from '@/components';
 import { absoluteAppUrl } from '@/features/auth';
+import { ExportPanel } from '@/features/export';
 import { NotesButton, NotesPanel, NotesProvider } from '@/features/notes';
 import { QualityButton } from '@/features/scene';
 import { FogPanel } from '@/features/fog';
@@ -26,7 +28,7 @@ import styles from './rooms.module.css';
 type OpenDialog = 'rename' | 'delete' | 'leave' | null;
 
 /** O canto superior direito abre um painel por vez: quem está na mesa ou as anotações. */
-type SidePanel = 'presence' | 'notes' | 'tokens' | 'fog' | null;
+type SidePanel = 'presence' | 'notes' | 'tokens' | 'fog' | 'export' | null;
 
 async function copyInviteLink(slug: string): Promise<void> {
   const link = absoluteAppUrl(roomPath(slug));
@@ -106,6 +108,12 @@ export function RoomHud() {
               onClick={() => toggleSidePanel('fog')}
             />
           )}
+          <IconButton
+            label={sidePanel === 'export' ? 'Esconder a exportação' : 'Exportar o mapa'}
+            icon={<Download size={18} />}
+            active={sidePanel === 'export'}
+            onClick={() => toggleSidePanel('export')}
+          />
           <ToolbarSeparator />
           {isGameMaster ? (
             <>
@@ -145,6 +153,11 @@ export function RoomHud() {
       {isGameMaster && sidePanel === 'fog' && (
         <div className={styles.sidePanel}>
           <FogPanel onClose={closeSidePanel} />
+        </div>
+      )}
+      {sidePanel === 'export' && (
+        <div className={styles.sidePanel}>
+          <ExportPanel isGameMaster={isGameMaster} onClose={closeSidePanel} />
         </div>
       )}
       {sidePanel === 'notes' && (
