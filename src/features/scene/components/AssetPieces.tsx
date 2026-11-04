@@ -1,6 +1,7 @@
+import { useMemo } from 'react';
 import { pieceCatalog } from '../catalog/catalog';
 import { getPieceLayers } from '../catalog/piece-geometry';
-import type { InstanceTransform, PropAsset } from '../layout';
+import { regroupWallSegments, type InstanceTransform, type PropAsset } from '../layout';
 import { ModelPieces } from './ModelPieces';
 import { PieceInstances } from './PieceInstances';
 
@@ -19,14 +20,15 @@ type CatalogPiecesProps = {
 /** Peça do catálogo, procedural ou .glb de pacote: o chamador não precisa saber qual. */
 export function CatalogPieces({ pieceKey, transforms, ghost = false }: CatalogPiecesProps) {
   const entry = pieceCatalog.get(pieceKey);
+  const span = entry?.wallSpan;
+  const placed = useMemo(
+    () => (span ? regroupWallSegments(transforms, span) : transforms),
+    [transforms, span],
+  );
   if (entry?.visual.type === 'model') {
+    // O modelo do pacote já vem normalizado (origem e escala em casas): nada de encaixar.
     return (
-      <ModelPieces
-        url={entry.visual.url}
-        transforms={transforms}
-        fitToCell={entry.kind === 'prop'}
-        ghost={ghost}
-      />
+      <ModelPieces url={entry.visual.url} transforms={placed} fitToCell={false} ghost={ghost} />
     );
   }
   return <PieceInstances layers={getPieceLayers(pieceKey)} transforms={transforms} ghost={ghost} />;
