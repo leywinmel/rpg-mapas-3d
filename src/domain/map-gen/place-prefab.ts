@@ -44,7 +44,8 @@ export function prefabRect(blueprint: Blueprint, center: Cell, rotation: number)
   };
 }
 
-function highestGround(model: MapModel, rect: CellRect): number {
+/** Degrau do chão em que a casa pronta vai assentar: a casa mais alta do retângulo. */
+export function prefabBaseLevel(model: MapModel, rect: CellRect): number {
   let highest = 0;
   for (let z = rect.z; z < rect.z + rect.depth; z += 1) {
     for (let x = rect.x; x < rect.x + rect.width; x += 1) {
@@ -78,7 +79,7 @@ export function placePrefab(model: MapModel, placement: PrefabPlacement): MapRes
   }
   const from = { x: rect.x, z: rect.z };
   const to = { x: rect.x + rect.width - 1, z: rect.z + rect.depth - 1 };
-  const base = highestGround(model, rect);
+  const base = prefabBaseLevel(model, rect);
   const painted = paintTerrainRect(model, { from, to, tile: blueprint.floor });
   if (!painted.ok) return painted;
   const leveled = setTerrainHeight(painted.value, { from, to, height: base });

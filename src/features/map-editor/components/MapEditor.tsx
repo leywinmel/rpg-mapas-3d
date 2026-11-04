@@ -24,6 +24,7 @@ import { EditorToolbar } from './EditorToolbar';
 import type { EditorSceneActions, EditorViewState } from './EditorInteraction';
 import { LibraryPanel } from './LibraryPanel';
 import { MapSizeControls } from './MapSizeControls';
+import { PrefabPanel } from './PrefabPanel';
 import { SaveIndicator } from './SaveIndicator';
 import layout from './MapWorkspace.module.css';
 import panel from './SidePanel.module.css';
@@ -142,6 +143,11 @@ export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample }: MapEd
       id: 'library',
       label: 'Biblioteca',
       content: <LibraryPanel brush={state.brush} tool={state.tool} dispatch={dispatch} />,
+    },
+    {
+      id: 'prefabs',
+      label: 'Casas',
+      content: <PrefabPanel brush={state.brush} tool={state.tool} dispatch={dispatch} />,
     },
     { id: 'maps', label: 'Mapas', content: mapsPanel },
     {
