@@ -1,0 +1,25 @@
+/* Planta da casa pronta vista de cima: só traços, cores dos tokens. */
+.plan {
+  width: 100%;
+  height: 3.5rem;
+}
+
+.wall {
+  stroke: var(--color-text-muted);
+  stroke-width: 0.35;
+  stroke-linecap: square;
+}
+
+.door {
+  stroke: var(--color-ember);
+  stroke-width: 0.6;
+}
+
+.floor {
+  fill: var(--color-surface-hover);
+}
+
+.meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}

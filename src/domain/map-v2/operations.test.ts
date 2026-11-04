@@ -6,6 +6,7 @@ import {
   paintTerrainCell,
   paintTerrainRect,
   placePiece,
+  placePieces,
   placeWall,
   removePiece,
   removeWall,
@@ -255,6 +256,42 @@ describe('piece operations', () => {
     expect(unwrap(removePiece(placed, { ...car, x: 70 }))).toBe(placed);
     expect(unwrap(removePiece(placed, { ...car, x: -5 }))).toBe(placed);
     expect(unwrap(removePiece(base, car))).toBe(base);
+  });
+});
+
+describe('placing pieces in batch', () => {
+  it('shouldPlaceEveryPieceInItsAnchorChunkAtOnce', () => {
+    const pieces = [
+      makePiece({ id: 'a', x: 1, z: 1 }),
+      makePiece({ id: 'b', x: 40, z: 1 }),
+      makePiece({ id: 'c', x: 2, z: 2 }),
+    ];
+    const after = unwrap(placePieces(base, pieces));
+    expectOnlyChunksChanged(base, after, ['0,0', '1,0']);
+    expect(getChunk(after, { cx: 0, cz: 0 }).pieces.map((piece) => piece.id)).toEqual(['a', 'c']);
+  });
+
+  it('shouldRefuseTheWholeBatchWhenOneIdRepeats', () => {
+    const placed = unwrap(placePiece(base, makePiece({ id: 'a' })));
+    expect(
+      errorsOf(placePieces(placed, [makePiece({ id: 'b' }), makePiece({ id: 'a' })]))[0],
+    ).toMatch(/"a"/);
+    expect(
+      errorsOf(placePieces(base, [makePiece({ id: 'b' }), makePiece({ id: 'b' })]))[0],
+    ).toMatch(/"b"/);
+  });
+
+  it('shouldRefuseTheWholeBatchWhenOnePieceLeavesTheMap', () => {
+    const result = placePieces(base, [makePiece({ id: 'a' }), makePiece({ id: 'b', x: 100 })]);
+    expect(result.ok).toBe(false);
+  });
+
+  it('shouldRespectTheChunkLimit', () => {
+    const many = Array.from({ length: MAX_PIECES_PER_CHUNK + 1 }, (_, index) =>
+      makePiece({ id: `p${index}`, x: index % 32, z: Math.floor(index / 32) % 32 }),
+    );
+    expect(placePieces(base, many).ok).toBe(false);
+    expect(placePieces(base, []).ok).toBe(true);
   });
 });
 

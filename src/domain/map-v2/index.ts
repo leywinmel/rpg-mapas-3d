@@ -28,6 +28,7 @@ export {
   type PieceAsset,
   type TerrainDocument,
 } from './schema';
+export * from './save-steps';
 export * from './stacking';
 export * from './storage';
 export * from './terrain';

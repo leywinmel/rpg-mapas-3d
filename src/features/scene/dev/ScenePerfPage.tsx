@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Button, Panel } from '@/components';
+import { SETTLEMENT_STYLE_LABELS, SETTLEMENT_STYLES, type SettlementStyle } from '@/domain/map-gen';
 import { cutawayShowingUpToStory, NO_CUTAWAY, type Cutaway, type MapModel } from '@/domain/map-v2';
 import { MapRenderer } from '../components/MapRenderer';
 import type { PerfSample } from '../components/PerfMeter';
@@ -43,9 +44,9 @@ type Build = {
   readyAt: number;
 };
 
-function build(side: number): Build {
+function build(side: number, style: SettlementStyle): Build {
   const startedAt = performance.now();
-  const model = generateCity({ size: { width: side, depth: side }, seed: SEED });
+  const model = generateCity({ size: { width: side, depth: side }, seed: SEED, style });
   const readyAt = performance.now();
   return { model, counts: countCity(model), generateMs: readyAt - startedAt, readyAt };
 }
@@ -112,7 +113,8 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 export default function ScenePerfPage() {
   const [side, setSide] = useState<number>(LARGEST_SIZE);
-  const [current, setCurrent] = useState<Build>(() => build(side));
+  const [style, setStyle] = useState<SettlementStyle>('medieval');
+  const [current, setCurrent] = useState<Build>(() => build(side, style));
   const [mountMs, setMountMs] = useState<number | null>(null);
   const [sample, setSample] = useState<PerfSample | null>(null);
   const [preset, setPreset] = useState<CameraPreset>('overview');
@@ -120,10 +122,11 @@ export default function ScenePerfPage() {
   const level = useQualityLevel();
   const { counts } = current;
 
-  const regenerate = (next: number) => {
+  const regenerate = (next: number, nextStyle: SettlementStyle = style) => {
     setSide(next);
+    setStyle(nextStyle);
     setMountMs(null);
-    setCurrent(build(next));
+    setCurrent(build(next, nextStyle));
   };
 
   return (
@@ -149,6 +152,18 @@ export default function ScenePerfPage() {
               onClick={() => regenerate(option)}
             >
               {option}×{option}
+            </Button>
+          ))}
+        </div>
+        <div className={styles.row}>
+          {SETTLEMENT_STYLES.map((option) => (
+            <Button
+              key={option}
+              size="sm"
+              variant={option === style ? 'secondary' : 'ghost'}
+              onClick={() => regenerate(side, option)}
+            >
+              {SETTLEMENT_STYLE_LABELS[option]}
             </Button>
           ))}
         </div>

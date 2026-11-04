@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { createEmptyMap, DEFAULT_FLOOR_TILE } from '@/domain/map-v2';
+import { createEmptyMap, DEFAULT_FLOOR_TILE, type MapModel } from '@/domain/map-v2';
 import { reportError } from '@/lib/report-error';
 import {
   copyName,
@@ -8,6 +8,12 @@ import {
   type MoveDirection,
   type NewMapInput,
 } from '../editor/map-list';
+import {
+  BatchSaveError,
+  blankBaseline,
+  saveMapV2InBatches,
+  type SaveProgress,
+} from '../services/batch-save';
 import { useMapEditorServices } from '../services/services-context';
 import type { MapSummary } from '../types';
 
@@ -19,6 +25,36 @@ export type RoomMapsSnapshot = {
 };
 
 type Context = Record<string, unknown>;
+
+export type CreateFromModelInput = {
+  name: string;
+  model: MapModel;
+  onProgress?: (progress: SaveProgress) => void;
+};
+
+export type ResumeSaveInput = {
+  mapId: string;
+  /** O que já chegou ao banco (o `saved` do BatchSaveError). */
+  saved: MapModel;
+  current: MapModel;
+  onProgress?: (progress: SaveProgress) => void;
+};
+
+/**
+ * O mapa foi criado, mas a gravação dos pedaços parou no meio. O mapa no banco continua
+ * válido (o que faltou é chão liso) e `saved` diz de onde a nova tentativa recomeça.
+ */
+export class PartialMapError extends Error {
+  readonly summary: MapSummary;
+  readonly saved: MapModel;
+
+  constructor(summary: MapSummary, failure: BatchSaveError) {
+    super('O mapa foi criado, mas nem todos os pedaços foram gravados.', { cause: failure.cause });
+    this.name = 'PartialMapError';
+    this.summary = summary;
+    this.saved = failure.saved;
+  }
+}
 
 /** Registra a falha (sem toast: o diálogo ou a lista mostram a mensagem) e repassa o erro. */
 async function attempt<T>(action: () => Promise<T>, context: Context, userMessage: string) {
@@ -68,6 +104,47 @@ export function useMapActions(snapshot: RoomMapsSnapshot) {
     [mapsV2, roomId, maps, patch],
   );
 
+  const createFromModel = useCallback(
+    ({ name, model, onProgress }: CreateFromModelInput) =>
+      attempt(
+        async () => {
+          const summary = await mapsV2.createMapV2({
+            roomId,
+            name,
+            size: model.size,
+            sortOrder: nextSortOrder(maps),
+            header: model.header,
+          });
+          patch({ maps: [...maps, summary] });
+          try {
+            await saveMapV2InBatches(mapsV2, {
+              mapId: summary.id,
+              saved: blankBaseline(model),
+              current: model,
+              onProgress,
+            });
+          } catch (error) {
+            if (error instanceof BatchSaveError) throw new PartialMapError(summary, error);
+            throw error;
+          }
+          return summary;
+        },
+        { action: 'create-map-from-model' },
+        'Não conseguimos gravar o mapa gerado.',
+      ),
+    [mapsV2, roomId, maps, patch],
+  );
+
+  const resumeSave = useCallback(
+    ({ mapId, saved, current, onProgress }: ResumeSaveInput) =>
+      attempt(
+        () => saveMapV2InBatches(mapsV2, { mapId, saved, current, onProgress }),
+        { action: 'resume-map-save', mapId },
+        'Não conseguimos terminar de gravar o mapa.',
+      ),
+    [mapsV2],
+  );
+
   const rename = useCallback(
     (mapId: string, name: string) =>
       attempt(
@@ -93,8 +170,13 @@ export function useMapActions(snapshot: RoomMapsSnapshot) {
             sortOrder: nextSortOrder(maps),
             header: model.header,
           });
-          await mapsV2.saveMapV2({ mapId: summary.id, saved: null, current: model });
           patch({ maps: [...maps, summary] });
+          // Em lotes: a cópia de uma cidade grande não cabe num pedido só.
+          await saveMapV2InBatches(mapsV2, {
+            mapId: summary.id,
+            saved: blankBaseline(model),
+            current: model,
+          });
           return summary;
         },
         { action: 'duplicate-map', mapId: source.id },
@@ -151,7 +233,7 @@ export function useMapActions(snapshot: RoomMapsSnapshot) {
     [service, maps, patch],
   );
 
-  return { create, rename, duplicate, remove, activate, move };
+  return { create, createFromModel, resumeSave, rename, duplicate, remove, activate, move };
 }
 
 export type MapActions = ReturnType<typeof useMapActions>;
