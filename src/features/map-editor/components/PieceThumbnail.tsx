@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Package } from 'lucide-react';
-import type { PieceIcon } from '@/features/scene';
+import { pieceCatalog, type PieceIcon } from '@/features/scene';
 import { logger } from '@/lib/logger';
 import { PIECE_ICONS } from './piece-icons';
 import styles from './PieceThumbnail.module.css';
@@ -26,8 +26,11 @@ export function PieceThumbnail({ source, icon }: { source: ThumbnailSource; icon
   const pieceKey = source.type === 'piece' ? source.key : null;
   const modelUrl = source.type === 'model' ? source.url : null;
   const sourceKey = pieceKey ? `piece:${pieceKey}` : `model:${modelUrl}`;
+  // Peça de pacote já tem miniatura pronta: vira um <img> comum, sem carregar o three.js.
+  const ready = pieceKey ? pieceCatalog.get(pieceKey)?.thumbnail : undefined;
 
   useEffect(() => {
+    if (ready) return;
     const pending = renderThumbnail(pieceKey, modelUrl);
     if (!pending) return;
     let cancelled = false;
@@ -42,9 +45,23 @@ export function PieceThumbnail({ source, icon }: { source: ThumbnailSource; icon
     return () => {
       cancelled = true;
     };
-  }, [pieceKey, modelUrl, sourceKey]);
+  }, [pieceKey, modelUrl, sourceKey, ready]);
 
   const Icon = icon ? PIECE_ICONS[icon] : Package;
+  if (ready) {
+    return (
+      <span className={styles.thumbnail} aria-hidden="true">
+        <img
+          src={ready}
+          alt=""
+          className={styles.image}
+          draggable={false}
+          loading="lazy"
+          decoding="async"
+        />
+      </span>
+    );
+  }
   return (
     <span className={styles.thumbnail} aria-hidden="true">
       {image?.for === sourceKey ? (

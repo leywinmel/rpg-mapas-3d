@@ -4,6 +4,7 @@ import { LogIn, Plus, UserPlus } from 'lucide-react';
 import { Button, ButtonLink, ErrorState, LoadingState, ThemeToggle } from '@/components';
 import { canCreateRoom } from '@/domain';
 import { AccountMenu, FormNotice, signInPath, useSession, type Session } from '@/features/auth';
+import { CREDITS_PATH } from '@/features/credits';
 import { envResult } from '@/lib/env';
 import { CreateRoomDialog } from '../components/CreateRoomDialog';
 import { JoinByLinkForm } from '../components/JoinByLinkForm';
@@ -120,6 +121,9 @@ export function LobbyPage() {
     <main className={styles.lobby}>
       <Topbar signedIn={session.user !== null} />
       {session.user ? <Dashboard session={session} userId={session.user.id} /> : <Welcome />}
+      <footer className={styles.footer}>
+        <Link to={CREDITS_PATH}>Créditos dos modelos 3D</Link>
+      </footer>
     </main>
   );
 }

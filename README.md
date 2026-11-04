@@ -76,6 +76,10 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   chão. A tecla `R` gira a peça, e o botão de atalhos mostra todas as teclas.
 - **Desfazer e refazer:** `Ctrl+Z` desfaz; `Ctrl+Y` (ou `Ctrl+Shift+Z`) refaz. O mapa se salva
   sozinho, e o canto de baixo avisa quando está "Salvando…" e "Salvo".
+- **Estilos de peças:** a biblioteca tem peças medievais, modernas e futuristas, com filtro por
+  estilo, busca por nome e miniaturas. Os estilos se misturam livremente no mesmo mapa; terra,
+  grama, água, árvore, rocha e caixa aparecem em todos os filtros. Objetos maiores (carros, ruas,
+  telhados) já ocupam o número certo de casas.
 - **Modelos próprios:** em "Meus modelos", o botão "Enviar .glb" aceita modelos 3D `.glb` de até
   10 MB. O modelo é ajustado ao tamanho de uma casa e entra no mapa como as outras peças.
 - **Jogadores:** veem só o mapa que o mestre mostrou, sem as ferramentas de edição. A troca de mapa e
@@ -156,3 +160,16 @@ O `scripts/dev.bat start` cria o `.env.local` sozinho com os valores locais. Na 
 - `VITE_SUPABASE_ANON_KEY`: chave pública do Supabase (a proteção dos dados é feita pelas regras do banco).
 - `SUPABASE_AUTH_GOOGLE_CLIENT_ID`: ID do app do Google para login (só no Supabase local).
 - `SUPABASE_AUTH_GOOGLE_SECRET`: segredo do app do Google para login (só no Supabase local).
+
+## 🎨 Créditos
+
+Os modelos 3D dos estilos são gratuitos e de domínio público (CC0). O crédito é por cortesia e
+também aparece no site, na página `/creditos` (link no rodapé da tela inicial).
+
+- **Quaternius** ([quaternius.com](https://quaternius.com)): Medieval Village MegaKit, Downtown
+  City MegaKit e Modular Sci-Fi MegaKit.
+- **Kenney** ([kenney.nl](https://kenney.nl/assets/car-kit)): Car Kit.
+- **Inter**, de Rasmus Andersson: fonte da interface (SIL Open Font License 1.1).
+
+As peças ficam otimizadas em `public/assets/<estilo>/`: um `.gltf` com `.bin` em meshopt, as texturas
+WebP compartilhadas em `textures/` e as miniaturas da biblioteca em `thumbs/`.

@@ -31,7 +31,7 @@
   justify-items: center;
   align-content: center;
   gap: var(--space-5);
-  min-height: calc(100vh - var(--space-8) - var(--space-6));
+  min-height: calc(100vh - var(--space-8) - var(--space-6) - var(--space-6));
   max-width: 38rem;
   margin: 0 auto;
   padding: var(--space-6);
@@ -88,6 +88,21 @@
 .muted {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
+}
+
+/* Rodapé discreto: o link existe para quem procura, sem disputar atenção com a mesa. */
+.footer {
+  padding: 0 var(--space-6) var(--space-4);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+
+.footer a {
+  color: var(--color-text-muted);
+}
+
+.footer a:hover {
+  color: var(--color-text);
 }
 
 .roomList {

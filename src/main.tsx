@@ -1,7 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@fontsource-variable/inter';
-import '@fontsource/cinzel/700.css';
 import { App } from '@/app/App';
 import { initTheme } from '@/lib/theme';
 import { logger } from '@/lib/logger';

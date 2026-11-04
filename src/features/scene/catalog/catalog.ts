@@ -1,11 +1,11 @@
 /**
- * Catálogo embutido de peças low-poly. As peças atuais são procedurais (geometria
- * simples gerada no navegador, sem baixar nada). Uma peça vinda de um pacote CC0
- * entra como `visual: { type: 'model', url: '/assets/...' }`: o editor só usa
- * chave, tipo, nome e ícone, então não muda.
+ * Catálogo embutido de peças low-poly: as procedurais (geometria simples gerada no
+ * navegador, sem baixar nada) e as dos pacotes CC0 (pack-pieces.ts), que só baixam
+ * o modelo quando o mapa usa a peça. O editor só usa chave, tipo, nome e ícone.
  */
 import { SCENE_PALETTE } from './palette';
-import type { CatalogEntry, PieceKind } from './catalog-types';
+import { PACK_PIECES } from './pack-pieces';
+import type { CatalogEntry, PieceKind, PieceStyle } from './catalog-types';
 
 const PROCEDURAL = { type: 'procedural' } as const;
 
@@ -22,6 +22,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'piso-pedra',
     kind: 'floor',
+    style: 'medieval',
+    category: 'floor',
     label: 'Piso de pedra',
     keywords: ['laje', 'masmorra', 'cripta'],
     icon: 'square',
@@ -32,6 +34,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'piso-madeira',
     kind: 'floor',
+    style: 'medieval',
+    category: 'floor',
     label: 'Piso de madeira',
     keywords: ['tábua', 'assoalho', 'taverna'],
     icon: 'square',
@@ -42,6 +46,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'terra',
     kind: 'floor',
+    style: 'generic',
+    category: 'floor',
     label: 'Terra',
     keywords: ['chão batido', 'caverna', 'estrada'],
     icon: 'mountain',
@@ -52,6 +58,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'grama',
     kind: 'floor',
+    style: 'generic',
+    category: 'floor',
     label: 'Grama',
     keywords: ['campo', 'floresta', 'mato'],
     icon: 'sprout',
@@ -62,6 +70,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'agua',
     kind: 'floor',
+    style: 'generic',
+    category: 'floor',
     label: 'Água',
     keywords: ['rio', 'lago', 'poça', 'esgoto'],
     icon: 'waves',
@@ -73,6 +83,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'parede-pedra',
     kind: 'wall',
+    style: 'medieval',
+    category: 'wall',
     label: 'Parede de pedra',
     keywords: ['muro', 'tijolo', 'masmorra'],
     icon: 'brick',
@@ -82,6 +94,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'parede-madeira',
     kind: 'wall',
+    style: 'medieval',
+    category: 'wall',
     label: 'Parede de madeira',
     keywords: ['tábua', 'cabana', 'paliçada'],
     icon: 'fence',
@@ -91,6 +105,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'grade',
     kind: 'wall',
+    style: 'medieval',
+    category: 'wall',
     label: 'Grade de ferro',
     keywords: ['cela', 'prisão', 'portão', 'barras'],
     icon: 'grid',
@@ -101,6 +117,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'barril',
     kind: 'prop',
+    style: 'medieval',
+    category: 'furniture',
     label: 'Barril',
     keywords: ['tonel', 'vinho'],
     icon: 'cylinder',
@@ -109,6 +127,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'caixa',
     kind: 'prop',
+    style: 'generic',
+    category: 'furniture',
     label: 'Caixa',
     keywords: ['caixote', 'engradado'],
     icon: 'box',
@@ -117,6 +137,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'mesa',
     kind: 'prop',
+    style: 'medieval',
+    category: 'furniture',
     label: 'Mesa',
     keywords: ['taverna', 'banquete'],
     icon: 'table',
@@ -125,6 +147,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'cadeira',
     kind: 'prop',
+    style: 'medieval',
+    category: 'furniture',
     label: 'Cadeira',
     keywords: ['banco', 'assento'],
     icon: 'armchair',
@@ -133,6 +157,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'bau',
     kind: 'prop',
+    style: 'medieval',
+    category: 'furniture',
     label: 'Baú',
     keywords: ['tesouro', 'arca'],
     icon: 'chest',
@@ -141,6 +167,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'pilar',
     kind: 'prop',
+    style: 'medieval',
+    category: 'structure',
     label: 'Pilar',
     keywords: ['coluna'],
     icon: 'pillar',
@@ -149,6 +177,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'estatua',
     kind: 'prop',
+    style: 'medieval',
+    category: 'structure',
     label: 'Estátua',
     keywords: ['ídolo', 'monumento', 'altar'],
     icon: 'statue',
@@ -157,6 +187,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'rocha',
     kind: 'prop',
+    style: 'generic',
+    category: 'nature',
     label: 'Rocha',
     keywords: ['pedra', 'pedregulho'],
     icon: 'rock',
@@ -165,6 +197,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'arvore',
     kind: 'prop',
+    style: 'generic',
+    category: 'nature',
     label: 'Árvore',
     keywords: ['pinheiro', 'floresta'],
     icon: 'tree',
@@ -173,6 +207,8 @@ export const BUILTIN_PIECES: readonly CatalogEntry[] = [
   {
     key: 'tocha',
     kind: 'prop',
+    style: 'medieval',
+    category: 'furniture',
     label: 'Tocha',
     keywords: ['fogo', 'luz', 'chama'],
     icon: 'flame',
@@ -186,10 +222,20 @@ export function normalizeSearchText(text: string): string {
   return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }
 
+/** Filtro de estilo da biblioteca: um estilo de mundo ou todos. */
+export type StyleFilter = Exclude<PieceStyle, 'generic'> | 'all';
+
+/** Peça genérica (terra, árvore...) serve a qualquer estilo, então passa em todo filtro. */
+export function matchesStyle(entry: CatalogEntry, style: StyleFilter): boolean {
+  return style === 'all' || entry.style === 'generic' || entry.style === style;
+}
+
+export type CatalogFilter = { kind?: PieceKind; style?: StyleFilter };
+
 export type PieceCatalog = {
   list: (kind?: PieceKind) => readonly CatalogEntry[];
   get: (key: string) => CatalogEntry | undefined;
-  search: (query: string, kind?: PieceKind) => readonly CatalogEntry[];
+  search: (query: string, filter?: CatalogFilter) => readonly CatalogEntry[];
 };
 
 /** Monta um catálogo a partir de entradas; recusa chave repetida para o mapa não ficar ambíguo. */
@@ -204,19 +250,21 @@ export function createCatalog(entries: readonly CatalogEntry[]): PieceCatalog {
   return {
     list,
     get: (key) => byKey.get(key),
-    search: (query, kind) => {
+    search: (query, { kind, style = 'all' } = {}) => {
       const needle = normalizeSearchText(query);
-      if (!needle) return list(kind);
-      return list(kind).filter((entry) =>
-        [entry.label, entry.key, ...entry.keywords].some((text) =>
-          normalizeSearchText(text).includes(needle),
-        ),
+      return list(kind).filter(
+        (entry) =>
+          matchesStyle(entry, style) &&
+          (!needle ||
+            [entry.label, entry.key, ...entry.keywords].some((text) =>
+              normalizeSearchText(text).includes(needle),
+            )),
       );
     },
   };
 }
 
-export const pieceCatalog = createCatalog(BUILTIN_PIECES);
+export const pieceCatalog = createCatalog([...BUILTIN_PIECES, ...PACK_PIECES]);
 
 /** Chão usado quando o mestre não escolhe outro (mesmo padrão do domínio). */
 export const DEFAULT_FLOOR_TILE = 'piso-pedra';

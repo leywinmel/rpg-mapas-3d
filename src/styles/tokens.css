@@ -108,7 +108,8 @@
 :root {
   /* Tipografia */
   --font-ui: 'Inter Variable', Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
-  --font-display: Cinzel, Georgia, 'Times New Roman', serif;
+  /* Títulos na mesma família da interface: neutra para mapas medievais, modernos e futuristas. */
+  --font-display: var(--font-ui);
   --font-mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;

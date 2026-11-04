@@ -5,7 +5,8 @@ import { LABEL_COLOR, LABEL_OUTLINE_COLOR } from './palette';
 
 const CELL_SIZE = 128;
 const COLUMNS = 8;
-const FONT_FAMILY = `Cinzel, Georgia, 'Times New Roman', serif`;
+// Mesma família da interface (Inter): sóbria em qualquer estilo de mapa e com números bem distintos.
+const FONT_FAMILY = `'Inter Variable', Inter, system-ui, 'Segoe UI', sans-serif`;
 const FONT_WEIGHT = 700;
 /** Quanto da célula o número ocupa no máximo (largura e altura). */
 const TEXT_FILL = 0.74;
