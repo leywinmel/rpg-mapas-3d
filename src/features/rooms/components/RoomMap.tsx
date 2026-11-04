@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import type { Cutaway } from '@/domain/map-v2';
 import { MapWorkspace, type MapView, type TableBinding } from '@/features/map-editor';
 import { FogSceneLayer, FogSync, useFogStore } from '@/features/fog';
+import { InitiativeSceneLayer, InitiativeSync } from '@/features/initiative';
 import { TableToolsSceneLayer, TableToolsSync } from '@/features/table-tools';
 import { TokensSceneLayer, TokensSync, useTokensStore } from '@/features/tokens';
 import { useRoomControls, useRoomSession } from '../hooks/room-session-context';
@@ -21,6 +22,7 @@ const SCENE_LAYER = (
     <TokensSceneLayer />
     <FogSceneLayer />
     <TableToolsSceneLayer />
+    <InitiativeSceneLayer />
   </>
 );
 
@@ -44,6 +46,7 @@ export function RoomMap() {
       <TokensSync />
       <FogSync />
       <TableToolsSync />
+      <InitiativeSync />
       <MapWorkspace
         roomId={roomId}
         isGameMaster={isGameMaster}

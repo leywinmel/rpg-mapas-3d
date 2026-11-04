@@ -9,3 +9,4 @@ export { TokensPanel } from './components/TokensPanel';
 export { TokensSceneLayer } from './components/TokensSceneLayer';
 export { TokensSync } from './components/TokensSync';
 export { useTokensStore, type TableView } from './hooks/tokens-store';
+export { tokenWorldPosition } from './scene/token-scene';

@@ -1,0 +1,209 @@
+/* ----------------------------------------------------------------- Painel */
+/* Mesmo canto e altura dos outros painéis da sala. */
+.panel {
+  width: min(24rem, calc(100vw - var(--space-6)));
+  max-height: calc(100vh - (var(--space-4) + var(--control-lg) + var(--space-3)) * 2);
+}
+
+.stack {
+  display: grid;
+  gap: var(--space-3);
+}
+
+/* ------------------------------------------------------------- Vez e rodada */
+.turnBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--control-sm);
+}
+
+.round {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.turnActions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* ------------------------------------------------------------------ Ordem */
+.list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.row:hover {
+  background: var(--color-surface-hover);
+}
+
+.rowCurrent,
+.rowCurrent:hover {
+  border-color: var(--color-ember);
+  background: var(--color-ember-soft);
+}
+
+.rowHidden .rowName {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.turnMark {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1rem;
+  color: var(--color-ember);
+}
+
+.value,
+.valueInput {
+  flex-shrink: 0;
+  width: 3rem;
+  height: var(--control-sm);
+  border-radius: var(--radius-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-bold);
+  text-align: center;
+}
+
+.value {
+  display: grid;
+  place-items: center;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.valueForm {
+  display: contents;
+}
+
+.valueInput {
+  padding: 0 var(--space-1);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: var(--weight-bold);
+}
+
+.valueInput:hover {
+  border-color: var(--color-border-strong);
+}
+
+.valueInput:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.valueInvalid,
+.valueInvalid:hover {
+  border-color: var(--color-danger);
+}
+
+.rowText {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.rowName {
+  overflow: hidden;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMeta {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.rowTools {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 0;
+}
+
+/* -------------------------------------------------------- Pôr na ordem */
+.addForm {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.addFields {
+  display: grid;
+  grid-template-columns: 1fr 5rem;
+  align-items: start;
+  gap: var(--space-2);
+}
+
+.valueField {
+  min-width: 0;
+}
+
+.selectField {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.fieldLabel {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+}
+
+.select {
+  width: 100%;
+  height: var(--control-md);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.select:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.addActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
