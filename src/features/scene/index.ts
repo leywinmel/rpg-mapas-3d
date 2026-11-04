@@ -8,5 +8,6 @@ export { SCENE_PALETTE } from './catalog/palette';
 export * from './layout';
 export { useCameraFocus, type FocusRequest, type GroundPoint } from './camera/camera-focus';
 export * from './quality/quality';
+export * from './scene-ui';
 export { QualityButton } from './quality/QualityButton';
 export { useQualityLevel, useQualitySettings, useQualityStore } from './quality/quality-store';
