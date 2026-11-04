@@ -25,6 +25,16 @@ vi.mock('@/features/fog', () => ({
   useFogStore: (select: (state: { revision: number }) => unknown) => select({ revision: 0 }),
 }));
 
+vi.mock('@/features/table-tools', () => ({
+  TableToolsSync: () => null,
+  TableToolsSceneLayer: () => null,
+}));
+
+vi.mock('@/features/initiative', () => ({
+  InitiativeSync: () => null,
+  InitiativeSceneLayer: () => null,
+}));
+
 vi.mock('@/features/tokens', () => ({
   TokensSync: () => null,
   TokensSceneLayer: () => null,
