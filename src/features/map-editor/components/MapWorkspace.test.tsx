@@ -200,6 +200,30 @@ describe('MapWorkspace', () => {
     expect(fake.saved).toEqual([]);
   });
 
+  it('shouldGenerateAVillageAndFinishTheSaveAfterAFailure', async () => {
+    const fake = createFakeServices({ activeMapId: null, maps: [] });
+    const { mapsV2 } = fake.services;
+    mapsV2.saveMapV2 = vi.fn(mapsV2.saveMapV2).mockRejectedValueOnce(new Error('rede caiu'));
+    renderWorkspace(fake, true);
+    fireEvent.click(await screen.findByRole('button', { name: 'Novo mapa' }));
+    const dialog = screen.getByRole('dialog', { name: 'Novo mapa' });
+    fireEvent.click(within(dialog).getByRole('radio', { name: 'Vila ou cidade' }));
+    expect(within(dialog).getByLabelText('Nome')).toHaveValue('Vila medieval');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Gerar mapa' }));
+
+    // O mapa já existe no banco, mas sem os pedaços: o erro aparece dentro da janela.
+    expect(await within(dialog).findByRole('alert', {}, SLOW)).toHaveTextContent(
+      'parte dele não foi gravada',
+    );
+    expect(fake.db.maps).toHaveLength(1);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Tentar de novo' }));
+    expect(await screen.findByTestId('viewport', {}, SLOW)).toHaveTextContent(
+      'Mapa 3D: Vila medieval',
+    );
+    const pieces = [...fake.db.maps[0]!.model.chunks.values()].flatMap((chunk) => chunk.pieces);
+    expect(pieces.length).toBeGreaterThan(100);
+  });
+
   it('shouldShowADeleteFailureInsideTheDialog', async () => {
     const fake = createFakeServices({ activeMapId: 'a', maps: [record('a', 'Cripta', 0)] });
     renderWorkspace(fake, true);
