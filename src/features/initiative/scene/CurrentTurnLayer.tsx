@@ -30,7 +30,8 @@ export default function CurrentTurnLayer() {
   const tokenId = useCurrentTokenId();
   const token = useTokensStore((state) => state.tokens.find((item) => item.id === tokenId) ?? null);
   const remote = useTokensStore((state) => (tokenId ? state.remoteDrags[tokenId] : undefined));
-  const cutaway = useTokensStore((state) => state.view?.cutaway ?? null);
+  // Cutaway nulo é "sem corte": quem falta é a vista (sem mapa aberto, sem anel).
+  const view = useTokensStore((state) => state.view);
   const ring = useRef<Mesh>(null);
   const clock = useRef(0);
 
@@ -41,7 +42,7 @@ export default function CurrentTurnLayer() {
     ring.current.scale.setScalar(pulse * (token?.size ?? 1));
   });
 
-  if (!token || cutaway === null || !isPieceVisible(token, cutaway)) return null;
+  if (!token || !view || !isPieceVisible(token, view.cutaway)) return null;
   const at = tokenWorldPosition(remote ?? token, token.size, token.level);
   return (
     <mesh
