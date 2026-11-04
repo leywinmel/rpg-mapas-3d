@@ -9,6 +9,7 @@ import {
   placeWallAt,
   rotatePiece,
   setAmbience,
+  shiftPieceLevel,
   wallFor,
   wallsOnEdge,
 } from './model-ops';
@@ -43,6 +44,30 @@ describe('model-ops', () => {
     // Girar 1 quarto troca largura e profundidade: a peça 2×1 passa a ocupar (1, 1) e (1, 2).
     const turned = pieceFor(model, draft({ rotation: 5, footprint: { width: 2, depth: 1 } }));
     expect(turned).toMatchObject({ rotation: 1, level: 0 });
+  });
+
+  it('shouldStackANewPieceOnTopOfThePieceBelow', () => {
+    const table = { source: 'catalog', key: 'mesa' } as const;
+    const withTable = ok(
+      placePieceAt(hill(createEmptyMap(SIZE), 1, 1, 1), draft({ id: 't', asset: table })),
+    );
+    expect(findPiece(withTable, { id: 't', x: 1, z: 1 })?.level).toBe(1);
+    // A mesa tem 2 degraus: o barril pousa no tampo, no degrau 3.
+    expect(pieceFor(withTable, draft({ id: 'b' })).level).toBe(3);
+    const stacked = ok(placePieceAt(withTable, draft({ id: 'b' })));
+    // Girar o barril de cima não o derruba da mesa.
+    expect(
+      findPiece(ok(rotatePiece(stacked, { id: 'b', x: 1, z: 1 })), { id: 'b', x: 1, z: 1 })?.level,
+    ).toBe(3);
+  });
+
+  it('shouldShiftAPieceLevelByHandWithinTheLimits', () => {
+    const ref = { id: 'p1', x: 1, z: 1 };
+    const placed = ok(placePieceAt(createEmptyMap(SIZE), draft()));
+    const raised = ok(shiftPieceLevel(placed, ref, 3));
+    expect(findPiece(raised, ref)?.level).toBe(3);
+    expect(ok(shiftPieceLevel(placed, ref, -1))).toBe(placed);
+    expect(ok(shiftPieceLevel(placed, { ...ref, id: 'nada' }, 1))).toBe(placed);
   });
 
   it('shouldRestANewWallOnTheHigherSideOfTheEdge', () => {

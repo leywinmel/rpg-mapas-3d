@@ -12,6 +12,11 @@ const ICON_SIZE = 18;
 const BADGE_ICON_SIZE = 14;
 
 /** Teclas do corte: Page Up mostra um andar, Page Down esconde, Home mostra todos. */
+/** Com Shift, Page Up/Down mexe no objeto selecionado do editor, não no corte. */
+function hasModifier(event: KeyboardEvent): boolean {
+  return event.ctrlKey || event.metaKey || event.altKey || event.shiftKey;
+}
+
 const CUTAWAY_KEYS: Readonly<Record<string, CutawayDirection | 'all'>> = {
   PageUp: 'up',
   PageDown: 'down',
@@ -91,7 +96,7 @@ export function CutawayControl({ binding, top }: CutawayControlProps) {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const command = CUTAWAY_KEYS[event.key];
-      if (!command || event.ctrlKey || event.metaKey || event.altKey || !isSceneKey(event)) return;
+      if (!command || hasModifier(event) || !isSceneKey(event)) return;
       event.preventDefault();
       if (command === 'all') setOwn(NO_CUTAWAY);
       else if (command === 'up' && canGoUp) setOwn(up);

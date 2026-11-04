@@ -10,6 +10,7 @@ export type EditorCommand =
   | { type: 'undo' }
   | { type: 'redo' }
   | { type: 'delete' }
+  | { type: 'level'; delta: number }
   | { type: 'escape' };
 
 export type KeyInput = {
@@ -40,6 +41,9 @@ export const TOOL_LABELS: Readonly<Record<Tool, string>> = {
   lower: 'Abaixar chão',
 };
 
+/** Shift + Page Up/Down sobe ou desce o objeto selecionado (sem Shift, é o corte de andares). */
+const LEVEL_KEYS: Readonly<Record<string, number>> = { pageup: 1, pagedown: -1 };
+
 export type ShortcutHelp = { keys: string; description: string };
 
 export const SHORTCUT_HELP: readonly ShortcutHelp[] = [
@@ -49,6 +53,7 @@ export const SHORTCUT_HELP: readonly ShortcutHelp[] = [
   })),
   { keys: 'R', description: 'Girar a peça (ou o objeto selecionado)' },
   { keys: 'Delete', description: 'Apagar o objeto selecionado' },
+  { keys: 'Shift+Page Up / Shift+Page Down', description: 'Subir ou descer o objeto selecionado' },
   { keys: 'Ctrl+Z', description: 'Desfazer' },
   { keys: 'Ctrl+Shift+Z ou Ctrl+Y', description: 'Refazer' },
   { keys: 'Esc', description: 'Voltar para Selecionar' },
@@ -69,6 +74,8 @@ export function shortcutCommand(input: KeyInput): EditorCommand | null {
     return null;
   }
   if (input.altKey || input.ctrlKey || input.metaKey) return null;
+  const level = input.shiftKey ? LEVEL_KEYS[key] : undefined;
+  if (level !== undefined) return { type: 'level', delta: level };
   if (key === 'r') return { type: 'rotate' };
   if (key === 'delete' || key === 'backspace') return { type: 'delete' };
   if (key === 'escape') return { type: 'escape' };

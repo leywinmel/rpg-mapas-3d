@@ -42,6 +42,7 @@ import {
   placePieceAt,
   placeWallAt,
   rotatePiece,
+  shiftPieceLevel,
   setAmbience,
   topPieceAt,
   type PointerHit,
@@ -94,6 +95,8 @@ export type EditorAction =
   | { type: 'stroke-end' }
   | { type: 'select-at'; hit: PointerHit }
   | { type: 'delete-selected' }
+  /** Sobe (positivo) ou desce o objeto selecionado, em degraus. */
+  | { type: 'shift-level'; delta: number }
   | { type: 'undo' }
   | { type: 'redo' }
   | { type: 'set-ambience'; patch: Partial<Ambience>; coalesceKey?: string }
@@ -289,6 +292,12 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         piece: state.selectedPiece,
       });
       return { ...commit(state, removed), selectedPiece: null };
+    }
+    case 'shift-level': {
+      if (state.tool !== 'select' || !state.selectedPiece) return state;
+      const shifted = shiftPieceLevel(state.history.present, state.selectedPiece, action.delta);
+      if (shifted.ok && shifted.value === state.history.present) return state;
+      return commit(state, shifted);
     }
     case 'undo': {
       const settled = finishStroke(state);

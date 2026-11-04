@@ -34,6 +34,20 @@ function walls(state: EditorState) {
 }
 
 describe('editorReducer', () => {
+  it('shouldRaiseTheSelectedPieceAndUndoIt', () => {
+    const placed = run([
+      { type: 'set-tool', tool: 'prop' },
+      { type: 'stroke-start', hit: hitAt(1, 1), newPropId: 'p' },
+      { type: 'stroke-end' },
+      { type: 'set-tool', tool: 'select' },
+      { type: 'select-at', hit: hitAt(1, 1) },
+    ]);
+    const raised = editorReducer(placed, { type: 'shift-level', delta: 2 });
+    expect(pieces(raised)[0]?.level).toBe(2);
+    expect(editorReducer(placed, { type: 'shift-level', delta: -1 })).toBe(placed);
+    expect(pieces(editorReducer(raised, { type: 'undo' }))[0]?.level).toBe(0);
+  });
+
   it('shouldPaintAWholeDragAndUndoItInOneStep', () => {
     const state = run([
       { type: 'choose-floor', key: 'grama' },

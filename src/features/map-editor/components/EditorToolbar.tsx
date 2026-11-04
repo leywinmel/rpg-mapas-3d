@@ -17,12 +17,14 @@ import {
 import { IconButton, Toolbar, ToolbarSeparator } from '@/components';
 import {
   MAX_FOOTPRINT,
+  MAX_LEVEL,
   MAX_WALL_HEIGHT_STEPS,
   MIN_WALL_HEIGHT_STEPS,
   stepsToWorld,
 } from '@/domain/map-v2';
 import type { EditorAction, EditorState, Tool } from '../editor/editor-reducer';
 import { canRedo, canUndo } from '../editor/history';
+import { findPiece } from '../editor/model-ops';
 import { SHORTCUT_HELP, TOOL_KEYS, TOOL_LABELS } from '../editor/shortcuts';
 import styles from './EditorToolbar.module.css';
 
@@ -48,6 +50,8 @@ type Props = { state: EditorState; dispatch: Dispatch<EditorAction> };
 
 const STEPPER_ICON_SIZE = 14;
 const MIN_FOOTPRINT_SIDE = 1;
+/** Base mais baixa de um objeto: o degrau 0. */
+const GROUND_LEVEL = 0;
 const worldUnits = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
 
 type StepperProps = {
@@ -108,6 +112,26 @@ function WallHeight({ state, dispatch }: Props) {
       raiseLabel="Parede mais alta"
       onChange={(height) => dispatch({ type: 'set-wall-height', height })}
     />
+  );
+}
+
+/** Nível da base do objeto selecionado: o ajuste à mão do empilhamento. */
+function SelectedPieceLevel({ state, dispatch }: Props) {
+  const piece = state.selectedPiece && findPiece(state.history.present, state.selectedPiece);
+  if (!piece) return null;
+  return (
+    <Toolbar label="Objeto selecionado">
+      <Stepper
+        label="Nível do objeto"
+        value={piece.level}
+        min={GROUND_LEVEL}
+        max={MAX_LEVEL}
+        display={`Nível ${worldUnits.format(stepsToWorld(piece.level))}`}
+        lowerLabel="Descer o objeto (Shift+Page Down)"
+        raiseLabel="Subir o objeto (Shift+Page Up)"
+        onChange={(level) => dispatch({ type: 'shift-level', delta: level - piece.level })}
+      />
+    </Toolbar>
   );
 }
 
@@ -211,6 +235,7 @@ export function EditorToolbar({ state, dispatch }: Props) {
         <ToolbarSeparator />
         <ShortcutsHelp />
       </Toolbar>
+      {selectedRotates && <SelectedPieceLevel state={state} dispatch={dispatch} />}
       {state.tool === 'wall' && (
         <Toolbar label="Opções da parede">
           <WallHeight state={state} dispatch={dispatch} />

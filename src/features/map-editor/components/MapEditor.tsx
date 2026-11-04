@@ -40,6 +40,8 @@ function commandToAction(command: EditorCommand): EditorAction {
       return { type: 'redo' };
     case 'delete':
       return { type: 'delete-selected' };
+    case 'level':
+      return { type: 'shift-level', delta: command.delta };
     case 'escape':
       return { type: 'set-tool', tool: 'select' };
   }

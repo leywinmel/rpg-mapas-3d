@@ -28,6 +28,16 @@ describe('shortcuts', () => {
     expect(shortcutCommand(key('Escape'))).toEqual({ type: 'escape' });
   });
 
+  it('shouldMoveTheSelectedPieceWithShiftPageUpAndDown', () => {
+    expect(shortcutCommand(key('PageUp', { shiftKey: true }))).toEqual({ type: 'level', delta: 1 });
+    expect(shortcutCommand(key('PageDown', { shiftKey: true }))).toEqual({
+      type: 'level',
+      delta: -1,
+    });
+    // Sem Shift, Page Up/Down é o corte de andares, que tem o próprio tratador.
+    expect(shortcutCommand(key('PageUp'))).toBeNull();
+  });
+
   it('shouldLeaveOtherKeysAndBrowserShortcutsAlone', () => {
     expect(shortcutCommand(key('q'))).toBeNull();
     expect(shortcutCommand(key('c', { ctrlKey: true }))).toBeNull();
