@@ -215,9 +215,21 @@ export function createSupabaseMapsV2Service(client: AppSupabaseClient): MapsV2Se
     throw new MapError('unknown', null, { cause: new Error('Pedaços demais na resposta.') });
   }
 
+  /**
+   * Pedaços meio cobertos pela névoa, já recortados pelo banco (o jogador não recebe o que está
+   * coberto; o mestre recebe lista vazia). Chegam sem hora: com eles, a leitura seguinte é inteira.
+   */
+  async function foggedChunks(mapId: string): Promise<ChunkRow[]> {
+    const rows = dataOf(await client.rpc('get_fogged_map_chunks', { p_map_id: mapId }));
+    return z.array(chunkRowSchema).parse(rows);
+  }
+
   async function loadV2(mapId: string, summary: MapSummary, header: unknown) {
     const size = { width: summary.width, depth: summary.depth };
-    const rows = await chunkPages(mapId, { columns: DOCUMENT_COLUMNS }, chunkRowSchema);
+    const rows = [
+      ...(await chunkPages(mapId, { columns: DOCUMENT_COLUMNS }, chunkRowSchema)),
+      ...(await foggedChunks(mapId)),
+    ];
     const loaded = loadMapModel({ size, header, chunks: rows.map(toStored) });
     if (!loaded.ok) throw unreadable(loaded.errors);
     const chunkVersions = versionsOf(rows);
@@ -291,6 +303,8 @@ export function createSupabaseMapsV2Service(client: AppSupabaseClient): MapsV2Se
           row.width === previous.model.size.width &&
           row.depth === previous.model.size.depth;
         if (!sameShape || !chunkVersions) return await loadMap(mapId, row);
+        // Com pedaço meio coberto pela névoa, a conta das horas não fecha: lê o mapa inteiro.
+        if ((await foggedChunks(mapId)).length > 0) return await loadMap(mapId, row);
         return await refreshChunks(mapId, row, { model: previous.model, versions: chunkVersions });
       } catch (error) {
         throw toMapError(error);

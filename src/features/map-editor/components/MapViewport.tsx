@@ -2,6 +2,7 @@
  * Ponto de entrada da cena 3D do editor e do jogador. É carregado com
  * React.lazy: three.js e companhia ficam num pedaço separado do build.
  */
+import type { ReactNode } from 'react';
 import type { Cutaway, MapModel } from '@/domain/map-v2';
 import type { ModelUrls } from '@/features/scene/components/AssetPieces';
 import type { PerfSample } from '@/features/scene/components/PerfMeter';
@@ -17,9 +18,11 @@ export type MapViewportProps = {
   /** Presente só para o mestre: liga as ferramentas de edição na cena. */
   editor?: EditorSceneBinding;
   onPerfSample?: (sample: PerfSample) => void;
+  /** Camada da mesa (tokens, névoa), por cima do mapa. */
+  layer?: ReactNode;
 };
 
-export default function MapViewport({ editor, ...scene }: MapViewportProps) {
+export default function MapViewport({ editor, layer, ...scene }: MapViewportProps) {
   const editing = editor && editor.view.tool !== 'select';
   return (
     <MapScene {...scene} mode={editing ? 'edit' : 'view'}>
@@ -31,6 +34,7 @@ export default function MapViewport({ editor, ...scene }: MapViewportProps) {
           actions={editor.actions}
         />
       )}
+      {layer}
     </MapScene>
   );
 }

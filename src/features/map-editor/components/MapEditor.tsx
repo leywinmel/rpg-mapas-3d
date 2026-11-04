@@ -4,6 +4,7 @@ import { topStory } from '@/domain/map-v2';
 import type { PerfSample } from '@/features/scene/components/PerfMeter';
 import { visibleCutaway, type CutawayBinding } from '../cutaway/cutaway-binding';
 import { CutawayControl } from '../cutaway/CutawayControl';
+import { useReportView, type TableBinding } from './table-binding';
 import { Minimap } from '../minimap/Minimap';
 import { showsMinimap } from '../minimap/minimap-image';
 import { MapCornerHud } from './MapCornerHud';
@@ -74,6 +75,7 @@ export type MapEditorProps = {
   /** Corte de andares do mestre (a trava dos jogadores não o alcança). */
   cutaway: CutawayBinding;
   onPerfSample?: (sample: PerfSample) => void;
+  table?: TableBinding;
 };
 
 /**
@@ -81,7 +83,7 @@ export type MapEditorProps = {
  * atalhos, os painéis e a cena. Monte com key = id do mapa: trocar de mapa
  * recomeça o histórico e grava o que faltava do mapa anterior.
  */
-export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample }: MapEditorProps) {
+export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample, table }: MapEditorProps) {
   const { mapsV2 } = useMapEditorServices();
   const { summary } = map;
   const title = name ?? summary.name;
@@ -138,6 +140,8 @@ export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample }: MapEd
     ],
   );
 
+  useReportView(table, { mapId: summary.id, model, cutaway: visibleCutaway(cutaway) });
+
   const tabs = [
     {
       id: 'library',
@@ -177,6 +181,7 @@ export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample }: MapEd
             editor={{ view, actions }}
             cutaway={visibleCutaway(cutaway)}
             onPerfSample={onPerfSample}
+            layer={table?.sceneLayer}
           />
         </Suspense>
       </ErrorBoundary>

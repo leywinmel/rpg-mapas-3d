@@ -3,7 +3,7 @@
  * guard_token_update) para a interface esconder o que o usuário não pode fazer;
  * a palavra final é sempre do banco.
  */
-import { isCovered, type FogMask } from './fog';
+import { isAreaCovered, type FogState } from './fog';
 
 export type MemberRole = 'gm' | 'player';
 
@@ -18,6 +18,8 @@ export type TokenAccess = {
   readonly ownerId: string | null;
   readonly x: number;
   readonly z: number;
+  /** Lado do token em casas (1 = 1×1). */
+  readonly size: number;
   readonly hidden: boolean;
 };
 
@@ -25,7 +27,7 @@ export type TokenAccess = {
 export const PLAYER_EDITABLE_TOKEN_FIELDS = [
   'x',
   'z',
-  'elevation',
+  'level',
   'rotation',
   'hp_current',
   'notes',
@@ -46,11 +48,14 @@ export function canEditTokenField(viewer: Viewer, token: TokenAccess, field: str
   return (PLAYER_EDITABLE_TOKEN_FIELDS as readonly string[]).includes(field);
 }
 
-/** O jogador não vê token escondido nem sob a névoa, a não ser o próprio. */
-export function canSeeToken(viewer: Viewer, token: TokenAccess, fog: FogMask | null): boolean {
+/**
+ * O jogador não vê token escondido nem todo sob a névoa, a não ser o próprio; uma casa do token
+ * à vista já basta (a mesma regra do banco, em is_area_covered).
+ */
+export function canSeeToken(viewer: Viewer, token: TokenAccess, fog: FogState | null): boolean {
   if (isGameMaster(viewer) || token.ownerId === viewer.userId) return true;
   if (token.hidden) return false;
-  return !(fog && isCovered(fog, { x: token.x, z: token.z }));
+  return !(fog && isAreaCovered(fog, token, token.size));
 }
 
 /** Criar mesa, salvar mapas e montar biblioteca pede conta; convidado só joga. */
