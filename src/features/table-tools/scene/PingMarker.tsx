@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { CylinderGeometry, RingGeometry, type Mesh, type MeshBasicMaterial } from 'three';
-import type { HeightMap } from '@/features/scene';
+import { SCENE_UI_USER_DATA, type HeightMap } from '@/features/scene';
 import { PING_LIFETIME_MS } from '../constants';
 import type { Ping } from '../hooks/table-tools-store';
 import { cellTop, PING_SHAPE, TABLE_SCENE_COLORS } from './table-tools-scene';
@@ -64,7 +64,7 @@ export function PingMarker({
   });
 
   return (
-    <group position={[at.x, at.y, at.z]}>
+    <group position={[at.x, at.y, at.z]} userData={SCENE_UI_USER_DATA}>
       <mesh ref={ring} geometry={ringGeometry} renderOrder={2} dispose={null}>
         <meshBasicMaterial
           ref={ringMaterial}
@@ -88,7 +88,7 @@ export function PingMarker({
         zIndexRange={LABEL_Z_RANGE}
         pointerEvents="none"
       >
-        <div className={styles.label}>
+        <div className={styles.label} data-scene-label>
           <span className={styles.distance}>{who}</span>
         </div>
       </Html>

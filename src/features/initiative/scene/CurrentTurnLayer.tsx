@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { RingGeometry, type Mesh } from 'three';
 import { isPieceVisible } from '@/domain/map-v2';
+import { SCENE_UI_USER_DATA } from '@/features/scene';
 import { tokenWorldPosition, useTokensStore } from '@/features/tokens';
 import { useCurrentTokenId } from '../hooks/initiative-store';
 
@@ -49,6 +50,7 @@ export default function CurrentTurnLayer() {
       position={[at.x, at.y + TURN_RING.lift, at.z]}
       scale={token.size}
       renderOrder={1}
+      userData={SCENE_UI_USER_DATA}
       dispose={null}
     >
       <meshBasicMaterial color={TURN_COLOR} transparent depthWrite={false} />

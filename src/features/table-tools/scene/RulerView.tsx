@@ -1,6 +1,6 @@
 import { Html, Line } from '@react-three/drei';
 import { measureCells } from '@/domain';
-import type { HeightMap } from '@/features/scene';
+import { SCENE_UI_USER_DATA, type HeightMap } from '@/features/scene';
 import { formatMeasurement } from '../format';
 import type { RulerLine } from '../hooks/table-tools-store';
 import { cellTop, RULER_SHAPE } from './table-tools-scene';
@@ -24,7 +24,7 @@ export function RulerView({ line, heights, color, owner }: RulerViewProps) {
   const to = cellTop(heights, line.to, RULER_SHAPE.lift);
   const text = formatMeasurement(measureCells(line.from, line.to));
   return (
-    <group>
+    <group userData={SCENE_UI_USER_DATA}>
       <Line
         points={[
           [from.x, from.y, from.z],
@@ -52,7 +52,7 @@ export function RulerView({ line, heights, color, owner }: RulerViewProps) {
         zIndexRange={LABEL_Z_RANGE}
         pointerEvents="none"
       >
-        <div className={styles.label}>
+        <div className={styles.label} data-scene-label>
           {owner && <span className={styles.owner}>{owner}</span>}
           <span className={styles.distance}>{text}</span>
         </div>
