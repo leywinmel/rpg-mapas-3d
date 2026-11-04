@@ -15,6 +15,7 @@ import { absoluteAppUrl } from '@/features/auth';
 import { NotesButton, NotesPanel, NotesProvider } from '@/features/notes';
 import { QualityButton } from '@/features/scene';
 import { FogPanel } from '@/features/fog';
+import { TableToolButtons, ToolHint } from '@/features/table-tools';
 import { TokensPanel, useTokensStore } from '@/features/tokens';
 import { reportError } from '@/lib/report-error';
 import { useRoomSession } from '../hooks/room-session-context';
@@ -92,6 +93,7 @@ export function RoomHud() {
             onClick={() => toggleSidePanel('presence')}
           />
           <NotesButton active={sidePanel === 'notes'} onClick={() => toggleSidePanel('notes')} />
+          <TableToolButtons />
           <IconButton
             label={sidePanel === 'tokens' ? 'Esconder os tokens' : 'Mostrar os tokens'}
             icon={<UserRound size={18} />}
@@ -132,6 +134,7 @@ export function RoomHud() {
           <ThemeToggle />
         </Toolbar>
       </div>
+      <ToolHint />
       {sidePanel === 'presence' && (
         <div className={styles.sidePanel}>
           <PresencePanel onClose={closeSidePanel} />

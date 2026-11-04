@@ -1,0 +1,30 @@
+/* Faixa da ferramenta ligada: centrada logo abaixo da barra da sala, sem tapar o mapa. */
+.hint {
+  position: absolute;
+  top: calc(var(--space-4) + var(--control-lg) + var(--space-3));
+  left: 50%;
+  z-index: var(--z-hud);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: calc(100vw - 2 * var(--space-4));
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-glass);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  transform: translateX(-50%);
+  backdrop-filter: blur(8px);
+}
+
+.hintText {
+  white-space: nowrap;
+}
+
+.readout {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}

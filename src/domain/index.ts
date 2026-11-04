@@ -6,3 +6,4 @@ export * from './map-document';
 export * from './permissions';
 export * from './tokens';
 export * from './initiative';
+export * from './measure';
