@@ -1,12 +1,13 @@
 /**
  * Altura de cada objeto, em degraus (meia unidade), para empilhar: onde a peça de cima pousa.
  *
- * O catálogo da cena não guarda altura, e os modelos podem mudar de pacote; por isso a tabela
- * casa pelo TIPO do objeto (o ícone do catálogo: barril, mesa, baú...), não pelo arquivo do
- * modelo. Os valores vêm das peças desenhadas hoje, arredondados para o degrau mais perto.
- * Modelo enviado pelo mestre não tem tipo: vale a altura padrão, e o mestre ajusta o nível à mão.
+ * Vale a altura que o catálogo já conhece (as peças de pacote trazem a do próprio modelo),
+ * arredondada para o degrau mais perto. As peças desenhadas no código não têm altura no
+ * catálogo: para elas a tabela casa pelo TIPO do objeto (o ícone: barril, mesa, baú...), com
+ * valores medidos no desenho. Modelo enviado pelo mestre não tem nenhum dos dois: vale a
+ * altura padrão, e o mestre ajusta o nível à mão.
  */
-import type { MapPiece, PieceAsset } from '@/domain/map-v2';
+import { worldToSteps, type MapPiece, type PieceAsset } from '@/domain/map-v2';
 import { pieceCatalog, type PieceIcon } from '@/features/scene';
 
 /** Objeto sem tipo conhecido (ex: .glb do mestre): uma unidade, a altura de uma mesa. */
@@ -27,8 +28,9 @@ const HEIGHT_BY_TYPE: Partial<Readonly<Record<PieceIcon, number>>> = {
 
 export function pieceHeightSteps(asset: PieceAsset): number {
   if (asset.source !== 'catalog') return DEFAULT_PIECE_HEIGHT_STEPS;
-  const icon = pieceCatalog.get(asset.key)?.icon;
-  return (icon && HEIGHT_BY_TYPE[icon]) ?? DEFAULT_PIECE_HEIGHT_STEPS;
+  const entry = pieceCatalog.get(asset.key);
+  if (entry?.height !== undefined) return worldToSteps(entry.height);
+  return (entry && HEIGHT_BY_TYPE[entry.icon]) ?? DEFAULT_PIECE_HEIGHT_STEPS;
 }
 
 /** A forma que o domínio pede para empilhar. */
