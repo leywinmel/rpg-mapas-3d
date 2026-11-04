@@ -1,0 +1,126 @@
+/* Mesmo canto e altura dos painéis de tokens, névoa e anotações. */
+.panel {
+  width: min(21rem, calc(100vw - var(--space-6)));
+  max-height: calc(100vh - (var(--space-4) + var(--control-lg) + var(--space-3)) * 2);
+}
+
+.stack {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.check input {
+  accent-color: var(--color-ember);
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-subtle);
+}
+
+.rectGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.areaLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.warning {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+
+.result {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-success);
+}
+
+.error {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+}
+
+/* Diálogo de importação */
+
+.fileInput {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.fileInput::file-selector-button {
+  margin-right: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.summary {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+}
+
+.summary dt {
+  color: var(--color-text-subtle);
+  font-size: var(--text-xs);
+}
+
+.summary dd {
+  margin: 0 0 var(--space-1);
+  overflow-wrap: anywhere;
+}
+
+.progress {
+  width: 100%;
+  height: var(--space-2);
+  accent-color: var(--color-ember);
+}
+
+.errorList {
+  margin: 0;
+  padding-left: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+}

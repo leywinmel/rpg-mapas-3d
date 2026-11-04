@@ -1,8 +1,17 @@
 import { useEffect, type ReactNode } from 'react';
 import type { Cutaway, MapModel } from '@/domain/map-v2';
+import type { ModelUrls } from '@/features/scene/components/AssetPieces';
 
 /** O mapa na tela de quem olha: o do editor do mestre ou o da mesa, para o jogador. */
-export type MapView = { mapId: string; model: MapModel; cutaway: Cutaway };
+export type MapView = {
+  mapId: string;
+  model: MapModel;
+  cutaway: Cutaway;
+  /** Nome do mapa (dá nome aos arquivos exportados). */
+  name?: string;
+  /** Endereços dos modelos .glb enviados (o .glb exportado inclui esses modelos). */
+  modelUrls?: ModelUrls;
+};
 
 /**
  * O que a mesa (tokens, névoa) pendura na área do mapa sem o editor conhecer essas features:
@@ -22,9 +31,11 @@ export function useReportView(table: TableBinding | undefined, view: MapView | n
   const mapId = view?.mapId;
   const model = view?.model;
   const cutaway = view?.cutaway ?? null;
+  const name = view?.name;
+  const modelUrls = view?.modelUrls;
   useEffect(() => {
     if (!onView) return;
-    onView(mapId && model ? { mapId, model, cutaway } : null);
-  }, [onView, mapId, model, cutaway]);
+    onView(mapId && model ? { mapId, model, cutaway, name, modelUrls } : null);
+  }, [onView, mapId, model, cutaway, name, modelUrls]);
   useEffect(() => () => onView?.(null), [onView]);
 }

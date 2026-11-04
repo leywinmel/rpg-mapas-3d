@@ -403,6 +403,39 @@ describe('saveMapV2', () => {
   });
 });
 
+describe('saveChunksV2', () => {
+  it('shouldSendOnlyTheBatchWithoutSizeOrDeletes', async () => {
+    const model = editedMap();
+    const { header, chunks } = serializeMapModel(model);
+    const { client, calls } = fakeClient();
+    const savedAt = await createSupabaseMapsV2Service(client).saveChunksV2({
+      mapId: MAP_ID,
+      header,
+      chunks: chunks.slice(0, 1),
+    });
+    expect(savedAt).toBe(SAVED_AT);
+    const params = rpcParams(calls);
+    expect(params.p_upserts.map(({ cx, cz }) => [cx, cz])).toEqual([[0, 0]]);
+    expect(params.p_deletes).toEqual([]);
+    expect(params).not.toHaveProperty('p_width');
+  });
+
+  it('shouldNotSendAnInvalidChunk', async () => {
+    const { header, chunks } = serializeMapModel(editedMap());
+    const first = chunks[0]!;
+    const broken = { ...first, document: { ...first.document, version: 9 } };
+    const { client, calls } = fakeClient();
+    await expect(
+      createSupabaseMapsV2Service(client).saveChunksV2({
+        mapId: MAP_ID,
+        header,
+        chunks: [broken as typeof first],
+      }),
+    ).rejects.toMatchObject({ kind: 'invalid' });
+    expect(argsOf(calls, 'rpc')).toEqual([]);
+  });
+});
+
 describe('createMapV2', () => {
   it('shouldCreateOnlyTheHeaderAtVersionTwo', async () => {
     const { client, calls } = fakeClient([{ data: SUMMARY_ROW, error: null }]);

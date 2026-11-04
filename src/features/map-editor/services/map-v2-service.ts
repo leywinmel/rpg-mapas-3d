@@ -25,6 +25,7 @@ import {
   type MapModel,
   type ChunkCoord,
   type MapSavePlan,
+  type SerializedChunk,
   type StoredChunk,
 } from '@/domain/map-v2';
 import type { AppSupabaseClient } from '@/lib/supabase';
@@ -70,6 +71,13 @@ export type SaveMapV2Input = {
   current: MapModel;
 };
 
+export type SaveChunksV2Input = {
+  mapId: string;
+  header: MapHeader;
+  /** Um lote de pedaços para gravar (inserir ou trocar); os outros pedaços ficam como estão. */
+  chunks: readonly SerializedChunk[];
+};
+
 export type CreateMapV2Input = {
   roomId: string;
   name: string;
@@ -92,6 +100,11 @@ export type MapsV2Service = {
    * saíram do mapa. Devolve a hora da gravação, ou null quando não havia nada a gravar.
    */
   saveMapV2: (input: SaveMapV2Input) => Promise<string | null>;
+  /**
+   * Grava um lote de pedaços sem olhar o resto do mapa (a importação de um mapa grande manda
+   * vários lotes, um depois do outro). Devolve a hora da gravação.
+   */
+  saveChunksV2: (input: SaveChunksV2Input) => Promise<string>;
   /** Cria o mapa só com o cabeçalho: todo pedaço começa como o chão liso padrão. */
   createMapV2: (input: CreateMapV2Input) => Promise<MapSummary>;
 };
@@ -324,6 +337,24 @@ export function createSupabaseMapsV2Service(client: AppSupabaseClient): MapsV2Se
         mapIdSchema.parse(mapId);
         const plan = planMapSave(saved, current);
         if (isEmptySavePlan(plan)) return null;
+        validatePlan(plan);
+        return dataOf(await client.rpc('save_map_v2', toRpcArgs(mapId, plan)));
+      } catch (error) {
+        throw toMapError(error);
+      }
+    },
+
+    async saveChunksV2({ mapId, header, chunks }) {
+      try {
+        const plan: MapSavePlan = {
+          header,
+          headerChanged: true,
+          size: { width: 0, depth: 0 },
+          sizeChanged: false,
+          upserts: [...chunks],
+          deletes: [],
+        };
+        mapIdSchema.parse(mapId);
         validatePlan(plan);
         return dataOf(await client.rpc('save_map_v2', toRpcArgs(mapId, plan)));
       } catch (error) {

@@ -73,8 +73,11 @@ function PlayerView({
   const assetIds = useMemo(() => uploadedAssetIds(model), [model]);
   const modelUrls = useModelUrls(assetIds);
   const top = useMemo(() => (model ? topStory(model) : 0), [model]);
-  useReportView(table, mapId && model ? { mapId, model, cutaway: visibleCutaway(cutaway) } : null);
   const name = room.maps.find((map) => map.id === mapId)?.name;
+  useReportView(
+    table,
+    mapId && model ? { mapId, model, cutaway: visibleCutaway(cutaway), name, modelUrls } : null,
+  );
 
   if (!mapId) {
     return (
