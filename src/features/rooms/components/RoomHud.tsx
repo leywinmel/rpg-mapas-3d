@@ -1,10 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, DoorOpen, Link2, Pencil, Trash2, UserRound, Users } from 'lucide-react';
+import {
+  ArrowLeft,
+  CloudFog,
+  DoorOpen,
+  Link2,
+  Pencil,
+  Trash2,
+  UserRound,
+  Users,
+} from 'lucide-react';
 import { IconButton, notify, ThemeToggle, Toolbar, ToolbarSeparator } from '@/components';
 import { absoluteAppUrl } from '@/features/auth';
 import { NotesButton, NotesPanel, NotesProvider } from '@/features/notes';
 import { QualityButton } from '@/features/scene';
+import { FogPanel } from '@/features/fog';
 import { TokensPanel, useTokensStore } from '@/features/tokens';
 import { reportError } from '@/lib/report-error';
 import { useRoomSession } from '../hooks/room-session-context';
@@ -16,7 +26,7 @@ import styles from './rooms.module.css';
 type OpenDialog = 'rename' | 'delete' | 'leave' | null;
 
 /** O canto superior direito abre um painel por vez: quem está na mesa ou as anotações. */
-type SidePanel = 'presence' | 'notes' | 'tokens' | null;
+type SidePanel = 'presence' | 'notes' | 'tokens' | 'fog' | null;
 
 async function copyInviteLink(slug: string): Promise<void> {
   const link = absoluteAppUrl(roomPath(slug));
@@ -88,6 +98,14 @@ export function RoomHud() {
             active={sidePanel === 'tokens'}
             onClick={() => toggleSidePanel('tokens')}
           />
+          {isGameMaster && (
+            <IconButton
+              label={sidePanel === 'fog' ? 'Esconder a névoa' : 'Mostrar a névoa'}
+              icon={<CloudFog size={18} />}
+              active={sidePanel === 'fog'}
+              onClick={() => toggleSidePanel('fog')}
+            />
+          )}
           <ToolbarSeparator />
           {isGameMaster ? (
             <>
@@ -122,6 +140,11 @@ export function RoomHud() {
       {sidePanel === 'tokens' && (
         <div className={styles.sidePanel}>
           <TokensPanel onClose={closeSidePanel} />
+        </div>
+      )}
+      {isGameMaster && sidePanel === 'fog' && (
+        <div className={styles.sidePanel}>
+          <FogPanel onClose={closeSidePanel} />
         </div>
       )}
       {sidePanel === 'notes' && (

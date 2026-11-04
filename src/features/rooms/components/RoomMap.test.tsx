@@ -19,6 +19,12 @@ vi.mock('@/features/map-editor', () => ({
   ),
 }));
 
+vi.mock('@/features/fog', () => ({
+  FogSync: () => null,
+  FogSceneLayer: () => null,
+  useFogStore: (select: (state: { revision: number }) => unknown) => select({ revision: 0 }),
+}));
+
 vi.mock('@/features/tokens', () => ({
   TokensSync: () => null,
   TokensSceneLayer: () => null,
