@@ -14,6 +14,17 @@ export const MAX_TOKEN_HP = 100000;
 export const MAX_TOKEN_NAME_LENGTH = 60;
 export const MAX_TOKEN_NOTES_LENGTH = 2000;
 
+/** Imagem em pé numa base ou boneco 3D com cores (coluna tokens.kind). */
+export const TOKEN_KINDS = ['image', 'model'] as const;
+export type TokenKind = (typeof TOKEN_KINDS)[number];
+
+/**
+ * Caminho da imagem no bucket token-images: "<id do dono>/<id do arquivo>.<extensão>". É a
+ * mesma regra do check tokens_image_path_format do banco.
+ */
+export const TOKEN_IMAGE_PATH_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(png|jpg|webp)$/;
+
 export type TokenPlacement = { readonly x: number; readonly z: number; readonly size: number };
 
 export function isValidTokenSize(size: number): boolean {
