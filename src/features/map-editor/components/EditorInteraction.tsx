@@ -8,9 +8,12 @@ import {
   MeshBasicMaterial,
 } from 'three';
 import { isInside } from '@/domain';
+import { findPrefab, prefabBaseLevel, prefabBlueprint, prefabRect } from '@/domain/map-gen';
 import {
+  isRectInside,
   pieceRect,
   stepsToWorld,
+  STORY_HEIGHT_STEPS,
   terrainAt,
   type Footprint,
   type MapModel,
@@ -126,6 +129,30 @@ function FootprintMarker({ piece, model }: { piece: MapPiece; model: MapModel })
   );
 }
 
+/**
+ * Caixa do volume da casa pronta (planta × andares), no chão em que ela vai assentar; vermelha
+ * quando ela sai do mapa. Só o contorno: desenhar centenas de peças fantasmas a cada casa que
+ * o cursor passa pesaria à toa.
+ */
+function PrefabGhost({ hit, view, model }: Pick<GhostProps, 'hit' | 'view' | 'model'>) {
+  const prefab = findPrefab(view.brush.prefab);
+  if (!prefab) return null;
+  const blueprint = prefabBlueprint(prefab);
+  const rect = prefabRect(blueprint, hit.cell, view.rotation);
+  const fits = isRectInside(model.size, rect);
+  const base = fits ? stepsToWorld(prefabBaseLevel(model, rect)) : 0;
+  const height = stepsToWorld(blueprint.stories * STORY_HEIGHT_STEPS);
+  return (
+    <lineSegments
+      geometry={markerGeometry}
+      material={fits ? markerMaterials.normal : markerMaterials.danger}
+      position={[rect.x + rect.width / 2, base + height / 2, rect.z + rect.depth / 2]}
+      scale={[rect.width, height / MARKER_HEIGHT, rect.depth]}
+      dispose={null}
+    />
+  );
+}
+
 type GhostProps = {
   hit: CellHit;
   view: EditorViewState;
@@ -186,6 +213,8 @@ function Ghost({ hit, view, model, heights, modelUrls }: GhostProps) {
     }
     case 'prop':
       return <PieceGhost hit={hit} view={view} model={model} modelUrls={modelUrls} />;
+    case 'prefab':
+      return <PrefabGhost hit={hit} view={view} model={model} />;
     case 'erase':
       return eraseTargetAt(model, hit) ? <CellMarker hit={hit} heights={heights} danger /> : null;
     case 'raise':

@@ -10,6 +10,8 @@ import { canUndo } from './history';
 import {
   createEditorState,
   editorReducer,
+  isPaintingTool,
+  prefabPieceId,
   type EditorAction,
   type EditorState,
   type PointerHit,
@@ -229,5 +231,51 @@ describe('editorReducer', () => {
     const state = run([{ type: 'stroke-start', hit: hitAt(0, 0), newPropId: 'x' }]);
     expect(canUndo(state.history)).toBe(false);
     expect(state.stroke).toBeNull();
+  });
+});
+
+describe('casas prontas no editor', () => {
+  const CLICK_ID = '123e4567-e89b-12d3-a456-426614174000';
+  const big = () => createEmptyMap({ width: 30, depth: 30 });
+  const all = (state: EditorState) =>
+    [...state.history.present.chunks.values()].flatMap((chunk) => [...chunk.pieces]);
+
+  it('shouldPlaceTheWholeHouseWithOneClickAndUndoItInOneStep', () => {
+    const placed = run(
+      [
+        { type: 'choose-prefab', id: 'medieval-sobrado' },
+        { type: 'stroke-start', hit: hitAt(15, 15), newPropId: CLICK_ID },
+        { type: 'stroke-move', hit: hitAt(18, 18) },
+        { type: 'stroke-end' },
+      ],
+      big(),
+    );
+    expect(placed.tool).toBe('prefab');
+    const ids = all(placed).map((piece) => piece.id);
+    expect(ids.length).toBeGreaterThan(10);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(
+      ids.every((id) => id.length <= 40 && id.startsWith(prefabPieceId(CLICK_ID, 0).slice(0, 32))),
+    ).toBe(true);
+    const undone = editorReducer(placed, { type: 'undo' });
+    expect(all(undone)).toEqual([]);
+    expect(canUndo(undone.history)).toBe(false);
+  });
+
+  it('shouldWarnWhenTheHouseDoesNotFit', () => {
+    const state = run(
+      [
+        { type: 'choose-prefab', id: 'medieval-taverna' },
+        { type: 'stroke-start', hit: hitAt(0, 0), newPropId: CLICK_ID },
+        { type: 'stroke-end' },
+      ],
+      big(),
+    );
+    expect(state.notice?.message).toMatch(/não cabe/);
+    expect(all(state)).toEqual([]);
+  });
+
+  it('shouldNotPaintHousesWhileDragging', () => {
+    expect(isPaintingTool('prefab')).toBe(false);
   });
 });

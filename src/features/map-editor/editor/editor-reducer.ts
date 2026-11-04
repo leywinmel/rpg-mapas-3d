@@ -7,6 +7,7 @@
  * histórico guarda referências baratas e o autosave grava só o que mudou.
  */
 import type { Ambience, Cell, GridSize, MapResult } from '@/domain';
+import { findPrefab, placePrefab, PREFABS, prefabBlueprint } from '@/domain/map-gen';
 import {
   MAX_FOOTPRINT,
   MAX_WALL_HEIGHT_STEPS,
@@ -52,9 +53,10 @@ import { cellsOnLine } from './stroke-line';
 
 export type { PointerHit } from './model-ops';
 
-export type Tool = 'select' | 'floor' | 'wall' | 'prop' | 'erase' | 'raise' | 'lower';
+export type Tool = 'select' | 'floor' | 'wall' | 'prop' | 'prefab' | 'erase' | 'raise' | 'lower';
 
-export type Brush = { floor: string; wall: string; prop: PropAsset };
+/** `prefab` é o id da casa pronta escolhida (ver `PREFABS`). */
+export type Brush = { floor: string; wall: string; prop: PropAsset; prefab: string };
 
 /**
  * Forma do pincel de chão e de altura: "free" pinta as casas por onde o cursor passa;
@@ -105,6 +107,7 @@ export type EditorAction =
   | { type: 'choose-floor'; key: string }
   | { type: 'choose-wall'; key: string }
   | { type: 'choose-prop'; asset: PropAsset }
+  | { type: 'choose-prefab'; id: string }
   | { type: 'rotate' }
   | { type: 'set-wall-height'; height: number }
   | { type: 'set-shape'; shape: BrushShape }
@@ -125,6 +128,7 @@ export const DEFAULT_BRUSH: Brush = {
   floor: DEFAULT_FLOOR_TILE,
   wall: DEFAULT_WALL_STYLE,
   prop: { source: 'catalog', key: DEFAULT_PROP_KEY },
+  prefab: PREFABS[0]!.id,
 };
 /** Uma parede nova tem um andar de altura: a mesma parede de 2 unidades do v1. */
 export const DEFAULT_WALL_HEIGHT = STORY_HEIGHT_STEPS;
@@ -147,9 +151,32 @@ export function createEditorState(model: MapModel): EditorState {
   };
 }
 
-/** Ferramentas que pintam arrastando (o objeto é um por clique). */
+/** Ferramentas que pintam arrastando (o objeto e a casa pronta são um por clique). */
 export function isPaintingTool(tool: Tool): boolean {
-  return tool !== 'select' && tool !== 'prop';
+  return tool !== 'select' && tool !== 'prop' && tool !== 'prefab';
+}
+
+/**
+ * Id de cada peça de uma casa pronta: o UUID do clique sem hífens (32 letras) mais o número
+ * da peça, que cabe no limite de 40 letras do id e não repete entre dois cliques.
+ */
+export function prefabPieceId(clickId: string, index: number): string {
+  return `${clickId.replaceAll('-', '')}-${index}`;
+}
+
+function placeChosenPrefab(
+  state: EditorState,
+  hit: PointerHit,
+  clickId: string,
+): MapResult<MapModel> {
+  const prefab = findPrefab(state.brush.prefab);
+  if (!prefab) return { ok: false, errors: ['Escolha uma casa pronta na biblioteca.'] };
+  return placePrefab(state.history.present, {
+    blueprint: prefabBlueprint(prefab),
+    center: hit.cell,
+    rotation: state.rotation,
+    newId: (index) => prefabPieceId(clickId, index),
+  });
 }
 
 /** Chave do que o traço já tocou: elevar duas vezes a mesma casa no mesmo arraste seria surpresa. */
@@ -190,6 +217,8 @@ function applyTool(
         rotation: state.rotation,
         footprint: state.footprint,
       });
+    case 'prefab':
+      return newPropId ? placeChosenPrefab(state, hit, newPropId) : unchanged;
     case 'erase': {
       const target = eraseTargetAt(model, hit);
       return target ? eraseTarget(model, target) : unchanged;
@@ -297,6 +326,8 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return { ...state, brush: { ...state.brush, wall: action.key }, tool: 'wall' };
     case 'choose-prop':
       return { ...state, brush: { ...state.brush, prop: action.asset }, tool: 'prop' };
+    case 'choose-prefab':
+      return { ...state, brush: { ...state.brush, prefab: action.id }, tool: 'prefab' };
     case 'rotate':
       return rotate(state);
     case 'set-wall-height':

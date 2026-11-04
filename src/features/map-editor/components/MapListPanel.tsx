@@ -171,6 +171,13 @@ export function MapListPanel({
         open={creating > 0}
         onClose={() => setCreating(0)}
         onCreate={create}
+        generator={{
+          actions,
+          onGenerated: (summary) => {
+            setCreating(0);
+            onSelect(summary.id);
+          },
+        }}
       />
       <RenameMapDialog
         key={renaming?.id ?? 'closed'}
