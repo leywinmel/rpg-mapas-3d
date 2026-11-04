@@ -1,4 +1,7 @@
 import { MAX_LEVEL, MAX_WALL_HEIGHT_STEPS } from './constants';
+import { createEmptyMap } from './model';
+import { placePiece, placeWall } from './operations';
+import { makePiece, makeWall, unwrap } from './test-fixtures';
 import {
   cutawayShowingUpToStory,
   effectiveCutaway,
@@ -6,6 +9,9 @@ import {
   isValidCutaway,
   MAX_CUTAWAY,
   NO_CUTAWAY,
+  stepCutaway,
+  storyShownByCutaway,
+  topStory,
   visibleWallHeight,
   type Cutaway,
 } from './cutaway';
@@ -99,5 +105,50 @@ describe('cutaway: values', () => {
     expect(cutawayShowingUpToStory(1)).toBe(8);
     expect(isPieceVisible({ level: 4 }, cutawayShowingUpToStory(1))).toBe(true);
     expect(isPieceVisible({ level: 8 }, cutawayShowingUpToStory(1))).toBe(false);
+  });
+});
+
+describe('cutaway: the story-by-story control', () => {
+  it('shouldFindTheHighestStoryWhereSomethingStarts', () => {
+    const empty = createEmptyMap({ width: 40, depth: 40 });
+    expect(topStory(empty)).toBe(0);
+    const withWall = unwrap(placeWall(empty, makeWall({ x: 35, z: 3, level: 8, height: 4 })));
+    expect(topStory(withWall)).toBe(2);
+    const withPiece = unwrap(placePiece(withWall, makePiece({ level: 13 })));
+    expect(topStory(withPiece)).toBe(3);
+  });
+
+  it('shouldNameTheStoryEachCutShows', () => {
+    expect(storyShownByCutaway(NO_CUTAWAY)).toBeNull();
+    expect(storyShownByCutaway(4)).toBe(0);
+    expect(storyShownByCutaway(8)).toBe(1);
+    expect(storyShownByCutaway(6)).toBe(1);
+    expect(storyShownByCutaway(0)).toBe(0);
+  });
+
+  it('shouldGoDownFromNoCutToTheStoryBelowTheTop', () => {
+    expect(stepCutaway(NO_CUTAWAY, 'down', 3)).toBe(12);
+    expect(stepCutaway(12, 'down', 3)).toBe(8);
+    expect(stepCutaway(4, 'down', 3)).toBe(4);
+  });
+
+  it('shouldGoUpUntilTheCutHidesNothing', () => {
+    expect(stepCutaway(4, 'up', 3)).toBe(8);
+    expect(stepCutaway(12, 'up', 3)).toBeNull();
+    expect(stepCutaway(NO_CUTAWAY, 'up', 3)).toBeNull();
+  });
+
+  it('shouldStillOfferTheGroundFloorOnAFlatMap', () => {
+    expect(stepCutaway(NO_CUTAWAY, 'down', 0)).toBe(4);
+    expect(stepCutaway(4, 'up', 0)).toBeNull();
+  });
+});
+
+describe('cutaway: tall walls count as stories', () => {
+  it('shouldOfferACutInsideATwoStoryWallStandingOnTheGround', () => {
+    const empty = createEmptyMap({ width: 8, depth: 8 });
+    const tall = unwrap(placeWall(empty, makeWall({ level: 0, height: 8 })));
+    expect(topStory(tall)).toBe(1);
+    expect(stepCutaway(NO_CUTAWAY, 'down', topStory(tall))).toBe(4);
   });
 });

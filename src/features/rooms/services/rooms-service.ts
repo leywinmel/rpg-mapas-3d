@@ -1,10 +1,11 @@
 import type { MemberRole } from '@/domain';
+import { isValidCutaway, type Cutaway } from '@/domain/map-v2';
 import { getSupabase, type AppSupabaseClient } from '@/lib/supabase';
 import { memberRoleSchema } from '../schemas';
 import type { Membership, PreviewResult, Room, RoomMember, RoomSummary } from '../types';
 import { RoomError, toRoomError } from './room-errors';
 
-const ROOM_COLUMNS = 'id, slug, name, owner_id, active_map_id';
+const ROOM_COLUMNS = 'id, slug, name, owner_id, active_map_id, cutaway_lock';
 const MEMBER_COLUMNS = 'user_id, nickname, role, joined_at';
 const PERMISSION_DENIED = '42501';
 
@@ -14,6 +15,7 @@ type RoomRow = {
   name: string;
   owner_id: string;
   active_map_id: string | null;
+  cutaway_lock: number | null;
 };
 
 export function toRoom(row: RoomRow): Room {
@@ -23,6 +25,8 @@ export function toRoom(row: RoomRow): Room {
     name: row.name,
     ownerId: row.owner_id,
     activeMapId: row.active_map_id,
+    // Valor fora do intervalo não passa do check do banco; se passar, a mesa fica livre.
+    cutawayLock: isValidCutaway(row.cutaway_lock) ? row.cutaway_lock : null,
   };
 }
 
@@ -133,6 +137,20 @@ export function createRoomsService(client: AppSupabaseClient) {
         .maybeSingle();
       if (error) throw toRoomError(error);
       // O RLS não dá erro quando bloqueia: só não devolve a linha.
+      if (!data) throw new RoomError('forbidden', null);
+      return toRoom(data);
+    },
+
+    /** O mestre trava o corte de andares dos jogadores (ou libera, com null). */
+    async setCutawayLock(roomId: string, lock: Cutaway): Promise<Room> {
+      if (!isValidCutaway(lock)) throw new RoomError('invalid', null);
+      const { data, error } = await client
+        .from('rooms')
+        .update({ cutaway_lock: lock })
+        .eq('id', roomId)
+        .select(ROOM_COLUMNS)
+        .maybeSingle();
+      if (error) throw toRoomError(error);
       if (!data) throw new RoomError('forbidden', null);
       return toRoom(data);
     },

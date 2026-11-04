@@ -38,6 +38,7 @@ const ROOM_ROW = {
   name: 'Cripta',
   owner_id: 'u1',
   active_map_id: null,
+  cutaway_lock: null,
 };
 
 describe('createRoomsService', () => {
@@ -57,6 +58,7 @@ describe('createRoomsService', () => {
       name: 'Cripta',
       ownerId: 'u1',
       activeMapId: null,
+      cutawayLock: null,
     });
   });
 
@@ -123,7 +125,14 @@ describe('createRoomsService', () => {
     const stranger = fakeClient({ data: null, error: null });
     await expect(createRoomsService(member.client).findMembership('abc123', 'u1')).resolves.toEqual(
       {
-        room: { id: 'r1', slug: 'abc123', name: 'Cripta', ownerId: 'u1', activeMapId: null },
+        room: {
+          id: 'r1',
+          slug: 'abc123',
+          name: 'Cripta',
+          ownerId: 'u1',
+          activeMapId: null,
+          cutawayLock: null,
+        },
         membership: { role: 'gm', nickname: 'Mestre' },
       },
     );
@@ -147,6 +156,27 @@ describe('createRoomsService', () => {
     await expect(createRoomsService(blocked.client).deleteRoom('r1')).rejects.toMatchObject({
       kind: 'forbidden',
     });
+  });
+
+  it('shouldLockTheCutawayAndReadTheLockBack', async () => {
+    const { client, calls } = fakeClient({ data: { ...ROOM_ROW, cutaway_lock: 8 }, error: null });
+    const room = await createRoomsService(client).setCutawayLock('r1', 8);
+    expect(calls).toContainEqual({ method: 'update', args: [{ cutaway_lock: 8 }] });
+    expect(room.cutawayLock).toBe(8);
+  });
+
+  it('shouldRefuseAnInvalidCutawayLockBeforeCallingTheServer', async () => {
+    const { client, calls } = fakeClient({ data: ROOM_ROW, error: null });
+    await expect(createRoomsService(client).setCutawayLock('r1', -1)).rejects.toMatchObject({
+      kind: 'invalid',
+    });
+    expect(calls).toHaveLength(0);
+  });
+
+  it('shouldTreatAStrangeLockFromTheDatabaseAsAFreeTable', async () => {
+    const { client } = fakeClient({ data: { ...ROOM_ROW, cutaway_lock: 9999 }, error: null });
+    const room = await createRoomsService(client).renameRoom('r1', 'Cripta');
+    expect(room.cutawayLock).toBeNull();
   });
 
   it('shouldRejectUnknownRoleFromDatabase', async () => {

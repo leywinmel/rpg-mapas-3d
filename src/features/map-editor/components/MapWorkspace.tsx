@@ -1,8 +1,12 @@
 import { lazy, Suspense, useMemo, useState, type ReactNode } from 'react';
 import { Map as MapIcon } from 'lucide-react';
 import { EmptyState, ErrorBoundary, ErrorState, LoadingState } from '@/components';
+import { NO_CUTAWAY, topStory, type Cutaway } from '@/domain/map-v2';
 import { reuseUnchangedChunks } from '@/features/scene/chunks/stable-model';
 import type { PerfSample } from '@/features/scene/components/PerfMeter';
+import { visibleCutaway, type CutawayBinding } from '../cutaway/cutaway-binding';
+import { CutawayControl } from '../cutaway/CutawayControl';
+import { useOwnCutaway } from '../cutaway/useOwnCutaway';
 import { sortMaps } from '../editor/map-list';
 import { useMapActions } from '../hooks/useMapActions';
 import { useMapModel } from '../hooks/useMapModel';
@@ -20,6 +24,10 @@ export type MapWorkspaceProps = {
   isGameMaster: boolean;
   /** Recebe a medição de quadros por segundo da cena (página de desenvolvimento). */
   onPerfSample?: (sample: PerfSample) => void;
+  /** Corte de andares em que o mestre travou os jogadores (rooms.cutaway_lock). */
+  cutawayLock?: Cutaway;
+  /** Só o mestre: grava a trava do corte da mesa. */
+  onCutawayLockChange?: (lock: Cutaway) => Promise<void>;
 };
 
 type RoomMaps = ReturnType<typeof useRoomMaps>;
@@ -36,9 +44,11 @@ const MAP_LOAD_ERROR = {
 /** O jogador só vê o mapa que o mestre mostrou à mesa, sem ferramentas. */
 function PlayerView({
   room,
+  cutaway,
   onPerfSample,
 }: {
   room: RoomMaps;
+  cutaway: CutawayBinding;
   onPerfSample?: MapWorkspaceProps['onPerfSample'];
 }) {
   const mapId = room.activeMapId;
@@ -53,6 +63,7 @@ function PlayerView({
   const model = state.status === 'ready' ? state.map.model : null;
   const assetIds = useMemo(() => uploadedAssetIds(model), [model]);
   const modelUrls = useModelUrls(assetIds);
+  const top = useMemo(() => (model ? topStory(model) : 0), [model]);
   const name = room.maps.find((map) => map.id === mapId)?.name;
 
   if (!mapId) {
@@ -87,11 +98,13 @@ function PlayerView({
             model={state.map.model}
             modelUrls={modelUrls}
             label={`Mapa 3D: ${name ?? summary.name}`}
+            cutaway={visibleCutaway(cutaway)}
             onPerfSample={onPerfSample}
           />
         </Suspense>
       </ErrorBoundary>
       <span className={layout.mapTag}>{name ?? summary.name}</span>
+      <CutawayControl binding={cutaway} top={top} />
     </>
   );
 }
@@ -100,10 +113,12 @@ function PlayerView({
 function GameMasterView({
   roomId,
   room,
+  cutaway,
   onPerfSample,
 }: {
   roomId: string;
   room: RoomMaps;
+  cutaway: CutawayBinding;
   onPerfSample?: MapWorkspaceProps['onPerfSample'];
 }) {
   const [chosenId, setChosenId] = useState<string | null>(null);
@@ -142,6 +157,7 @@ function GameMasterView({
         map={state.map}
         name={selected?.name}
         mapsPanel={mapsPanel}
+        cutaway={cutaway}
         onPerfSample={onPerfSample}
       />
     );
@@ -177,8 +193,25 @@ function GameMasterView({
  * Área do mapa da sala. O mestre edita e escolhe o mapa da mesa; o jogador vê
  * só o mapa ativo. Trocas de mapa e gravações chegam pelo tempo real.
  */
-export function MapWorkspace({ roomId, isGameMaster, onPerfSample }: MapWorkspaceProps) {
+export function MapWorkspace({
+  roomId,
+  isGameMaster,
+  onPerfSample,
+  cutawayLock = NO_CUTAWAY,
+  onCutawayLockChange,
+}: MapWorkspaceProps) {
   const room = useRoomMaps(roomId);
+  const [ownCutaway, setOwnCutaway] = useOwnCutaway(roomId);
+  const cutaway = useMemo<CutawayBinding>(
+    () => ({
+      own: ownCutaway,
+      setOwn: setOwnCutaway,
+      lock: cutawayLock,
+      isMaster: isGameMaster,
+      changeLock: onCutawayLockChange,
+    }),
+    [ownCutaway, setOwnCutaway, cutawayLock, isGameMaster, onCutawayLockChange],
+  );
 
   if (room.status === 'loading') {
     return (
@@ -202,9 +235,9 @@ export function MapWorkspace({ roomId, isGameMaster, onPerfSample }: MapWorkspac
   return (
     <div className={layout.workspace}>
       {isGameMaster ? (
-        <GameMasterView roomId={roomId} room={room} onPerfSample={onPerfSample} />
+        <GameMasterView roomId={roomId} room={room} cutaway={cutaway} onPerfSample={onPerfSample} />
       ) : (
-        <PlayerView room={room} onPerfSample={onPerfSample} />
+        <PlayerView room={room} cutaway={cutaway} onPerfSample={onPerfSample} />
       )}
     </div>
   );

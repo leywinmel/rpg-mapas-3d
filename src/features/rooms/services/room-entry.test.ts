@@ -1,7 +1,14 @@
 import type { PreviewResult } from '../types';
 import { resolveRoomEntry, type ResolveEntryInput } from './room-entry';
 
-const ROOM = { id: 'r1', slug: 'demo', name: 'Cripta', ownerId: 'u1', activeMapId: null };
+const ROOM = {
+  id: 'r1',
+  slug: 'demo',
+  name: 'Cripta',
+  ownerId: 'u1',
+  activeMapId: null,
+  cutawayLock: null,
+};
 const PREVIEW: PreviewResult = { status: 'found', preview: { id: 'r1', name: 'Cripta' } };
 
 function service(options: {

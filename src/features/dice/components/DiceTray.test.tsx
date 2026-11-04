@@ -72,7 +72,14 @@ beforeAll(async () => {
 function setSession(role: 'gm' | 'player') {
   const userId = role === 'gm' ? MASTER : PLAYER;
   const value: RoomSessionValue = {
-    room: { id: ROOM, slug: 'demo', name: 'Mesa', ownerId: MASTER, activeMapId: null },
+    room: {
+      id: ROOM,
+      slug: 'demo',
+      name: 'Mesa',
+      ownerId: MASTER,
+      activeMapId: null,
+      cutawayLock: null,
+    },
     membership: { role, nickname: role === 'gm' ? 'Mestre' : 'Ana' },
     isGameMaster: role === 'gm',
     members: [

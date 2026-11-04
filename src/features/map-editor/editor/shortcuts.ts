@@ -52,6 +52,8 @@ export const SHORTCUT_HELP: readonly ShortcutHelp[] = [
   { keys: 'Ctrl+Z', description: 'Desfazer' },
   { keys: 'Ctrl+Shift+Z ou Ctrl+Y', description: 'Refazer' },
   { keys: 'Esc', description: 'Voltar para Selecionar' },
+  { keys: 'Page Up / Page Down', description: 'Mostrar ou esconder um andar (corte)' },
+  { keys: 'Home', description: 'Mostrar todos os andares' },
   { keys: 'Botão direito', description: 'Girar a câmera (com uma ferramenta ativa)' },
   { keys: 'Botão do meio', description: 'Arrastar a câmera' },
   { keys: 'Roda do mouse', description: 'Aproximar e afastar' },
@@ -81,4 +83,16 @@ export function isTypingTarget(target: EventTarget | null): boolean {
   if (typeof HTMLElement === 'undefined' || !(target instanceof HTMLElement)) return false;
   if (target.isContentEditable) return true;
   return ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
+}
+
+/** Tecla dentro de um diálogo aberto (ex: renomear mapa) não é atalho do editor. */
+export function isInsideDialog(target: EventTarget | null): boolean {
+  return (
+    typeof Element !== 'undefined' && target instanceof Element && target.closest('dialog') !== null
+  );
+}
+
+/** Atalho que vale para o teclado da cena: nem campo de texto, nem diálogo aberto. */
+export function isSceneKey(event: KeyboardEvent): boolean {
+  return !isTypingTarget(event.target) && !isInsideDialog(event.target);
 }

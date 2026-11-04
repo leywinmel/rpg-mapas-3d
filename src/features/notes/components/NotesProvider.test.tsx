@@ -32,7 +32,14 @@ function member(userId: string, nickname: string, role: 'gm' | 'player'): RoomMe
 function sessionAs(role: 'gm' | 'player'): RoomSessionValue {
   const userId = role === 'gm' ? GM_ID : ANA_ID;
   return {
-    room: { id: ROOM_ID, slug: 'demo', name: 'Mesa', ownerId: GM_ID, activeMapId: null },
+    room: {
+      id: ROOM_ID,
+      slug: 'demo',
+      name: 'Mesa',
+      ownerId: GM_ID,
+      activeMapId: null,
+      cutawayLock: null,
+    },
     membership: { role, nickname: role === 'gm' ? 'Mestre' : 'Ana' },
     isGameMaster: role === 'gm',
     members: [member(GM_ID, 'Mestre', 'gm'), member(ANA_ID, 'Ana', 'player')],

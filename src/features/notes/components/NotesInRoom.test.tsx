@@ -26,7 +26,14 @@ vi.mock('../services/notes-channel', () => ({
 
 function sessionAs(role: 'gm' | 'player'): RoomSessionValue {
   return {
-    room: { id: 'room-1', slug: 'demo', name: 'Mesa', ownerId: GM_ID, activeMapId: null },
+    room: {
+      id: 'room-1',
+      slug: 'demo',
+      name: 'Mesa',
+      ownerId: GM_ID,
+      activeMapId: null,
+      cutawayLock: null,
+    },
     membership: { role, nickname: role === 'gm' ? 'Mestre' : 'Ana' },
     isGameMaster: role === 'gm',
     members: TABLE_MEMBERS,

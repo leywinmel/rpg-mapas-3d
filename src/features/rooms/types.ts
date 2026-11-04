@@ -1,4 +1,5 @@
 import type { MemberRole } from '@/domain';
+import type { Cutaway } from '@/domain/map-v2';
 
 export const MEMBER_ROLES = ['gm', 'player'] as const satisfies readonly MemberRole[];
 
@@ -11,6 +12,8 @@ export type Room = {
   name: string;
   ownerId: string;
   activeMapId: string | null;
+  /** Corte de andares em que o mestre travou os jogadores; null = cada um escolhe o seu. */
+  cutawayLock: Cutaway;
 };
 
 export type Membership = { role: MemberRole; nickname: string };
