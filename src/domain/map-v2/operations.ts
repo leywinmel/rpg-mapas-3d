@@ -10,7 +10,14 @@
 import { isEdgeInside, isInside, type Cell } from '../grid';
 import type { MapResult } from '../map-document';
 import { chunkKey } from './chunks';
-import { editArea, forEachIndex, replaceChunk, resolveArea, resolveTile } from './chunk-edit';
+import {
+  editArea,
+  forEachIndex,
+  replaceChunk,
+  resolveArea,
+  resolveTile,
+  withChunks,
+} from './chunk-edit';
 import { MAX_PIECES_PER_CHUNK, MAX_WALLS_PER_CHUNK } from './constants';
 import { pieceFitsInMap, pieceOwnerChunk } from './footprint';
 import { wallTopLevel } from './height';
@@ -112,6 +119,38 @@ export function placePiece(model: MapModel, piece: MapPiece): MapResult<MapModel
     return fail([`Este pedaço do mapa já tem o máximo de ${MAX_PIECES_PER_CHUNK} peças.`]);
   }
   return ok(replaceChunk(model, { ...owner, pieces: [...owner.pieces, clean] }));
+}
+
+/**
+ * Põe várias peças de uma vez (uma casa pronta inteira): as mesmas regras de placePiece, mas a
+ * busca de ids repetidos olha o mapa uma vez só, e não uma vez por peça. Se uma peça é recusada,
+ * nenhuma entra: a casa pronta não fica pela metade.
+ */
+export function placePieces(model: MapModel, pieces: readonly MapPiece[]): MapResult<MapModel> {
+  const taken = new Set<string>();
+  for (const chunk of model.chunks.values()) for (const piece of chunk.pieces) taken.add(piece.id);
+  const added = new Map<string, MapPiece[]>();
+  for (const piece of pieces) {
+    const parsed = parseWithSchema(pieceSchema, piece);
+    if (!parsed.ok) return parsed;
+    const clean = parsed.value;
+    if (!pieceFitsInMap(model.size, clean)) return fail([`A peça "${clean.id}" não cabe no mapa.`]);
+    if (taken.has(clean.id)) return fail([`Já existe uma peça com o id "${clean.id}" neste mapa.`]);
+    taken.add(clean.id);
+    const key = chunkKey(pieceOwnerChunk(clean));
+    const list = added.get(key);
+    if (list) list.push(clean);
+    else added.set(key, [clean]);
+  }
+  const replaced = new Map<string, MapChunk>();
+  for (const [key, list] of added) {
+    const owner = getChunk(model, pieceOwnerChunk(list[0]!));
+    if (owner.pieces.length + list.length > MAX_PIECES_PER_CHUNK) {
+      return fail([`Este pedaço do mapa já tem o máximo de ${MAX_PIECES_PER_CHUNK} peças.`]);
+    }
+    replaced.set(key, { ...owner, pieces: [...owner.pieces, ...list] });
+  }
+  return ok(withChunks(model, replaced));
 }
 
 /**
