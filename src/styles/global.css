@@ -119,6 +119,24 @@ select {
   pointer-events: auto;
 }
 
+/*
+ * Coluna direita: o painel do topo (quem está na mesa, anotações, iniciativa...) e o painel dos
+ * dados (que cresce de baixo para cima) têm a mesma altura máxima e se cobririam. Com os dois
+ * abertos, cada um fica com metade do espaço livre e rola por dentro.
+ */
+.room {
+  --room-column-chrome: calc(var(--space-4) + var(--control-lg) + var(--space-3));
+  --room-column-half: calc((100vh - 2 * var(--room-column-chrome) - var(--space-3)) / 2);
+}
+
+.room:has(.room__dice-dock > :not(:only-child)) .room__side-panel > * {
+  max-height: var(--room-column-half);
+}
+
+.room:has(.room__side-panel) .room__dice-dock > :first-child:not(:only-child) {
+  max-height: var(--room-column-half);
+}
+
 .scene {
   position: absolute;
   inset: 0;

@@ -21,12 +21,16 @@ import { FogPanel } from '@/features/fog';
 import { InitiativePanel } from '@/features/initiative';
 import { TableToolButtons, ToolHint } from '@/features/table-tools';
 import { TokensPanel, useTokensStore } from '@/features/tokens';
+import { cx } from '@/lib/cx';
 import { reportError } from '@/lib/report-error';
 import { useRoomSession } from '../hooks/room-session-context';
 import { LOBBY_PATH, roomPath } from '../paths';
 import { PresencePanel } from './PresencePanel';
 import { DeleteRoomDialog, LeaveRoomDialog, RenameRoomDialog } from './RoomAdminDialogs';
 import styles from './rooms.module.css';
+
+/** `room__side-panel` é o gancho do global.css para dividir a coluna direita com os dados. */
+const SIDE_PANEL_CLASS = cx(styles.sidePanel, 'room__side-panel');
 
 type OpenDialog = 'rename' | 'delete' | 'leave' | null;
 
@@ -152,32 +156,32 @@ export function RoomHud() {
       </div>
       <ToolHint />
       {sidePanel === 'presence' && (
-        <div className={styles.sidePanel}>
+        <div className={SIDE_PANEL_CLASS}>
           <PresencePanel onClose={closeSidePanel} />
         </div>
       )}
       {sidePanel === 'tokens' && (
-        <div className={styles.sidePanel}>
+        <div className={SIDE_PANEL_CLASS}>
           <TokensPanel onClose={closeSidePanel} />
         </div>
       )}
       {isGameMaster && sidePanel === 'fog' && (
-        <div className={styles.sidePanel}>
+        <div className={SIDE_PANEL_CLASS}>
           <FogPanel onClose={closeSidePanel} />
         </div>
       )}
       {sidePanel === 'initiative' && (
-        <div className={styles.sidePanel}>
+        <div className={SIDE_PANEL_CLASS}>
           <InitiativePanel onClose={closeSidePanel} />
         </div>
       )}
       {sidePanel === 'export' && (
-        <div className={styles.sidePanel}>
+        <div className={SIDE_PANEL_CLASS}>
           <ExportPanel isGameMaster={isGameMaster} onClose={closeSidePanel} />
         </div>
       )}
       {sidePanel === 'notes' && (
-        <div className={styles.sidePanel}>
+        <div className={SIDE_PANEL_CLASS}>
           <NotesPanel onClose={closeSidePanel} />
         </div>
       )}

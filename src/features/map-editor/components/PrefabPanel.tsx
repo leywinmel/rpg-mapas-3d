@@ -12,12 +12,14 @@ import {
 } from '@/domain/map-gen';
 import type { Brush, EditorAction, Tool } from '../editor/editor-reducer';
 import { TOOL_KEYS } from '../editor/shortcuts';
+import type { StyleFilter } from '@/features/scene';
 import styles from './SidePanel.module.css';
 import plan from './PrefabPanel.module.css';
 
 const STYLE_OPTIONS: ReadonlyArray<SegmentOption<SettlementStyle>> = SETTLEMENT_STYLES.map(
   (style) => ({ value: style, label: SETTLEMENT_STYLE_LABELS[style] }),
 );
+const DEFAULT_SETTLEMENT_STYLE: SettlementStyle = 'medieval';
 /** Folga em volta da planta, em casas, para o traço da parede não ser cortado na borda. */
 const PLAN_MARGIN = 0.5;
 
@@ -55,16 +57,26 @@ function prefabTitle(prefab: PrefabDefinition): string {
   return `${prefab.label}: ${prefab.width}×${prefab.depth} casas, ${storiesLabel(prefab.stories)}`;
 }
 
-type Props = { brush: Brush; tool: Tool; dispatch: Dispatch<EditorAction> };
+/** O filtro da biblioteca manda; sem ele ("Todos"), vale o estilo da última casa escolhida. */
+function initialStyle(libraryStyle: StyleFilter, brush: Brush): SettlementStyle {
+  if (libraryStyle !== 'all') return libraryStyle;
+  return findPrefab(brush.prefab)?.style ?? DEFAULT_SETTLEMENT_STYLE;
+}
+
+type Props = {
+  brush: Brush;
+  tool: Tool;
+  dispatch: Dispatch<EditorAction>;
+  /** Estilo escolhido na biblioteca; as casas abrem nele. */
+  libraryStyle: StyleFilter;
+};
 
 /**
  * Casas prontas: escolher uma liga a ferramenta; cada clique no mapa põe a casa inteira
  * centrada no cursor (R gira), e um Ctrl+Z tira tudo de uma vez.
  */
-export function PrefabPanel({ brush, tool, dispatch }: Props) {
-  const [style, setStyle] = useState<SettlementStyle>(
-    () => findPrefab(brush.prefab)?.style ?? 'medieval',
-  );
+export function PrefabPanel({ brush, tool, dispatch, libraryStyle }: Props) {
+  const [style, setStyle] = useState<SettlementStyle>(() => initialStyle(libraryStyle, brush));
   const prefabs = PREFABS.filter((prefab) => prefab.style === style);
   return (
     <div className={styles.stack}>

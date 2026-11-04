@@ -7,6 +7,15 @@ export type ReportFailureOptions = {
   action: string;
   /** Falso quando a própria tela (janela, formulário, lista) mostra a frase devolvida. */
   toast?: boolean;
+  /** Próximo passo sugerido, mostrado junto do aviso. */
+  hint?: string;
+  /** Dados extras do log (ex: id do mapa); nunca dado pessoal. */
+  context?: Record<string, unknown>;
+};
+
+export type FailureReporterConfig = {
+  /** Avisar no canto quando a chamada não diz nada. Padrão: a tela mostra a frase sozinha. */
+  toastByDefault?: boolean;
 };
 
 export type FailureReporter = {
@@ -23,12 +32,17 @@ export type FailureReporter = {
 export function createFailureReporter(
   feature: string,
   toFailure: (error: unknown) => ReportableFailure,
+  { toastByDefault = false }: FailureReporterConfig = {},
 ): FailureReporter {
-  function report(error: unknown, { action, toast = false }: ReportFailureOptions): string {
+  function report(
+    error: unknown,
+    { action, toast = toastByDefault, hint, context }: ReportFailureOptions,
+  ): string {
     const failure = toFailure(error);
     reportError(error, {
       userMessage: failure.message,
-      context: { feature, action, kind: failure.kind, code: failure.code },
+      hint,
+      context: { feature, action, ...context, kind: failure.kind, code: failure.code },
       severity: failure.kind === 'unknown' ? 'error' : 'warn',
       toast,
     });

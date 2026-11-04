@@ -1,5 +1,6 @@
 import { ZodError } from 'zod';
-import { reportError } from '@/lib/report-error';
+import { createFailureReporter, type ReportFailureOptions } from '@/lib/report-feature-failure';
+import { classifySupabaseError, type SupabaseErrorTable } from '@/lib/supabase-error';
 
 /** Falhas dos dados em categorias que a tela sabe explicar. O detalhe técnico vai para o log. */
 export type DiceErrorKind = 'forbidden' | 'invalid' | 'network' | 'unknown';
@@ -12,12 +13,15 @@ export const DICE_ERROR_MESSAGES: Record<DiceErrorKind, string> = {
 };
 
 /** Códigos do Postgres/PostgREST que as regras de dice_rolls usam (ver migrations). */
-const KIND_BY_CODE: Record<string, DiceErrorKind> = {
-  '42501': 'forbidden',
-  '22023': 'invalid',
-  '23502': 'invalid',
-  '23514': 'invalid',
-  '22P02': 'invalid',
+const ERROR_TABLE: SupabaseErrorTable<DiceErrorKind> = {
+  byPostgresCode: {
+    '42501': 'forbidden',
+    '22023': 'invalid',
+    '23502': 'invalid',
+    '23514': 'invalid',
+    '22P02': 'invalid',
+  },
+  network: 'network',
 };
 
 export class DiceError extends Error {
@@ -33,41 +37,17 @@ export class DiceError extends Error {
   }
 }
 
-type PostgrestLike = { code?: unknown; message?: unknown };
-
 export function toDiceError(error: unknown): DiceError {
   if (error instanceof DiceError) return error;
   if (error instanceof ZodError) return new DiceError('invalid', null, { cause: error });
-  const { code, message } = (error && typeof error === 'object' ? error : {}) as PostgrestLike;
-  const codeText = typeof code === 'string' ? code : null;
-  const kindFromCode = codeText ? KIND_BY_CODE[codeText] : undefined;
-  if (kindFromCode) return new DiceError(kindFromCode, codeText, { cause: error });
-  if (typeof message === 'string' && message.toLowerCase().includes('failed to fetch')) {
-    return new DiceError('network', codeText, { cause: error });
-  }
-  return new DiceError('unknown', codeText, { cause: error });
+  const { kind, code } = classifySupabaseError(error, ERROR_TABLE, 'unknown');
+  return new DiceError(kind, code, { cause: error });
 }
 
-export type ReportDiceOptions = {
-  action: string;
-  /** Falso quando a própria tela (janela, formulário) mostra a frase devolvida. */
-  toast?: boolean;
-  /** Próximo passo sugerido, mostrado junto do aviso. */
-  hint?: string;
-};
+export type ReportDiceOptions = ReportFailureOptions;
+
+// Os dados avisam no canto por padrão: a rolagem acontece com o painel fechado ou sem formulário.
+const reporter = createFailureReporter('dice', toDiceError, { toastByDefault: true });
 
 /** Registra a falha (com o código, sem dado pessoal) e devolve a frase amigável. */
-export function reportDiceFailure(
-  error: unknown,
-  { action, toast = true, hint }: ReportDiceOptions,
-): string {
-  const diceError = toDiceError(error);
-  reportError(error, {
-    userMessage: diceError.message,
-    hint,
-    context: { feature: 'dice', action, kind: diceError.kind, code: diceError.code },
-    severity: diceError.kind === 'unknown' ? 'error' : 'warn',
-    toast,
-  });
-  return diceError.message;
-}
+export const reportDiceFailure = reporter.report;

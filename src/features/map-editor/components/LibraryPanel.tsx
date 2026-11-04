@@ -34,7 +34,14 @@ const SECTIONS: ReadonlyArray<{ category: PieceCategory; title: string }> = [
 
 const SINGLE_CELL = { width: 1, depth: 1 } as const;
 
-type Props = { brush: Brush; tool: Tool; dispatch: Dispatch<EditorAction> };
+type Props = {
+  brush: Brush;
+  tool: Tool;
+  dispatch: Dispatch<EditorAction>;
+  /** O filtro mora no editor para sobreviver à troca de aba e guiar a aba das casas. */
+  style: StyleFilter;
+  onStyleChange: (style: StyleFilter) => void;
+};
 
 function isChosen(entry: CatalogEntry, { brush, tool }: Pick<Props, 'brush' | 'tool'>): boolean {
   if (entry.kind === 'floor') return tool === 'floor' && brush.floor === entry.key;
@@ -58,9 +65,8 @@ function pieceTitle(entry: CatalogEntry): string {
 }
 
 /** Biblioteca de peças: filtro por estilo (mistura livre no mesmo mapa), busca e miniaturas. */
-export function LibraryPanel({ brush, tool, dispatch }: Props) {
+export function LibraryPanel({ brush, tool, dispatch, style, onStyleChange }: Props) {
   const [query, setQuery] = useState('');
-  const [style, setStyle] = useState<StyleFilter>('all');
   const found = pieceCatalog.search(query, { style });
   const sections = SECTIONS.map((section) => ({
     ...section,
@@ -73,7 +79,7 @@ export function LibraryPanel({ brush, tool, dispatch }: Props) {
         label="Estilo das peças"
         options={STYLE_OPTIONS}
         value={style}
-        onChange={setStyle}
+        onChange={onStyleChange}
       />
       <TextField
         label="Buscar peça"

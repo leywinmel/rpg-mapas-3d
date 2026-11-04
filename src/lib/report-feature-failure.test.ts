@@ -41,4 +41,27 @@ describe('createFailureReporter', () => {
     expect(() => logAndRethrow('carregar')(error)).toThrow(error);
     expect(reportError).toHaveBeenCalledTimes(1);
   });
+
+  it('shouldToastByDefaultWhenConfiguredAndPassHintAndExtraContext', () => {
+    const { report } = createFailureReporter('mesas', toFailure, { toastByDefault: true });
+    report(new Error('negado'), {
+      action: 'sair',
+      hint: 'Tente de novo.',
+      context: { mapId: 'm1' },
+    });
+    expect(reportError).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({
+        hint: 'Tente de novo.',
+        toast: true,
+        context: {
+          feature: 'mesas',
+          action: 'sair',
+          mapId: 'm1',
+          kind: 'forbidden',
+          code: '42501',
+        },
+      }),
+    );
+  });
 });

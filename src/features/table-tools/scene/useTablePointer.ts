@@ -8,6 +8,11 @@ import { useTableToolsStore } from '../hooks/table-tools-store';
 const PRIMARY_BUTTON = 0;
 const CROSSHAIR = 'crosshair';
 
+/** Com uma janela aberta, o Esc é dela (fecha a janela) e não pode apagar a régua por trás. */
+export function isModalDialogOpen(): boolean {
+  return document.querySelector('dialog[open]') !== null;
+}
+
 /**
  * Régua e ping pegam o clique antes de todo o resto (câmera, editor, tokens): os ouvintes ficam
  * na janela, na fase de captura, e param o evento ali. Assim Alt+clique marca o mapa até em cima
@@ -70,7 +75,7 @@ export function useTablePointer(heights: HeightMap | null) {
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
+      if (event.key !== 'Escape' || isModalDialogOpen()) return;
       const store = useTableToolsStore.getState();
       if (store.ruler) store.clearRuler();
       else if (store.tool !== 'none') store.setTool('none');
