@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import type { Cutaway } from '@/domain/map-v2';
 import { MapWorkspace, type MapView, type TableBinding } from '@/features/map-editor';
+import { ExportSceneLayer } from '@/features/export';
 import { FogSceneLayer, FogSync, useFogStore } from '@/features/fog';
 import { TokensSceneLayer, TokensSync, useTokensStore } from '@/features/tokens';
 import { useRoomControls, useRoomSession } from '../hooks/room-session-context';
@@ -19,6 +20,7 @@ const SCENE_LAYER = (
   <>
     <TokensSceneLayer />
     <FogSceneLayer />
+    <ExportSceneLayer />
   </>
 );
 

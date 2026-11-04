@@ -4,7 +4,7 @@ import { RingGeometry, type Group } from 'three';
 import { anchorUnderCursor, canMoveToken, type Cell } from '@/domain';
 import { isPieceVisible } from '@/domain/map-v2';
 import { useRoomSession } from '@/features/rooms';
-import { modelHeightMap, pickCell, type HeightMap } from '@/features/scene';
+import { modelHeightMap, pickCell, SCENE_UI_USER_DATA, type HeightMap } from '@/features/scene';
 import { useTokensStore } from '../hooks/tokens-store';
 import type { Token } from '../types';
 import { TokenLabel } from './TokenLabel';
@@ -81,7 +81,13 @@ function TokenPiece({ token, anchor, selected, onPointerDown }: PieceProps) {
         <TokenModel token={token} transparent={token.hidden} />
       </group>
       {selected && (
-        <mesh geometry={ringGeometry} position={[0, RING_LIFT, 0]} scale={scale} dispose={null}>
+        <mesh
+          geometry={ringGeometry}
+          position={[0, RING_LIFT, 0]}
+          scale={scale}
+          userData={SCENE_UI_USER_DATA}
+          dispose={null}
+        >
           <meshBasicMaterial color={TOKEN_SCENE_COLORS.selection} transparent depthWrite={false} />
         </mesh>
       )}

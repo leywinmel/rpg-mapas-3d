@@ -140,7 +140,13 @@ export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample, table }
     ],
   );
 
-  useReportView(table, { mapId: summary.id, model, cutaway: visibleCutaway(cutaway) });
+  useReportView(table, {
+    mapId: summary.id,
+    model,
+    cutaway: visibleCutaway(cutaway),
+    name: title,
+    modelUrls,
+  });
 
   const tabs = [
     {

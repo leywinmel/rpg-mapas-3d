@@ -21,7 +21,8 @@ export function TokenLabel({ token, height }: { token: Token; height: number }) 
     : 0;
   return (
     <Html position={[0, height, 0]} center zIndexRange={LABEL_Z_RANGE} pointerEvents="none">
-      <div className={styles.label}>
+      {/* A marca deixa a imagem exportada redesenhar a etiqueta (ela não faz parte do canvas). */}
+      <div className={styles.label} data-scene-label>
         <span className={styles.name}>
           {token.hidden && <EyeOff size={12} aria-label="Escondido dos jogadores" />}
           {token.name}

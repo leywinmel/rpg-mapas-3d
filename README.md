@@ -162,6 +162,26 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
 - **Testar sozinho:** como nos dados, entre em `/sala/demo` com o mestre e a jogadora em duas origens
   diferentes, cubra tudo numa aba e revele um pedaço olhando a outra.
 
+### Exportar e importar
+
+- **Abrir:** o botão de download na barra do topo da sala abre o painel "Exportar", com três abas.
+- **Arquivo (só o mestre):** baixa o mapa aberto como `.rpgmap.json`, o formato próprio do rpgmaps
+  (versionado e validado na volta), com os tokens e a névoa se você marcar. Leva o mapa inteiro,
+  inclusive o que a névoa cobre, por isso o jogador não tem essa aba.
+- **Importar mapa (só o mestre):** na aba "Mapas" do editor. Escolha um `.rpgmap.json` (até 100 MB;
+  um mapa no formato antigo também serve e é convertido). O mapa entra como mapa NOVO da mesa,
+  gravado em lotes com barra de progresso. Se a gravação parar no meio, a janela mostra o erro e
+  oferece "Tentar de novo" (continua do lote que caiu) ou "Cancelar e apagar o mapa incompleto".
+  Token de imagem cuja imagem sumiu vira boneco 3D, com aviso.
+- **Imagem:** baixa um PNG da vista atual, no tamanho e na qualidade da tela. "Esconder a grade e a
+  interface" tira a grade, o cursor do editor e as etiquetas dos tokens. A imagem do jogador sai com
+  a névoa escura por cima e sem nada do que ela cobre.
+- **Modelo 3D:** baixa um `.glb` (em metros: 1 casa = 1,5 m) com chão, paredes e objetos, respeitando
+  o corte de andares; os tokens ficam de fora. Escolha a área: a vista atual, um retângulo ou, só
+  para o mestre, o mapa inteiro. O painel estima o tamanho e avisa acima de 30 MB. O jogador só
+  exporta o que a névoa deixa ver. Medido: cidade gerada de 1000×1000 casas ≈ 150 MB em ~6 s; mapa
+  de 1000×1000 só com chão ≈ 89 MB em ~5 s; vila de 256×256 ≈ 8 MB em < 1 s.
+
 ### Ligar o login com Google
 
 O login com Google vem desligado no ambiente local. Para ligar:

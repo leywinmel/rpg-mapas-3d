@@ -29,8 +29,8 @@ export const TOKEN_MODEL_KEYS = TOKEN_MODELS.map((model) => model.value) as [
   ...TokenModelKey[],
 ];
 
-export const TOKEN_KINDS = ['image', 'model'] as const;
-export type TokenKind = (typeof TOKEN_KINDS)[number];
+// O tipo do token mora no domínio: o arquivo exportado do mapa usa a mesma lista (DRY [#6]).
+export { TOKEN_KINDS, type TokenKind } from '@/domain';
 
 /** Cores iniciais do boneco: roupa e detalhe. */
 export const DEFAULT_TOKEN_COLORS = { primary: '#8a3b2e', secondary: '#d9b45a' } as const;
