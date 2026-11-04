@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useThree, type ThreeEvent } from '@react-three/fiber';
-import { BoxGeometry, Color, EdgesGeometry, type Texture } from 'three';
+import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
+import { BoxGeometry, Color, EdgesGeometry, type Mesh, type Texture } from 'three';
 import { brushRect, type Cell, type FogState } from '@/domain';
 import type { CellRect } from '@/domain/map-v2';
 import { useRoomSession } from '@/features/rooms';
@@ -8,7 +8,7 @@ import { modelHeightMap, pickCell, type HeightMap } from '@/features/scene';
 import { useTokensStore } from '@/features/tokens';
 import { useFogStore } from '../hooks/fog-store';
 import { createFogTexture, paintFogTexture } from './fog-texture';
-import { FOG_PAINTER_MARGIN, FOG_SCENE } from './fog-scene';
+import { FOG_PAINTER_MARGIN, FOG_SCENE, fogLiftFor } from './fog-scene';
 
 const BYTE = 255;
 const previewGeometry = new EdgesGeometry(new BoxGeometry(1, FOG_SCENE.previewHeight, 1));
@@ -36,8 +36,14 @@ const ignoreRaycast = () => null;
 function FogOverlay({ fog, master }: { fog: FogState; master: boolean }) {
   const texture = useFogTexture(fog, master ? FOG_SCENE.masterColor : FOG_SCENE.playerColor);
   const { width, depth } = fog.size;
+  const mesh = useRef<Mesh>(null);
+  // Quanto mais longe a câmera, menos precisa a profundidade: a névoa do jogador sobe junto.
+  useFrame(({ camera }) => {
+    if (mesh.current) mesh.current.position.y = fogLiftFor(camera.position.y);
+  });
   return (
     <mesh
+      ref={mesh}
       rotation-x={-Math.PI / 2}
       position={[width / 2, FOG_SCENE.lift, depth / 2]}
       renderOrder={master ? FOG_SCENE.masterRenderOrder : 0}
@@ -53,7 +59,13 @@ function FogOverlay({ fog, master }: { fog: FogState; master: boolean }) {
           depthWrite={false}
         />
       ) : (
-        <meshBasicMaterial map={texture} alphaTest={FOG_SCENE.alphaTest} />
+        <meshBasicMaterial
+          map={texture}
+          alphaTest={FOG_SCENE.alphaTest}
+          polygonOffset
+          polygonOffsetFactor={FOG_SCENE.polygonOffset}
+          polygonOffsetUnits={FOG_SCENE.polygonOffset}
+        />
       )}
     </mesh>
   );

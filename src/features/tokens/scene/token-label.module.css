@@ -3,6 +3,8 @@
   display: grid;
   justify-items: center;
   gap: var(--space-1);
+  /* O Html do drei não tem largura: sem isto a etiqueta encolhe e corta o nome. */
+  width: max-content;
   min-width: 4rem;
   max-width: 10rem;
   padding: var(--space-1) var(--space-2);
