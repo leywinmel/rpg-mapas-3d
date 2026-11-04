@@ -19,6 +19,12 @@ vi.mock('@/features/map-editor', () => ({
   ),
 }));
 
+vi.mock('@/features/tokens', () => ({
+  TokensSync: () => null,
+  TokensSceneLayer: () => null,
+  useTokensStore: { getState: () => ({ setView: () => undefined }) },
+}));
+
 const CONTROLS: RoomControls = {
   membersState: { status: 'loading' },
   reloadMembers: () => undefined,

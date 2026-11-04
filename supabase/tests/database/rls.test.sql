@@ -50,14 +50,15 @@ select lives_ok(format($$ select public.join_room(%L, 'Bia') $$, (select slug fr
 -- Mestre coloca tokens: um de cada jogador, um escondido e um sob a névoa
 select pg_temp.act_as('00000000-0000-0000-0000-0000000000a1');
 insert into public.tokens (id, map_id, owner_id, kind, name, model_key, x, z, hidden) values
-  ('00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000b1', '00000000-0000-0000-0000-0000000000a2', 'model', 'Ana', 'hero', 1, 1, false),
-  ('00000000-0000-0000-0000-0000000000c2', '00000000-0000-0000-0000-0000000000b1', '00000000-0000-0000-0000-0000000000a3', 'model', 'Bia', 'hero', 2, 1, false),
-  ('00000000-0000-0000-0000-0000000000c3', '00000000-0000-0000-0000-0000000000b1', null, 'model', 'Emboscada', 'goblin', 5, 5, true),
-  ('00000000-0000-0000-0000-0000000000c4', '00000000-0000-0000-0000-0000000000b1', null, 'model', 'Na névoa', 'goblin', 0, 9, false);
--- Névoa cobrindo só a casa (x=0, z=9): bit 90 → byte 11, bit 2 → 0x04
-insert into public.map_fog (map_id, enabled, covered)
-values ('00000000-0000-0000-0000-0000000000b1', true,
-        decode('0000000000000000000000' || '04', 'hex'));
+  ('00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000b1', '00000000-0000-0000-0000-0000000000a2', 'model', 'Ana', 'figure', 1, 1, false),
+  ('00000000-0000-0000-0000-0000000000c2', '00000000-0000-0000-0000-0000000000b1', '00000000-0000-0000-0000-0000000000a3', 'model', 'Bia', 'figure', 2, 1, false),
+  ('00000000-0000-0000-0000-0000000000c3', '00000000-0000-0000-0000-0000000000b1', null, 'model', 'Emboscada', 'creature', 5, 5, true),
+  ('00000000-0000-0000-0000-0000000000c4', '00000000-0000-0000-0000-0000000000b1', null, 'model', 'Na névoa', 'creature', 0, 9, false);
+-- Névoa cobrindo só a casa (x=0, z=9): pedaço (0, 0), bit 9 · 32 + 0 = 288
+insert into public.map_fog (map_id, enabled)
+values ('00000000-0000-0000-0000-0000000000b1', true);
+insert into public.map_fog_chunks (map_id, cx, cz, covered)
+values ('00000000-0000-0000-0000-0000000000b1', 0, 0, set_bit(0::bit(1024), 288, 1));
 -- Anotação secreta só para a Ana e uma para todos
 insert into public.notes (id, room_id, author_id, title, to_all) values
   ('00000000-0000-0000-0000-0000000000d1', (select room_id from ctx), '00000000-0000-0000-0000-0000000000a1', 'Segredo da Ana', false),

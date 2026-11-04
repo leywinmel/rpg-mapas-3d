@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, DoorOpen, Link2, Pencil, Trash2, Users } from 'lucide-react';
+import { ArrowLeft, DoorOpen, Link2, Pencil, Trash2, UserRound, Users } from 'lucide-react';
 import { IconButton, notify, ThemeToggle, Toolbar, ToolbarSeparator } from '@/components';
 import { absoluteAppUrl } from '@/features/auth';
 import { NotesButton, NotesPanel, NotesProvider } from '@/features/notes';
 import { QualityButton } from '@/features/scene';
+import { TokensPanel, useTokensStore } from '@/features/tokens';
 import { reportError } from '@/lib/report-error';
 import { useRoomSession } from '../hooks/room-session-context';
 import { LOBBY_PATH, roomPath } from '../paths';
@@ -15,7 +16,7 @@ import styles from './rooms.module.css';
 type OpenDialog = 'rename' | 'delete' | 'leave' | null;
 
 /** O canto superior direito abre um painel por vez: quem está na mesa ou as anotações. */
-type SidePanel = 'presence' | 'notes' | null;
+type SidePanel = 'presence' | 'notes' | 'tokens' | null;
 
 async function copyInviteLink(slug: string): Promise<void> {
   const link = absoluteAppUrl(roomPath(slug));
@@ -43,6 +44,14 @@ export function RoomHud() {
   const closeSidePanel = () => setSidePanel(null);
   const toggleSidePanel = (panel: Exclude<SidePanel, null>) =>
     setSidePanel((current) => (current === panel ? null : panel));
+  // Escolher um token na cena abre o painel dele.
+  useEffect(
+    () =>
+      useTokensStore.subscribe((state, previous) => {
+        if (state.selectedId && state.selectedId !== previous.selectedId) setSidePanel('tokens');
+      }),
+    [],
+  );
 
   return (
     // O provider fica montado com o painel fechado: o aviso de anotação nova chega do mesmo jeito.
@@ -73,6 +82,12 @@ export function RoomHud() {
             onClick={() => toggleSidePanel('presence')}
           />
           <NotesButton active={sidePanel === 'notes'} onClick={() => toggleSidePanel('notes')} />
+          <IconButton
+            label={sidePanel === 'tokens' ? 'Esconder os tokens' : 'Mostrar os tokens'}
+            icon={<UserRound size={18} />}
+            active={sidePanel === 'tokens'}
+            onClick={() => toggleSidePanel('tokens')}
+          />
           <ToolbarSeparator />
           {isGameMaster ? (
             <>
@@ -102,6 +117,11 @@ export function RoomHud() {
       {sidePanel === 'presence' && (
         <div className={styles.sidePanel}>
           <PresencePanel onClose={closeSidePanel} />
+        </div>
+      )}
+      {sidePanel === 'tokens' && (
+        <div className={styles.sidePanel}>
+          <TokensPanel onClose={closeSidePanel} />
         </div>
       )}
       {sidePanel === 'notes' && (

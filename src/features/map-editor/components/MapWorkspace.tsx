@@ -9,6 +9,7 @@ import { CutawayControl } from '../cutaway/CutawayControl';
 import { Minimap } from '../minimap/Minimap';
 import { showsMinimap } from '../minimap/minimap-image';
 import { MapCornerHud } from './MapCornerHud';
+import { useReportView, type TableBinding } from './table-binding';
 import { useOwnCutaway } from '../cutaway/useOwnCutaway';
 import { sortMaps } from '../editor/map-list';
 import { useMapActions } from '../hooks/useMapActions';
@@ -31,6 +32,8 @@ export type MapWorkspaceProps = {
   cutawayLock?: Cutaway;
   /** Só o mestre: grava a trava do corte da mesa. */
   onCutawayLockChange?: (lock: Cutaway) => Promise<void>;
+  /** Tokens e névoa da mesa, pendurados na cena. */
+  table?: TableBinding;
 };
 
 type RoomMaps = ReturnType<typeof useRoomMaps>;
@@ -49,17 +52,19 @@ function PlayerView({
   room,
   cutaway,
   onPerfSample,
+  table,
 }: {
   room: RoomMaps;
   cutaway: CutawayBinding;
   onPerfSample?: MapWorkspaceProps['onPerfSample'];
+  table?: TableBinding;
 }) {
   const mapId = room.activeMapId;
   const [attempt, setAttempt] = useState(0);
   // A cada gravação do mestre o mapa volta inteiro do banco; os pedaços iguais reaproveitam o
   // objeto de antes, e a cena redesenha só o que mudou.
   const state = useMapModel(mapId, {
-    revision: mapId ? (room.revisions[mapId] ?? 0) : 0,
+    revision: (mapId ? (room.revisions[mapId] ?? 0) : 0) + (table?.reloadKey ?? 0),
     attempt,
     settle: reuseUnchangedChunks,
     incremental: true,
@@ -68,6 +73,7 @@ function PlayerView({
   const assetIds = useMemo(() => uploadedAssetIds(model), [model]);
   const modelUrls = useModelUrls(assetIds);
   const top = useMemo(() => (model ? topStory(model) : 0), [model]);
+  useReportView(table, mapId && model ? { mapId, model, cutaway: visibleCutaway(cutaway) } : null);
   const name = room.maps.find((map) => map.id === mapId)?.name;
 
   if (!mapId) {
@@ -104,6 +110,7 @@ function PlayerView({
             label={`Mapa 3D: ${name ?? summary.name}`}
             cutaway={visibleCutaway(cutaway)}
             onPerfSample={onPerfSample}
+            layer={table?.sceneLayer}
           />
         </Suspense>
       </ErrorBoundary>
@@ -122,11 +129,13 @@ function GameMasterView({
   room,
   cutaway,
   onPerfSample,
+  table,
 }: {
   roomId: string;
   room: RoomMaps;
   cutaway: CutawayBinding;
   onPerfSample?: MapWorkspaceProps['onPerfSample'];
+  table?: TableBinding;
 }) {
   const [chosenId, setChosenId] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -166,6 +175,7 @@ function GameMasterView({
         mapsPanel={mapsPanel}
         cutaway={cutaway}
         onPerfSample={onPerfSample}
+        table={table}
       />
     );
   }
@@ -206,6 +216,7 @@ export function MapWorkspace({
   onPerfSample,
   cutawayLock = NO_CUTAWAY,
   onCutawayLockChange,
+  table,
 }: MapWorkspaceProps) {
   const room = useRoomMaps(roomId);
   const [ownCutaway, setOwnCutaway] = useOwnCutaway(roomId);
@@ -242,9 +253,15 @@ export function MapWorkspace({
   return (
     <div className={layout.workspace}>
       {isGameMaster ? (
-        <GameMasterView roomId={roomId} room={room} cutaway={cutaway} onPerfSample={onPerfSample} />
+        <GameMasterView
+          roomId={roomId}
+          room={room}
+          cutaway={cutaway}
+          onPerfSample={onPerfSample}
+          table={table}
+        />
       ) : (
-        <PlayerView room={room} cutaway={cutaway} onPerfSample={onPerfSample} />
+        <PlayerView room={room} cutaway={cutaway} onPerfSample={onPerfSample} table={table} />
       )}
     </div>
   );
