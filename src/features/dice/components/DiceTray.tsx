@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Dices } from 'lucide-react';
+import { cx } from '@/lib/cx';
 import { IconButton, Toolbar } from '@/components';
 import { useDiceTable } from '../hooks/useDiceTable';
 import { useRollDraft } from '../hooks/useRollDraft';
@@ -19,7 +20,7 @@ export function DiceTray() {
   const table = useDiceTable({ onRemoteThrow: () => setOpen(true) });
 
   return (
-    <div className={styles.dock}>
+    <div className={cx(styles.dock, 'room__dice-dock')}>
       {open && (
         <DicePanel
           table={table}
