@@ -151,8 +151,8 @@ describe('instanceCapacity', () => {
 
 describe('camera', () => {
   it('shouldFrameTheMapCenterAndKeepTheTargetOnTheBoard', () => {
-    const frame = cameraFrame({ width: 10, depth: 20 });
-    expect(frame.target).toEqual({ x: 5, y: 0, z: 10 });
+    const frame = cameraFrame({ width: 8, depth: 8 });
+    expect(frame.target).toEqual({ x: 4, y: 0, z: 4 });
     expect(frame.position.y).toBeGreaterThan(0);
     expect(frame.maxDistance).toBeGreaterThan(frame.minDistance);
     expect(clampToBoard({ x: -3, y: 0, z: 25 }, { width: 10, depth: 20 })).toEqual({
@@ -160,6 +160,22 @@ describe('camera', () => {
       y: 0,
       z: 20,
     });
+  });
+});
+
+describe('camera on a giant map', () => {
+  it('shouldBackAwayUntilTheWholeMapFitsAndAimJustInFrontOfTheCenter', () => {
+    const size = { width: 1000, depth: 1000 };
+    const frame = cameraFrame(size);
+    const { position, target } = frame;
+    const distance = Math.hypot(position.x - target.x, position.y, position.z - target.z);
+    expect(distance).toBeGreaterThan(Math.hypot(1000, 1000) / 2);
+    expect(distance).toBeLessThan(frame.maxDistance);
+    expect(frame.far).toBeGreaterThan(distance + 1000);
+    // Mira entre o centro e a ponta da frente, nunca perto do canto (0,0).
+    expect(target.x).toBeGreaterThan(500);
+    expect(target.x).toBeLessThan(1000);
+    expect(target.z).toBe(target.x);
   });
 });
 

@@ -9,9 +9,11 @@ import {
   Minus,
   MousePointer2,
   PaintBucket,
+  Paintbrush,
   Plus,
   Redo2,
   RotateCw,
+  SquareDashed,
   Undo2,
 } from 'lucide-react';
 import { IconButton, Toolbar, ToolbarSeparator } from '@/components';
@@ -22,7 +24,12 @@ import {
   MIN_WALL_HEIGHT_STEPS,
   stepsToWorld,
 } from '@/domain/map-v2';
-import type { EditorAction, EditorState, Tool } from '../editor/editor-reducer';
+import {
+  supportsRectShape,
+  type EditorAction,
+  type EditorState,
+  type Tool,
+} from '../editor/editor-reducer';
 import { canRedo, canUndo } from '../editor/history';
 import { findPiece } from '../editor/model-ops';
 import { SHORTCUT_HELP, TOOL_KEYS, TOOL_LABELS } from '../editor/shortcuts';
@@ -112,6 +119,26 @@ function WallHeight({ state, dispatch }: Props) {
       raiseLabel="Parede mais alta"
       onChange={(height) => dispatch({ type: 'set-wall-height', height })}
     />
+  );
+}
+
+/** Pincel livre ou retângulo arrastado (chão e altura). */
+function BrushShapeChoice({ state, dispatch }: Props) {
+  return (
+    <>
+      <IconButton
+        label="Pincel livre: pinta por onde o cursor passa"
+        icon={<Paintbrush size={ICON_SIZE} />}
+        active={state.shape === 'free'}
+        onClick={() => dispatch({ type: 'set-shape', shape: 'free' })}
+      />
+      <IconButton
+        label="Retângulo: arraste de um canto ao outro"
+        icon={<SquareDashed size={ICON_SIZE} />}
+        active={state.shape === 'rect'}
+        onClick={() => dispatch({ type: 'set-shape', shape: 'rect' })}
+      />
+    </>
   );
 }
 
@@ -236,6 +263,11 @@ export function EditorToolbar({ state, dispatch }: Props) {
         <ShortcutsHelp />
       </Toolbar>
       {selectedRotates && <SelectedPieceLevel state={state} dispatch={dispatch} />}
+      {supportsRectShape(state.tool) && (
+        <Toolbar label="Forma do pincel">
+          <BrushShapeChoice state={state} dispatch={dispatch} />
+        </Toolbar>
+      )}
       {state.tool === 'wall' && (
         <Toolbar label="Opções da parede">
           <WallHeight state={state} dispatch={dispatch} />

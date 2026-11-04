@@ -4,6 +4,9 @@ import { topStory } from '@/domain/map-v2';
 import type { PerfSample } from '@/features/scene/components/PerfMeter';
 import { visibleCutaway, type CutawayBinding } from '../cutaway/cutaway-binding';
 import { CutawayControl } from '../cutaway/CutawayControl';
+import { Minimap } from '../minimap/Minimap';
+import { showsMinimap } from '../minimap/minimap-image';
+import { MapCornerHud } from './MapCornerHud';
 import {
   createEditorState,
   editorReducer,
@@ -172,7 +175,10 @@ export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample }: MapEd
         </Suspense>
       </ErrorBoundary>
       <EditorSidebar title={title} tabs={tabs} />
-      <CutawayControl binding={cutaway} top={top} />
+      <MapCornerHud>
+        {showsMinimap(model) && <Minimap model={model} />}
+        <CutawayControl binding={cutaway} top={top} />
+      </MapCornerHud>
       <div className={layout.bottomBar}>
         <EditorToolbar state={state} dispatch={dispatch} />
         <div className={layout.saveSlot}>

@@ -107,7 +107,7 @@ export function CutawayControl({ binding, top }: CutawayControlProps) {
   }, [setOwn, up, down, canGoUp, canGoDown]);
 
   return (
-    <div className={styles.anchor}>
+    <div>
       <Toolbar label="Corte de andares" orientation="vertical">
         <IconButton
           label="Mostrar o andar de cima (Page Up)"

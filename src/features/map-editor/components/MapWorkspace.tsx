@@ -6,6 +6,9 @@ import { reuseUnchangedChunks } from '@/features/scene/chunks/stable-model';
 import type { PerfSample } from '@/features/scene/components/PerfMeter';
 import { visibleCutaway, type CutawayBinding } from '../cutaway/cutaway-binding';
 import { CutawayControl } from '../cutaway/CutawayControl';
+import { Minimap } from '../minimap/Minimap';
+import { showsMinimap } from '../minimap/minimap-image';
+import { MapCornerHud } from './MapCornerHud';
 import { useOwnCutaway } from '../cutaway/useOwnCutaway';
 import { sortMaps } from '../editor/map-list';
 import { useMapActions } from '../hooks/useMapActions';
@@ -104,7 +107,10 @@ function PlayerView({
         </Suspense>
       </ErrorBoundary>
       <span className={layout.mapTag}>{name ?? summary.name}</span>
-      <CutawayControl binding={cutaway} top={top} />
+      <MapCornerHud>
+        {showsMinimap(state.map.model) && <Minimap model={state.map.model} />}
+        <CutawayControl binding={cutaway} top={top} />
+      </MapCornerHud>
     </>
   );
 }

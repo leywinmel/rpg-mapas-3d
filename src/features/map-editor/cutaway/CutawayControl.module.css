@@ -1,14 +1,3 @@
-/*
- * O corte fica na borda direita, acima do canto dos dados: longe das ferramentas do editor
- * (embaixo) e do painel de quem está na mesa (em cima).
- */
-.anchor {
-  position: absolute;
-  right: var(--space-4);
-  bottom: var(--map-workspace-corner);
-  z-index: var(--z-hud);
-}
-
 .badge {
   display: grid;
   justify-items: center;

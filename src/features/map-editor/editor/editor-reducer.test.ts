@@ -34,6 +34,38 @@ function walls(state: EditorState) {
 }
 
 describe('editorReducer', () => {
+  it('shouldPaintADraggedRectangleThatFollowsTheCursorAndUndoesInOneStep', () => {
+    const grown = run([
+      { type: 'choose-floor', key: 'grama' },
+      { type: 'set-shape', shape: 'rect' },
+      { type: 'stroke-start', hit: hitAt(0, 0), newPropId: 'x' },
+      { type: 'stroke-move', hit: hitAt(3, 2) },
+    ]);
+    expect(terrainAt(grown.history.present, { x: 3, z: 2 })?.tile).toBe('grama');
+    const shrunk = editorReducer(grown, { type: 'stroke-move', hit: hitAt(1, 1) });
+    // O que saiu do retângulo volta a ser como era antes do arraste.
+    expect(terrainAt(shrunk.history.present, { x: 3, z: 2 })?.tile).toBe('piso-pedra');
+    expect(terrainAt(shrunk.history.present, { x: 1, z: 1 })?.tile).toBe('grama');
+    const done = editorReducer(shrunk, { type: 'stroke-end' });
+    expect(
+      terrainAt(editorReducer(done, { type: 'undo' }).history.present, { x: 0, z: 0 })?.tile,
+    ).toBe('piso-pedra');
+  });
+
+  it('shouldRaiseARectangleOnlyOneStepHoweverTheCursorMoves', () => {
+    const state = run([
+      { type: 'set-tool', tool: 'raise' },
+      { type: 'set-shape', shape: 'rect' },
+      { type: 'stroke-start', hit: hitAt(0, 0), newPropId: 'x' },
+      { type: 'stroke-move', hit: hitAt(2, 2) },
+      { type: 'stroke-move', hit: hitAt(1, 2) },
+      { type: 'stroke-move', hit: hitAt(2, 2) },
+      { type: 'stroke-end' },
+    ]);
+    expect(terrainAt(state.history.present, { x: 2, z: 2 })?.height).toBe(1);
+    expect(terrainAt(state.history.present, { x: 3, z: 3 })?.height).toBe(0);
+  });
+
   it('shouldRaiseTheSelectedPieceAndUndoIt', () => {
     const placed = run([
       { type: 'set-tool', tool: 'prop' },

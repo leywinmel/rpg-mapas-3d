@@ -6,12 +6,13 @@
  * O mapa é o MapModel do v2: cada operação troca só os pedaços tocados, então o
  * histórico guarda referências baratas e o autosave grava só o que mudou.
  */
-import type { Ambience, GridSize, MapResult } from '@/domain';
+import type { Ambience, Cell, GridSize, MapResult } from '@/domain';
 import {
   MAX_FOOTPRINT,
   MAX_WALL_HEIGHT_STEPS,
   MIN_WALL_HEIGHT_STEPS,
   paintTerrainCell,
+  paintTerrainRect,
   resizeMap,
   stepTerrainHeight,
   STORY_HEIGHT_STEPS,
@@ -55,9 +56,25 @@ export type Tool = 'select' | 'floor' | 'wall' | 'prop' | 'erase' | 'raise' | 'l
 
 export type Brush = { floor: string; wall: string; prop: PropAsset };
 
+/**
+ * Forma do pincel de chão e de altura: "free" pinta as casas por onde o cursor passa;
+ * "rect" pinta o retângulo entre a casa onde o arraste começou e a casa sob o cursor
+ * (para cobrir um mapa gigante sem passar o mouse casa por casa).
+ */
+export type BrushShape = 'free' | 'rect';
+
+const RECT_TOOLS: ReadonlySet<Tool> = new Set<Tool>(['floor', 'raise', 'lower']);
+
+/** A ferramenta aceita o pincel em retângulo? */
+export function supportsRectShape(tool: Tool): boolean {
+  return RECT_TOOLS.has(tool);
+}
+
 type Stroke = {
   before: MapModel;
   visited: ReadonlySet<string>;
+  /** Casa onde o arraste em retângulo começou (nulo no pincel livre). */
+  anchor: Cell | null;
   /** Última casa pintada: o próximo movimento preenche a linha até a casa nova. */
   last: PointerHit | null;
 };
@@ -69,6 +86,7 @@ export type EditorState = {
   history: History<MapModel>;
   tool: Tool;
   brush: Brush;
+  shape: BrushShape;
   /** Giro do próximo objeto colocado, em quartos de volta (0 a 3). */
   rotation: number;
   /** Tamanho em casas do próximo objeto colocado, antes de girar. */
@@ -89,6 +107,7 @@ export type EditorAction =
   | { type: 'choose-prop'; asset: PropAsset }
   | { type: 'rotate' }
   | { type: 'set-wall-height'; height: number }
+  | { type: 'set-shape'; shape: BrushShape }
   | { type: 'set-footprint'; footprint: Footprint }
   | { type: 'stroke-start'; hit: PointerHit; newPropId: string }
   | { type: 'stroke-move'; hit: PointerHit }
@@ -117,6 +136,7 @@ export function createEditorState(model: MapModel): EditorState {
     history: createHistory(model),
     tool: 'select',
     brush: DEFAULT_BRUSH,
+    shape: 'free',
     rotation: 0,
     footprint: SINGLE_CELL,
     wallHeight: DEFAULT_WALL_HEIGHT,
@@ -223,6 +243,33 @@ function paintAlong(state: EditorState, hit: PointerHit): EditorState {
   );
 }
 
+function rectChange(state: EditorState, from: Cell, to: Cell): MapResult<MapModel> {
+  const before = state.stroke?.before ?? state.history.present;
+  if (state.tool === 'floor')
+    return paintTerrainRect(before, { from, to, tile: state.brush.floor });
+  const delta = state.tool === 'raise' ? RAISE_STEP : -RAISE_STEP;
+  return stepTerrainHeight(before, { from, to, delta });
+}
+
+/**
+ * O retângulo é refeito a partir do mapa de ANTES do arraste a cada casa nova: encolher o
+ * retângulo desfaz o que saiu dele, e elevar não acumula um degrau por movimento.
+ */
+function paintRect(state: EditorState, hit: PointerHit): EditorState {
+  const stroke = state.stroke;
+  if (!stroke?.anchor) return state;
+  const last = stroke.last;
+  if (last && last.cell.x === hit.cell.x && last.cell.z === hit.cell.z) return state;
+  const next = { ...stroke, last: hit };
+  const result = rectChange(state, stroke.anchor, hit.cell);
+  if (!result.ok) return { ...state, stroke: next, notice: noticeFor(state, result.errors) };
+  return { ...state, history: replacePresent(state.history, result.value), stroke: next };
+}
+
+function usesRect(state: EditorState): boolean {
+  return state.shape === 'rect' && supportsRectShape(state.tool);
+}
+
 function finishStroke(state: EditorState): EditorState {
   if (!state.stroke) return state;
   return { ...state, history: commitFrom(state.history, state.stroke.before), stroke: null };
@@ -260,6 +307,8 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
           MAX_WALL_HEIGHT_STEPS,
         ),
       };
+    case 'set-shape':
+      return { ...finishStroke(state), shape: action.shape };
     case 'set-footprint':
       return {
         ...state,
@@ -272,12 +321,19 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       if (state.tool === 'select') return state;
       const started: EditorState = {
         ...finishStroke(state),
-        stroke: { before: state.history.present, visited: new Set(), last: null },
+        stroke: {
+          before: state.history.present,
+          visited: new Set(),
+          anchor: usesRect(state) ? action.hit.cell : null,
+          last: null,
+        },
         coalesceKey: null,
       };
+      if (usesRect(started)) return paintRect(started, action.hit);
       return paint(started, action.hit, action.newPropId);
     }
     case 'stroke-move':
+      if (state.stroke?.anchor) return paintRect(state, action.hit);
       return isPaintingTool(state.tool) ? paintAlong(state, action.hit) : state;
     case 'stroke-end':
       return finishStroke(state);

@@ -297,17 +297,40 @@ const CAMERA_MAX_DISTANCE_PADDING = 12;
  * o fundo mais perto daria mais precisão de profundidade, mas mudaria a cena de quem já tinha mapa.
  */
 const MIN_CAMERA_FAR = 1000;
+/**
+ * Distância, em raios do mapa (meia diagonal), em que o mapa inteiro cabe numa tela de
+ * computador (16:10) com o fov de 45° e a câmera inclinada 50°. Medido no navegador.
+ */
+const CAMERA_FIT_FACTOR = 1.8;
+/**
+ * Em perspectiva a ponta perto da câmera ocupa mais tela que a do fundo: mirar um pouco à
+ * frente do centro (fração do raio) põe as quatro pontas dentro do quadro.
+ */
+const CAMERA_FIT_TARGET_SHIFT = 0.3;
 
 /**
- * Enquadramento inicial: vista de maquete em diagonal, centrada no mapa. A
- * distância cresce com o lado do mapa, mas fica perto o bastante para a maquete
- * aparecer grande e a neblina (que também cresce com o mapa) só engolir o fundo.
- * Por isso, em mapa grande, as pontas saem do quadro; a roda do mouse afasta.
+ * Enquadramento inicial: vista de maquete em diagonal. Em mapa pequeno, centrada e perto, para a
+ * maquete aparecer grande e a neblina (que também cresce com o mapa) só engolir o fundo. Em
+ * mapa grande essa distância deixava só o meio e a ponta (0,0) na tela, e o mestre achava que
+ * a câmera olhava para o canto (RPG-25); então, quando a distância de "caber tudo" é maior, ela
+ * vence e o alvo vem um pouco para a frente, para as quatro pontas aparecerem.
  */
 export function cameraFrame(size: GridSize): CameraFrame {
   const span = Math.max(size.width, size.depth);
-  const distance = span * CAMERA_DISTANCE_FACTOR + CAMERA_DISTANCE_PADDING;
-  const target = { x: size.width / 2, y: 0, z: size.depth / 2 };
+  const close = span * CAMERA_DISTANCE_FACTOR + CAMERA_DISTANCE_PADDING;
+  const radius = Math.hypot(size.width, size.depth) / 2;
+  const fits = radius * CAMERA_FIT_FACTOR;
+  const distance = Math.max(close, fits);
+  // Para a frente = na direção da câmera (o azimute), sem sair do mapa.
+  const shift = fits > close ? radius * CAMERA_FIT_TARGET_SHIFT : 0;
+  const target = clampToBoard(
+    {
+      x: size.width / 2 + shift * Math.sin(CAMERA_AZIMUTH),
+      y: 0,
+      z: size.depth / 2 + shift * Math.cos(CAMERA_AZIMUTH),
+    },
+    size,
+  );
   const horizontal = Math.sin(CAMERA_POLAR) * distance;
   const maxDistance = span * CAMERA_MAX_DISTANCE_FACTOR + CAMERA_MAX_DISTANCE_PADDING;
   return {

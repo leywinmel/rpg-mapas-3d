@@ -6,6 +6,7 @@ export * from './catalog/catalog';
 export type * from './catalog/catalog-types';
 export { SCENE_PALETTE } from './catalog/palette';
 export * from './layout';
+export { useCameraFocus, type FocusRequest, type GroundPoint } from './camera/camera-focus';
 export * from './quality/quality';
 export { QualityButton } from './quality/QualityButton';
 export { useQualityLevel, useQualitySettings, useQualityStore } from './quality/quality-store';
