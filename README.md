@@ -10,6 +10,7 @@ em tempo real, com dados 3D, névoa e anotações enviadas pelo mestre.
 
 - Salas por link: o jogador entra com um apelido, e a conta é opcional.
 - Editor de mapas 3D com peças prontas (uso livre) e envio de modelos `.glb` próprios.
+- Gerador de vilas e cidades (medieval, moderna ou futurista) e casas prontas para pôr com um clique.
 - Tokens com imagem ou boneco 3D, barra de vida e notas.
 - Névoa que o mestre pinta e revela.
 - Anotações do mestre, com texto e imagem, para a mesa toda ou para jogadores escolhidos; chegam na hora e ficam salvas na mesa.
@@ -74,6 +75,14 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
 - **Montar:** escolha uma peça na aba "Biblioteca" e clique na grade; para pintar o chão, dá para
   arrastar. A barra de baixo troca a ferramenta: chão, parede, objeto, apagar e elevar ou abaixar o
   chão. A tecla `R` gira a peça, e o botão de atalhos mostra todas as teclas.
+- **Gerar vila ou cidade:** em "Novo mapa", a opção "Vila ou cidade" monta o mapa inteiro com ruas,
+  casas mobiliadas com portas, janelas e telhados, praças, árvores e veículos. Escolha o estilo, o
+  tamanho (vila 64, cidadezinha 160, cidade 400 ou metrópole 1000 casas de lado) e a semente: a mesma
+  semente gera sempre o mesmo mapa, e "Sortear" troca por outra. A prévia mostra a planta antes de
+  salvar. Mapas grandes são salvos em partes, com barra de progresso; se uma parte falhar, dá para
+  tentar de novo, deixar o mapa como está ou apagá-lo. Os exemplos prontos usam sementes fixas.
+- **Casas prontas:** a aba "Casas" (atalho `H`) traz casas inteiras de cada estilo, com móveis e
+  telhado. Um clique põe a casa no cursor, `R` gira, e `Ctrl+Z` desfaz a casa toda de uma vez.
 - **Desfazer e refazer:** `Ctrl+Z` desfaz; `Ctrl+Y` (ou `Ctrl+Shift+Z`) refaz. O mapa se salva
   sozinho, e o canto de baixo avisa quando está "Salvando…" e "Salvo".
 - **Estilos de peças:** a biblioteca tem peças medievais, modernas e futuristas, com filtro por
