@@ -374,10 +374,25 @@ function sidewalkRing(planner: Planner, area: CellRect): CellRect {
   return inset(area, 1);
 }
 
+/** Faixa mínima da praça entre as duas fileiras de casas. */
+const MIN_PLAZA_DEPTH = 6;
+
+/**
+ * Quarteirão fundo vira largo de mercado: casas nas faces norte e sul, praça na faixa do
+ * meio. Sem isso, na vila pequena (4 quarteirões) a praça vazia ocuparia um quarto do mapa.
+ */
+function fillPlazaBlock(planner: Planner, area: CellRect): void {
+  const rowDepth = planner.profile.lotDepth;
+  const middle = area.depth - 2 * rowDepth;
+  if (middle < MIN_PLAZA_DEPTH) return fillPlaza(planner, area);
+  fillLots(planner, area);
+  fillPlaza(planner, { x: area.x, z: area.z + rowDepth, width: area.width, depth: middle });
+}
+
 function fillBlock(planner: Planner, area: CellRect, isPlaza: boolean): void {
   const inner = sidewalkRing(planner, area);
   if (inner.width <= 0 || inner.depth <= 0) return;
-  if (isPlaza) return fillPlaza(planner, inner);
+  if (isPlaza) return fillPlazaBlock(planner, inner);
   if (planner.random.chance(planner.profile.parkChance)) return fillPark(planner, inner);
   fillLots(planner, inner);
 }

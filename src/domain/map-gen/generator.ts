@@ -15,6 +15,7 @@ import {
   MAX_MAP_SIZE_V2,
   MAX_PIECES_PER_CHUNK,
   MAX_WALLS_PER_CHUNK,
+  wallKey,
   wallOwnerChunk,
   type MapChunk,
   type MapModel,
@@ -54,7 +55,7 @@ export type GeneratedSettlement = {
 };
 
 /** Pedaço em construção: os arrays ainda podem ser mexidos, ninguém mais os tem. */
-type Draft = { walls: MapWall[]; pieces: MapPiece[] };
+type Draft = { walls: MapWall[]; pieces: MapPiece[]; wallKeys: Set<string> };
 
 type Builder = {
   readonly size: GridSize;
@@ -66,18 +67,25 @@ type Builder = {
 function draftAt(builder: Builder, key: string): Draft {
   const found = builder.drafts.get(key);
   if (found) return found;
-  const draft: Draft = { walls: [], pieces: [] };
+  const draft: Draft = { walls: [], pieces: [], wallKeys: new Set() };
   builder.drafts.set(key, draft);
   return draft;
 }
 
+/**
+ * Dois prédios encostados pelos fundos dividem a parede da divisa: a aresta recebe uma parede
+ * só (a do primeiro prédio), como o domínio exige.
+ */
 function addWall(builder: Builder, wall: MapWall): void {
   const draft = draftAt(builder, chunkKey(wallOwnerChunk(builder.size, wall)));
+  const key = wallKey(wall);
+  if (draft.wallKeys.has(key)) return;
   if (draft.walls.length >= MAX_WALLS_PER_CHUNK) {
     builder.dropped += 1;
     return;
   }
   draft.walls.push(wall);
+  draft.wallKeys.add(key);
 }
 
 /** Id curto e único no mapa: o pedaço da âncora e a ordem dentro dele. */
@@ -225,7 +233,7 @@ export function buildSettlement(plan: SettlementPlan): GeneratedSettlement {
   for (const coord of listChunks(size)) {
     const key = chunkKey(coord);
     const bounds = chunkBounds(size, coord);
-    const draft = builder.drafts.get(key) ?? { walls: [], pieces: [] };
+    const draft = builder.drafts.get(key) ?? { walls: [], pieces: [], wallKeys: new Set() };
     walls += draft.walls.length;
     pieces += draft.pieces.length;
     chunks.set(key, {

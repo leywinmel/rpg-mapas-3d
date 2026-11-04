@@ -7,14 +7,23 @@
 
 .preview {
   display: block;
-  width: 100%;
+  justify-self: center;
+  width: min(100%, 14rem);
   aspect-ratio: 1;
-  max-height: 14rem;
-  object-fit: contain;
   image-rendering: pixelated;
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+}
+
+/* O fieldset só serve para desligar todos os campos de uma vez durante a gravação. */
+.fields {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
 .seedRow {
@@ -89,6 +98,7 @@
 }
 
 .caption {
+  justify-self: center;
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }

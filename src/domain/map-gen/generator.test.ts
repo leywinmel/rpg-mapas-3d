@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  loadMapModel,
   parseChunk,
   pieceRect,
   rectContains,
   serializeChunk,
+  serializeMapModel,
   terrainAt,
   type MapModel,
   type MapPiece,
@@ -41,6 +43,19 @@ describe('settlement generator', () => {
         expect(ids.has(piece.id)).toBe(false);
         ids.add(piece.id);
       }
+    }
+  });
+
+  // Na cidadezinha há prédios encostados pelos fundos: a parede da divisa não pode repetir.
+  it.each(SETTLEMENT_STYLES)('shouldSurviveTheRoundTripThroughTheDatabase (%s)', (style) => {
+    for (const seed of [2024, 2077, 7]) {
+      const { model } = generateSettlement({ style, size: side(TOWN), seed });
+      const stored = JSON.parse(JSON.stringify(serializeMapModel(model))) as {
+        header: unknown;
+        chunks: { coord: { cx: number; cz: number }; document: unknown }[];
+      };
+      const loaded = loadMapModel({ size: model.size, ...stored });
+      expect(loaded.ok ? [] : loaded.errors.slice(0, 3)).toEqual([]);
     }
   });
 

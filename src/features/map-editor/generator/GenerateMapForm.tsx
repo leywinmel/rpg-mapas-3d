@@ -65,7 +65,7 @@ export function GenerateMapFields({
   };
   return (
     <form id={formId} className={panel.form} onSubmit={submit} noValidate>
-      <fieldset className={panel.form} disabled={disabled}>
+      <fieldset className={styles.fields} disabled={disabled}>
         <div className={panel.field}>
           <span className={panel.label}>Exemplos prontos</span>
           <div className={styles.examples}>
