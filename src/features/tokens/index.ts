@@ -9,6 +9,7 @@ export { TokensPanel } from './components/TokensPanel';
 export { TokensSceneLayer } from './components/TokensSceneLayer';
 export { TokensSync } from './components/TokensSync';
 export { useTokensStore, type TableView } from './hooks/tokens-store';
+export { tokenWorldPosition } from './scene/token-scene';
 // Para exportar e importar o mapa com os tokens (feature export).
 export { DEFAULT_TOKEN_COLORS, TOKEN_MODEL_KEYS, type TokenModelKey } from './constants';
 export { getTokensService, type TokensService } from './services/tokens-service';

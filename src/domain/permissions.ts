@@ -78,3 +78,14 @@ export function canSendNotes(viewer: Viewer): boolean {
 export function canManageInitiative(viewer: Viewer): boolean {
   return isGameMaster(viewer);
 }
+
+/**
+ * Valor da iniciativa: o mestre muda qualquer um; o jogador, só o da entrada do próprio token
+ * (a mesma regra da política de update e do gatilho guard_initiative_update).
+ */
+export function canEditInitiativeValue(
+  viewer: Viewer,
+  entry: { readonly ownerId: string | null },
+): boolean {
+  return isGameMaster(viewer) || (entry.ownerId !== null && entry.ownerId === viewer.userId);
+}

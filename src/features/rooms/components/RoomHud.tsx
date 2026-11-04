@@ -7,6 +7,7 @@ import {
   Download,
   Link2,
   Pencil,
+  Swords,
   Trash2,
   UserRound,
   Users,
@@ -17,6 +18,8 @@ import { ExportPanel } from '@/features/export';
 import { NotesButton, NotesPanel, NotesProvider } from '@/features/notes';
 import { QualityButton } from '@/features/scene';
 import { FogPanel } from '@/features/fog';
+import { InitiativePanel } from '@/features/initiative';
+import { TableToolButtons, ToolHint } from '@/features/table-tools';
 import { TokensPanel, useTokensStore } from '@/features/tokens';
 import { reportError } from '@/lib/report-error';
 import { useRoomSession } from '../hooks/room-session-context';
@@ -28,7 +31,7 @@ import styles from './rooms.module.css';
 type OpenDialog = 'rename' | 'delete' | 'leave' | null;
 
 /** O canto superior direito abre um painel por vez: quem está na mesa ou as anotações. */
-type SidePanel = 'presence' | 'notes' | 'tokens' | 'fog' | 'export' | null;
+type SidePanel = 'presence' | 'notes' | 'tokens' | 'fog' | 'initiative' | 'export' | null;
 
 async function copyInviteLink(slug: string): Promise<void> {
   const link = absoluteAppUrl(roomPath(slug));
@@ -94,6 +97,13 @@ export function RoomHud() {
             onClick={() => toggleSidePanel('presence')}
           />
           <NotesButton active={sidePanel === 'notes'} onClick={() => toggleSidePanel('notes')} />
+          <TableToolButtons />
+          <IconButton
+            label={sidePanel === 'initiative' ? 'Esconder a iniciativa' : 'Mostrar a iniciativa'}
+            icon={<Swords size={18} />}
+            active={sidePanel === 'initiative'}
+            onClick={() => toggleSidePanel('initiative')}
+          />
           <IconButton
             label={sidePanel === 'tokens' ? 'Esconder os tokens' : 'Mostrar os tokens'}
             icon={<UserRound size={18} />}
@@ -140,6 +150,7 @@ export function RoomHud() {
           <ThemeToggle />
         </Toolbar>
       </div>
+      <ToolHint />
       {sidePanel === 'presence' && (
         <div className={styles.sidePanel}>
           <PresencePanel onClose={closeSidePanel} />
@@ -153,6 +164,11 @@ export function RoomHud() {
       {isGameMaster && sidePanel === 'fog' && (
         <div className={styles.sidePanel}>
           <FogPanel onClose={closeSidePanel} />
+        </div>
+      )}
+      {sidePanel === 'initiative' && (
+        <div className={styles.sidePanel}>
+          <InitiativePanel onClose={closeSidePanel} />
         </div>
       )}
       {sidePanel === 'export' && (

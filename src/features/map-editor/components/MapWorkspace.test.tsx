@@ -23,6 +23,8 @@ vi.mock('./PieceThumbnail', () => ({ PieceThumbnail: () => <span /> }));
 
 /** A máquina de testes é lenta e a cena entra por import dinâmico: dá mais folga à espera. */
 const SLOW = { timeout: 5000 };
+// Gerar a vila inteira leva mais de 5 s quando a suíte toda roda em paralelo.
+const GENERATION = { timeout: 12000 };
 
 const ROOM_ID = 'room-1';
 const SIZE = { width: 6, depth: 4 };
@@ -212,12 +214,12 @@ describe('MapWorkspace', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Gerar mapa' }));
 
     // O mapa já existe no banco, mas sem os pedaços: o erro aparece dentro da janela.
-    expect(await within(dialog).findByRole('alert', {}, SLOW)).toHaveTextContent(
+    expect(await within(dialog).findByRole('alert', {}, GENERATION)).toHaveTextContent(
       'parte dele não foi gravada',
     );
     expect(fake.db.maps).toHaveLength(1);
     fireEvent.click(within(dialog).getByRole('button', { name: 'Tentar de novo' }));
-    expect(await screen.findByTestId('viewport', {}, SLOW)).toHaveTextContent(
+    expect(await screen.findByTestId('viewport', {}, GENERATION)).toHaveTextContent(
       'Mapa 3D: Vila medieval',
     );
     const pieces = [...fake.db.maps[0]!.model.chunks.values()].flatMap((chunk) => chunk.pieces);

@@ -13,6 +13,7 @@ em tempo real, com dados 3D, névoa e anotações enviadas pelo mestre.
 - Gerador de vilas e cidades (medieval, moderna ou futurista) e casas prontas para pôr com um clique.
 - Tokens com imagem ou boneco 3D, barra de vida e notas.
 - Névoa que o mestre pinta e revela.
+- Ferramentas da mesa: régua em casas e metros, ping ao vivo e ordem de iniciativa com vez e rodada.
 - Anotações do mestre, com texto e imagem, para a mesa toda ou para jogadores escolhidos; chegam na hora e ficam salvas na mesa.
 - Dados 3D com física, que todos veem rolar; o mestre pode rolar escondido e a mesa guarda o histórico.
 - Exportar mapas como arquivo do site, imagem PNG ou modelo 3D `.glb`.
@@ -161,6 +162,23 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
 - **Antes de usar:** o mapa precisa estar salvo no formato novo (salve no editor uma vez).
 - **Testar sozinho:** como nos dados, entre em `/sala/demo` com o mestre e a jogadora em duas origens
   diferentes, cubra tudo numa aba e revele um pedaço olhando a outra.
+
+### Ferramentas da mesa
+
+- **Régua:** o botão de régua na barra do topo liga a medida; arraste no mapa de uma casa a outra.
+  Conta em casas e metros (1 casa = 1,5 m), com a diagonal valendo 1 casa (regra da 5ª edição).
+  É só sua; o botão de antena no aviso do canto compartilha a régua ao vivo com a mesa. `Esc` apaga.
+- **Ping:** `Alt` + clique no mapa (ou o botão de alfinete e um clique) mostra um marcador animado
+  para todo mundo, com o seu apelido. Vai só pelo canal ao vivo, nada fica no banco, e há um limite
+  de 3 pings a cada 3 segundos. Sob a névoa, o jogador só marca a casa: o ping não mostra o que
+  está coberto.
+- **Iniciativa:** o botão de espadas abre o painel "Iniciativa". O mestre põe tokens do mapa ou
+  entradas livres (armadilha, reforços) com o valor, desempata com as setas, começa o combate, passa
+  e volta a vez e encerra com a bandeira. A rodada conta sozinha, e um anel laranja marca no mapa o
+  token da vez. O jogador vê a ordem ao vivo e muda só o valor do próprio token.
+- **O que o jogador não vê:** token escondido ou sob a névoa não aparece na ordem do jogador (o banco
+  nem manda a linha), e a entrada livre pode ser marcada como escondida.
+- **Na imagem:** com "esconder a interface" no PNG, a régua, o ping e o anel da vez ficam de fora.
 
 ### Exportar e importar
 

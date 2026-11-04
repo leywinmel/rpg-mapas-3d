@@ -51,14 +51,14 @@ isOneToOne: false
                   ]
                 },"initiative_entries": {
                   Row: {
-                    "created_at": string,"id": string,"is_current": boolean,"label": string,"position": number,"room_id": string,"token_id": string | null,"value": number
+                    "created_at": string,"hidden": boolean,"id": string,"is_current": boolean,"label": string,"position": number,"room_id": string,"token_id": string | null,"value": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"is_current"?: boolean,"label": string,"position"?: number,"room_id": string,"token_id"?: string | null,"value"?: number
+                    "created_at"?: string,"hidden"?: boolean,"id"?: string,"is_current"?: boolean,"label": string,"position"?: number,"room_id": string,"token_id"?: string | null,"value"?: number
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"is_current"?: boolean,"label"?: string,"position"?: number,"room_id"?: string,"token_id"?: string | null,"value"?: number
+                    "created_at"?: string,"hidden"?: boolean,"id"?: string,"is_current"?: boolean,"label"?: string,"position"?: number,"room_id"?: string,"token_id"?: string | null,"value"?: number
                   }
                   Relationships: [
                     {
@@ -295,14 +295,14 @@ isOneToOne: false
                   ]
                 },"rooms": {
                   Row: {
-                    "active_map_id": string | null,"created_at": string,"cutaway_lock": number | null,"id": string,"name": string,"owner_id": string,"slug": string,"updated_at": string
+                    "active_map_id": string | null,"created_at": string,"cutaway_lock": number | null,"id": string,"initiative_round": number,"name": string,"owner_id": string,"slug": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "active_map_id"?: string | null,"created_at"?: string,"cutaway_lock"?: number | null,"id"?: string,"name": string,"owner_id": string,"slug"?: string,"updated_at"?: string
+                    "active_map_id"?: string | null,"created_at"?: string,"cutaway_lock"?: number | null,"id"?: string,"initiative_round"?: number,"name": string,"owner_id": string,"slug"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "active_map_id"?: string | null,"created_at"?: string,"cutaway_lock"?: number | null,"id"?: string,"name"?: string,"owner_id"?: string,"slug"?: string,"updated_at"?: string
+                    "active_map_id"?: string | null,"created_at"?: string,"cutaway_lock"?: number | null,"id"?: string,"initiative_round"?: number,"name"?: string,"owner_id"?: string,"slug"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -432,12 +432,16 @@ isOneToOne: false
 "can_view_map":
 { Args: { "p_map": string }; Returns: boolean
                            },
+"clear_initiative":
+{ Args: { "p_room_id": string }; Returns: undefined
+                           },
 "create_room":
 { Args: { "p_name": string,"p_nickname": string }; Returns: {
               "active_map_id": string | null,
 "created_at": string,
 "cutaway_lock": number | null,
 "id": string,
+"initiative_round": number,
 "name": string,
 "owner_id": string,
 "slug": string,
@@ -498,6 +502,9 @@ isOneToOne: false
 "note_room_id":
 { Args: { "p_note": string }; Returns: string
                            },
+"owns_initiative_token":
+{ Args: { "p_token": string }; Returns: boolean
+                           },
 "redact_fogged_chunk":
 { Args: { "p_bits": unknown,"p_cx": number,"p_cz": number,"p_document": Json,"p_map": string }; Returns: Json
                            },
@@ -527,6 +534,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"set_initiative_turn":
+{ Args: { "p_current"?: string,"p_room_id": string,"p_round": number }; Returns: undefined
+                           },
 "shares_room_with":
 { Args: { "p_user": string }; Returns: boolean
                            }

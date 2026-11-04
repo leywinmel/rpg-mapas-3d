@@ -1,6 +1,7 @@
 import { createFogState, fillFog, paintFogRect } from './fog';
 import {
   canCreateRoom,
+  canEditInitiativeValue,
   canEditTokenField,
   canMoveToken,
   canRollHidden,
@@ -52,5 +53,11 @@ describe('permissions', () => {
     expect(canCreateRoom(ana)).toBe(true);
     expect(canRollHidden(ana)).toBe(false);
     expect(canRollHidden(gm)).toBe(true);
+  });
+  it('shouldLetPlayersEditOnlyTheirOwnInitiativeValue', () => {
+    expect(canEditInitiativeValue(ana, { ownerId: 'ana' })).toBe(true);
+    expect(canEditInitiativeValue(guest, { ownerId: 'ana' })).toBe(false);
+    expect(canEditInitiativeValue(ana, { ownerId: null })).toBe(false);
+    expect(canEditInitiativeValue(gm, { ownerId: null })).toBe(true);
   });
 });
