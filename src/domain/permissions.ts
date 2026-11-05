@@ -42,6 +42,14 @@ export function canMoveToken(viewer: Viewer, token: TokenAccess): boolean {
   return isGameMaster(viewer) || token.ownerId === viewer.userId;
 }
 
+/**
+ * Mover o cenário durante o jogo (carros, caixotes): só o mestre. É a mesma regra do banco, que
+ * só deixa quem edita o mapa gravar os pedaços (map_chunks).
+ */
+export function canMoveScenery(viewer: Viewer): boolean {
+  return isGameMaster(viewer);
+}
+
 export function canEditTokenField(viewer: Viewer, token: TokenAccess, field: string): boolean {
   if (isGameMaster(viewer)) return true;
   if (token.ownerId !== viewer.userId) return false;
