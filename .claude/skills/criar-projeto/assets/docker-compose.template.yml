@@ -1,0 +1,48 @@
+# docker-compose.template.yml
+# Base do AMBIENTE LOCAL dos servicos acessorios. Adapte aos servicos reais do projeto.
+# Regras: credenciais/portas SEMPRE via .env [#80][#37]; healthchecks [#82]; paridade com prod [#81].
+# Suba com:  ./scripts/dev.sh start   (ou)   scripts\dev.bat start
+
+services:
+  db:
+    image: postgres:16-alpine            # fixe a versao major para paridade com prod [#81]
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data  # persistencia via volume nomeado
+    healthcheck:                          # app so sobe quando o banco estiver pronto [#82]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Cache/sessao — remova se a arquitetura nao usar cache estrategico [#66]
+  cache:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Fila/mensageria — exemplo para processamento assincrono [#72]. Remova se nao usar.
+  # queue:
+  #   image: rabbitmq:3-management-alpine
+  #   restart: unless-stopped
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+  #     RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+  #   ports:
+  #     - "5672:5672"
+  #     - "15672:15672"
+
+volumes:
+  db_data:

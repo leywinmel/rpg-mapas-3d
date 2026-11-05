@@ -1,0 +1,24 @@
+@echo off
+rem ============================================================
+rem  dev.bat - controle do ambiente local (Windows)
+rem  Uso:  scripts\dev.bat [start^|stop^|restart^|status^|logs]
+rem  Encapsula o docker compose para o desenvolvedor nao decorar comandos.
+rem  Le a config do .env (fonte unica de verdade).
+rem ============================================================
+setlocal
+cd /d "%~dp0\.."
+
+set "ACAO=%~1"
+if "%ACAO%"=="" set "ACAO=start"
+
+if /i "%ACAO%"=="start"   ( docker compose up -d & goto fim )
+if /i "%ACAO%"=="stop"    ( docker compose down & goto fim )
+if /i "%ACAO%"=="restart" ( docker compose down & docker compose up -d & goto fim )
+if /i "%ACAO%"=="status"  ( docker compose ps & goto fim )
+if /i "%ACAO%"=="logs"    ( docker compose logs -f & goto fim )
+
+echo Uso: scripts\dev.bat [start^|stop^|restart^|status^|logs]
+exit /b 1
+
+:fim
+endlocal
