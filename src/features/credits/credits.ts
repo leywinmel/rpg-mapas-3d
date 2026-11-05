@@ -43,7 +43,7 @@ export const MODEL_CREDITS: readonly Credit[] = [
     work: 'Car Kit',
     author: 'Kenney',
     url: 'https://kenney.nl/assets/car-kit',
-    usage: 'Carros, caminhões, veículos de serviço e o carro futurista.',
+    usage: 'Carros, caminhões, tratores, veículos de serviço, o carro futurista e os karts.',
     ...CC0,
   },
 ];
