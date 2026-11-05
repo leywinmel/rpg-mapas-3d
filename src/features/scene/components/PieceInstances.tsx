@@ -65,7 +65,8 @@ export function PieceInstances({ layers, transforms, ghost = false }: PieceInsta
           geometry={layer.geometry}
           material={ghost ? getGhostMaterial(layer.material) : layer.material}
           transforms={transforms}
-          shadows={!ghost}
+          // Vidro é translúcido: com sombra cheia, a janela escurecia o chão como uma parede.
+          shadows={!ghost && !layer.material.transparent}
         />
       ))}
     </>
