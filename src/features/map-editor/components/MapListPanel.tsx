@@ -22,27 +22,61 @@ import styles from './SidePanel.module.css';
 
 const ICON_SIZE = 14;
 
-export type MapListPanelProps = {
-  maps: readonly MapSummary[];
-  activeMapId: string | null;
+type MapSelection = {
   /** Mapa aberto no editor do mestre (pode não ser o que a mesa está vendo). */
   selectedMapId: string | null;
   onSelect: (mapId: string | null) => void;
   actions: MapActions;
 };
 
-/** Lista de mapas da mesa: abrir no editor, mostrar à mesa, renomear, duplicar, ordenar, apagar. */
-export function MapListPanel({
-  maps,
-  activeMapId,
-  selectedMapId,
-  onSelect,
-  actions,
-}: MapListPanelProps) {
+/** Qual janela da lista de mapas está aberta (criar, importar, renomear, apagar). */
+export type MapDialogs = MapSelection & {
+  creating: number;
+  importing: number;
+  renaming: MapSummary | null;
+  deleting: MapSummary | null;
+  openCreate: () => void;
+  openImport: () => void;
+  setCreating: (value: number) => void;
+  setImporting: (value: number) => void;
+  setRenaming: (map: MapSummary | null) => void;
+  setDeleting: (map: MapSummary | null) => void;
+};
+
+/**
+ * O estado das janelas fica com quem monta a área do mapa, e não com a lista: a lista troca de
+ * lugar quando um mapa abre no editor (por exemplo, o primeiro mapa da mesa, recém-criado pelo
+ * gerador), e a janela de criar não pode sumir no meio da gravação com o "Tentar de novo".
+ */
+export function useMapDialogs(selection: MapSelection): MapDialogs {
   const [creating, setCreating] = useState(0);
   const [importing, setImporting] = useState(0);
   const [renaming, setRenaming] = useState<MapSummary | null>(null);
   const [deleting, setDeleting] = useState<MapSummary | null>(null);
+  return {
+    ...selection,
+    creating,
+    importing,
+    renaming,
+    deleting,
+    openCreate: () => setCreating((value) => value + 1),
+    openImport: () => setImporting((value) => value + 1),
+    setCreating,
+    setImporting,
+    setRenaming,
+    setDeleting,
+  };
+}
+
+export type MapListPanelProps = {
+  maps: readonly MapSummary[];
+  activeMapId: string | null;
+  dialogs: MapDialogs;
+};
+
+/** Lista de mapas da mesa: abrir no editor, mostrar à mesa, renomear, duplicar, ordenar, apagar. */
+export function MapListPanel({ maps, activeMapId, dialogs }: MapListPanelProps) {
+  const { selectedMapId, onSelect, actions, setRenaming, setDeleting } = dialogs;
   const [busyId, setBusyId] = useState<string | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const ordered = sortMaps(maps);
@@ -60,12 +94,6 @@ export function MapListPanel({
     }
   };
 
-  const create = async (input: NewMapInput) => {
-    const summary = await actions.create(input);
-    setCreating(0);
-    onSelect(summary.id);
-  };
-
   const duplicate = (map: MapSummary) =>
     quick(
       map.id,
@@ -76,24 +104,12 @@ export function MapListPanel({
   const move = (map: MapSummary, direction: MoveDirection) =>
     quick(map.id, () => actions.move(map.id, direction), 'Não conseguimos mudar a ordem.');
 
-  const remove = async () => {
-    if (!deleting) return;
-    await actions.remove(deleting.id);
-    if (selectedMapId === deleting.id) onSelect(null);
-    setDeleting(null);
-  };
-
   return (
     <div className={styles.stack}>
-      <Button icon={<Plus size={16} />} block onClick={() => setCreating((value) => value + 1)}>
+      <Button icon={<Plus size={16} />} block onClick={dialogs.openCreate}>
         Novo mapa
       </Button>
-      <Button
-        variant="secondary"
-        icon={<FileUp size={16} />}
-        block
-        onClick={() => setImporting((value) => value + 1)}
-      >
+      <Button variant="secondary" icon={<FileUp size={16} />} block onClick={dialogs.openImport}>
         Importar mapa
       </Button>
       {ordered.length === 0 && (
@@ -187,6 +203,33 @@ export function MapListPanel({
           {failure}
         </p>
       )}
+    </div>
+  );
+}
+
+/**
+ * As janelas da lista de mapas. Ficam num lugar fixo da área do mapa (veja useMapDialogs), fora
+ * da barra lateral que muda quando o editor abre.
+ */
+export function MapListDialogs({ dialogs }: { dialogs: MapDialogs }) {
+  const { creating, importing, renaming, deleting, actions, onSelect, selectedMapId } = dialogs;
+  const { setCreating, setImporting, setRenaming, setDeleting } = dialogs;
+
+  const create = async (input: NewMapInput) => {
+    const summary = await actions.create(input);
+    setCreating(0);
+    onSelect(summary.id);
+  };
+
+  const remove = async () => {
+    if (!deleting) return;
+    await actions.remove(deleting.id);
+    if (selectedMapId === deleting.id) onSelect(null);
+    setDeleting(null);
+  };
+
+  return (
+    <>
       <ImportMapDialog
         key={`import-${importing}`}
         open={importing > 0}
@@ -222,6 +265,6 @@ export function MapListPanel({
         onClose={() => setDeleting(null)}
         onDelete={remove}
       />
-    </div>
+    </>
   );
 }

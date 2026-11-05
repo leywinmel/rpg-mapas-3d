@@ -18,7 +18,7 @@ import { uploadedAssetIds, useModelUrls } from '../hooks/useModelUrls';
 import { useRoomMaps } from '../hooks/useRoomMaps';
 import { EditorSidebar } from './EditorSidebar';
 import { MapEditor } from './MapEditor';
-import { MapListPanel } from './MapListPanel';
+import { MapListDialogs, MapListPanel, useMapDialogs } from './MapListPanel';
 import layout from './MapWorkspace.module.css';
 
 const MapViewport = lazy(() => import('./MapViewport'));
@@ -163,22 +163,57 @@ function GameMasterView({
   const state = useMapModel(selectedId, { attempt });
   const selected = room.maps.find((map) => map.id === selectedId);
 
+  const dialogs = useMapDialogs({ selectedMapId: selectedId, onSelect: setChosenId, actions });
   const mapsPanel = (
-    <MapListPanel
-      maps={room.maps}
-      activeMapId={room.activeMapId}
-      selectedMapId={selectedId}
-      onSelect={setChosenId}
-      actions={actions}
-    />
+    <MapListPanel maps={room.maps} activeMapId={room.activeMapId} dialogs={dialogs} />
   );
 
+  // As janelas ficam sempre no mesmo lugar: o mapa que abre no editor não as desmonta.
+  return (
+    <>
+      <GameMasterArea
+        selectedId={selectedId}
+        state={state}
+        name={selected?.name}
+        mapsPanel={mapsPanel}
+        onRetry={() => setAttempt((value) => value + 1)}
+        cutaway={cutaway}
+        onPerfSample={onPerfSample}
+        table={table}
+      />
+      <MapListDialogs dialogs={dialogs} />
+    </>
+  );
+}
+
+type GameMasterAreaProps = {
+  selectedId: string | null;
+  state: ReturnType<typeof useMapModel>;
+  name: string | undefined;
+  mapsPanel: ReactNode;
+  onRetry: () => void;
+  cutaway: CutawayBinding;
+  onPerfSample?: MapWorkspaceProps['onPerfSample'];
+  table?: TableBinding;
+};
+
+/** O editor do mapa escolhido ou, enquanto ele não abre, a lista com o aviso do momento. */
+function GameMasterArea({
+  selectedId,
+  state,
+  name,
+  mapsPanel,
+  onRetry,
+  cutaway,
+  onPerfSample,
+  table,
+}: GameMasterAreaProps) {
   if (state.status === 'ready' && state.map.summary.id === selectedId) {
     return (
       <MapEditor
         key={selectedId}
         map={state.map}
-        name={selected?.name}
+        name={name}
         mapsPanel={mapsPanel}
         cutaway={cutaway}
         onPerfSample={onPerfSample}
@@ -202,10 +237,7 @@ function GameMasterView({
           />
         )}
         {selectedId && state.status === 'error' && (
-          <ErrorState
-            description={MAP_LOAD_ERROR[state.reason]}
-            onRetry={() => setAttempt((value) => value + 1)}
-          />
+          <ErrorState description={MAP_LOAD_ERROR[state.reason]} onRetry={onRetry} />
         )}
         {selectedId && state.status !== 'error' && <LoadingState label="Abrindo o mapa…" />}
       </Centered>
