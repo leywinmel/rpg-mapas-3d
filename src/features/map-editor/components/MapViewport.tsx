@@ -18,12 +18,17 @@ export type MapViewportProps = {
   cutaway?: Cutaway;
   /** Presente só para o mestre: liga as ferramentas de edição na cena. */
   editor?: EditorSceneBinding;
+  /**
+   * O mapa em que o editor trabalha, quando a cena desenha outro por cima dele (o objeto que
+   * ainda desliza até o lugar novo). Sem ele, o editor usa o próprio `model`.
+   */
+  editModel?: MapModel;
   onPerfSample?: (sample: PerfSample) => void;
   /** Camada da mesa (tokens, névoa), por cima do mapa. */
   layer?: ReactNode;
 };
 
-export default function MapViewport({ editor, layer, ...scene }: MapViewportProps) {
+export default function MapViewport({ editor, editModel, layer, ...scene }: MapViewportProps) {
   const editing = editor && editor.view.tool !== 'select';
   return (
     <MapScene {...scene} mode={editing ? 'edit' : 'view'}>
@@ -31,7 +36,7 @@ export default function MapViewport({ editor, layer, ...scene }: MapViewportProp
         // O cursor e o fantasma do editor são interface: a imagem exportada pode escondê-los.
         <group userData={SCENE_UI_USER_DATA}>
           <EditorInteraction
-            model={scene.model}
+            model={editModel ?? scene.model}
             modelUrls={scene.modelUrls}
             view={editor.view}
             actions={editor.actions}

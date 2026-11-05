@@ -9,7 +9,7 @@ import { CutawayControl } from '../cutaway/CutawayControl';
 import { Minimap } from '../minimap/Minimap';
 import { showsMinimap } from '../minimap/minimap-image';
 import { MapCornerHud } from './MapCornerHud';
-import { useReportView, type TableBinding } from './table-binding';
+import { useReportView, useShownModel, type TableBinding } from './table-binding';
 import { useOwnCutaway } from '../cutaway/useOwnCutaway';
 import { sortMaps } from '../editor/map-list';
 import { useMapActions } from '../hooks/useMapActions';
@@ -69,14 +69,18 @@ function PlayerView({
     settle: reuseUnchangedChunks,
     incremental: true,
   });
-  const model = state.status === 'ready' ? state.map.model : null;
-  const assetIds = useMemo(() => uploadedAssetIds(model), [model]);
+  const readyModel = state.status === 'ready' ? state.map.model : null;
+  // A cena desenha o mapa com o ajuste da mesa; a mesa (tokens, névoa, exportar) segue o do banco.
+  const model = useShownModel(mapId, readyModel, table?.adjustModel);
+  const assetIds = useMemo(() => uploadedAssetIds(readyModel), [readyModel]);
   const modelUrls = useModelUrls(assetIds);
-  const top = useMemo(() => (model ? topStory(model) : 0), [model]);
+  const top = useMemo(() => (readyModel ? topStory(readyModel) : 0), [readyModel]);
   const name = room.maps.find((map) => map.id === mapId)?.name;
   useReportView(
     table,
-    mapId && model ? { mapId, model, cutaway: visibleCutaway(cutaway), name, modelUrls } : null,
+    mapId && readyModel
+      ? { mapId, model: readyModel, cutaway: visibleCutaway(cutaway), name, modelUrls }
+      : null,
   );
 
   if (!mapId) {
@@ -108,7 +112,7 @@ function PlayerView({
       <ErrorBoundary area="a cena 3D" fill>
         <Suspense fallback={<LoadingState label="Montando a cena 3D…" fill />}>
           <MapViewport
-            model={state.map.model}
+            model={model ?? state.map.model}
             modelUrls={modelUrls}
             label={`Mapa 3D: ${name ?? summary.name}`}
             cutaway={visibleCutaway(cutaway)}

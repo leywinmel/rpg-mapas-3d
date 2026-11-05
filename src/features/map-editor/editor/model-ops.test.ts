@@ -4,6 +4,7 @@ import {
   eraseTarget,
   eraseTargetAt,
   findPiece,
+  movePieceTo,
   pieceFor,
   placePieceAt,
   placeWallAt,
@@ -68,6 +69,30 @@ describe('model-ops', () => {
     expect(findPiece(raised, ref)?.level).toBe(3);
     expect(ok(shiftPieceLevel(placed, ref, -1))).toBe(placed);
     expect(ok(shiftPieceLevel(placed, { ...ref, id: 'nada' }, 1))).toBe(placed);
+  });
+
+  it('shouldMoveALooseObjectOntoTheGroundOfTheNewCellKeepingItsLift', () => {
+    const ref = { id: 'p1', x: 1, z: 1 };
+    const placed = ok(placePieceAt(hill(createEmptyMap(SIZE), 4, 2, 3), draft()));
+    const onHill = ok(movePieceTo(placed, ref, { x: 4, z: 2 }));
+    expect(findPiece(onHill, { id: 'p1', x: 4, z: 2 })?.level).toBe(3);
+    // Erguido à mão um degrau acima do chão: continua um degrau acima no lugar novo.
+    const lifted = ok(shiftPieceLevel(placed, ref, 1));
+    expect(
+      findPiece(ok(movePieceTo(lifted, ref, { x: 4, z: 2 })), { ...ref, x: 4, z: 2 })?.level,
+    ).toBe(4);
+  });
+
+  it('shouldKeepFixedSceneryAndRefuseLeavingTheMap', () => {
+    const pillar = { source: 'catalog', key: 'pilar' } as const;
+    const model = ok(placePieceAt(createEmptyMap(SIZE), draft({ asset: pillar })));
+    expect(ok(movePieceTo(model, { id: 'p1', x: 1, z: 1 }, { x: 3, z: 3 }))).toBe(model);
+    const car = { source: 'catalog', key: 'mod-carro' } as const;
+    const withCar = ok(
+      placePieceAt(createEmptyMap(SIZE), draft({ asset: car, footprint: { width: 2, depth: 1 } })),
+    );
+    expect(movePieceTo(withCar, { id: 'p1', x: 1, z: 1 }, { x: 5, z: 1 }).ok).toBe(false);
+    expect(movePieceTo(withCar, { id: 'p1', x: 1, z: 1 }, { x: -1, z: 1 }).ok).toBe(false);
   });
 
   it('shouldRestANewWallOnTheHigherSideOfTheEdge', () => {

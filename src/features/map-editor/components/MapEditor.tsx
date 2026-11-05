@@ -1,11 +1,21 @@
-import { lazy, Suspense, useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { ErrorBoundary, LoadingState, notify } from '@/components';
+import type { Cell } from '@/domain';
 import { topStory } from '@/domain/map-v2';
 import type { StyleFilter } from '@/features/scene';
 import type { PerfSample } from '@/features/scene/components/PerfMeter';
 import { visibleCutaway, type CutawayBinding } from '../cutaway/cutaway-binding';
 import { CutawayControl } from '../cutaway/CutawayControl';
-import { useReportView, type TableBinding } from './table-binding';
+import { useReportView, useShownModel, type TableBinding } from './table-binding';
 import { Minimap } from '../minimap/Minimap';
 import { showsMinimap } from '../minimap/minimap-image';
 import { MapCornerHud } from './MapCornerHud';
@@ -48,17 +58,28 @@ function commandToAction(command: EditorCommand): EditorAction {
       return { type: 'delete-selected' };
     case 'level':
       return { type: 'shift-level', delta: command.delta };
+    case 'nudge':
+      return { type: 'nudge-selected', dx: command.dx, dz: command.dz };
     case 'escape':
       return { type: 'set-tool', tool: 'select' };
   }
 }
 
-function useEditorShortcuts(dispatch: (action: EditorAction) => void) {
+/**
+ * `hasSelection` diz se há objeto selecionado agora: sem ele as setas ficam com a página (rolar
+ * um painel), em vez de serem engolidas por um atalho que não faria nada.
+ */
+function useEditorShortcuts(dispatch: (action: EditorAction) => void, hasSelection: boolean) {
+  const selection = useRef(hasSelection);
+  useEffect(() => {
+    selection.current = hasSelection;
+  }, [hasSelection]);
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!isSceneKey(event)) return;
       const command = shortcutCommand(event);
       if (!command) return;
+      if (command.type === 'nudge' && !selection.current) return;
       event.preventDefault();
       dispatch(commandToAction(command));
     };
@@ -98,7 +119,9 @@ export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample, table }
     stored: map.saved,
     save: mapsV2.saveMapV2,
   });
-  useEditorShortcuts(dispatch);
+  useEditorShortcuts(dispatch, state.tool === 'select' && state.selectedPiece !== null);
+  // O que a cena desenha: o mapa do editor com o que a mesa sobrepõe (o objeto deslizando).
+  const shown = useShownModel(summary.id, model, table?.adjustModel);
 
   // Jogada recusada (ex: a peça não cabe): avisa uma vez; o mesmo aviso repetido no arraste não.
   useEffect(() => {
@@ -120,6 +143,8 @@ export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample, table }
       onStrokeMove: (hit: PointerHit) => dispatch({ type: 'stroke-move', hit }),
       onStrokeEnd: () => dispatch({ type: 'stroke-end' }),
       onSelectAt: (hit: PointerHit) => dispatch({ type: 'select-at', hit }),
+      onGrab: (hit: PointerHit) => dispatch({ type: 'select-at', hit }),
+      onDrop: (anchor: Cell) => dispatch({ type: 'move-selected', anchor }),
     }),
     [],
   );
@@ -198,7 +223,8 @@ export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample, table }
       <ErrorBoundary area="a cena 3D" fill>
         <Suspense fallback={<LoadingState label="Montando a cena 3D…" fill />}>
           <MapViewport
-            model={model}
+            model={shown}
+            editModel={model}
             modelUrls={modelUrls}
             label={`Mapa 3D: ${title}`}
             editor={{ view, actions }}

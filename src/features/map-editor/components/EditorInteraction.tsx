@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { ThreeEvent } from '@react-three/fiber';
+import { useThree, type ThreeEvent } from '@react-three/fiber';
 import {
   BoxGeometry,
   EdgesGeometry,
@@ -7,7 +7,7 @@ import {
   RingGeometry,
   MeshBasicMaterial,
 } from 'three';
-import { isInside } from '@/domain';
+import { isInside, type Cell } from '@/domain';
 import { findPrefab, prefabBaseLevel, prefabBlueprint, prefabRect } from '@/domain/map-gen';
 import {
   isRectInside,
@@ -21,6 +21,7 @@ import {
   type PieceRef,
 } from '@/domain/map-v2';
 import {
+  isMovableAsset,
   modelHeightMap,
   nearestEdge,
   pickCell,
@@ -30,6 +31,7 @@ import {
   type CellHit,
   type HeightMap,
 } from '@/features/scene';
+import { useCameraLock } from '@/features/scene/camera/useCameraLock';
 import { pieceTransform } from '@/features/scene/chunks/chunk-instances';
 import {
   AssetPieces,
@@ -37,7 +39,14 @@ import {
   type ModelUrls,
 } from '@/features/scene/components/AssetPieces';
 import type { Brush, PointerHit, Tool } from '../editor/editor-reducer';
-import { eraseTargetAt, findPiece, pieceFor, wallFor } from '../editor/model-ops';
+import {
+  eraseTargetAt,
+  findPiece,
+  movePieceTo,
+  pieceFor,
+  topPieceAt,
+  wallFor,
+} from '../editor/model-ops';
 
 /** Arrasto menor que isto (px) ainda conta como clique de seleção, não como giro de câmera. */
 const CLICK_TOLERANCE_PX = 4;
@@ -67,6 +76,10 @@ export type EditorSceneActions = {
   onStrokeMove: (hit: PointerHit) => void;
   onStrokeEnd: () => void;
   onSelectAt: (hit: PointerHit) => void;
+  /** Apertou um carro ou objeto solto com a ferramenta Selecionar: ele fica selecionado. */
+  onGrab: (hit: PointerHit) => void;
+  /** Soltou o objeto arrastado nesta âncora (a casa de menor x e z dele). */
+  onDrop: (anchor: Cell) => void;
 };
 
 export type EditorSceneBinding = { view: EditorViewState; actions: EditorSceneActions };
@@ -243,6 +256,130 @@ function SelectionRing({ model, selected }: { model: MapModel; selected: PieceRe
   );
 }
 
+/** Arraste de um objeto já posto: quem é, onde o cursor pegou nele e onde ele cairia agora. */
+type PieceDrag = {
+  ref: PieceRef;
+  /** Casa apertada menos a âncora: o objeto não pula para debaixo do cursor ao pegar. */
+  grip: { dx: number; dz: number };
+  anchor: Cell;
+  startX: number;
+  startY: number;
+  moved: boolean;
+};
+
+type DragGhostProps = { drag: PieceDrag; model: MapModel; modelUrls: ModelUrls };
+
+/** Onde o objeto arrastado cairia: já apoiado no chão novo, ou vermelho quando sai do mapa. */
+function DragGhost({ drag, model, modelUrls }: DragGhostProps) {
+  const piece = findPiece(model, drag.ref);
+  const preview = useMemo(() => {
+    if (!piece) return null;
+    const moved = movePieceTo(model, piece, drag.anchor);
+    const ref = { id: piece.id, ...drag.anchor };
+    return moved.ok ? (findPiece(moved.value, ref) ?? null) : null;
+  }, [model, piece, drag.anchor]);
+  if (!piece) return null;
+  if (!preview) return <FootprintMarker piece={{ ...piece, ...drag.anchor }} model={model} />;
+  return (
+    <>
+      <AssetPieces
+        asset={preview.asset}
+        transforms={[pieceTransform(preview)]}
+        modelUrls={modelUrls}
+        ghost
+      />
+      <FootprintMarker piece={preview} model={model} />
+    </>
+  );
+}
+
+/** Carro ou objeto solto mais alto da casa: o que o mestre pega com a ferramenta Selecionar. */
+function grabbableAt(model: MapModel, cell: Cell): MapPiece | undefined {
+  const top = topPieceAt(model, cell);
+  return top && isMovableAsset(top.asset) ? top : undefined;
+}
+
+/**
+ * Pegar, arrastar e soltar um objeto já posto (RPG-27). Enquanto arrasta, a câmera não gira; o
+ * mapa só muda ao soltar, num passo só do histórico (é aí que a mesa vê o objeto deslizar).
+ */
+function usePieceDrag(model: MapModel, actions: EditorSceneActions) {
+  const lockCamera = useCameraLock();
+  const [drag, setDrag] = useState<PieceDrag | null>(null);
+  const dragRef = useRef<PieceDrag | null>(null);
+  const update = (next: PieceDrag | null) => {
+    dragRef.current = next;
+    setDrag(next);
+  };
+
+  // Soltar fora do canvas também termina o arraste (senão o objeto ficaria "grudado").
+  useEffect(() => {
+    if (!drag) return;
+    const finish = () => {
+      const current = dragRef.current;
+      update(null);
+      lockCamera(false);
+      if (!current?.moved) return;
+      if (current.anchor.x === current.ref.x && current.anchor.z === current.ref.z) return;
+      actions.onDrop(current.anchor);
+    };
+    window.addEventListener('pointerup', finish);
+    window.addEventListener('blur', finish);
+    return () => {
+      window.removeEventListener('pointerup', finish);
+      window.removeEventListener('blur', finish);
+    };
+    // Só a presença do arraste importa: o resto é lido do ref na hora de soltar.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drag !== null]);
+
+  const start = (event: ThreeEvent<PointerEvent>, hit: PointerHit) => {
+    const piece = grabbableAt(model, hit.cell);
+    if (!piece) return;
+    lockCamera(true);
+    actions.onGrab(hit);
+    update({
+      ref: { id: piece.id, x: piece.x, z: piece.z },
+      grip: { dx: hit.cell.x - piece.x, dz: hit.cell.z - piece.z },
+      anchor: { x: piece.x, z: piece.z },
+      startX: event.nativeEvent.clientX,
+      startY: event.nativeEvent.clientY,
+      moved: false,
+    });
+  };
+
+  const move = (event: ThreeEvent<PointerEvent>, hit: PointerHit | null) => {
+    const current = dragRef.current;
+    if (!current || !hit) return;
+    const distance = Math.hypot(
+      event.nativeEvent.clientX - current.startX,
+      event.nativeEvent.clientY - current.startY,
+    );
+    if (!current.moved && distance <= CLICK_TOLERANCE_PX) return;
+    const anchor = { x: hit.cell.x - current.grip.dx, z: hit.cell.z - current.grip.dz };
+    if (current.moved && anchor.x === current.anchor.x && anchor.z === current.anchor.z) return;
+    update({ ...current, anchor, moved: true });
+  };
+
+  return { drag, start, move };
+}
+
+type GrabCursor = 'none' | 'grab' | 'grabbing';
+
+/** Mãozinha sobre o que dá para pegar; mão fechada enquanto arrasta. */
+function useGrabCursor(cursor: GrabCursor) {
+  const get = useThree((three) => three.get);
+  useEffect(() => {
+    if (cursor === 'none') return;
+    const canvas = get().gl.domElement;
+    const previous = canvas.style.cursor;
+    canvas.style.cursor = cursor;
+    return () => {
+      canvas.style.cursor = previous;
+    };
+  }, [get, cursor]);
+}
+
 export type EditorInteractionProps = EditorSceneBinding & {
   model: MapModel;
   modelUrls: ModelUrls;
@@ -259,6 +396,10 @@ export function EditorInteraction({ model, modelUrls, view, actions }: EditorInt
   const [hover, setHover] = useState<CellHit | null>(null);
   const [dragging, setDragging] = useState(false);
   const currentKey = useRef('');
+  const pieceDrag = usePieceDrag(model, actions);
+  const canGrab =
+    view.tool === 'select' && hover !== null && grabbableAt(model, hover.cell) !== undefined;
+  useGrabCursor(pieceDrag.drag ? 'grabbing' : canGrab ? 'grab' : 'none');
 
   const updateHover = (hit: CellHit | null) => {
     const key = hoverKey(view.tool, hit);
@@ -285,13 +426,18 @@ export function EditorInteraction({ model, modelUrls, view, actions }: EditorInt
   const onPointerMove = (event: ThreeEvent<PointerEvent>) => {
     const hit = pickCell(event.ray, heights);
     updateHover(hit);
+    pieceDrag.move(event, hit);
     if (dragging && hit) actions.onStrokeMove(hit);
   };
 
   const onPointerDown = (event: ThreeEvent<PointerEvent>) => {
-    if (event.button !== 0 || view.tool === 'select') return;
+    if (event.button !== 0) return;
     const hit = pickCell(event.ray, heights);
     if (!hit) return;
+    if (view.tool === 'select') {
+      pieceDrag.start(event, hit);
+      return;
+    }
     setDragging(true);
     actions.onStrokeStart(hit);
   };
@@ -315,8 +461,11 @@ export function EditorInteraction({ model, modelUrls, view, actions }: EditorInt
       >
         <planeGeometry args={[width + CATCH_PLANE_MARGIN, depth + CATCH_PLANE_MARGIN]} />
       </mesh>
-      {hover && (
+      {hover && !pieceDrag.drag?.moved && (
         <Ghost hit={hover} view={view} model={model} heights={heights} modelUrls={modelUrls} />
+      )}
+      {pieceDrag.drag?.moved && (
+        <DragGhost drag={pieceDrag.drag} model={model} modelUrls={modelUrls} />
       )}
       {view.selectedPiece && <SelectionRing model={model} selected={view.selectedPiece} />}
     </>
