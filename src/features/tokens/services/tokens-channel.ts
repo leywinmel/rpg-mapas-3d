@@ -5,6 +5,7 @@ import {
   sendBroadcast,
   type SharedChannelEntry,
 } from '@/lib/realtime-channel';
+import { pieceMovedMessageSchema, type PieceMovedMessage } from '@/domain/map-v2';
 import { getSupabase, type AppSupabaseClient } from '@/lib/supabase';
 import { TOKEN_EVENTS } from '../constants';
 import { dragMessageSchema, tokenIdMessageSchema, type DragMessage } from '../schemas';
@@ -15,6 +16,8 @@ export type TokensChannelHandlers = {
   /** Um token foi gravado: reler a linha (o RLS decide se ela ainda aparece). */
   onSaved: (tokenId: string) => void;
   onRemoved: (tokenId: string) => void;
+  /** O mestre moveu uma peça do cenário que está à vista de todos. */
+  onPieceMoved: (message: PieceMovedMessage) => void;
   /** Conectou ou reconectou: pode ter perdido avisos no meio. */
   onConnected: () => void;
   onConnectionProblem: (error: unknown) => void;
@@ -24,6 +27,7 @@ export type TokensChannel = {
   sendDrag: (message: DragMessage) => Promise<void>;
   announceSaved: (tokenId: string) => Promise<void>;
   announceRemoved: (tokenId: string) => Promise<void>;
+  announcePieceMoved: (message: PieceMovedMessage) => Promise<void>;
   close: () => void;
 };
 
@@ -60,6 +64,10 @@ function listen(entry: OpenChannel): void {
     .on('broadcast', { event: TOKEN_EVENTS.removed }, ({ payload }) => {
       const message = parsed(tokenIdMessageSchema, payload, 'receive-removed');
       if (message) entry.handlers.onRemoved(message.tokenId);
+    })
+    .on('broadcast', { event: TOKEN_EVENTS.pieceMoved }, ({ payload }) => {
+      const message = parsed(pieceMovedMessageSchema, payload, 'receive-piece-moved');
+      if (message) entry.handlers.onPieceMoved(message);
     });
   entry.channel.subscribe((status, error) => {
     if (status === 'SUBSCRIBED') {
@@ -92,6 +100,7 @@ export function openTokensChannel(
     sendDrag: (message) => sendBroadcast(entry.channel, TOKEN_EVENTS.drag, message),
     announceSaved: (tokenId) => sendBroadcast(entry.channel, TOKEN_EVENTS.saved, { tokenId }),
     announceRemoved: (tokenId) => sendBroadcast(entry.channel, TOKEN_EVENTS.removed, { tokenId }),
+    announcePieceMoved: (message) => sendBroadcast(entry.channel, TOKEN_EVENTS.pieceMoved, message),
     close,
   };
 }

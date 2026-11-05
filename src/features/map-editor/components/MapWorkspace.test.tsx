@@ -218,12 +218,17 @@ describe('MapWorkspace', () => {
       'parte dele não foi gravada',
     );
     expect(fake.db.maps).toHaveLength(1);
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Tentar de novo' }));
+    // O mapa incompleto já abre no editor (é o único da mesa); a janela continua lá, com o
+    // "Tentar de novo". Antes ela sumia quando a lista ia para a barra do editor.
     expect(await screen.findByTestId('viewport', {}, GENERATION)).toHaveTextContent(
       'Mapa 3D: Vila medieval',
     );
-    const pieces = [...fake.db.maps[0]!.model.chunks.values()].flatMap((chunk) => chunk.pieces);
-    expect(pieces.length).toBeGreaterThan(100);
+    expect(dialog).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Tentar de novo' }));
+    await waitFor(() => {
+      const pieces = [...fake.db.maps[0]!.model.chunks.values()].flatMap((chunk) => chunk.pieces);
+      expect(pieces.length).toBeGreaterThan(100);
+    }, GENERATION);
   });
 
   it('shouldShowADeleteFailureInsideTheDialog', async () => {

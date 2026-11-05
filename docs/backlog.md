@@ -63,3 +63,4 @@ antes de tokens e névoa (RPG-8 a RPG-11).
 - [x] **RPG-24** Altura e andares: cada casa tem altura (morros, degraus, plataformas, escadas, rampas), as peças empilham (sobrados, torres, prédios) e um corte esconde o que está acima de uma altura para ver o lado de dentro. Cada jogador mexe no próprio corte; o mestre trava ou libera.
 - [x] **RPG-25** Mapas de até 1000×1000 casas, guardados e desenhados em pedaços. Em PC fraco a qualidade se ajusta sozinha (menos detalhe ao longe, sombras simples), com um botão para trocar.
 - [x] **RPG-26** Objetos maiores que uma casa: carros, carroças, carruagens, árvores grandes, fontes e afins ocupam várias casas (ex.: 2×4) e giram de 90 em 90 graus. Pedido do usuário em 01/11.
+- [x] **RPG-27** O mestre move carros e objetos soltos do cenário durante o jogo (arrastar, `R` e setas); a mesa vê a peça deslizar até o lugar novo e o jogador continua movendo só tokens. Pedido do usuário em 01/11.

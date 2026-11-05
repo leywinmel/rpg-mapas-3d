@@ -40,6 +40,7 @@ import {
 import {
   eraseTarget,
   eraseTargetAt,
+  movePieceTo,
   normalizeQuarterTurns,
   placePieceAt,
   placeWallAt,
@@ -117,6 +118,10 @@ export type EditorAction =
   | { type: 'stroke-end' }
   | { type: 'select-at'; hit: PointerHit }
   | { type: 'delete-selected' }
+  /** Leva o objeto selecionado (carro ou objeto solto) para a âncora: soltou o arraste. */
+  | { type: 'move-selected'; anchor: Cell }
+  /** Empurra o objeto selecionado uma casa pelas setas do teclado. */
+  | { type: 'nudge-selected'; dx: number; dz: number }
   /** Sobe (positivo) ou desce o objeto selecionado, em degraus. */
   | { type: 'shift-level'; delta: number }
   | { type: 'undo' }
@@ -316,6 +321,17 @@ function rotate(state: EditorState): EditorState {
   return { ...state, rotation: normalizeQuarterTurns(state.rotation + 1) };
 }
 
+/** O objeto selecionado vai para a âncora nova e continua selecionado lá. */
+function moveSelected(state: EditorState, anchor: Cell): EditorState {
+  const selected = state.tool === 'select' ? state.selectedPiece : null;
+  if (!selected) return state;
+  const moved = movePieceTo(state.history.present, selected, anchor);
+  if (moved.ok && moved.value === state.history.present) return state;
+  const committed = commit(state, moved);
+  if (!moved.ok) return committed;
+  return { ...committed, selectedPiece: { id: selected.id, x: anchor.x, z: anchor.z } };
+}
+
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
   switch (action.type) {
     case 'set-tool':
@@ -379,6 +395,13 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         piece: state.selectedPiece,
       });
       return { ...commit(state, removed), selectedPiece: null };
+    }
+    case 'move-selected':
+      return moveSelected(finishStroke(state), action.anchor);
+    case 'nudge-selected': {
+      const selected = state.selectedPiece;
+      if (!selected) return state;
+      return moveSelected(state, { x: selected.x + action.dx, z: selected.z + action.dz });
     }
     case 'shift-level': {
       if (state.tool !== 'select' || !state.selectedPiece) return state;

@@ -28,6 +28,15 @@ describe('shortcuts', () => {
     expect(shortcutCommand(key('Escape'))).toEqual({ type: 'escape' });
   });
 
+  it('shouldNudgeTheSelectedPieceWithTheArrows', () => {
+    expect(shortcutCommand(key('ArrowUp'))).toEqual({ type: 'nudge', dx: 0, dz: -1 });
+    expect(shortcutCommand(key('ArrowDown'))).toEqual({ type: 'nudge', dx: 0, dz: 1 });
+    expect(shortcutCommand(key('ArrowLeft'))).toEqual({ type: 'nudge', dx: -1, dz: 0 });
+    expect(shortcutCommand(key('ArrowRight'))).toEqual({ type: 'nudge', dx: 1, dz: 0 });
+    // Shift + seta fica livre para a câmera.
+    expect(shortcutCommand(key('ArrowUp', { shiftKey: true }))).toBeNull();
+  });
+
   it('shouldMoveTheSelectedPieceWithShiftPageUpAndDown', () => {
     expect(shortcutCommand(key('PageUp', { shiftKey: true }))).toEqual({ type: 'level', delta: 1 });
     expect(shortcutCommand(key('PageDown', { shiftKey: true }))).toEqual({

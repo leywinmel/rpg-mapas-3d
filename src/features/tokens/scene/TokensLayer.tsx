@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
+import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import { RingGeometry, type Group } from 'three';
 import { anchorUnderCursor, canMoveToken, type Cell } from '@/domain';
 import { isPieceVisible } from '@/domain/map-v2';
 import { useRoomSession } from '@/features/rooms';
 import { modelHeightMap, pickCell, SCENE_UI_USER_DATA, type HeightMap } from '@/features/scene';
+import { useCameraLock } from '@/features/scene/camera/useCameraLock';
 import { useTokensStore } from '../hooks/tokens-store';
 import type { Token } from '../types';
 import { TokenLabel } from './TokenLabel';
@@ -29,22 +30,6 @@ const ringGeometry = new RingGeometry(
   TOKEN_SHAPE.selectionOuter,
   32,
 ).rotateX(-Math.PI / 2);
-
-type Toggleable = { enabled: boolean };
-
-function isToggleable(value: unknown): value is Toggleable {
-  return typeof value === 'object' && value !== null && 'enabled' in value;
-}
-
-/** A câmera não gira enquanto um token é arrastado com o botão esquerdo. */
-function useCameraLock() {
-  const getState = useThree((state) => state.get);
-  return (locked: boolean) => {
-    // Lido na hora: os controles da câmera são do three, não estado do React.
-    const { controls } = getState();
-    if (isToggleable(controls)) controls.enabled = !locked;
-  };
-}
 
 type PieceProps = {
   token: Token;

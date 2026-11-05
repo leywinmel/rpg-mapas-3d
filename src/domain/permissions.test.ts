@@ -3,6 +3,7 @@ import {
   canCreateRoom,
   canEditInitiativeValue,
   canEditTokenField,
+  canMoveScenery,
   canMoveToken,
   canRollHidden,
   canSeeToken,
@@ -21,6 +22,12 @@ describe('permissions', () => {
     expect(canMoveToken(ana, anaToken)).toBe(true);
     expect(canMoveToken(guest, anaToken)).toBe(false);
     expect(canMoveToken(gm, monster)).toBe(true);
+  });
+
+  it('shouldLetOnlyTheGameMasterMoveTheScenery', () => {
+    expect(canMoveScenery(gm)).toBe(true);
+    expect(canMoveScenery(ana)).toBe(false);
+    expect(canMoveScenery(guest)).toBe(false);
   });
 
   it('shouldMirrorTheDatabaseFieldGuard', () => {

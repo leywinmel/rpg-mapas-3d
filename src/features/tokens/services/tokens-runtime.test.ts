@@ -40,6 +40,7 @@ function fakeChannel() {
     sendDrag: vi.fn(async () => undefined),
     announceSaved: vi.fn(async () => undefined),
     announceRemoved: vi.fn(async () => undefined),
+    announcePieceMoved: vi.fn(async () => undefined),
     close: vi.fn(),
   } satisfies TokensChannel;
 }
@@ -84,6 +85,19 @@ describe('tokens runtime', () => {
     useTokensStore.getState().setFogCovers(() => true);
     actions.dragToken(token(), { x: 3, z: 1 });
     expect(channel.sendDrag).not.toHaveBeenCalled();
+    dispose();
+  });
+
+  it('shouldAnnounceAMovedPieceOnTheTableChannel', () => {
+    const { actions, channel, dispose } = setup(GM);
+    const message = {
+      mapId: MAP_ID,
+      pieceId: 'carro-1',
+      from: { x: 1, z: 1, rotation: 0, level: 0 },
+      to: { x: 4, z: 1, rotation: 1, level: 0 },
+    };
+    actions.announcePieceMoved(message);
+    expect(channel.announcePieceMoved).toHaveBeenCalledWith(message);
     dispose();
   });
 

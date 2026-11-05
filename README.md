@@ -84,6 +84,11 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   tentar de novo, deixar o mapa como está ou apagá-lo. Os exemplos prontos usam sementes fixas.
 - **Casas prontas:** a aba "Casas" (atalho `H`) traz casas inteiras de cada estilo, com móveis e
   telhado. Um clique põe a casa no cursor, `R` gira, e `Ctrl+Z` desfaz a casa toda de uma vez.
+- **Mover carros e objetos durante o jogo:** com a ferramenta de seleção (`V`), o mestre arrasta um
+  veículo ou objeto solto (barril, caixa, mesa, baú, modelo `.glb` próprio) para outra casa; `R` gira
+  a peça escolhida e as setas a empurram uma casa. Paredes, chão, telhados e casas ficam no lugar. A
+  mesa toda vê a peça deslizar até o lugar novo, e `Ctrl+Z` desfaz. O jogador não move peças: só
+  tokens. Peça sob a névoa não é anunciada; ela aparece para o jogador quando a névoa sai.
 - **Desfazer e refazer:** `Ctrl+Z` desfaz; `Ctrl+Y` (ou `Ctrl+Shift+Z`) refaz. O mapa se salva
   sozinho, e o canto de baixo avisa quando está "Salvando…" e "Salvo".
 - **Estilos de peças:** a biblioteca tem peças medievais, modernas e futuristas, com filtro por

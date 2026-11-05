@@ -9,7 +9,7 @@ import { CutawayControl } from '../cutaway/CutawayControl';
 import { Minimap } from '../minimap/Minimap';
 import { showsMinimap } from '../minimap/minimap-image';
 import { MapCornerHud } from './MapCornerHud';
-import { useReportView, type TableBinding } from './table-binding';
+import { useReportView, useShownModel, type TableBinding } from './table-binding';
 import { useOwnCutaway } from '../cutaway/useOwnCutaway';
 import { sortMaps } from '../editor/map-list';
 import { useMapActions } from '../hooks/useMapActions';
@@ -18,7 +18,7 @@ import { uploadedAssetIds, useModelUrls } from '../hooks/useModelUrls';
 import { useRoomMaps } from '../hooks/useRoomMaps';
 import { EditorSidebar } from './EditorSidebar';
 import { MapEditor } from './MapEditor';
-import { MapListPanel } from './MapListPanel';
+import { MapListDialogs, MapListPanel, useMapDialogs } from './MapListPanel';
 import layout from './MapWorkspace.module.css';
 
 const MapViewport = lazy(() => import('./MapViewport'));
@@ -69,14 +69,18 @@ function PlayerView({
     settle: reuseUnchangedChunks,
     incremental: true,
   });
-  const model = state.status === 'ready' ? state.map.model : null;
-  const assetIds = useMemo(() => uploadedAssetIds(model), [model]);
+  const readyModel = state.status === 'ready' ? state.map.model : null;
+  // A cena desenha o mapa com o ajuste da mesa; a mesa (tokens, névoa, exportar) segue o do banco.
+  const model = useShownModel(mapId, readyModel, table?.adjustModel);
+  const assetIds = useMemo(() => uploadedAssetIds(readyModel), [readyModel]);
   const modelUrls = useModelUrls(assetIds);
-  const top = useMemo(() => (model ? topStory(model) : 0), [model]);
+  const top = useMemo(() => (readyModel ? topStory(readyModel) : 0), [readyModel]);
   const name = room.maps.find((map) => map.id === mapId)?.name;
   useReportView(
     table,
-    mapId && model ? { mapId, model, cutaway: visibleCutaway(cutaway), name, modelUrls } : null,
+    mapId && readyModel
+      ? { mapId, model: readyModel, cutaway: visibleCutaway(cutaway), name, modelUrls }
+      : null,
   );
 
   if (!mapId) {
@@ -108,7 +112,7 @@ function PlayerView({
       <ErrorBoundary area="a cena 3D" fill>
         <Suspense fallback={<LoadingState label="Montando a cena 3D…" fill />}>
           <MapViewport
-            model={state.map.model}
+            model={model ?? state.map.model}
             modelUrls={modelUrls}
             label={`Mapa 3D: ${name ?? summary.name}`}
             cutaway={visibleCutaway(cutaway)}
@@ -159,22 +163,57 @@ function GameMasterView({
   const state = useMapModel(selectedId, { attempt });
   const selected = room.maps.find((map) => map.id === selectedId);
 
+  const dialogs = useMapDialogs({ selectedMapId: selectedId, onSelect: setChosenId, actions });
   const mapsPanel = (
-    <MapListPanel
-      maps={room.maps}
-      activeMapId={room.activeMapId}
-      selectedMapId={selectedId}
-      onSelect={setChosenId}
-      actions={actions}
-    />
+    <MapListPanel maps={room.maps} activeMapId={room.activeMapId} dialogs={dialogs} />
   );
 
+  // As janelas ficam sempre no mesmo lugar: o mapa que abre no editor não as desmonta.
+  return (
+    <>
+      <GameMasterArea
+        selectedId={selectedId}
+        state={state}
+        name={selected?.name}
+        mapsPanel={mapsPanel}
+        onRetry={() => setAttempt((value) => value + 1)}
+        cutaway={cutaway}
+        onPerfSample={onPerfSample}
+        table={table}
+      />
+      <MapListDialogs dialogs={dialogs} />
+    </>
+  );
+}
+
+type GameMasterAreaProps = {
+  selectedId: string | null;
+  state: ReturnType<typeof useMapModel>;
+  name: string | undefined;
+  mapsPanel: ReactNode;
+  onRetry: () => void;
+  cutaway: CutawayBinding;
+  onPerfSample?: MapWorkspaceProps['onPerfSample'];
+  table?: TableBinding;
+};
+
+/** O editor do mapa escolhido ou, enquanto ele não abre, a lista com o aviso do momento. */
+function GameMasterArea({
+  selectedId,
+  state,
+  name,
+  mapsPanel,
+  onRetry,
+  cutaway,
+  onPerfSample,
+  table,
+}: GameMasterAreaProps) {
   if (state.status === 'ready' && state.map.summary.id === selectedId) {
     return (
       <MapEditor
         key={selectedId}
         map={state.map}
-        name={selected?.name}
+        name={name}
         mapsPanel={mapsPanel}
         cutaway={cutaway}
         onPerfSample={onPerfSample}
@@ -198,10 +237,7 @@ function GameMasterView({
           />
         )}
         {selectedId && state.status === 'error' && (
-          <ErrorState
-            description={MAP_LOAD_ERROR[state.reason]}
-            onRetry={() => setAttempt((value) => value + 1)}
-          />
+          <ErrorState description={MAP_LOAD_ERROR[state.reason]} onRetry={onRetry} />
         )}
         {selectedId && state.status !== 'error' && <LoadingState label="Abrindo o mapa…" />}
       </Centered>

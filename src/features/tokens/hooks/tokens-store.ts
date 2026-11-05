@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Cell } from '@/domain';
+import type { PieceMovedMessage } from '@/domain/map-v2';
 import type { MapView } from '@/features/map-editor';
 import type { NewTokenInput, Token, TokenPatch } from '../types';
 
@@ -20,6 +21,8 @@ export type TokenActions = {
   dragToken: (token: Token, anchor: Cell) => void;
   /** Soltou: grava a casa nova; o andar acompanha o chão. */
   dropToken: (token: Token, anchor: Cell) => Promise<void>;
+  /** Avisa a mesa que o mestre moveu um carro ou objeto solto (quem chama já conferiu a névoa). */
+  announcePieceMoved: (message: PieceMovedMessage) => void;
   getImageUrl: (path: string) => Promise<string>;
   reload: () => void;
 };

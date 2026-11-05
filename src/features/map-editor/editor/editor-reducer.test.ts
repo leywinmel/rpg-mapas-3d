@@ -181,6 +181,50 @@ describe('editorReducer', () => {
     expect(deleted.selectedPiece).toBeNull();
   });
 
+  it('shouldMoveTheSelectedLooseObjectByDragAndArrowsAndUndoEachStep', () => {
+    const placed = run([
+      { type: 'choose-prop', asset: { source: 'catalog', key: 'barril' } },
+      { type: 'stroke-start', hit: hitAt(1, 1), newPropId: 'barril-1' },
+      { type: 'stroke-end' },
+      { type: 'set-tool', tool: 'select' },
+      { type: 'select-at', hit: hitAt(1, 1) },
+    ]);
+    const dropped = editorReducer(placed, { type: 'move-selected', anchor: { x: 3, z: 2 } });
+    expect(pieces(dropped).map(({ x, z }) => ({ x, z }))).toEqual([{ x: 3, z: 2 }]);
+    expect(dropped.selectedPiece).toEqual({ id: 'barril-1', x: 3, z: 2 });
+    const nudged = editorReducer(dropped, { type: 'nudge-selected', dx: 1, dz: 0 });
+    expect(pieces(nudged)[0]).toMatchObject({ x: 4, z: 2 });
+    const undone = editorReducer(nudged, { type: 'undo' });
+    expect(pieces(undone)[0]).toMatchObject({ x: 3, z: 2 });
+    expect(pieces(editorReducer(undone, { type: 'undo' }))[0]).toMatchObject({ x: 1, z: 1 });
+  });
+
+  it('shouldWarnWhenTheMovedObjectWouldLeaveTheMap', () => {
+    const placed = run([
+      { type: 'choose-prop', asset: { source: 'catalog', key: 'barril' } },
+      { type: 'stroke-start', hit: hitAt(0, 0), newPropId: 'barril-1' },
+      { type: 'stroke-end' },
+      { type: 'set-tool', tool: 'select' },
+      { type: 'select-at', hit: hitAt(0, 0) },
+    ]);
+    const refused = editorReducer(placed, { type: 'nudge-selected', dx: -1, dz: 0 });
+    expect(pieces(refused)[0]).toMatchObject({ x: 0, z: 0 });
+    expect(refused.notice?.message).toMatch(/sairia do mapa/);
+    expect(refused.selectedPiece).toEqual(placed.selectedPiece);
+  });
+
+  it('shouldNotMoveFixedScenery', () => {
+    const placed = run([
+      { type: 'choose-prop', asset: { source: 'catalog', key: 'pilar' } },
+      { type: 'stroke-start', hit: hitAt(1, 1), newPropId: 'pilar-1' },
+      { type: 'stroke-end' },
+      { type: 'set-tool', tool: 'select' },
+      { type: 'select-at', hit: hitAt(1, 1) },
+    ]);
+    expect(editorReducer(placed, { type: 'nudge-selected', dx: 1, dz: 0 })).toBe(placed);
+    expect(editorReducer(placed, { type: 'move-selected', anchor: { x: 3, z: 3 } })).toBe(placed);
+  });
+
   it('shouldDrawWallsOnTheNearestEdgeWithTheChosenHeight', () => {
     const state = run([
       { type: 'choose-wall', key: 'parede-madeira' },

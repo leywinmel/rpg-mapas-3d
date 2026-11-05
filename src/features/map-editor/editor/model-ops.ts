@@ -3,12 +3,13 @@
  * imutáveis de '@/domain/map-v2'); aqui só se traduz "o cursor está nesta casa, perto desta
  * aresta" para a operação certa, com a peça ou parede já apoiada no chão.
  */
-import type { Ambience, Cell, GridEdge, MapResult } from '@/domain';
+import { isInside, type Ambience, type Cell, type GridEdge, type MapResult } from '@/domain';
 import {
-  chunkKey,
+  findPiece,
   getChunk,
+  movePiece,
   paintTerrainCell,
-  pieceOwnerChunk,
+  pieceFitsInMap,
   piecesOccupyingCell,
   placePiece,
   placeWall,
@@ -27,12 +28,13 @@ import {
   type PieceAsset,
   type PieceRef,
 } from '@/domain/map-v2';
-import { distanceToNearestEdge, nearestEdge } from '@/features/scene';
+import { distanceToNearestEdge, isMovableAsset, nearestEdge } from '@/features/scene';
 import { heightOfPiece } from './piece-heights';
 
 /** Até esta distância da aresta, a borracha prefere apagar a parede em vez do chão. */
 export const WALL_ERASE_RANGE = 0.22;
 const DEFAULT_PIECE_SCALE = 1;
+const OUTSIDE_MAP_MESSAGE = 'O objeto não cabe ali: ele sairia do mapa.';
 
 export type PointerHit = { cell: Cell; point: { x: number; z: number } };
 
@@ -47,11 +49,8 @@ export function wallsOnEdge(model: MapModel, edge: GridEdge): MapWall[] {
     .sort((a, b) => a.level - b.level);
 }
 
-/** A peça pelo id e pela âncora, ou undefined se ela não existe mais (ex: depois de desfazer). */
-export function findPiece(model: MapModel, ref: PieceRef): MapPiece | undefined {
-  const owner = model.chunks.get(chunkKey(pieceOwnerChunk(ref)));
-  return owner?.pieces.find((piece) => piece.id === ref.id);
-}
+// A busca da peça pelo id e pela âncora mora no domínio (o mover do jogo usa a mesma).
+export { findPiece };
 
 /** Peça mais alta da casa: é a que o clique de seleção e a borracha pegam. */
 export function topPieceAt(model: MapModel, cell: Cell): MapPiece | undefined {
@@ -113,6 +112,27 @@ export function rotatePiece(model: MapModel, ref: PieceRef): MapResult<MapModel>
   const wasResting = piece.level === restingLevelOf(removed.value, piece);
   const level = wasResting ? restingLevelOf(removed.value, turned) : piece.level;
   return placePiece(removed.value, { ...turned, level });
+}
+
+/**
+ * Leva a peça para outra âncora, no mesmo giro (RPG-27: o mestre arrasta o carro ou empurra o
+ * caixote pelas setas). Ela volta a se apoiar no que está embaixo do lugar novo e guarda a
+ * folga que tinha acima do apoio (a que o mestre deu à mão com Shift+Page Up). Só carro e objeto
+ * solto se movem assim; o resto do cenário não muda, e o modelo volta o MESMO.
+ */
+export function movePieceTo(model: MapModel, ref: PieceRef, anchor: Cell): MapResult<MapModel> {
+  const piece = findPiece(model, ref);
+  if (!piece || !isMovableAsset(piece.asset)) return { ok: true, value: model };
+  if (piece.x === anchor.x && piece.z === anchor.z) return { ok: true, value: model };
+  const target = { ...piece, x: anchor.x, z: anchor.z };
+  if (!isInside(model.size, anchor) || !pieceFitsInMap(model.size, target)) {
+    return { ok: false, errors: [OUTSIDE_MAP_MESSAGE] };
+  }
+  const removed = removePiece(model, piece);
+  if (!removed.ok) return removed;
+  const lift = piece.level - restingLevelOf(removed.value, piece);
+  const level = Math.min(Math.max(restingLevelOf(removed.value, target) + lift, 0), MAX_LEVEL);
+  return movePiece(model, piece, { ...target, level });
 }
 
 /** Onde a peça pousaria ali, sem contar ela mesma. */
