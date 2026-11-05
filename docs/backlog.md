@@ -64,3 +64,42 @@ antes de tokens e névoa (RPG-8 a RPG-11).
 - [x] **RPG-25** Mapas de até 1000×1000 casas, guardados e desenhados em pedaços. Em PC fraco a qualidade se ajusta sozinha (menos detalhe ao longe, sombras simples), com um botão para trocar.
 - [x] **RPG-26** Objetos maiores que uma casa: carros, carroças, carruagens, árvores grandes, fontes e afins ocupam várias casas (ex.: 2×4) e giram de 90 em 90 graus. Pedido do usuário em 01/11.
 - [x] **RPG-27** O mestre move carros e objetos soltos do cenário durante o jogo (arrastar, `R` e setas); a mesa vê a peça deslizar até o lugar novo e o jogador continua movendo só tokens. Pedido do usuário em 01/11.
+
+## Épico 9: Detalhe e ambientação (pedido do usuário em 05/11)
+
+Decisões em `answers/2026_11_05 epico-9 001.md`. Ordem: correções primeiro, depois tokens, depois o resto.
+
+**Fase A: correções**
+
+- [ ] **RPG-28** Telhado fecha com a parede: oitão triangular nas pontas do telhado de duas águas, também nas casas prontas e no gerador.
+- [ ] **RPG-29** Andares com acabamento igual: sem cores ou texturas diferentes entre andares nem faixas soltas sobre as janelas; quinas que se fecham.
+- [ ] **RPG-30** Só o mestre escolhe o andar (corte de altura) que a mesa vê; o controle do jogador sai (muda a decisão do RPG-24).
+- [ ] **RPG-31** Telhados imunes à névoa: na área escondida o jogador vê os telhados; chão, interior e tokens continuam escondidos.
+
+**Fase B: tokens**
+
+- [ ] **RPG-32** Tokens 3D prontos e fofos: heróis de fantasia (elfo arqueiro, guerreiro, mago, ladino, anão, clérigo, bárbaro), monstros clássicos (goblin, orc, esqueleto, lobo, dragão), horror paranormal e cósmico (cultista, investigador, criatura de tentáculos), cyberpunk (mercenário, netrunner), pré-história (homem das cavernas) e NPCs da cidade (guarda, mercador, policial). Arquétipos genéricos, sem personagens com marca registrada.
+
+**Fase C: paredes**
+
+- [ ] **RPG-33** Acabamentos (tijolo, madeira, reboco, pedra) e paleta para tingir; a casa inteira fica com a mesma cor.
+
+**Fase D: cidade viva**
+
+- [ ] **RPG-34** Prédios públicos: delegacia, hospital, correios, lojinhas e mercado, nas casas prontas e no gerador de cidade.
+- [ ] **RPG-35** Praças com fonte, caminhos, bancos, canteiros e estátuas grandes; o gerador põe praça nas cidades.
+- [ ] **RPG-36** Decoração de rua: postes, hidrantes, lixeiras, placas, bancas, cones e caixas de correio.
+- [ ] **RPG-37** Vegetação: tipos de árvores, arbustos, flores, folhas e pedras no chão.
+
+**Fase E: clima e ambiente**
+
+- [ ] **RPG-38** Dia e noite (luz e céu), escolhidos pelo mestre.
+- [ ] **RPG-39** Chuva passando na tela; cada jogador pode desligar na própria tela.
+- [ ] **RPG-40** Fundos temáticos no lugar da cor única: floresta com folhas, deserto, cidade, masmorra, mar.
+- [ ] **RPG-41** Pisos novos: areia, deserto, poça e lama.
+
+**Fase F: estilos, mapas e interação**
+
+- [ ] **RPG-42** Estilo cyberpunk (neon, letreiros, hologramas, megaprédios, máquinas de venda) como estilo novo; o futurista atual continua como "sci-fi".
+- [ ] **RPG-43** Mapas prontos de masmorra, caverna e deserto no gerador, além de vilas e cidades.
+- [ ] **RPG-44** Peças com interação: garra do trator, portas traseiras de ambulância e van; só o mestre aciona e a mesa vê.
