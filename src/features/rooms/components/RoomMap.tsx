@@ -4,6 +4,12 @@ import { MapWorkspace, type MapView, type TableBinding } from '@/features/map-ed
 import { ExportSceneLayer } from '@/features/export';
 import { FogSceneLayer, FogSync, useFogStore } from '@/features/fog';
 import { InitiativeSceneLayer, InitiativeSync } from '@/features/initiative';
+import {
+  receivePieceMoved,
+  ScenerySceneLayer,
+  ScenerySync,
+  useSceneryAdjuster,
+} from '@/features/scenery';
 import { TableToolsSceneLayer, TableToolsSync } from '@/features/table-tools';
 import { TokensSceneLayer, TokensSync, useTokensStore } from '@/features/tokens';
 import { useRoomControls, useRoomSession } from '../hooks/room-session-context';
@@ -21,6 +27,7 @@ function showView(view: MapView | null) {
 const SCENE_LAYER = (
   <>
     <TokensSceneLayer />
+    <ScenerySceneLayer />
     <FogSceneLayer />
     <TableToolsSceneLayer />
     <InitiativeSceneLayer />
@@ -34,9 +41,11 @@ export function RoomMap() {
   const roomId = room.id;
   // Mudou a névoa: o jogador relê o mapa (o banco só manda o que está descoberto).
   const fogRevision = useFogStore((state) => state.revision);
+  // O carro que o mestre moveu desliza na cena; o pedaço do mapa não o desenha enquanto isso.
+  const adjustModel = useSceneryAdjuster();
   const table = useMemo<TableBinding>(
-    () => ({ sceneLayer: SCENE_LAYER, onView: showView, reloadKey: fogRevision }),
-    [fogRevision],
+    () => ({ sceneLayer: SCENE_LAYER, onView: showView, reloadKey: fogRevision, adjustModel }),
+    [fogRevision, adjustModel],
   );
   // A trava volta do banco e entra na sessão na hora; os jogadores a recebem pelo canal da mesa.
   const changeCutawayLock = useCallback(
@@ -45,7 +54,9 @@ export function RoomMap() {
   );
   return (
     <>
-      <TokensSync />
+      {/* O mestre é quem move: o aviso que volta pelo canal não serve para ele. */}
+      <TokensSync onPieceMoved={isGameMaster ? undefined : receivePieceMoved} />
+      <ScenerySync />
       <FogSync />
       <TableToolsSync />
       <InitiativeSync />

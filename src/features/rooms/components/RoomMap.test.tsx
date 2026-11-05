@@ -35,6 +35,13 @@ vi.mock('@/features/initiative', () => ({
   InitiativeSceneLayer: () => null,
 }));
 
+vi.mock('@/features/scenery', () => ({
+  ScenerySync: () => null,
+  ScenerySceneLayer: () => null,
+  receivePieceMoved: () => undefined,
+  useSceneryAdjuster: () => undefined,
+}));
+
 vi.mock('@/features/tokens', () => ({
   TokensSync: () => null,
   TokensSceneLayer: () => null,

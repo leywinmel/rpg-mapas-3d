@@ -1,5 +1,5 @@
 import { anchorUnderCursor, canMoveToken, tokenCells, type Cell, type Viewer } from '@/domain';
-import type { MapModel } from '@/domain/map-v2';
+import type { MapModel, PieceMovedMessage } from '@/domain/map-v2';
 import { heightAt, modelHeightMap, useCameraFocus } from '@/features/scene';
 import { reportError } from '@/lib/report-error';
 import { DRAG_BROADCAST_INTERVAL_MS, TOKENS_RELOAD_DELAY_MS } from '../constants';
@@ -82,6 +82,8 @@ export function connectTokensChannel(options: {
   service: TokensService;
   openChannel: typeof openTokensChannel;
   reloader: TokensReloader;
+  /** Quem cuida do cenário que o mestre move (a feature scenery); sem ele, o aviso é ignorado. */
+  onPieceMoved?: (message: PieceMovedMessage) => void;
 }): TokensChannel {
   const { service, reloader } = options;
   const refresh = async (tokenId: string) => {
@@ -105,6 +107,7 @@ export function connectTokensChannel(options: {
       },
       onSaved: (tokenId) => void refresh(tokenId),
       onRemoved: (tokenId) => useTokensStore.getState().removeToken(tokenId),
+      onPieceMoved: (message) => options.onPieceMoved?.(message),
       onConnected: reloader.soon,
       onConnectionProblem: createConnectionWarning(),
     },
@@ -185,6 +188,9 @@ export function createTokenActions(options: {
         useTokensStore.getState().upsertToken(token);
         tokenFailures.report(error, { action: 'move', toast: true });
       }
+    },
+    announcePieceMoved(message) {
+      announce((channel) => channel.announcePieceMoved(message));
     },
     getImageUrl: service.getImageUrl,
     reload: options.reloader.soon,

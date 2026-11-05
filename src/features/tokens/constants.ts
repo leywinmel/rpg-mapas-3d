@@ -48,6 +48,11 @@ export const TOKEN_EVENTS = {
   saved: 'token-saved',
   /** Um token foi apagado. */
   removed: 'token-removed',
+  /**
+   * O mestre moveu um carro ou objeto solto do mapa (RPG-27): `{ mapId, pieceId, from, to }`.
+   * Vai pelo mesmo canal dos tokens: é o canal do que se move na mesa.
+   */
+  pieceMoved: 'piece-moved',
 } as const;
 
 /** No arraste, no máximo um aviso a cada tanto: a grade já reduz a uma mensagem por casa. */

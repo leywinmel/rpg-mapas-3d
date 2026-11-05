@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { PieceMovedMessage } from '@/domain/map-v2';
 import { useRoomSession } from '@/features/rooms';
 import { useTokensStore } from '../hooks/tokens-store';
 import { openTokensChannel, type TokensChannel } from '../services/tokens-channel';
@@ -18,13 +19,24 @@ export type TokensDependencies = {
  * Liga os tokens do mapa aberto ao banco e ao canal da mesa: carrega a lista, escuta quem
  * arrasta e quem grava, e monta as ações que a cena e o painel usam. Não desenha nada.
  */
-export function TokensSync({ dependencies }: { dependencies?: Partial<TokensDependencies> }) {
+export type TokensSyncProps = {
+  dependencies?: Partial<TokensDependencies>;
+  /** Recebe o aviso de peça do cenário movida pelo mestre (RPG-27), que chega por este canal. */
+  onPieceMoved?: (message: PieceMovedMessage) => void;
+};
+
+export function TokensSync({ dependencies, onPieceMoved }: TokensSyncProps) {
   const { room, viewer } = useRoomSession();
   const [service] = useState(() => dependencies?.service ?? getTokensService());
   const [openChannel] = useState(() => dependencies?.openChannel ?? openTokensChannel);
   const [reloader] = useState(() => createTokensReloader(service));
   const mapId = useTokensStore((state) => state.view?.mapId ?? null);
   const channelRef = useRef<TokensChannel | null>(null);
+  // Num ref: trocar quem ouve não pode reabrir o canal.
+  const pieceListener = useRef(onPieceMoved);
+  useEffect(() => {
+    pieceListener.current = onPieceMoved;
+  }, [onPieceMoved]);
 
   useEffect(() => {
     if (mapId) reloader.now();
@@ -32,7 +44,13 @@ export function TokensSync({ dependencies }: { dependencies?: Partial<TokensDepe
   }, [mapId, reloader]);
 
   useEffect(() => {
-    const channel = connectTokensChannel({ roomId: room.id, service, openChannel, reloader });
+    const channel = connectTokensChannel({
+      roomId: room.id,
+      service,
+      openChannel,
+      reloader,
+      onPieceMoved: (message) => pieceListener.current?.(message),
+    });
     channelRef.current = channel;
     return () => {
       channel.close();
