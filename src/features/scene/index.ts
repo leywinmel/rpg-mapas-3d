@@ -3,6 +3,7 @@
 // para o three.js não pesar na tela inicial.
 export * from './ambience';
 export * from './catalog/catalog';
+export * from './catalog/movable';
 export type * from './catalog/catalog-types';
 export { SCENE_PALETTE } from './catalog/palette';
 export * from './layout';
