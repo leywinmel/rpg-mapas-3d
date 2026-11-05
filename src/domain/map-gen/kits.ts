@@ -155,9 +155,13 @@ const MODERN: StyleKit = {
     { key: 'mod-taxi', footprint: CAR },
     { key: 'mod-van', footprint: CAR },
     { key: 'mod-viatura', footprint: CAR },
+    { key: 'mod-hatch-esportivo', footprint: CAR },
+    { key: 'mod-suv-luxo', footprint: CAR },
     { key: 'mod-caminhonete', footprint: VAN },
+    { key: 'mod-picape', footprint: VAN },
     { key: 'mod-furgao', footprint: VAN },
     { key: 'mod-ambulancia', footprint: VAN },
+    { key: 'mod-caminhao-carroceria', footprint: VAN },
   ],
   bigVehicles: [
     { key: 'mod-bombeiros', footprint: TRUCK },
