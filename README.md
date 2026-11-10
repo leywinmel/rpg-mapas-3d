@@ -231,6 +231,37 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
 - `npm run db:reset`: recria o banco local do zero.
 - `npm run test:db`: testa as regras de acesso do banco (quem vê e altera o quê).
 
+## ☁️ Publicar na nuvem
+
+O site é estático e fica na Vercel; contas, banco, tempo real e arquivos ficam num projeto
+Supabase. O plano grátis dos dois dá conta: o site inteiro tem cerca de 7 MB, e a física dos
+dados só é baixada quando alguém rola.
+
+Passos que só o dono das contas faz, uma vez (cada um abre o navegador para entrar):
+
+1. `npx supabase login`.
+2. Crie o projeto em [supabase.com/dashboard](https://supabase.com/dashboard): plano Free, região
+   South America (São Paulo). A senha do banco fica só no seu gerenciador de senhas.
+3. `npx vercel login`.
+
+Depois, na pasta do projeto:
+
+4. `npx supabase link --project-ref <ref do projeto>` e `npx supabase db push` (aplica as
+   migrations; o `seed.sql` é só do ambiente local).
+5. No painel do Supabase, em Authentication → Sign In / Providers, ligue "Allow anonymous
+   sign-ins" (convidados por link). Em URL Configuration, ponha o endereço da Vercel como Site URL
+   e em Redirect URLs (`https://<site>.vercel.app/**`). Google: veja "Ligar o login com Google".
+6. `npx vercel link`, depois `npx vercel env add VITE_SUPABASE_URL production` e
+   `npx vercel env add VITE_SUPABASE_ANON_KEY production` (valores em Project Settings → API Keys).
+7. `npx vercel --prod`.
+
+Antes de publicar, `npm run build` e `npm run preview` servem a versão de produção em
+`http://localhost:4173` com os mesmos cabeçalhos de segurança (CSP) do `vercel.json`.
+
+Limites do plano grátis: o Supabase pausa o projeto após 7 dias sem uso (reativa no painel) e dá
+500 MB de banco, 1 GB de arquivos e 200 conexões simultâneas no tempo real; a Vercel dá 100 GB de
+tráfego por mês.
+
 ## 📝 Variáveis de Ambiente
 
 O `scripts/dev.bat start` cria o `.env.local` sozinho com os valores locais. Na nuvem, configure na Vercel:
