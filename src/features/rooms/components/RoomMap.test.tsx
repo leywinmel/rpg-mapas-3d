@@ -14,7 +14,7 @@ vi.mock('@/features/map-editor', () => ({
   MapWorkspace: ({ roomId, isGameMaster, cutawayLock, onCutawayLockChange }: MapWorkspaceProps) => (
     <p>
       {`mapas de ${roomId} como ${isGameMaster ? 'mestre' : 'jogador'}, `}
-      {`trava ${String(cutawayLock)}, ${onCutawayLockChange ? 'pode travar' : 'não trava'}`}
+      {`mesa vê ${String(cutawayLock)}, ${onCutawayLockChange ? 'pode escolher' : 'não escolhe'}`}
     </p>
   ),
 }));
@@ -86,14 +86,14 @@ describe('RoomMap', () => {
   it('shouldOpenTheEditorForTheGameMasterOfTheRoom', () => {
     renderAs('gm');
     expect(
-      screen.getByText('mapas de room-1 como mestre, trava 8, pode travar'),
+      screen.getByText('mapas de room-1 como mestre, mesa vê 8, pode escolher'),
     ).toBeInTheDocument();
   });
 
   it('shouldOpenThePlayerViewForAPlayerWithTheLockButNoWayToChangeIt', () => {
     renderAs('player');
     expect(
-      screen.getByText('mapas de room-1 como jogador, trava 8, não trava'),
+      screen.getByText('mapas de room-1 como jogador, mesa vê 8, não escolhe'),
     ).toBeInTheDocument();
   });
 });

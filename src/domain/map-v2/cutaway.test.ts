@@ -55,27 +55,24 @@ describe('cutaway: what stays hidden', () => {
   });
 });
 
-describe('cutaway: the master lock', () => {
+describe('cutaway: the story the master chose for the table', () => {
   const effective = (own: Cutaway, locked: Cutaway, isMaster = false) =>
     effectiveCutaway({ own, locked, isMaster });
 
-  it('shouldUseThePlayersOwnCutWhenTheTableIsFree', () => {
-    expect(effective(6, null)).toBe(6);
+  it('shouldShowThePlayerEverythingWhenTheMasterChoseNothing', () => {
     expect(effective(null, null)).toBeNull();
+    // O jogador não tem corte próprio: o que sobrou de uma escolha antiga não conta.
+    expect(effective(6, null)).toBeNull();
   });
 
-  it('shouldUseTheLockWhenThePlayerHasNoCutOfTheirOwn', () => {
+  it('shouldShowThePlayerExactlyTheStoryTheMasterChose', () => {
     expect(effective(null, 8)).toBe(8);
-  });
-
-  it('shouldUseTheLowerCutBetweenThePlayerAndTheLock', () => {
-    expect(effective(4, 8)).toBe(4);
+    expect(effective(4, 8)).toBe(8);
     expect(effective(12, 8)).toBe(8);
-    expect(effective(8, 8)).toBe(8);
-    expect(effective(0, 8)).toBe(0);
+    expect(effective(0, 8)).toBe(8);
   });
 
-  it('shouldNotAffectTheMaster', () => {
+  it('shouldLetTheMasterLookAtAnotherStoryWithoutChangingTheTable', () => {
     expect(effective(null, 4, true)).toBeNull();
     expect(effective(12, 4, true)).toBe(12);
     expect(effective(2, 4, true)).toBe(2);

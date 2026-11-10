@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, Layers, Lock, LockOpen } from 'lucide-react';
+import { Building2, ChevronDown, ChevronUp, Eye, Layers, Users } from 'lucide-react';
 import { IconButton, Toolbar, ToolbarSeparator } from '@/components';
-import { NO_CUTAWAY, type Cutaway, type CutawayDirection } from '@/domain/map-v2';
+import { NO_CUTAWAY, stepCutaway, type Cutaway, type CutawayDirection } from '@/domain/map-v2';
 import { reportError } from '@/lib/report-error';
 import { isSceneKey } from '../editor/shortcuts';
 import { cutawayPhrase, shortCutawayLabel } from './cutaway-labels';
-import { steppedOwnCutaway, visibleCutaway, type CutawayBinding } from './cutaway-binding';
+import { masterCutaway, type CutawayBinding } from './cutaway-binding';
 import styles from './CutawayControl.module.css';
 
 const ICON_SIZE = 18;
@@ -29,29 +29,40 @@ export type CutawayControlProps = {
   top: number;
 };
 
-type LockButtonProps = { binding: CutawayBinding; changeLock: (lock: Cutaway) => Promise<void> };
+type StoryBadgeProps = { icon: typeof Layers; label: string; text: string };
 
-/** Mestre: trava os jogadores no corte que ele está vendo, ou libera a mesa. */
-function LockButton({ binding, changeLock }: LockButtonProps) {
+/** Nome curto do andar com a frase inteira para a dica e o leitor de tela. */
+function StoryBadge({ icon: Icon, label, text }: StoryBadgeProps) {
+  return (
+    <span className={styles.badge} aria-live="polite" title={text}>
+      <Icon size={BADGE_ICON_SIZE} aria-hidden="true" />
+      <span aria-hidden="true">{label}</span>
+      <span className="visually-hidden">{text}</span>
+    </span>
+  );
+}
+
+/**
+ * Andar que os jogadores veem: o mestre manda à mesa o andar que ele está olhando, ou volta a
+ * mostrar todos. A escolha fica na sala (rooms.cutaway_lock) e chega aos jogadores na hora.
+ */
+type TableStoryControlProps = {
+  binding: CutawayBinding;
+  setTableCutaway: NonNullable<CutawayBinding['setTableCutaway']>;
+};
+
+function TableStoryControl({ binding, setTableCutaway }: TableStoryControlProps) {
   const [pending, setPending] = useState(false);
-  const { lock, own } = binding;
-  const locked = lock !== NO_CUTAWAY;
-  const label = locked
-    ? `Liberar o corte dos jogadores (travado ${cutawayPhrase(lock)})`
-    : own === NO_CUTAWAY
-      ? 'Escolha um andar para travar o corte dos jogadores'
-      : `Travar os jogadores ${cutawayPhrase(own)}`;
+  const { own, tableCutaway } = binding;
 
-  const toggle = async () => {
+  const choose = async (cut: Cutaway) => {
     setPending(true);
     try {
-      await changeLock(locked ? NO_CUTAWAY : own);
+      await setTableCutaway(cut);
     } catch (error) {
       reportError(error, {
-        userMessage: locked
-          ? 'Não deu para liberar o corte dos jogadores.'
-          : 'Não deu para travar o corte dos jogadores.',
-        context: { feature: 'map-editor', action: 'cutaway-lock' },
+        userMessage: 'Não deu para mudar o andar que os jogadores veem.',
+        context: { feature: 'map-editor', action: 'cutaway-table-story' },
       });
     } finally {
       setPending(false);
@@ -59,39 +70,42 @@ function LockButton({ binding, changeLock }: LockButtonProps) {
   };
 
   return (
-    <IconButton
-      label={label}
-      icon={locked ? <Lock size={ICON_SIZE} /> : <LockOpen size={ICON_SIZE} />}
-      active={locked}
-      disabled={pending || (!locked && own === NO_CUTAWAY)}
-      onClick={() => void toggle()}
-    />
-  );
-}
-
-/** Jogador: mostra que o mestre travou o corte (ele ainda pode esconder mais andares). */
-function LockedNotice({ lock }: { lock: Cutaway }) {
-  const text = `O mestre travou o corte ${cutawayPhrase(lock)}`;
-  return (
-    <span className={styles.lockedNotice} role="status" title={text}>
-      <Lock size={BADGE_ICON_SIZE} aria-hidden="true" />
-      <span className="visually-hidden">{text}</span>
-    </span>
+    <>
+      <StoryBadge
+        icon={Users}
+        label={shortCutawayLabel(tableCutaway)}
+        text={`Os jogadores veem ${cutawayPhrase(tableCutaway)}`}
+      />
+      <IconButton
+        label={`Mostrar aos jogadores o andar que você vê (${cutawayPhrase(own)})`}
+        icon={<Eye size={ICON_SIZE} />}
+        size="sm"
+        disabled={pending || tableCutaway === own}
+        onClick={() => void choose(own)}
+      />
+      <IconButton
+        label="Mostrar todos os andares aos jogadores"
+        icon={<Building2 size={ICON_SIZE} />}
+        size="sm"
+        disabled={pending || tableCutaway === NO_CUTAWAY}
+        onClick={() => void choose(NO_CUTAWAY)}
+      />
+    </>
   );
 }
 
 /**
- * Controle discreto do corte de andares, na borda direita da cena: subir e descer um andar
- * por vez (também por Page Up, Page Down e Home). Cada pessoa tem o seu; o mestre trava os
- * jogadores num corte quando o andar de cima é segredo.
+ * Controle discreto do corte de andares, na borda direita da cena, só para o mestre (RPG-30).
+ * Em cima, o andar que ele mesmo vê: sobe e desce um andar por vez (também por Page Up, Page
+ * Down e Home). Embaixo, o andar que os jogadores veem, que só muda quando ele manda.
  */
 export function CutawayControl({ binding, top }: CutawayControlProps) {
-  const visible = visibleCutaway(binding);
-  const up = steppedOwnCutaway(binding, 'up', top);
-  const down = steppedOwnCutaway(binding, 'down', top);
-  const canGoUp = visibleCutaway({ ...binding, own: up }) !== visible;
-  const canGoDown = visibleCutaway({ ...binding, own: down }) !== visible;
-  const { setOwn, changeLock, isMaster, lock } = binding;
+  const visible = masterCutaway(binding);
+  const up = stepCutaway(visible, 'up', top);
+  const down = stepCutaway(visible, 'down', top);
+  const canGoUp = up !== visible;
+  const canGoDown = down !== visible;
+  const { setOwn, setTableCutaway } = binding;
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -116,15 +130,11 @@ export function CutawayControl({ binding, top }: CutawayControlProps) {
           disabled={!canGoUp}
           onClick={() => setOwn(up)}
         />
-        <span
-          className={styles.badge}
-          aria-live="polite"
-          title={`Mostrando ${cutawayPhrase(visible)}`}
-        >
-          <Layers size={BADGE_ICON_SIZE} aria-hidden="true" />
-          <span aria-hidden="true">{shortCutawayLabel(visible)}</span>
-          <span className="visually-hidden">{`Mostrando ${cutawayPhrase(visible)}`}</span>
-        </span>
+        <StoryBadge
+          icon={Layers}
+          label={shortCutawayLabel(visible)}
+          text={`Você vê ${cutawayPhrase(visible)}`}
+        />
         <IconButton
           label="Esconder o andar de cima (Page Down)"
           icon={<ChevronDown size={ICON_SIZE} />}
@@ -132,16 +142,10 @@ export function CutawayControl({ binding, top }: CutawayControlProps) {
           disabled={!canGoDown}
           onClick={() => setOwn(down)}
         />
-        {isMaster && changeLock && (
+        {setTableCutaway && (
           <>
             <ToolbarSeparator />
-            <LockButton binding={binding} changeLock={changeLock} />
-          </>
-        )}
-        {!isMaster && lock !== NO_CUTAWAY && (
-          <>
-            <ToolbarSeparator />
-            <LockedNotice lock={lock} />
+            <TableStoryControl binding={binding} setTableCutaway={setTableCutaway} />
           </>
         )}
       </Toolbar>

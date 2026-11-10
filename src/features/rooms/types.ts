@@ -12,7 +12,7 @@ export type Room = {
   name: string;
   ownerId: string;
   activeMapId: string | null;
-  /** Corte de andares em que o mestre travou os jogadores; null = cada um escolhe o seu. */
+  /** Corte de andares que os jogadores veem, escolhido pelo mestre; null = todos os andares. */
   cutawayLock: Cutaway;
 };
 

@@ -1,7 +1,7 @@
 /**
  * Corte de andares: esconde o que está acima de uma altura absoluta para ver o lado de dentro
- * dos prédios. Aqui ficam só as regras puras; o corte de cada pessoa fica no navegador dela e
- * a trava do mestre, na mesa (rooms.cutaway_lock).
+ * dos prédios. Aqui ficam só as regras puras; o corte que o mestre olha sozinho fica no navegador
+ * dele e o andar que a mesa vê, na sala (rooms.cutaway_lock).
  *
  * O TERRENO NUNCA É ESCONDIDO nem cortado, nem quando o corte fica abaixo de um morro: por
  * isso não há função de terreno neste arquivo. O corte só mexe em paredes e peças.
@@ -50,21 +50,20 @@ export function visibleWallHeight(wall: Pick<MapWall, 'level' | 'height'>, cut: 
 }
 
 export type CutawayChoice = {
-  /** O corte que a pessoa escolheu para si. */
+  /** O corte que o mestre escolheu só para ele olhar. */
   readonly own: Cutaway;
-  /** O corte em que o mestre travou a mesa; null = mesa livre. */
+  /** O corte que o mestre escolheu para a mesa; null = os jogadores veem tudo. */
   readonly locked: Cutaway;
   readonly isMaster: boolean;
 };
 
 /**
- * O corte que vale para quem está olhando. O mestre vê o que escolheu, a trava não o alcança.
- * Para o jogador, com a mesa travada vale o menor entre o dele e o travado (o que esconde
- * mais), e quem não escolheu corte nenhum fica no travado; com a mesa livre vale o dele.
+ * O corte que vale para quem está olhando. O mestre vê o que escolheu para si, para espiar
+ * outro andar sem mudar o que a mesa vê. O jogador não escolhe nada (RPG-30): vê exatamente o
+ * andar que o mestre escolheu para a mesa e, sem escolha, todos os andares.
  */
 export function effectiveCutaway({ own, locked, isMaster }: CutawayChoice): Cutaway {
-  if (isMaster || locked === null) return own;
-  return own === null ? locked : Math.min(own, locked);
+  return isMaster ? own : locked;
 }
 
 /**

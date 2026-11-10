@@ -13,7 +13,7 @@ import type { Cell } from '@/domain';
 import { topStory } from '@/domain/map-v2';
 import type { StyleFilter } from '@/features/scene';
 import type { PerfSample } from '@/features/scene/components/PerfMeter';
-import { visibleCutaway, type CutawayBinding } from '../cutaway/cutaway-binding';
+import { masterCutaway, type CutawayBinding } from '../cutaway/cutaway-binding';
 import { CutawayControl } from '../cutaway/CutawayControl';
 import { useReportView, useShownModel, type TableBinding } from './table-binding';
 import { Minimap } from '../minimap/Minimap';
@@ -94,7 +94,7 @@ export type MapEditorProps = {
   mapsPanel: ReactNode;
   /** Nome atual vindo da lista da mesa (o mapa carregado não acompanha renomeações). */
   name?: string;
-  /** Corte de andares do mestre (a trava dos jogadores não o alcança). */
+  /** Corte de andares: o que o mestre vê e o andar que ele escolheu para a mesa. */
   cutaway: CutawayBinding;
   onPerfSample?: (sample: PerfSample) => void;
   table?: TableBinding;
@@ -170,7 +170,7 @@ export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample, table }
   useReportView(table, {
     mapId: summary.id,
     model,
-    cutaway: visibleCutaway(cutaway),
+    cutaway: masterCutaway(cutaway),
     name: title,
     modelUrls,
   });
@@ -228,7 +228,7 @@ export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample, table }
             modelUrls={modelUrls}
             label={`Mapa 3D: ${title}`}
             editor={{ view, actions }}
-            cutaway={visibleCutaway(cutaway)}
+            cutaway={masterCutaway(cutaway)}
             onPerfSample={onPerfSample}
             layer={table?.sceneLayer}
           />
