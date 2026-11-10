@@ -233,27 +233,30 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
 
 ## ☁️ Publicar na nuvem
 
-O site é estático e fica na Vercel; contas, banco, tempo real e arquivos ficam num projeto
-Supabase. O plano grátis dos dois dá conta: o site inteiro tem cerca de 7 MB, e a física dos
-dados só é baixada quando alguém rola.
+O site está no ar em **https://rpgmaps-sepia.vercel.app**. Ele é estático e fica na Vercel;
+contas, banco, tempo real e arquivos ficam no projeto Supabase `nxlnjnmryexavvsadbkz`. O plano
+grátis dos dois dá conta: o site inteiro tem cerca de 7 MB, e a física dos dados só é baixada
+quando alguém rola.
 
-Passos que só o dono das contas faz, uma vez (cada um abre o navegador para entrar):
+Para publicar uma versão nova, na pasta do projeto (uma vez por máquina, `npx supabase login`,
+`npx vercel login` e `npx vercel link` ligam as contas; no Windows, use `npx.cmd`):
 
-1. `npx supabase login`.
-2. Crie o projeto em [supabase.com/dashboard](https://supabase.com/dashboard): plano Free, região
-   South America (São Paulo). A senha do banco fica só no seu gerenciador de senhas.
-3. `npx vercel login`.
+1. `npx supabase db push --linked` aplica as migrations novas (o `seed.sql` é só do ambiente local).
+2. `npx supabase config push` aplica a configuração de Auth da nuvem: a seção
+   `[remotes.production]` do `supabase/config.toml` sobrescreve o endereço do site e o que no plano
+   Free fica melhor com o valor do painel. `npx supabase config diff` mostra antes o que mudaria.
+3. `npx vercel --prod` publica. As variáveis `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` já
+   estão cadastradas na Vercel (`npx vercel env ls production`).
 
-Depois, na pasta do projeto:
+Para começar do zero (projeto novo): crie o projeto Free em
+[supabase.com/dashboard](https://supabase.com/dashboard), rode `npx supabase link --project-ref <ref>`,
+troque o `project_id` e o endereço em `[remotes.production]`, cadastre as duas variáveis com
+`npx vercel env add <NOME> --environment production --type config --value <valor> --yes` e siga
+os passos acima. Google: veja "Ligar o login com Google".
 
-4. `npx supabase link --project-ref <ref do projeto>` e `npx supabase db push` (aplica as
-   migrations; o `seed.sql` é só do ambiente local).
-5. No painel do Supabase, em Authentication → Sign In / Providers, ligue "Allow anonymous
-   sign-ins" (convidados por link). Em URL Configuration, ponha o endereço da Vercel como Site URL
-   e em Redirect URLs (`https://<site>.vercel.app/**`). Google: veja "Ligar o login com Google".
-6. `npx vercel link`, depois `npx vercel env add VITE_SUPABASE_URL production` e
-   `npx vercel env add VITE_SUPABASE_ANON_KEY production` (valores em Project Settings → API Keys).
-7. `npx vercel --prod`.
+Decisão de produto: a confirmação de e-mail no cadastro fica desligada, porque o remetente padrão
+do Supabase manda poucos e-mails por hora; com SMTP próprio dá para ligar
+(`enable_confirmations` em `[auth.email]`).
 
 Antes de publicar, `npm run build` e `npm run preview` servem a versão de produção em
 `http://localhost:4173` com os mesmos cabeçalhos de segurança (CSP) do `vercel.json`.

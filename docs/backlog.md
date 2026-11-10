@@ -51,6 +51,8 @@ Decisões de produto: [answers/2026_10_31 rpgmaps-requisitos 001.md](../answers/
 
 - [ ] **RPG-17** Polimento visual e de interação (tema, estados de carregamento e erro).
 - [~] **RPG-18** Publicação: projeto Supabase na nuvem, Vercel, domínio, login Google em produção.
+  No ar em https://rpgmaps-sepia.vercel.app desde 10/11 (migrations, auth e variáveis aplicadas).
+  Faltam: login Google em produção, domínio próprio, SMTP próprio para ligar a confirmação de e-mail.
 
 ## Épico 8: Mundos maiores e outros estilos (pedido do usuário em 01/11)
 
