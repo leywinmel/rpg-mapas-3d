@@ -99,6 +99,12 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   10 MB. O modelo é ajustado ao tamanho de uma casa e entra no mapa como as outras peças.
 - **Jogadores:** veem só o mapa que o mestre mostrou, sem as ferramentas de edição. A troca de mapa e
   cada alteração salva aparecem na hora, sem recarregar a página.
+- **Andares e corte:** as peças empilham (sobrados, torres) e o corte de andares esconde o que está
+  acima de um andar para ver o lado de dentro. Só o mestre mexe nele, no controle do canto direito
+  do mapa: em cima, o andar que ele mesmo vê (`Page Up` mostra um andar, `Page Down` esconde,
+  `Home` mostra todos), para espiar outro andar sem mudar nada para a mesa; embaixo, o andar que os
+  jogadores veem, com "mostrar aos jogadores o andar que você vê" e "mostrar todos os andares".
+  O jogador não tem controle: vê exatamente o andar que o mestre escolheu e, sem escolha, tudo.
 - **Qualidade da cena:** o botão com o velocímetro, no alto da mesa, troca entre automática, alta,
   média e baixa. Na automática, a cena baixa sozinha as sombras, a nitidez e a distância dos
   detalhes quando o computador não dá conta, e volta a subir quando sobra fôlego. A escolha fica

@@ -1,11 +1,10 @@
 import { lazy, Suspense, useMemo, useState, type ReactNode } from 'react';
 import { Map as MapIcon } from 'lucide-react';
 import { EmptyState, ErrorBoundary, ErrorState, LoadingState } from '@/components';
-import { NO_CUTAWAY, topStory, type Cutaway } from '@/domain/map-v2';
+import { NO_CUTAWAY, type Cutaway } from '@/domain/map-v2';
 import { reuseUnchangedChunks } from '@/features/scene/chunks/stable-model';
 import type { PerfSample } from '@/features/scene/components/PerfMeter';
-import { visibleCutaway, type CutawayBinding } from '../cutaway/cutaway-binding';
-import { CutawayControl } from '../cutaway/CutawayControl';
+import { playerCutaway, type CutawayBinding } from '../cutaway/cutaway-binding';
 import { Minimap } from '../minimap/Minimap';
 import { showsMinimap } from '../minimap/minimap-image';
 import { MapCornerHud } from './MapCornerHud';
@@ -28,9 +27,9 @@ export type MapWorkspaceProps = {
   isGameMaster: boolean;
   /** Recebe a medição de quadros por segundo da cena (página de desenvolvimento). */
   onPerfSample?: (sample: PerfSample) => void;
-  /** Corte de andares em que o mestre travou os jogadores (rooms.cutaway_lock). */
+  /** Andar que os jogadores veem, escolhido pelo mestre (rooms.cutaway_lock); null = tudo. */
   cutawayLock?: Cutaway;
-  /** Só o mestre: grava a trava do corte da mesa. */
+  /** Só o mestre: grava o andar que os jogadores veem. */
   onCutawayLockChange?: (lock: Cutaway) => Promise<void>;
   /** Tokens e névoa da mesa, pendurados na cena. */
   table?: TableBinding;
@@ -47,15 +46,18 @@ const MAP_LOAD_ERROR = {
   invalid: 'Este mapa está num formato que não reconhecemos.',
 } as const;
 
-/** O jogador só vê o mapa que o mestre mostrou à mesa, sem ferramentas. */
+/**
+ * O jogador só vê o mapa que o mestre mostrou à mesa, sem ferramentas: nem o corte de andares
+ * ele escolhe, vê o andar que o mestre escolheu para a mesa (RPG-30).
+ */
 function PlayerView({
   room,
-  cutaway,
+  cutawayLock,
   onPerfSample,
   table,
 }: {
   room: RoomMaps;
-  cutaway: CutawayBinding;
+  cutawayLock: Cutaway;
   onPerfSample?: MapWorkspaceProps['onPerfSample'];
   table?: TableBinding;
 }) {
@@ -74,13 +76,11 @@ function PlayerView({
   const model = useShownModel(mapId, readyModel, table?.adjustModel);
   const assetIds = useMemo(() => uploadedAssetIds(readyModel), [readyModel]);
   const modelUrls = useModelUrls(assetIds);
-  const top = useMemo(() => (readyModel ? topStory(readyModel) : 0), [readyModel]);
+  const cutaway = playerCutaway(cutawayLock);
   const name = room.maps.find((map) => map.id === mapId)?.name;
   useReportView(
     table,
-    mapId && readyModel
-      ? { mapId, model: readyModel, cutaway: visibleCutaway(cutaway), name, modelUrls }
-      : null,
+    mapId && readyModel ? { mapId, model: readyModel, cutaway, name, modelUrls } : null,
   );
 
   if (!mapId) {
@@ -115,7 +115,7 @@ function PlayerView({
             model={model ?? state.map.model}
             modelUrls={modelUrls}
             label={`Mapa 3D: ${name ?? summary.name}`}
-            cutaway={visibleCutaway(cutaway)}
+            cutaway={cutaway}
             onPerfSample={onPerfSample}
             layer={table?.sceneLayer}
           />
@@ -124,7 +124,6 @@ function PlayerView({
       <span className={layout.mapTag}>{name ?? summary.name}</span>
       <MapCornerHud>
         {showsMinimap(state.map.model) && <Minimap model={state.map.model} />}
-        <CutawayControl binding={cutaway} top={top} />
       </MapCornerHud>
     </>
   );
@@ -134,16 +133,28 @@ function PlayerView({
 function GameMasterView({
   roomId,
   room,
-  cutaway,
+  cutawayLock,
+  onCutawayLockChange,
   onPerfSample,
   table,
 }: {
   roomId: string;
   room: RoomMaps;
-  cutaway: CutawayBinding;
+  cutawayLock: Cutaway;
+  onCutawayLockChange?: (lock: Cutaway) => Promise<void>;
   onPerfSample?: MapWorkspaceProps['onPerfSample'];
   table?: TableBinding;
 }) {
+  const [ownCutaway, setOwnCutaway] = useOwnCutaway(roomId);
+  const cutaway = useMemo<CutawayBinding>(
+    () => ({
+      own: ownCutaway,
+      setOwn: setOwnCutaway,
+      tableCutaway: cutawayLock,
+      setTableCutaway: onCutawayLockChange,
+    }),
+    [ownCutaway, setOwnCutaway, cutawayLock, onCutawayLockChange],
+  );
   const [chosenId, setChosenId] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const actions = useMapActions({
@@ -258,17 +269,6 @@ export function MapWorkspace({
   table,
 }: MapWorkspaceProps) {
   const room = useRoomMaps(roomId);
-  const [ownCutaway, setOwnCutaway] = useOwnCutaway(roomId);
-  const cutaway = useMemo<CutawayBinding>(
-    () => ({
-      own: ownCutaway,
-      setOwn: setOwnCutaway,
-      lock: cutawayLock,
-      isMaster: isGameMaster,
-      changeLock: onCutawayLockChange,
-    }),
-    [ownCutaway, setOwnCutaway, cutawayLock, isGameMaster, onCutawayLockChange],
-  );
 
   if (room.status === 'loading') {
     return (
@@ -295,12 +295,18 @@ export function MapWorkspace({
         <GameMasterView
           roomId={roomId}
           room={room}
-          cutaway={cutaway}
+          cutawayLock={cutawayLock}
+          onCutawayLockChange={onCutawayLockChange}
           onPerfSample={onPerfSample}
           table={table}
         />
       ) : (
-        <PlayerView room={room} cutaway={cutaway} onPerfSample={onPerfSample} table={table} />
+        <PlayerView
+          room={room}
+          cutawayLock={cutawayLock}
+          onPerfSample={onPerfSample}
+          table={table}
+        />
       )}
     </div>
   );

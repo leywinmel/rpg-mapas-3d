@@ -1,44 +1,28 @@
-import {
-  effectiveCutaway,
-  stepCutaway,
-  NO_CUTAWAY,
-  type Cutaway,
-  type CutawayDirection,
-} from '@/domain/map-v2';
-
-/** O que a tela do mapa sabe do corte de andares de quem está olhando. */
-export type CutawayBinding = {
-  /** O corte que a pessoa escolheu para si. */
-  readonly own: Cutaway;
-  readonly setOwn: (cut: Cutaway) => void;
-  /** O corte em que o mestre travou os jogadores; null = mesa livre. */
-  readonly lock: Cutaway;
-  readonly isMaster: boolean;
-  /** Só o mestre: trava os jogadores num corte, ou libera com null. */
-  readonly changeLock?: (lock: Cutaway) => Promise<void>;
-};
-
-export function visibleCutaway(binding: CutawayBinding): Cutaway {
-  return effectiveCutaway({
-    own: binding.own,
-    locked: binding.lock,
-    isMaster: binding.isMaster,
-  });
-}
+import { effectiveCutaway, NO_CUTAWAY, type Cutaway } from '@/domain/map-v2';
 
 /**
- * O corte que a pessoa escolhe ao subir ou descer um andar, a partir do que ela vê. O jogador
- * travado não passa da trava; voltar até ela grava "sem escolha", para ele seguir a trava
- * quando o mestre a mudar.
+ * O que a tela do mestre sabe do corte de andares. Só ele tem este controle (RPG-30): o
+ * jogador vê o andar que o mestre escolheu para a mesa, sem escolha própria.
  */
-export function steppedOwnCutaway(
-  binding: CutawayBinding,
-  direction: CutawayDirection,
-  top: number,
-): Cutaway {
-  const next = stepCutaway(visibleCutaway(binding), direction, top);
-  const { lock, isMaster } = binding;
-  if (isMaster || lock === null) return next;
-  if (next === null) return NO_CUTAWAY;
-  return next >= lock ? NO_CUTAWAY : next;
+export type CutawayBinding = {
+  /** O corte que o mestre olha sozinho, sem mudar o que a mesa vê. */
+  readonly own: Cutaway;
+  readonly setOwn: (cut: Cutaway) => void;
+  /** O andar que os jogadores veem (rooms.cutaway_lock); null = todos os andares. */
+  readonly tableCutaway: Cutaway;
+  /**
+   * Grava o andar que os jogadores veem; null mostra todos. Sem ele (página de
+   * desenvolvimento, sem sala), a parte da mesa não aparece no controle.
+   */
+  readonly setTableCutaway?: (cut: Cutaway) => Promise<void>;
+};
+
+/** O corte que o mestre vê na própria tela. */
+export function masterCutaway(binding: CutawayBinding): Cutaway {
+  return effectiveCutaway({ own: binding.own, locked: binding.tableCutaway, isMaster: true });
+}
+
+/** O corte que o jogador vê: só o que o mestre escolheu para a mesa. */
+export function playerCutaway(tableCutaway: Cutaway): Cutaway {
+  return effectiveCutaway({ own: NO_CUTAWAY, locked: tableCutaway, isMaster: false });
 }
