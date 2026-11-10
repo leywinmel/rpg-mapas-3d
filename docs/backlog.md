@@ -50,7 +50,7 @@ Decisões de produto: [answers/2026_10_31 rpgmaps-requisitos 001.md](../answers/
 ## Épico 6: Acabamento e lançamento
 
 - [ ] **RPG-17** Polimento visual e de interação (tema, estados de carregamento e erro).
-- [ ] **RPG-18** Publicação: projeto Supabase na nuvem, Vercel, domínio, login Google em produção.
+- [~] **RPG-18** Publicação: projeto Supabase na nuvem, Vercel, domínio, login Google em produção.
 
 ## Épico 8: Mundos maiores e outros estilos (pedido do usuário em 01/11)
 
