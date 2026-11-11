@@ -76,7 +76,7 @@ Decisões em `answers/2026_11_05 epico-9 001.md`. Ordem: correções primeiro, d
 - [ ] **RPG-28** Telhado fecha com a parede: oitão triangular nas pontas do telhado de duas águas, também nas casas prontas e no gerador.
 - [ ] **RPG-29** Andares com acabamento igual: sem cores ou texturas diferentes entre andares nem faixas soltas sobre as janelas; quinas que se fecham.
 - [ ] **RPG-30** Só o mestre escolhe o andar (corte de altura) que a mesa vê; o controle do jogador sai (muda a decisão do RPG-24).
-- [ ] **RPG-31** Telhados imunes à névoa: na área escondida o jogador vê os telhados; chão, interior e tokens continuam escondidos.
+- [x] **RPG-31** Telhados imunes à névoa: na área escondida o jogador vê os telhados e as paredes (o lado de fora dos prédios); chão, relevo, interior e tokens continuam escondidos e nem saem do banco.
 
 **Fase B: tokens**
 

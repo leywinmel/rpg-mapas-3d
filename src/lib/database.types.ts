@@ -49,6 +49,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"fog_exempt_pieces": {
+                  Row: {
+                    "key": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "key": string
+                  }
+                  Update: {
+                    "key"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"initiative_entries": {
                   Row: {
                     "created_at": string,"hidden": boolean,"id": string,"is_current": boolean,"label": string,"position": number,"room_id": string,"token_id": string | null,"value": number
