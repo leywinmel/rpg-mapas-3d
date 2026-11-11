@@ -30,6 +30,9 @@ function previewHeaders(localSupabaseUrl: string | undefined): Record<string, st
 
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
+  // Fora do node_modules: as worktrees compartilham o node_modules por junção, e dois servidores
+  // escrevendo no mesmo cache de dependências deixam o React duplicado ("Invalid hook call").
+  cacheDir: '.vite-cache',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

@@ -234,6 +234,10 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
 - Com o site rodando, `http://localhost:5173/componentes` mostra todos os componentes visuais nos dois temas (só em desenvolvimento).
 - Com o site rodando, `http://localhost:5173/dev/cena` gera uma cidade de teste de até 1000 × 1000
   casas e mostra quadros por segundo e tempo de montagem da cena (só em desenvolvimento, sem conta).
+- `scripts/assets/close-roofs.mjs` e `scripts/assets/convert-wall.mjs`: convertem modelos brutos dos
+  pacotes CC0 (pasta `rpgmaps-pacotes-3d`, fora do repositório) para o formato do site (geometria
+  comprimida, texturas compartilhadas). As miniaturas saem do próprio renderizador do site
+  (`renderPieceThumbnail`) e vão para `public/assets/<estilo>/thumbs/`.
 - `npm run db:reset`: recria o banco local do zero.
 - `npm run test:db`: testa as regras de acesso do banco (quem vê e altera o quê).
 
