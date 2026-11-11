@@ -13,6 +13,7 @@ import {
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { DEFAULT_TOKEN_COLORS, tokenModelEntry, tokenModelUrl } from '../constants';
 import { useTokensStore } from '../hooks/tokens-store';
+import { useTokenViewStore } from '../hooks/token-view-store';
 import { tokenFailures } from '../services/token-errors';
 import type { Token } from '../types';
 import {
@@ -368,9 +369,20 @@ function BodyLook({ token, transparent }: LookProps) {
   return <ModelLook token={token} transparent={transparent} />;
 }
 
-/** Base redonda e o corpo do token (cartão ou boneco), no tamanho de um token 1×1. */
+/**
+ * Base redonda e o corpo do token (cartão ou boneco), no tamanho de um token 1×1. Sem a base
+ * (escolha de quem olha), o corpo desce a altura dela e fica com os pés no chão.
+ */
 export function TokenModel({ token, transparent }: LookProps) {
   const { baseRadius, baseHeight } = TOKEN_SHAPE;
+  const showBases = useTokenViewStore((state) => state.showBases);
+  if (!showBases) {
+    return (
+      <group position={[0, -baseHeight, 0]}>
+        <BodyLook token={token} transparent={transparent} />
+      </group>
+    );
+  }
   return (
     <>
       <mesh castShadow receiveShadow position={[0, baseHeight / 2, 0]}>

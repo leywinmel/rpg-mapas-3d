@@ -21,7 +21,7 @@ import { QualityButton } from '@/features/scene';
 import { FogPanel } from '@/features/fog';
 import { InitiativePanel } from '@/features/initiative';
 import { TableToolButtons, ToolHint } from '@/features/table-tools';
-import { TokensPanel, useTokensStore } from '@/features/tokens';
+import { TokenBasesButton, TokensPanel, useTokensStore } from '@/features/tokens';
 import { cx } from '@/lib/cx';
 import { reportError } from '@/lib/report-error';
 import { useRoomSession } from '../hooks/room-session-context';
@@ -161,6 +161,7 @@ export function RoomHud() {
             />
           )}
           <ToolbarSeparator />
+          <TokenBasesButton />
           <QualityButton />
           <ThemeToggle />
         </Toolbar>
