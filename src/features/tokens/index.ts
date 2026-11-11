@@ -5,6 +5,7 @@
 //   <TokensSceneLayer />            camada da cena 3D (carga sob demanda)
 //   <TokensPanel onClose={...} />   painel "Tokens" da barra
 // O mapa aberto chega por useTokensStore.getState().setView (MapWorkspace → table.onView).
+export { TokenBasesButton } from './components/TokenBasesButton';
 export { TokensPanel } from './components/TokensPanel';
 export { TokensSceneLayer } from './components/TokensSceneLayer';
 export { TokensSync } from './components/TokensSync';
