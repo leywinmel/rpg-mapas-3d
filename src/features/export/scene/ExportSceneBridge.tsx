@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useThree } from '@react-three/fiber';
-import { fogRange } from '@/features/scene';
+import { fogRange, useWeatherStore } from '@/features/scene';
 import { useTokensStore } from '@/features/tokens';
 import { useExportStore } from '../hooks/export-store';
 import { capturePng } from './png-capture';
@@ -24,7 +24,7 @@ export default function ExportSceneBridge() {
           const model = useTokensStore.getState().view?.model;
           if (!model) return null;
           const span = Math.max(model.size.width, model.size.depth);
-          const { far } = fogRange(model.header.ambience, span);
+          const { far } = fogRange(model.header.ambience, span, useWeatherStore.getState().table);
           return visibleGroundRect(get().camera, model.size, far);
         },
       }),

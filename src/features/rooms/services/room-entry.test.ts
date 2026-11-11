@@ -1,13 +1,14 @@
-import type { PreviewResult } from '../types';
+import type { PreviewResult, Room } from '../types';
 import { resolveRoomEntry, type ResolveEntryInput } from './room-entry';
 
-const ROOM = {
+const ROOM: Room = {
   id: 'r1',
   slug: 'demo',
   name: 'Cripta',
   ownerId: 'u1',
   activeMapId: null,
   cutawayLock: null,
+  tableWeather: { weather: 'clear', dayPhase: 'map' },
 };
 const PREVIEW: PreviewResult = { status: 'found', preview: { id: 'r1', name: 'Cripta' } };
 

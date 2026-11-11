@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Object3D, type DirectionalLight } from 'three';
-import type { Ambience, GridSize } from '@/domain';
-import { resolvePreset } from '../ambience';
+import type { GridSize } from '@/domain';
+import type { SceneLook } from '../ambience';
 import { useQualitySettings } from '../quality/quality-store';
 
 /** Luz principal baixa (fim de tarde / tocha distante): sombras longas dão o ar dramático. */
@@ -22,10 +22,10 @@ const PHYSICAL_LIGHT_SCALE = Math.PI;
  * three não refaz o mapa de sombra sozinho); ligar e desligar a sombra recompila os materiais
  * uma vez, o que só acontece quando o nível muda.
  */
-export function SceneLights({ ambience, size }: { ambience: Ambience; size: GridSize }) {
+export function SceneLights({ look, size }: { look: SceneLook; size: GridSize }) {
   const { shadows, shadowMapSize } = useQualitySettings();
-  const preset = resolvePreset(ambience.preset);
-  const strength = ambience.light * PHYSICAL_LIGHT_SCALE;
+  const preset = look;
+  const strength = look.lightScale * PHYSICAL_LIGHT_SCALE;
   const span = Math.max(size.width, size.depth);
   const center = { x: size.width / 2, z: size.depth / 2 };
   // A luz direcional mira um alvo; ele precisa estar na cena para a posição valer.

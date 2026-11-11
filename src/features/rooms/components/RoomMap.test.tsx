@@ -63,6 +63,7 @@ function sessionAs(role: 'gm' | 'player'): RoomSessionValue {
       ownerId: 'gm-1',
       activeMapId: null,
       cutawayLock: 8,
+      tableWeather: { weather: 'clear', dayPhase: 'map' },
     },
     membership: { role, nickname: 'Ana' },
     isGameMaster: role === 'gm',

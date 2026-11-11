@@ -39,6 +39,8 @@ const ROOM_ROW = {
   owner_id: 'u1',
   active_map_id: null,
   cutaway_lock: null,
+  weather: 'clear',
+  day_phase: 'map',
 };
 
 describe('createRoomsService', () => {
@@ -59,6 +61,7 @@ describe('createRoomsService', () => {
       ownerId: 'u1',
       activeMapId: null,
       cutawayLock: null,
+      tableWeather: { weather: 'clear', dayPhase: 'map' },
     });
   });
 
@@ -132,6 +135,7 @@ describe('createRoomsService', () => {
           ownerId: 'u1',
           activeMapId: null,
           cutawayLock: null,
+          tableWeather: { weather: 'clear', dayPhase: 'map' },
         },
         membership: { role: 'gm', nickname: 'Mestre' },
       },
@@ -177,6 +181,34 @@ describe('createRoomsService', () => {
     const { client } = fakeClient({ data: { ...ROOM_ROW, cutaway_lock: 9999 }, error: null });
     const room = await createRoomsService(client).renameRoom('r1', 'Cripta');
     expect(room.cutawayLock).toBeNull();
+  });
+
+  it('shouldSendOnlyTheChangedWeatherFieldAndReadItBack', async () => {
+    const { client, calls } = fakeClient({
+      data: { ...ROOM_ROW, weather: 'storm', day_phase: 'night' },
+      error: null,
+    });
+    const room = await createRoomsService(client).setTableWeather('r1', { weather: 'storm' });
+    expect(calls).toContainEqual({ method: 'update', args: [{ weather: 'storm' }] });
+    expect(room.tableWeather).toEqual({ weather: 'storm', dayPhase: 'night' });
+  });
+
+  it('shouldRefuseAnUnknownWeatherBeforeCallingTheServer', async () => {
+    const { client, calls } = fakeClient({ data: ROOM_ROW, error: null });
+    const service = createRoomsService(client);
+    // Valor vindo de fora do tipo (ex: mensagem adulterada) não chega ao banco.
+    const bogus = JSON.parse('{"weather":"neve"}') as { weather: 'rain' };
+    await expect(service.setTableWeather('r1', bogus)).rejects.toMatchObject({ kind: 'invalid' });
+    expect(calls).toHaveLength(0);
+  });
+
+  it('shouldTreatAnUnknownWeatherFromTheDatabaseAsClearSky', async () => {
+    const { client } = fakeClient({
+      data: { ...ROOM_ROW, weather: 'neve', day_phase: 'aurora' },
+      error: null,
+    });
+    const room = await createRoomsService(client).renameRoom('r1', 'Cripta');
+    expect(room.tableWeather).toEqual({ weather: 'clear', dayPhase: 'map' });
   });
 
   it('shouldRejectUnknownRoleFromDatabase', async () => {

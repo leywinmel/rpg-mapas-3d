@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   CloudFog,
+  CloudRain,
   DoorOpen,
   Download,
   Link2,
@@ -26,6 +27,7 @@ import { reportError } from '@/lib/report-error';
 import { useRoomSession } from '../hooks/room-session-context';
 import { LOBBY_PATH, roomPath } from '../paths';
 import { PresencePanel } from './PresencePanel';
+import { WeatherPanel } from './WeatherPanel';
 import { DeleteRoomDialog, LeaveRoomDialog, RenameRoomDialog } from './RoomAdminDialogs';
 import styles from './rooms.module.css';
 
@@ -35,7 +37,8 @@ const SIDE_PANEL_CLASS = cx(styles.sidePanel, 'room__side-panel');
 type OpenDialog = 'rename' | 'delete' | 'leave' | null;
 
 /** O canto superior direito abre um painel por vez: quem está na mesa ou as anotações. */
-type SidePanel = 'presence' | 'notes' | 'tokens' | 'fog' | 'initiative' | 'export' | null;
+type SidePanel =
+  'presence' | 'notes' | 'tokens' | 'fog' | 'weather' | 'initiative' | 'export' | null;
 
 async function copyInviteLink(slug: string): Promise<void> {
   const link = absoluteAppUrl(roomPath(slug));
@@ -123,6 +126,14 @@ export function RoomHud() {
             />
           )}
           <IconButton
+            label={
+              sidePanel === 'weather' ? 'Esconder o clima da mesa' : 'Clima da mesa: chuva e hora'
+            }
+            icon={<CloudRain size={18} />}
+            active={sidePanel === 'weather'}
+            onClick={() => toggleSidePanel('weather')}
+          />
+          <IconButton
             label={sidePanel === 'export' ? 'Esconder a exportação' : 'Exportar o mapa'}
             icon={<Download size={18} />}
             active={sidePanel === 'export'}
@@ -168,6 +179,11 @@ export function RoomHud() {
       {isGameMaster && sidePanel === 'fog' && (
         <div className={SIDE_PANEL_CLASS}>
           <FogPanel onClose={closeSidePanel} />
+        </div>
+      )}
+      {sidePanel === 'weather' && (
+        <div className={SIDE_PANEL_CLASS}>
+          <WeatherPanel onClose={closeSidePanel} />
         </div>
       )}
       {sidePanel === 'initiative' && (

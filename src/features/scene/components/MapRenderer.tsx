@@ -7,6 +7,7 @@ import { MapBorder } from './BoardGrid';
 import { ChunkCuller } from './ChunkCuller';
 import { ChunkView, type ChunkRegistry } from './ChunkView';
 import { TorchLights } from './TorchLights';
+import { useTableWeather } from '../weather/weather-store';
 
 export type MapRendererProps = {
   model: MapModel;
@@ -33,7 +34,8 @@ export const MapRenderer = memo(function MapRenderer({
     [chunks, cutaway],
   );
   const span = Math.max(model.size.width, model.size.depth);
-  const fog = fogRange(model.header.ambience, span);
+  const table = useTableWeather();
+  const fog = fogRange(model.header.ambience, span, table);
   return (
     <>
       {showGrid && <MapBorder size={model.size} />}

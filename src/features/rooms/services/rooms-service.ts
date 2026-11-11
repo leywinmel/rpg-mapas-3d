@@ -1,11 +1,17 @@
-import type { MemberRole } from '@/domain';
+import {
+  isDayPhase,
+  isWeatherKind,
+  toTableWeather,
+  type MemberRole,
+  type TableWeather,
+} from '@/domain';
 import { isValidCutaway, type Cutaway } from '@/domain/map-v2';
 import { getSupabase, type AppSupabaseClient } from '@/lib/supabase';
 import { memberRoleSchema } from '../schemas';
 import type { Membership, PreviewResult, Room, RoomMember, RoomSummary } from '../types';
 import { RoomError, toRoomError } from './room-errors';
 
-const ROOM_COLUMNS = 'id, slug, name, owner_id, active_map_id, cutaway_lock';
+const ROOM_COLUMNS = 'id, slug, name, owner_id, active_map_id, cutaway_lock, weather, day_phase';
 const MEMBER_COLUMNS = 'user_id, nickname, role, joined_at';
 const PERMISSION_DENIED = '42501';
 
@@ -16,6 +22,8 @@ type RoomRow = {
   owner_id: string;
   active_map_id: string | null;
   cutaway_lock: number | null;
+  weather: string;
+  day_phase: string;
 };
 
 export function toRoom(row: RoomRow): Room {
@@ -27,6 +35,8 @@ export function toRoom(row: RoomRow): Room {
     activeMapId: row.active_map_id,
     // Valor fora do intervalo não passa do check do banco; se passar, a mesa fica livre.
     cutawayLock: isValidCutaway(row.cutaway_lock) ? row.cutaway_lock : null,
+    // Código desconhecido (versão futura do banco) vira céu limpo com a luz do mapa.
+    tableWeather: toTableWeather(row.weather, row.day_phase),
   };
 }
 
@@ -147,6 +157,28 @@ export function createRoomsService(client: AppSupabaseClient) {
       const { data, error } = await client
         .from('rooms')
         .update({ cutaway_lock: lock })
+        .eq('id', roomId)
+        .select(ROOM_COLUMNS)
+        .maybeSingle();
+      if (error) throw toRoomError(error);
+      if (!data) throw new RoomError('forbidden', null);
+      return toRoom(data);
+    },
+
+    /** O mestre troca o tempo ou a hora da mesa (RPG-38, RPG-39). */
+    async setTableWeather(roomId: string, patch: Partial<TableWeather>): Promise<Room> {
+      const update: { weather?: string; day_phase?: string } = {};
+      if (patch.weather !== undefined) {
+        if (!isWeatherKind(patch.weather)) throw new RoomError('invalid', null);
+        update.weather = patch.weather;
+      }
+      if (patch.dayPhase !== undefined) {
+        if (!isDayPhase(patch.dayPhase)) throw new RoomError('invalid', null);
+        update.day_phase = patch.dayPhase;
+      }
+      const { data, error } = await client
+        .from('rooms')
+        .update(update)
         .eq('id', roomId)
         .select(ROOM_COLUMNS)
         .maybeSingle();

@@ -1,4 +1,4 @@
-import type { MemberRole } from '@/domain';
+import type { MemberRole, TableWeather } from '@/domain';
 import type { Cutaway } from '@/domain/map-v2';
 
 export const MEMBER_ROLES = ['gm', 'player'] as const satisfies readonly MemberRole[];
@@ -14,6 +14,8 @@ export type Room = {
   activeMapId: string | null;
   /** Corte de andares que os jogadores veem, escolhido pelo mestre; null = todos os andares. */
   cutawayLock: Cutaway;
+  /** Tempo e hora que a mesa vê, escolhidos pelo mestre (rooms.weather, rooms.day_phase). */
+  tableWeather: TableWeather;
 };
 
 export type Membership = { role: MemberRole; nickname: string };

@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
-import type { Ambience, GridSize } from '@/domain';
+import { showsRain, type Ambience, type GridSize } from '@/domain';
 import type { Cutaway, MapModel } from '@/domain/map-v2';
 import { cx } from '@/lib/cx';
-import { fogRange } from '../ambience';
+import { fogRange, sceneLook } from '../ambience';
 import { cameraFrame } from '../layout';
 import { useQualitySettings } from '../quality/quality-store';
 import type { ModelUrls } from './AssetPieces';
@@ -11,7 +11,9 @@ import { CameraRig, type CameraMode } from './CameraRig';
 import { MapRenderer } from './MapRenderer';
 import { PerfMeter, type PerfSample } from './PerfMeter';
 import { QualityMonitor } from './QualityMonitor';
+import { RainLayer } from './RainLayer';
 import { SceneLights } from './SceneLights';
+import { useTableWeather, useWeatherStore } from '../weather/weather-store';
 
 const MIN_PIXEL_RATIO = 1;
 const CAMERA_FOV = 45;
@@ -43,7 +45,10 @@ export function SceneCanvas({
   children,
 }: SceneCanvasProps) {
   const { maxPixelRatio } = useQualitySettings();
-  const fog = fogRange(ambience, Math.max(size.width, size.depth));
+  const table = useTableWeather();
+  const rainEnabled = useWeatherStore((state) => state.rainEnabled);
+  const look = sceneLook(ambience, table);
+  const fog = fogRange(ambience, Math.max(size.width, size.depth), table);
   const { position, far } = cameraFrame(size);
   return (
     <Canvas
@@ -60,9 +65,12 @@ export function SceneCanvas({
       }}
       gl={{ antialias: true, powerPreference: 'high-performance' }}
     >
-      <color attach="background" args={[ambience.fogColor]} />
-      <fog attach="fog" args={[ambience.fogColor, fog.near, fog.far]} />
-      <SceneLights ambience={ambience} size={size} />
+      <color attach="background" args={[look.fogColor]} />
+      <fog attach="fog" args={[look.fogColor, fog.near, fog.far]} />
+      <SceneLights look={look} size={size} />
+      {table.weather !== 'clear' && showsRain(table.weather, rainEnabled) && (
+        <RainLayer kind={table.weather} size={size} />
+      )}
       <CameraRig size={size} mode={mode} />
       <QualityMonitor />
       {children}
