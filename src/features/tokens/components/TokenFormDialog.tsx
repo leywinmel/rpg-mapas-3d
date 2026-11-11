@@ -16,7 +16,9 @@ import {
   DEFAULT_TOKEN_COLORS,
   TOKEN_IMAGE_MAX_MEGABYTES,
   TOKEN_IMAGE_MIME_TYPES,
+  TOKEN_MODEL_GROUPS,
   TOKEN_MODELS,
+  tokenModelEntry,
   type TokenKind,
   type TokenModelKey,
 } from '../constants';
@@ -225,14 +227,23 @@ export function TokenFormDialog({ open, onClose }: TokenFormDialogProps) {
                 disabled={pending}
                 onChange={(event) => setModelKey(event.target.value as TokenModelKey)}
               >
-                {TOKEN_MODELS.map((model) => (
-                  <option key={model.value} value={model.value}>
-                    {model.label}
-                  </option>
+                {TOKEN_MODEL_GROUPS.map((group) => (
+                  <optgroup key={group.value} label={group.label}>
+                    {TOKEN_MODELS.filter((model) => model.group === group.value).map((model) => (
+                      <option key={model.value} value={model.value}>
+                        {model.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
+              {tokenModelEntry(modelKey).file && (
+                <span className={styles.hint}>
+                  Boneco pronto, com as cores dele. As cores abaixo valem só para os simples.
+                </span>
+              )}
             </div>
-            <div className={styles.colorRow}>
+            <div className={styles.colorRow} hidden={tokenModelEntry(modelKey).file !== null}>
               <label className={styles.check}>
                 <input
                   type="color"
