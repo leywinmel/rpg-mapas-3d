@@ -4,7 +4,17 @@ import type { CatalogEntry } from './catalog-types';
 import { getFallbackLayers, getPieceLayers, hasProceduralBuilder } from './piece-geometry';
 
 const REQUIRED_KEYS = {
-  floor: ['piso-pedra', 'piso-madeira', 'terra', 'grama', 'agua'],
+  floor: [
+    'piso-pedra',
+    'piso-madeira',
+    'terra',
+    'grama',
+    'agua',
+    'areia',
+    'chao-rachado',
+    'lama',
+    'poca',
+  ],
   wall: ['parede-pedra', 'parede-madeira', 'grade'],
   prop: [
     'barril',
