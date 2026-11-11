@@ -6,15 +6,22 @@ import { CutawayControl } from './CutawayControl';
 
 function renderControl(overrides: Partial<CutawayBinding>, top = 3) {
   const setOwn = vi.fn<(cut: Cutaway) => void>();
-  const binding: CutawayBinding = { own: null, setOwn, lock: null, isMaster: false, ...overrides };
+  const setTableCutaway = vi.fn<(cut: Cutaway) => Promise<void>>().mockResolvedValue(undefined);
+  const binding: CutawayBinding = {
+    own: null,
+    setOwn,
+    tableCutaway: null,
+    setTableCutaway,
+    ...overrides,
+  };
   render(<CutawayControl binding={binding} top={top} />);
-  return { setOwn };
+  return { setOwn, setTableCutaway };
 }
 
 describe('CutawayControl', () => {
   it('shouldHideTheTopStoryWithTheButtonAndWithPageDown', () => {
     const { setOwn } = renderControl({});
-    expect(screen.getByText('Mostrando todos os andares')).toBeInTheDocument();
+    expect(screen.getByText('Você vê todos os andares')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Mostrar o andar de cima/ })).toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: /Esconder o andar de cima/ }));
     expect(setOwn).toHaveBeenLastCalledWith(12);
@@ -22,25 +29,36 @@ describe('CutawayControl', () => {
     expect(setOwn).toHaveBeenCalledTimes(2);
   });
 
-  it('shouldShowAPlayerThatTheMasterLockedTheCut', () => {
-    renderControl({ lock: 4 });
-    expect(screen.getByText('Mostrando até o térreo')).toBeInTheDocument();
-    expect(screen.getByText('O mestre travou o corte até o térreo')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Mostrar o andar de cima/ })).toBeDisabled();
-    expect(screen.queryByRole('button', { name: /Travar/ })).not.toBeInTheDocument();
+  it('shouldKeepTheMastersOwnViewApartFromWhatThePlayersSee', () => {
+    renderControl({ own: 8, tableCutaway: 4 });
+    expect(screen.getByText('Você vê até o 1º andar')).toBeInTheDocument();
+    expect(screen.getByText('Os jogadores veem até o térreo')).toBeInTheDocument();
   });
 
-  it('shouldLetTheMasterLockThePlayersAtHisOwnCut', async () => {
-    const changeLock = vi.fn<(lock: Cutaway) => Promise<void>>().mockResolvedValue(undefined);
-    renderControl({ isMaster: true, own: 8, changeLock });
-    fireEvent.click(screen.getByRole('button', { name: 'Travar os jogadores até o 1º andar' }));
-    await waitFor(() => expect(changeLock).toHaveBeenCalledWith(8));
+  it('shouldSendTheStoryTheMasterSeesToTheTable', async () => {
+    const { setTableCutaway } = renderControl({ own: 8 });
+    expect(screen.getByText('Os jogadores veem todos os andares')).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Mostrar aos jogadores o andar que você vê (até o 1º andar)',
+      }),
+    );
+    await waitFor(() => expect(setTableCutaway).toHaveBeenCalledWith(8));
   });
 
-  it('shouldAskTheMasterToPickAStoryBeforeLocking', () => {
-    renderControl({ isMaster: true, changeLock: vi.fn() });
+  it('shouldShowEveryStoryToTheTableAgain', async () => {
+    const { setTableCutaway } = renderControl({ tableCutaway: 4 });
+    fireEvent.click(screen.getByRole('button', { name: 'Mostrar todos os andares aos jogadores' }));
+    await waitFor(() => expect(setTableCutaway).toHaveBeenCalledWith(null));
+  });
+
+  it('shouldDisableTheChoiceThePlayersAlreadySee', () => {
+    renderControl({ own: 8, tableCutaway: 8 });
     expect(
-      screen.getByRole('button', { name: 'Escolha um andar para travar o corte dos jogadores' }),
+      screen.getByRole('button', { name: /Mostrar aos jogadores o andar que você vê/ }),
     ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Mostrar todos os andares aos jogadores' }),
+    ).toBeEnabled();
   });
 });

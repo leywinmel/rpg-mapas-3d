@@ -1,7 +1,7 @@
 /**
- * O corte de andares que cada pessoa escolheu, guardado no navegador dela, um por mesa: no
- * mesmo navegador, uma mesa com prédios altos não muda a vista de outra. O mestre trava a mesa
- * pelo banco (rooms.cutaway_lock); aqui fica só a escolha pessoal.
+ * O corte de andares que o mestre olha sozinho, guardado no navegador dele, um por mesa: no
+ * mesmo navegador, uma mesa com prédios altos não muda a vista de outra. O andar que os jogadores
+ * veem fica no banco (rooms.cutaway_lock); aqui fica só a vista pessoal do mestre.
  */
 import { isValidCutaway, NO_CUTAWAY, type Cutaway } from '@/domain/map-v2';
 import { logger } from '@/lib/logger';

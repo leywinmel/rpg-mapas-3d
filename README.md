@@ -99,6 +99,12 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   10 MB. O modelo é ajustado ao tamanho de uma casa e entra no mapa como as outras peças.
 - **Jogadores:** veem só o mapa que o mestre mostrou, sem as ferramentas de edição. A troca de mapa e
   cada alteração salva aparecem na hora, sem recarregar a página.
+- **Andares e corte:** as peças empilham (sobrados, torres) e o corte de andares esconde o que está
+  acima de um andar para ver o lado de dentro. Só o mestre mexe nele, no controle do canto direito
+  do mapa: em cima, o andar que ele mesmo vê (`Page Up` mostra um andar, `Page Down` esconde,
+  `Home` mostra todos), para espiar outro andar sem mudar nada para a mesa; embaixo, o andar que os
+  jogadores veem, com "mostrar aos jogadores o andar que você vê" e "mostrar todos os andares".
+  O jogador não tem controle: vê exatamente o andar que o mestre escolheu e, sem escolha, tudo.
 - **Qualidade da cena:** o botão com o velocímetro, no alto da mesa, troca entre automática, alta,
   média e baixa. Na automática, a cena baixa sozinha as sombras, a nitidez e a distância dos
   detalhes quando o computador não dá conta, e volta a subir quando sobra fôlego. A escolha fica
@@ -232,6 +238,10 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
 - Com o site rodando, `http://localhost:5173/componentes` mostra todos os componentes visuais nos dois temas (só em desenvolvimento).
 - Com o site rodando, `http://localhost:5173/dev/cena` gera uma cidade de teste de até 1000 × 1000
   casas e mostra quadros por segundo e tempo de montagem da cena (só em desenvolvimento, sem conta).
+- `scripts/assets/close-roofs.mjs` e `scripts/assets/convert-wall.mjs`: convertem modelos brutos dos
+  pacotes CC0 (pasta `rpgmaps-pacotes-3d`, fora do repositório) para o formato do site (geometria
+  comprimida, texturas compartilhadas). As miniaturas saem do próprio renderizador do site
+  (`renderPieceThumbnail`) e vão para `public/assets/<estilo>/thumbs/`.
 - `npm run db:reset`: recria o banco local do zero.
 - `npm run test:db`: testa as regras de acesso do banco (quem vê e altera o quê).
 

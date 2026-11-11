@@ -1,26 +1,23 @@
-import { steppedOwnCutaway, visibleCutaway, type CutawayBinding } from './cutaway-binding';
+import { masterCutaway, playerCutaway, type CutawayBinding } from './cutaway-binding';
 
 function binding(overrides: Partial<CutawayBinding>): CutawayBinding {
-  return { own: null, setOwn: () => undefined, lock: null, isMaster: false, ...overrides };
+  return {
+    own: null,
+    setOwn: () => undefined,
+    tableCutaway: null,
+    setTableCutaway: () => Promise.resolve(),
+    ...overrides,
+  };
 }
 
 describe('cutaway-binding', () => {
-  it('shouldLetAFreePlayerWalkThroughTheStories', () => {
-    expect(steppedOwnCutaway(binding({}), 'down', 3)).toBe(12);
-    expect(steppedOwnCutaway(binding({ own: 12 }), 'up', 3)).toBeNull();
+  it('shouldShowTheMasterHisOwnCutWhateverTheTableSees', () => {
+    expect(masterCutaway(binding({ tableCutaway: 4 }))).toBeNull();
+    expect(masterCutaway(binding({ own: 12, tableCutaway: 4 }))).toBe(12);
   });
 
-  it('shouldKeepALockedPlayerAtOrBelowTheLock', () => {
-    const locked = binding({ lock: 8 });
-    expect(visibleCutaway(locked)).toBe(8);
-    expect(steppedOwnCutaway(locked, 'up', 3)).toBeNull();
-    expect(steppedOwnCutaway(locked, 'down', 3)).toBe(4);
-    expect(steppedOwnCutaway(binding({ lock: 8, own: 4 }), 'up', 3)).toBeNull();
-  });
-
-  it('shouldIgnoreTheLockForTheMaster', () => {
-    const master = binding({ lock: 4, isMaster: true });
-    expect(visibleCutaway(master)).toBeNull();
-    expect(steppedOwnCutaway(binding({ lock: 4, isMaster: true, own: 4 }), 'up', 3)).toBe(8);
+  it('shouldShowThePlayerOnlyWhatTheMasterChoseForTheTable', () => {
+    expect(playerCutaway(null)).toBeNull();
+    expect(playerCutaway(8)).toBe(8);
   });
 });

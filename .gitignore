@@ -30,3 +30,9 @@ desktop.ini
 
 # Claude (configurações locais)
 .claude/settings.local.json
+
+.vercel
+.env*
+
+# Cache do Vite (um por checkout; veja vite.config.ts)
+.vite-cache/
