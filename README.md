@@ -167,9 +167,13 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
 - **Pintar:** "Pintar no mapa" troca o clique na cena pelo pincel (de 1×1 a 21×21 casas) ou pelo
   retângulo, cobrindo ou revelando. Enquanto pinta, a câmera não gira com o botão esquerdo; fechar o
   painel larga o pincel.
-- **O que cada um vê:** o mestre vê a névoa translúcida por cima de tudo. O jogador vê escuridão, e o
-  banco nem manda o que está embaixo: peças, paredes e tokens cobertos não chegam ao navegador dele
-  (o próprio token do jogador continua visível). A mudança chega ao vivo para a mesa toda.
+- **O que cada um vê:** o mestre vê a névoa translúcida por cima de tudo. O jogador vê escuridão com a
+  silhueta da cidade por cima: as paredes (com portas e janelas) e os telhados do catálogo continuam
+  à vista mesmo na área coberta, mas o chão, o relevo, o que está dentro das casas (móveis, objetos,
+  veículos, modelos enviados) e os tokens cobertos não chegam ao navegador dele; o banco nem manda
+  (o próprio token do jogador continua visível). A mudança chega ao vivo para a mesa toda. A lista
+  de peças que atravessam a névoa fica na tabela `fog_exempt_pieces` (hoje, os cinco telhados
+  medievais); um teste confere que ela bate com o catálogo.
 - **Antes de usar:** o mapa precisa estar salvo no formato novo (salve no editor uma vez).
 - **Testar sozinho:** como nos dados, entre em `/sala/demo` com o mestre e a jogadora em duas origens
   diferentes, cubra tudo numa aba e revele um pedaço olhando a outra.

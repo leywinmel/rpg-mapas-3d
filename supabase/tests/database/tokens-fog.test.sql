@@ -57,7 +57,10 @@ values
    'Antigo', 20, 20, 1, '{"version": 1}');
 insert into public.map_chunks (map_id, cx, cz, document)
 values ('00000000-0000-0000-0000-00000000b001', 0, 0, pg_temp.chunk()),
-       ('00000000-0000-0000-0000-00000000b001', 1, 1, pg_temp.chunk() - 'walls' || '{"walls": []}');
+       -- O pedaço (1, 1) é de borda (8×8 casas) e vazio: o terreno tem só 64 casas, como o domínio
+       -- grava, e nada de parede ou peça (a peça mora no pedaço onde está a âncora dela).
+       ('00000000-0000-0000-0000-00000000b001', 1, 1, pg_temp.chunk() - 'walls' - 'pieces'
+         || '{"walls": [], "pieces": [], "terrain": {"palette": ["piso-pedra"], "tiles": [1, 64], "heights": [2, 64]}}');
 
 select pg_temp.act_as('00000000-0000-0000-0000-0000000000a2');
 do $$ begin perform public.join_room((select slug from ctx), 'Ana'); end $$;
@@ -166,8 +169,8 @@ select is((select document -> 'terrain' from redacted),
   '{"palette": ["piso-pedra"], "tiles": [1, 320, 0, 704], "heights": [2, 320, 0, 704]}'::jsonb,
   'casas cobertas chegam sem chão e sem altura');
 select results_eq($$ select (w ->> 'x')::int, (w ->> 'z')::int from redacted, jsonb_array_elements(document -> 'walls') w $$,
-  $$ values (5, 5), (6, 10) $$,
-  'parede no meio do escuro some; a da beira da luz fica');
+  $$ values (5, 5), (20, 20), (6, 10) $$,
+  'toda parede chega, mesmo no meio do escuro (RPG-31: o lado de fora do prédio fica à vista)');
 select results_eq($$ select p ->> 'id' from redacted, jsonb_array_elements(document -> 'pieces') p $$,
   $$ values ('a'::text) $$,
   'peça toda no escuro some, mesmo deitada (giro troca largura e profundidade)');
