@@ -1,7 +1,15 @@
-import { useEffect, useState } from 'react';
-import { Billboard } from '@react-three/drei';
-import { SRGBColorSpace, TextureLoader, type Texture } from 'three';
-import { DEFAULT_TOKEN_COLORS } from '../constants';
+import { useEffect, useMemo, useState } from 'react';
+import { Billboard, useAnimations, useGLTF } from '@react-three/drei';
+import {
+  Mesh,
+  type Material,
+  type Object3D,
+  SRGBColorSpace,
+  TextureLoader,
+  type Texture,
+} from 'three';
+import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
+import { DEFAULT_TOKEN_COLORS, tokenModelEntry, tokenModelUrl } from '../constants';
 import { useTokensStore } from '../hooks/tokens-store';
 import { tokenFailures } from '../services/token-errors';
 import type { Token } from '../types';
@@ -127,6 +135,80 @@ function FigureLook({ token, transparent }: LookProps) {
   );
 }
 
+/** Nome da animação parada que o conversor deixa em cada boneco pronto. */
+const IDLE_CLIP = 'Idle';
+/** Boneco pronto olha para o sul do mapa (+z), de frente para a câmera padrão. */
+const FACE_SOUTH_Y = Math.PI;
+
+function fadeMaterials(object: Object3D, transparent: boolean): void {
+  object.traverse((child) => {
+    if (!(child instanceof Mesh)) return;
+    child.castShadow = true;
+    const materials: Material[] = Array.isArray(child.material) ? child.material : [child.material];
+    for (const material of materials) {
+      material.transparent = transparent;
+      material.opacity = transparent ? HIDDEN_TOKEN_OPACITY : 1;
+      material.depthWrite = !transparent;
+    }
+  });
+}
+
+/** Boneco pronto (arquivo glTF com esqueleto), parado na animação "Idle", na altura do token. */
+function ReadyLook({
+  url,
+  height,
+  transparent,
+}: {
+  url: string;
+  height: number;
+  transparent: boolean;
+}) {
+  const gltf = useGLTF(url, false, true);
+  // Cada token precisa do próprio esqueleto: dois tokens do mesmo boneco animam independentes.
+  const object = useMemo(() => {
+    const copy = cloneSkinned(gltf.scene);
+    copy.traverse((child) => {
+      if (!(child instanceof Mesh)) return;
+      child.material = Array.isArray(child.material)
+        ? child.material.map((material: Material) => material.clone())
+        : child.material.clone();
+    });
+    return copy;
+  }, [gltf.scene]);
+  const { actions } = useAnimations(gltf.animations, object);
+
+  useEffect(() => {
+    const idle = actions[IDLE_CLIP];
+    if (!idle) return;
+    // Começa num ponto diferente para uma fileira de tokens não respirar em uníssono.
+    idle.reset().play().time = Math.random() * idle.getClip().duration;
+    return () => {
+      idle.stop();
+    };
+  }, [actions]);
+
+  useEffect(() => fadeMaterials(object, transparent), [object, transparent]);
+
+  const scale = TOKEN_SHAPE.figureHeight / height;
+  return (
+    <primitive
+      object={object}
+      position={[0, TOKEN_SHAPE.baseHeight, 0]}
+      rotation={[0, FACE_SOUTH_Y, 0]}
+      scale={scale}
+    />
+  );
+}
+
+function ModelLook({ token, transparent }: LookProps) {
+  const entry = token.modelKey ? tokenModelEntry(token.modelKey) : null;
+  const url = entry ? tokenModelUrl(entry) : null;
+  if (entry && url && entry.height) {
+    return <ReadyLook url={url} height={entry.height} transparent={transparent} />;
+  }
+  return <FigureLook token={token} transparent={transparent} />;
+}
+
 /** Base redonda e o corpo do token (cartão ou boneco), no tamanho de um token 1×1. */
 export function TokenModel({ token, transparent }: LookProps) {
   const { baseRadius, baseHeight } = TOKEN_SHAPE;
@@ -139,7 +221,7 @@ export function TokenModel({ token, transparent }: LookProps) {
       {token.kind === 'image' ? (
         <CardLook token={token} transparent={transparent} />
       ) : (
-        <FigureLook token={token} transparent={transparent} />
+        <ModelLook token={token} transparent={transparent} />
       )}
     </>
   );

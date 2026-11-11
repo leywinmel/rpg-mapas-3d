@@ -81,7 +81,7 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 
 **Fase B: tokens**
 
-- [ ] **RPG-32** Tokens 3D prontos e fofos: heróis de fantasia (elfo arqueiro, guerreiro, mago, ladino, anão, clérigo, bárbaro), monstros clássicos (goblin, orc, esqueleto, lobo, dragão), horror paranormal e cósmico (cultista, investigador, criatura de tentáculos), cyberpunk (mercenário, netrunner), pré-história (homem das cavernas) e NPCs da cidade (guarda, mercador, policial). Arquétipos genéricos, sem personagens com marca registrada.
+- [~] **RPG-32** (parte 1 em 11/11: cavaleiro, bárbaro, mago, ladinos e 4 esqueletos do KayKit, animados; faltam monstros, horror, cyberpunk, caverna e NPCs) Tokens 3D prontos e fofos: heróis de fantasia (elfo arqueiro, guerreiro, mago, ladino, anão, clérigo, bárbaro), monstros clássicos (goblin, orc, esqueleto, lobo, dragão), horror paranormal e cósmico (cultista, investigador, criatura de tentáculos), cyberpunk (mercenário, netrunner), pré-história (homem das cavernas) e NPCs da cidade (guarda, mercador, policial). Arquétipos genéricos, sem personagens com marca registrada.
 
 **Fase C: paredes**
 

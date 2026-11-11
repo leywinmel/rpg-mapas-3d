@@ -46,6 +46,20 @@ export const MODEL_CREDITS: readonly Credit[] = [
     usage: 'Carros, caminhões, tratores, veículos de serviço, o carro futurista e os karts.',
     ...CC0,
   },
+  {
+    work: 'KayKit Character Pack: Adventurers',
+    author: 'Kay Lousberg',
+    url: 'https://kaylousberg.itch.io/kaykit-adventurers',
+    usage: 'Bonecos de token: cavaleiro, bárbaro, mago e ladinos.',
+    ...CC0,
+  },
+  {
+    work: 'KayKit Character Pack: Skeletons',
+    author: 'Kay Lousberg',
+    url: 'https://kaylousberg.itch.io/kaykit-skeletons',
+    usage: 'Bonecos de token: esqueletos guerreiro, mago, ladino e servo.',
+    ...CC0,
+  },
 ];
 
 export const FONT_CREDITS: readonly Credit[] = [
