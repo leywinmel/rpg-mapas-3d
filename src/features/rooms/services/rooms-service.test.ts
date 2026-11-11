@@ -98,26 +98,49 @@ describe('createRoomsService', () => {
     const { client, calls } = fakeClient({
       data: [
         {
-          role: 'player',
-          nickname: 'Ana',
-          joined_at: '2026-10-01T10:00:00Z',
-          rooms: { id: 'old', slug: 'old', name: 'Antiga', updated_at: '2026-10-01T09:00:00Z' },
+          id: 'old',
+          slug: 'old',
+          name: 'Antiga',
+          updated_at: '2026-10-01T09:00:00Z',
+          room_members: [{ role: 'player', nickname: 'Ana', joined_at: '2026-10-01T10:00:00Z' }],
         },
         {
-          role: 'gm',
-          nickname: 'Theo',
-          joined_at: '2026-10-02T10:00:00Z',
-          rooms: { id: 'new', slug: 'new', name: 'Nova', updated_at: '2026-10-05T10:00:00Z' },
+          id: 'new',
+          slug: 'new',
+          name: 'Nova',
+          updated_at: '2026-10-05T10:00:00Z',
+          room_members: [{ role: 'gm', nickname: 'Theo', joined_at: '2026-10-02T10:00:00Z' }],
         },
       ],
       error: null,
     });
     const rooms = await createRoomsService(client).listMyRooms('u1');
-    expect(calls).toContainEqual({ method: 'eq', args: ['user_id', 'u1'] });
+    expect(calls).toContainEqual({ method: 'eq', args: ['room_members.user_id', 'u1'] });
     expect(rooms.map((room) => [room.id, room.role, room.lastActivityAt])).toEqual([
       ['new', 'gm', '2026-10-05T10:00:00Z'],
       ['old', 'player', '2026-10-01T10:00:00Z'],
     ]);
+  });
+
+  it('shouldListTheRoomsTheAdminHasNotJoinedYet', async () => {
+    const { client } = fakeClient({
+      data: [
+        {
+          id: 'r1',
+          slug: 'r1',
+          name: 'Alheia',
+          updated_at: '2026-10-03T10:00:00Z',
+          room_members: [],
+        },
+      ],
+      error: null,
+    });
+    const [room] = await createRoomsService(client).listMyRooms('admin');
+    expect(room).toMatchObject({
+      role: 'gm',
+      joined: false,
+      lastActivityAt: '2026-10-03T10:00:00Z',
+    });
   });
 
   it('shouldReturnMembershipOnlyForMembers', async () => {

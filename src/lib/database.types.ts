@@ -23,7 +23,21 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "day_phases": {
+            "admins": {
+                  Row: {
+                    "created_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"day_phases": {
                   Row: {
                     "code": string,"label": string
                   }
@@ -542,6 +556,9 @@ isOneToOne: false
 { Args: { "p_slug": string }; Returns: {
               "id": string,"name": string
             }[]
+                           },
+"is_admin":
+{ Args: Record<PropertyKey, never>; Returns: boolean
                            },
 "is_area_covered":
 { Args: { "p_map": string,"p_size": number,"p_x": number,"p_z": number }; Returns: boolean
