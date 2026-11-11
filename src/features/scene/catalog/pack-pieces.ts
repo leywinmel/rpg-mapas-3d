@@ -429,7 +429,7 @@ export const PACK_PIECES: readonly CatalogEntry[] = [
     thumbnail: '/assets/modern/thumbs/mod-parede-tijolo.webp',
     height: 2.0,
     wallSpan: STORY_SPAN,
-    farColor: '#6e6c69',
+    farColor: '#955440',
   },
   {
     key: 'mod-parede-lisa',
@@ -471,7 +471,7 @@ export const PACK_PIECES: readonly CatalogEntry[] = [
     thumbnail: '/assets/modern/thumbs/mod-tijolo-janela.webp',
     height: 2.0,
     wallSpan: STORY_SPAN,
-    farColor: '#6e6c69',
+    farColor: '#955440',
   },
   {
     key: 'mod-vitrine',

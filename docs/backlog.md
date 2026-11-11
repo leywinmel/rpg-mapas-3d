@@ -113,3 +113,10 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 - [ ] **RPG-45** Lugares prontos de verdade, mobiliados e com adereços: escola (100×100), posto de gasolina (50×50), hospital (200×200), delegacia, prédios inteiros; entram como "casa pronta" de um clique e como mapa pronto. O usuário vai mandar a lista de mapas que quer para uma sessão.
 - [ ] **RPG-46** Barcos e navios (pequeno, pesqueiro, navio grande) e um gerador de porto/cais com água.
 - [ ] **RPG-47** Muito mais adereços em cada lugar (dentro e fora): o gerador e as casas prontas enchem os cômodos, as calçadas e os pátios, em vez de deixar cenário vazio.
+
+**Fase H: correções e modelos mais limpos (pedido do usuário em 11/11)**
+
+- [x] **RPG-49** Paredes iguais dos dois lados (nenhuma mostra o lado de dentro para a rua), escada que vai do começo ao fim das casas sem buraco e parede de tijolo com relevo de verdade, da mesma cor na parede lisa e na com janela.
+- [ ] **RPG-50** Carros realistas sem marca (sedã, SUV, picape, van, caminhão, muscle car), maiores: 3×4 ou 3×5 casas.
+- [ ] **RPG-51** Animais como tokens, numa categoria separada de jogadores e NPCs: gato, cachorro, cavalo, vaca, rato e outros.
+- [ ] **RPG-52** Mais casas modernas, menos secas, algumas com telhado, com as paredes da mesma cor das paredes com janela.

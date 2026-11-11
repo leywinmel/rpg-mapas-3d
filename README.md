@@ -257,6 +257,11 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
   pacotes CC0 (pasta `rpgmaps-pacotes-3d`, fora do repositório) para o formato do site (geometria
   comprimida, texturas compartilhadas). As miniaturas saem do próprio renderizador do site
   (`renderPieceThumbnail`) e vão para `public/assets/<estilo>/thumbs/`.
+- `scripts/assets/mirror-walls.mjs <modo> <entrada.gltf> <saída.gltf>`: deixa uma parede de pacote
+  igual dos dois lados (`front`/`back` espelham uma metade, `dup` copia painéis de um lado só) ou
+  estica uma peça no comprimento (`stretch:<fator>`). Rode sempre a partir do modelo original.
+- `scripts/assets/brick-walls.mjs public/assets/modern`: gera as paredes de tijolo em relevo do
+  estilo moderno (lisa e com janela) e a textura `textures/brick-relief.webp`.
 - `npm run db:reset`: recria o banco local do zero.
 - `npm run test:db`: testa as regras de acesso do banco (quem vê e altera o quê).
 
