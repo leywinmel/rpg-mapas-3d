@@ -29,6 +29,8 @@ export type RoomSummary = Membership & {
   name: string;
   /** O mais recente entre a última mudança da mesa e a entrada na mesa. */
   lastActivityAt: string;
+  /** Falso só para o admin, que vê todas as mesas antes de entrar nelas. */
+  joined: boolean;
 };
 
 /** O pouco que dá para saber de uma mesa antes de entrar: o nome. */

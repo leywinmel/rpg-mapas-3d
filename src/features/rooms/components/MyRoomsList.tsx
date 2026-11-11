@@ -40,7 +40,9 @@ export function MyRoomsList({ userId, emptyHint }: { userId: string; emptyHint: 
             <Avatar nickname={room.name} seed={room.id} size="sm" />
             <span className={styles.roomInfo}>
               <span className={styles.roomName}>{room.name}</span>
-              <span className={styles.muted}>Você é {room.nickname}</span>
+              <span className={styles.muted}>
+                {room.joined ? `Você é ${room.nickname}` : 'Admin: você ainda não entrou'}
+              </span>
             </span>
             <span className={cx(styles.badge, room.role === 'gm' && styles.badgeGm)}>
               {ROLE_LABELS[room.role]}

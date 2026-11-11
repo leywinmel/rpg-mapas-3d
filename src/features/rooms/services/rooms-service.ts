@@ -62,22 +62,29 @@ function latest(a: string, b: string): string {
 /** Mesas e membros no Supabase, atrás de uma interface mockável [#20][#45]. */
 export function createRoomsService(client: AppSupabaseClient) {
   return {
-    /** Mesas em que a pessoa é membro, mais recentes primeiro. */
+    /**
+     * Mesas em que a pessoa é membro, mais recentes primeiro. O RLS decide quais mesas vêm: para o
+     * admin, todas; as que ele ainda não entrou chegam sem a linha de membro.
+     */
     async listMyRooms(userId: string): Promise<RoomSummary[]> {
       const { data, error } = await client
-        .from('room_members')
-        .select('role, nickname, joined_at, rooms!inner(id, slug, name, updated_at)')
-        .eq('user_id', userId);
+        .from('rooms')
+        .select('id, slug, name, updated_at, room_members(role, nickname, joined_at)')
+        .eq('room_members.user_id', userId);
       if (error) throw toRoomError(error);
       return data
-        .map((row) => ({
-          id: row.rooms.id,
-          slug: row.rooms.slug,
-          name: row.rooms.name,
-          role: toRole(row.role),
-          nickname: row.nickname,
-          lastActivityAt: latest(row.rooms.updated_at, row.joined_at),
-        }))
+        .map((row): RoomSummary => {
+          const member = row.room_members[0];
+          return {
+            id: row.id,
+            slug: row.slug,
+            name: row.name,
+            role: member ? toRole(member.role) : 'gm',
+            nickname: member?.nickname ?? '',
+            lastActivityAt: member ? latest(row.updated_at, member.joined_at) : row.updated_at,
+            joined: member !== undefined,
+          };
+        })
         .sort((a, b) => Date.parse(b.lastActivityAt) - Date.parse(a.lastActivityAt));
     },
 
