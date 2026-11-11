@@ -12,3 +12,5 @@ export * from './quality/quality';
 export * from './scene-ui';
 export { QualityButton } from './quality/QualityButton';
 export { useQualityLevel, useQualitySettings, useQualityStore } from './quality/quality-store';
+export * from './weather/weather';
+export { useTableWeather, useWeatherStore } from './weather/weather-store';

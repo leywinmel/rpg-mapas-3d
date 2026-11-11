@@ -14,6 +14,7 @@ em tempo real, com dados 3D, névoa e anotações enviadas pelo mestre.
 - Tokens com imagem ou boneco 3D, barra de vida e notas.
 - Névoa que o mestre pinta e revela.
 - Ferramentas da mesa: régua em casas e metros, ping ao vivo e ordem de iniciativa com vez e rodada.
+- Clima da mesa: chuva, tempestade com relâmpagos e hora do dia (dia, entardecer, noite), escolhidos pelo mestre.
 - Anotações do mestre, com texto e imagem, para a mesa toda ou para jogadores escolhidos; chegam na hora e ficam salvas na mesa.
 - Dados 3D com física, que todos veem rolar; o mestre pode rolar escondido e a mesa guarda o histórico.
 - Exportar mapas como arquivo do site, imagem PNG ou modelo 3D `.glb`.
@@ -76,6 +77,7 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
 - **Montar:** escolha uma peça na aba "Biblioteca" e clique na grade; para pintar o chão, dá para
   arrastar. A barra de baixo troca a ferramenta: chão, parede, objeto, apagar e elevar ou abaixar o
   chão. A tecla `R` gira a peça, e o botão de atalhos mostra todas as teclas.
+  Entre os chãos há areia, chão rachado de deserto, lama e poças d'água sobre a pedra.
 - **Gerar vila ou cidade:** em "Novo mapa", a opção "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas com portas, janelas e telhados, praças, árvores e veículos. Escolha o estilo, o
   tamanho (vila 64, cidadezinha 160, cidade 400 ou metrópole 1000 casas de lado) e a semente: a mesma
@@ -197,6 +199,10 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
 - **O que o jogador não vê:** token escondido ou sob a névoa não aparece na ordem do jogador (o banco
   nem manda a linha), e a entrada livre pode ser marcada como escondida.
 - **Na imagem:** com "esconder a interface" no PNG, a régua, o ping e o anel da vez ficam de fora.
+- **Clima da mesa:** o botão de nuvem com chuva abre o painel "Clima da mesa". O mestre escolhe o
+  tempo (limpo, chuva ou tempestade) e a hora (a do mapa, dia, entardecer ou noite); a mesa toda vê
+  na hora, e a escolha fica salva na mesa. Cada pessoa pode desligar a chuva só na própria tela
+  ("Mostrar a chuva na minha tela"). Quem pediu menos movimento no sistema não vê os relâmpagos.
 
 ### Exportar e importar
 

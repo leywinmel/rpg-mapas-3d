@@ -23,7 +23,21 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "dice_rolls": {
+            "day_phases": {
+                  Row: {
+                    "code": string,"label": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "code": string,"label": string
+                  }
+                  Update: {
+                    "code"?: string,"label"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"dice_rolls": {
                   Row: {
                     "created_at": string,"hidden": boolean,"id": string,"modifier": number,"notation": string,"results": NonNullable<Json>,"roller_id": string | null,"room_id": string,"total": number
                   }
@@ -309,14 +323,14 @@ isOneToOne: false
                   ]
                 },"rooms": {
                   Row: {
-                    "active_map_id": string | null,"created_at": string,"cutaway_lock": number | null,"id": string,"initiative_round": number,"name": string,"owner_id": string,"slug": string,"updated_at": string
+                    "active_map_id": string | null,"created_at": string,"cutaway_lock": number | null,"day_phase": string,"id": string,"initiative_round": number,"name": string,"owner_id": string,"slug": string,"updated_at": string,"weather": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "active_map_id"?: string | null,"created_at"?: string,"cutaway_lock"?: number | null,"id"?: string,"initiative_round"?: number,"name": string,"owner_id": string,"slug"?: string,"updated_at"?: string
+                    "active_map_id"?: string | null,"created_at"?: string,"cutaway_lock"?: number | null,"day_phase"?: string,"id"?: string,"initiative_round"?: number,"name": string,"owner_id": string,"slug"?: string,"updated_at"?: string,"weather"?: string
                   }
                   Update: {
-                    "active_map_id"?: string | null,"created_at"?: string,"cutaway_lock"?: number | null,"id"?: string,"initiative_round"?: number,"name"?: string,"owner_id"?: string,"slug"?: string,"updated_at"?: string
+                    "active_map_id"?: string | null,"created_at"?: string,"cutaway_lock"?: number | null,"day_phase"?: string,"id"?: string,"initiative_round"?: number,"name"?: string,"owner_id"?: string,"slug"?: string,"updated_at"?: string,"weather"?: string
                   }
                   Relationships: [
                     {
@@ -326,11 +340,23 @@ isOneToOne: false
       referencedRelation: "maps"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "rooms_day_phase_fk"
+      columns: ["day_phase"]
+isOneToOne: false
+      referencedRelation: "day_phases"
+      referencedColumns: ["code"]
+    },{
       foreignKeyName: "rooms_owner_id_fkey"
       columns: ["owner_id"]
 isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rooms_weather_fk"
+      columns: ["weather"]
+isOneToOne: false
+      referencedRelation: "weather_kinds"
+      referencedColumns: ["code"]
     }
                   ]
                 },"token_kinds": {
@@ -431,6 +457,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"weather_kinds": {
+                  Row: {
+                    "code": string,"label": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "code": string,"label": string
+                  }
+                  Update: {
+                    "code"?: string,"label"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 }
           }
           Views: {
@@ -454,12 +494,14 @@ isOneToOne: false
               "active_map_id": string | null,
 "created_at": string,
 "cutaway_lock": number | null,
+"day_phase": string,
 "id": string,
 "initiative_round": number,
 "name": string,
 "owner_id": string,
 "slug": string,
-"updated_at": string
+"updated_at": string,
+"weather": string
             }
                           SetofOptions: {
         from: "*"

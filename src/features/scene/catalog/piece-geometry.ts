@@ -220,6 +220,102 @@ function waterFloor(): ProceduralLayer[] {
   ];
 }
 
+/** Areia de deserto ou praia: ondinhas do vento e umas pedrinhas (RPG-41). */
+function sandFloor(): ProceduralLayer[] {
+  const random = seededRandom('areia-dunas');
+  const parts: Part[] = [box([1, FLOOR_CAP_DEPTH, 1], C.sandTop, { y: CAP_BOTTOM })];
+  for (let index = 0; index < 3; index += 1) {
+    const width = 0.55 + random() * 0.3;
+    parts.push(
+      box([width, 0.012, 0.05], C.sandRipple, {
+        x: (random() - 0.5) * 0.3,
+        z: -0.3 + index * 0.3,
+        ry: (random() - 0.5) * 0.35,
+      }),
+    );
+  }
+  parts.push(lump(0.03, C.sandPebble, { x: 0.3, y: 0.005, z: 0.22, sy: 0.5 }));
+  return [matte(parts, 'areia')];
+}
+
+/** Chão rachado de deserto: placas secas com fendas escuras entre elas (RPG-41). */
+function crackedFloor(): ProceduralLayer[] {
+  const random = seededRandom('chao-rachado-placas');
+  const parts: Part[] = [capBase(C.crackedSeam)];
+  const plates: Array<[number, number, number, number]> = [
+    [-0.26, -0.27, 0.44, 0.42],
+    [0.24, -0.3, 0.48, 0.36],
+    [-0.3, 0.2, 0.36, 0.56],
+    [0.17, 0.2, 0.6, 0.54],
+  ];
+  for (const [x, z, width, depth] of plates) {
+    const lift = random() * 0.015;
+    parts.push(
+      box([width, 0.03 + lift, depth], C.crackedTop, {
+        x,
+        y: -0.03,
+        z,
+        ry: (random() - 0.5) * 0.12,
+      }),
+    );
+  }
+  return [matte(parts, 'chao-rachado')];
+}
+
+/** Lama: terra escura e mole com manchas molhadas que brilham (RPG-41). */
+function mudFloor(): ProceduralLayer[] {
+  const wet: Array<[number, number, number]> = [
+    [-0.18, -0.12, 0.26],
+    [0.24, 0.22, 0.18],
+  ];
+  return [
+    matte(
+      [
+        box([1, FLOOR_CAP_DEPTH, 1], C.mudTop, { y: CAP_BOTTOM }),
+        lump(0.07, C.mudSide, { x: 0.28, y: 0.0, z: -0.28, sy: 0.35 }),
+        lump(0.05, C.mudSide, { x: -0.3, y: 0.0, z: 0.3, sy: 0.35 }),
+      ],
+      'lama',
+    ),
+    {
+      geometry: mergeParts(
+        wet.map(([x, z, radius]) =>
+          cylinder({ top: radius, bottom: radius, height: 0.008, segments: 7 }, C.mudWet, {
+            x,
+            z,
+          }),
+        ),
+        'lama-molhada',
+      ),
+      material: 'water',
+    },
+  ];
+}
+
+/** Poça d'água sobre lajes de pedra: a rua depois da chuva (RPG-41). */
+function puddleFloor(): ProceduralLayer[] {
+  return [
+    ...stoneFloor(),
+    {
+      geometry: mergeParts(
+        [
+          cylinder({ top: 0.34, bottom: 0.34, height: 0.006, segments: 9 }, C.puddleWater, {
+            x: -0.04,
+            z: 0.03,
+            sx: 1.15,
+          }),
+          cylinder({ top: 0.12, bottom: 0.12, height: 0.006, segments: 7 }, C.puddleWater, {
+            x: 0.33,
+            z: -0.3,
+          }),
+        ],
+        'poca',
+      ),
+      material: 'water',
+    },
+  ];
+}
+
 // ---------------------------------------------------------------------------
 // Paredes: um segmento de 1 casa de comprimento e 1 de altura, centrado em x.
 // ---------------------------------------------------------------------------
@@ -472,6 +568,10 @@ export const PROCEDURAL_BUILDERS: Readonly<Record<string, () => ProceduralLayer[
   terra: dirtFloor,
   grama: grassFloor,
   agua: waterFloor,
+  areia: sandFloor,
+  'chao-rachado': crackedFloor,
+  lama: mudFloor,
+  poca: puddleFloor,
   'parede-pedra': stoneWall,
   'parede-madeira': woodWall,
   grade: ironGrate,

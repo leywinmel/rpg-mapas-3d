@@ -8,3 +8,4 @@ export * from './tokens';
 export * from './initiative';
 export * from './measure';
 export * from './glide';
+export * from './table-weather';

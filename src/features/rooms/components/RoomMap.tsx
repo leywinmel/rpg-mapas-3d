@@ -1,4 +1,5 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import { DEFAULT_TABLE_WEATHER } from '@/domain';
 import type { Cutaway } from '@/domain/map-v2';
 import { MapWorkspace, type MapView, type TableBinding } from '@/features/map-editor';
 import { ExportSceneLayer } from '@/features/export';
@@ -10,6 +11,7 @@ import {
   ScenerySync,
   useSceneryAdjuster,
 } from '@/features/scenery';
+import { useWeatherStore } from '@/features/scene';
 import { TableToolsSceneLayer, TableToolsSync } from '@/features/table-tools';
 import { TokensSceneLayer, TokensSync, useTokensStore } from '@/features/tokens';
 import { useRoomControls, useRoomSession } from '../hooks/room-session-context';
@@ -52,6 +54,10 @@ export function RoomMap() {
     async (lock: Cutaway) => replaceRoom(await getRoomsService().setCutawayLock(roomId, lock)),
     [roomId, replaceRoom],
   );
+  // Tempo e hora da mesa vão para a cena; ao sair da mesa, o próximo mapa abre de céu limpo.
+  const tableWeather = room.tableWeather;
+  useEffect(() => useWeatherStore.getState().setTable(tableWeather), [tableWeather]);
+  useEffect(() => () => useWeatherStore.getState().setTable(DEFAULT_TABLE_WEATHER), []);
   return (
     <>
       {/* O mestre é quem move: o aviso que volta pelo canal não serve para ele. */}
