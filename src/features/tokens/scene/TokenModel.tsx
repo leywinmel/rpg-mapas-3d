@@ -8,6 +8,7 @@ import {
   SRGBColorSpace,
   TextureLoader,
   type Texture,
+  Vector3,
 } from 'three';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { DEFAULT_TOKEN_COLORS, tokenModelEntry, tokenModelUrl } from '../constants';
@@ -17,9 +18,11 @@ import type { Token } from '../types';
 import {
   fitUploadedModel,
   HIDDEN_TOKEN_OPACITY,
+  PRIMITIVE_FIGURE_HEIGHT,
   TOKEN_SCENE_COLORS,
   TOKEN_SHAPE,
   UPLOADED_MODEL_FOOTPRINT,
+  uploadedModelFacing,
 } from './token-scene';
 
 const loader = new TextureLoader();
@@ -81,12 +84,23 @@ function CardLook({ token, transparent }: LookProps) {
   );
 }
 
-/** Boneco simples de primitivas, nas duas cores escolhidas: roupa e detalhe. */
+/** Boneco simples de primitivas, nas duas cores escolhidas, crescido inteiro até a altura de gente. */
 function FigureLook({ token, transparent }: LookProps) {
+  return (
+    <group scale={TOKEN_SHAPE.figureHeight / PRIMITIVE_FIGURE_HEIGHT}>
+      <PrimitiveFigure token={token} transparent={transparent} />
+    </group>
+  );
+}
+
+/** Boneco de primitivas no tamanho em que foi desenhado (PRIMITIVE_FIGURE_HEIGHT). */
+function PrimitiveFigure({ token, transparent }: LookProps) {
   const primary = token.colorPrimary ?? DEFAULT_TOKEN_COLORS.primary;
   const secondary = token.colorSecondary ?? DEFAULT_TOKEN_COLORS.secondary;
   const extra = materialProps(transparent);
-  const { baseHeight, figureHeight } = TOKEN_SHAPE;
+  const figureHeight = PRIMITIVE_FIGURE_HEIGHT;
+  // O grupo de fora escala a base junto: a altura dela volta ao normal aqui.
+  const baseHeight = TOKEN_SHAPE.baseHeight / (TOKEN_SHAPE.figureHeight / PRIMITIVE_FIGURE_HEIGHT);
 
   if (token.modelKey === 'creature') {
     return (
@@ -260,6 +274,23 @@ function MissingModelLook({ transparent }: { transparent: boolean }) {
   );
 }
 
+/** Vértices do modelo no espaço dele (sem a pose da animação), para achar os pés. */
+function modelPoints(object: Object3D): Vector3[] {
+  object.updateMatrixWorld(true);
+  const points: Vector3[] = [];
+  object.traverse((child) => {
+    if (!(child instanceof Mesh)) return;
+    const positions = child.geometry.getAttribute('position');
+    if (!positions) return;
+    for (let index = 0; index < positions.count; index += 1) {
+      points.push(
+        new Vector3().fromBufferAttribute(positions, index).applyMatrix4(child.matrixWorld),
+      );
+    }
+  });
+  return points;
+}
+
 type ModelBoundaryProps = { fallback: ReactNode; children: ReactNode };
 
 /** Um .glb quebrado vira a caixa; os outros tokens e a cena seguem de pé. */
@@ -282,7 +313,7 @@ class UploadedModelBoundary extends Component<ModelBoundaryProps, { failed: bool
 /** Modelo .glb enviado pelo mestre, encaixado no token (escala e origem variam por arquivo). */
 function LoadedUploadedModel({ url, transparent }: { url: string; transparent: boolean }) {
   const gltf = useGLTF(url, false, true);
-  const { object, fit } = useMemo(() => {
+  const { object, fit, facing } = useMemo(() => {
     const copy = cloneSkinned(gltf.scene);
     copy.traverse((child) => {
       if (!(child instanceof Mesh)) return;
@@ -290,7 +321,11 @@ function LoadedUploadedModel({ url, transparent }: { url: string; transparent: b
         ? child.material.map((material: Material) => material.clone())
         : child.material.clone();
     });
-    return { object: copy, fit: fitUploadedModel(new Box3().setFromObject(copy)) };
+    return {
+      object: copy,
+      fit: fitUploadedModel(new Box3().setFromObject(copy)),
+      facing: uploadedModelFacing(modelPoints(copy)),
+    };
   }, [gltf.scene]);
   const { actions, names } = useAnimations(gltf.animations, object);
 
@@ -305,7 +340,12 @@ function LoadedUploadedModel({ url, transparent }: { url: string; transparent: b
 
   useEffect(() => fadeMaterials(object, transparent), [object, transparent]);
 
-  return <primitive object={object} position={fit.position} scale={fit.scale} />;
+  // O encaixe já pôs o centro na origem: girar em volta dela não tira o modelo da base.
+  return (
+    <group rotation={[0, facing, 0]}>
+      <primitive object={object} position={fit.position} scale={fit.scale} />
+    </group>
+  );
 }
 
 function UploadedLook({ token, transparent }: LookProps) {
