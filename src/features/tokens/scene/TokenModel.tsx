@@ -23,6 +23,7 @@ import {
   TOKEN_SCENE_COLORS,
   TOKEN_SHAPE,
   UPLOADED_MODEL_FOOTPRINT,
+  declaredModelFacing,
   uploadedModelFacing,
 } from './token-scene';
 
@@ -325,7 +326,7 @@ function LoadedUploadedModel({ url, transparent }: { url: string; transparent: b
     return {
       object: copy,
       fit: fitUploadedModel(new Box3().setFromObject(copy)),
-      facing: uploadedModelFacing(modelPoints(copy)),
+      facing: declaredModelFacing(copy.userData) ?? uploadedModelFacing(modelPoints(copy)),
     };
   }, [gltf.scene]);
   const { actions, names } = useAnimations(gltf.animations, object);

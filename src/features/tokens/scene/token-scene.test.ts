@@ -4,6 +4,7 @@ import {
   TOKEN_SHAPE,
   turnToward,
   UPLOADED_MODEL_FOOTPRINT,
+  declaredModelFacing,
   uploadedModelFacing,
 } from './token-scene';
 
@@ -90,5 +91,20 @@ describe('uploadedModelFacing', () => {
   it('shouldLeaveAModelWithoutFeetAsItCame', () => {
     expect(uploadedModelFacing([])).toBe(0);
     expect(uploadedModelFacing([{ x: 0, y: 0, z: 0 }])).toBe(0);
+  });
+});
+
+describe('declaredModelFacing', () => {
+  it('shouldTrustTheFrontTheFileDeclares', () => {
+    expect(declaredModelFacing({ rpgmapsFront: '+z' })).toBe(0);
+    expect(declaredModelFacing({ rpgmapsFront: '-z' })).toBeCloseTo(Math.PI);
+    expect(declaredModelFacing({ rpgmapsFront: '+x' })).toBeCloseTo(-Math.PI / 2);
+    expect(declaredModelFacing({ rpgmapsFront: '-x' })).toBeCloseTo(Math.PI / 2);
+  });
+
+  it('shouldFallBackToGuessingWhenTheFileSaysNothingUseful', () => {
+    expect(declaredModelFacing({})).toBeNull();
+    expect(declaredModelFacing({ rpgmapsFront: 'frente' })).toBeNull();
+    expect(declaredModelFacing({ rpgmapsFront: 1 })).toBeNull();
   });
 });

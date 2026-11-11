@@ -121,6 +121,7 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 - [ ] **RPG-53** Ônibus e carreta do pacote Rgsdev (13 e 12 casas): pedem subir o limite de peça do mapa (hoje 8 casas).
 - [x] **RPG-55** Admin do site: entra em qualquer mesa como mestre e vê mapas, tokens e modelos de todos. Quem é admin fica só no banco (tabela `admins`), nunca no Git.
 - [x] **RPG-56** Botão na barra da sala para esconder ou mostrar a base redonda dos tokens. Vale só para quem clica e fica salvo no navegador; sem base, o token desce e pisa no chão.
+- [x] **RPG-57** Modelo enviado pode dizer no próprio arquivo para onde olha (extras da cena, `rpgmapsFront`); o app confia nisso antes de adivinhar pelos pés, que erra em bicho de tentáculos ou galhos. O `clean-model.mjs` ganhou `--smooth`, que tira o facetado dos rostos gerados por IA.
 - [x] **RPG-54** Token vira o rosto para onde anda, sozinho, ao ser movido (o rumo não é salvo: ao recarregar, volta a olhar para o sul).
 - [ ] **RPG-51** Animais como tokens, numa categoria separada de jogadores e NPCs: gato, cachorro, cavalo, vaca, rato e outros.
 - [ ] **RPG-52** Mais casas modernas, menos secas, algumas com telhado, com as paredes da mesma cor das paredes com janela.

@@ -129,3 +129,25 @@ export function uploadedModelFacing(points: readonly Point3[]): number {
   const offset = (feetZ - (minZ + depth / 2)) / depth;
   return offset < -FEET_MIN_OFFSET ? Math.PI : 0;
 }
+
+/**
+ * Chave dos extras da cena do .glb em que o próprio arquivo diz para onde olha ("+z", "-z",
+ * "+x" ou "-x"). Bicho de tentáculos ou galhos não tem pés que digam a frente: quem prepara o
+ * modelo (scripts/assets/clean-model.mjs --front) marca, e o app confia na marca.
+ */
+export const MODEL_FRONT_KEY = 'rpgmapsFront';
+
+/** Giro em y que leva cada frente marcada para o sul (+z). */
+const FRONT_TURNS: Readonly<Record<string, number>> = {
+  '+z': 0,
+  '-z': Math.PI,
+  '+x': -Math.PI / 2,
+  '-x': Math.PI / 2,
+};
+
+/** Giro da frente que o arquivo declara; nulo se ele não declara (ou declara algo estranho). */
+export function declaredModelFacing(extras: Readonly<Record<string, unknown>>): number | null {
+  const front = extras[MODEL_FRONT_KEY];
+  if (typeof front !== 'string') return null;
+  return FRONT_TURNS[front] ?? null;
+}
