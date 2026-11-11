@@ -22,6 +22,7 @@ const token = (overrides: Partial<Token> = {}): Token => ({
   name: 'Ana',
   imagePath: null,
   modelKey: 'figure',
+  modelAssetId: null,
   colorPrimary: '#112233',
   colorSecondary: '#445566',
   x: 1,

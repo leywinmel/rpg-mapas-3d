@@ -66,6 +66,35 @@ describe('createTableImportTarget', () => {
     expect(fake.tokens.updateToken).not.toHaveBeenCalled();
   });
 
+  it('shouldKeepTheUploadedModelWhenItIsInTheLibraryOfWhoImports', async () => {
+    const fake = deps();
+    const result = await target(fake).createToken({
+      mapId: 'mapa',
+      token: fileToken({ kind: 'asset', imagePath: null, modelAssetId: 'modelo' }),
+      onCreated: () => undefined,
+      previousId: null,
+    });
+    expect(result).toBe('created');
+    expect(fake.tokens.createToken).toHaveBeenCalledWith(
+      expect.objectContaining({ look: { kind: 'asset', assetId: 'modelo' } }),
+    );
+  });
+
+  it('shouldTurnTheModelIntoAFigureWhenTheDatabaseRefusesIt', async () => {
+    const fake = deps();
+    fake.tokens.createToken.mockRejectedValueOnce(new Error('42501'));
+    const result = await target(fake).createToken({
+      mapId: 'mapa',
+      token: fileToken({ kind: 'asset', imagePath: null, modelAssetId: 'modelo' }),
+      onCreated: () => undefined,
+      previousId: null,
+    });
+    expect(result).toBe('fallback');
+    expect(fake.tokens.createToken).toHaveBeenLastCalledWith(
+      expect.objectContaining({ look: expect.objectContaining({ kind: 'model' }) }),
+    );
+  });
+
   it('shouldFallBackToAFigureWhenTheImageIsGone', async () => {
     const fake = deps(async () => {
       throw new Error('404');

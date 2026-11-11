@@ -72,6 +72,11 @@ export const fileTokenSchema = z.object({
   kind: z.enum(TOKEN_KINDS),
   imagePath: z.string().regex(TOKEN_IMAGE_PATH_PATTERN).nullable(),
   modelKey: z.string().regex(MODEL_KEY).nullable(),
+  /**
+   * Modelo .glb da biblioteca do mestre. Opcional: arquivos antigos não têm. Na importação, só
+   * serve se o modelo for de quem importa; senão o token vira boneco.
+   */
+  modelAssetId: z.uuid().nullable().optional(),
   colorPrimary: z.string().regex(HEX_COLOR).nullable(),
   colorSecondary: z.string().regex(HEX_COLOR).nullable(),
   x: cellCoordinate,

@@ -12,6 +12,7 @@ export function toFileToken(token: Token): FileToken {
     kind: token.kind,
     imagePath: token.imagePath,
     modelKey: token.modelKey,
+    modelAssetId: token.modelAssetId,
     colorPrimary: token.colorPrimary,
     colorSecondary: token.colorSecondary,
     x: token.x,

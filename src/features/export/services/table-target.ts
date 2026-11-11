@@ -66,6 +66,11 @@ export function createTableImportTarget(
   }
 
   async function lookOf(token: FileToken): Promise<{ look: TokenLook; result: TokenImportResult }> {
+    if (token.kind === 'asset') {
+      if (token.modelAssetId)
+        return { look: { kind: 'asset', assetId: token.modelAssetId }, result: 'created' };
+      return { look: modelLook(token), result: 'fallback' };
+    }
     if (token.kind !== 'image' || !token.imagePath) {
       return { look: modelLook(token), result: 'created' };
     }
@@ -85,7 +90,7 @@ export function createTableImportTarget(
       if (!tokenId) {
         const { look, result: lookResult } = await lookOf(token);
         result = lookResult;
-        const created = await deps.tokens.createToken({
+        const input = {
           mapId,
           ownerId: null,
           name: token.name,
@@ -95,8 +100,21 @@ export function createTableImportTarget(
           level: token.level,
           hpMax: token.hpMax,
           hidden: token.hidden,
-          look,
-        });
+        };
+        let created;
+        try {
+          created = await deps.tokens.createToken({ ...input, look });
+        } catch (error) {
+          if (look.kind !== 'asset') throw error;
+          // O modelo é de outro mestre ou foi apagado: o banco recusa, e o token vira boneco.
+          logger.warn(
+            'Modelo do token não está na biblioteca de quem importa.',
+            { feature: 'export' },
+            error,
+          );
+          created = await deps.tokens.createToken({ ...input, look: modelLook(token) });
+          result = 'fallback';
+        }
         tokenId = created.id;
         onCreated(tokenId);
       }

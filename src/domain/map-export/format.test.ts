@@ -74,6 +74,29 @@ describe('arquivo do mapa v2', () => {
     expect(isCellCovered(result.fog!, { x: 5, z: 2 })).toBe(false);
   });
 
+  it('guarda o modelo enviado do token e aceita arquivo antigo sem ele', () => {
+    const uploaded: FileToken = {
+      ...token,
+      kind: 'asset',
+      modelKey: null,
+      modelAssetId: '7b1c2d3e-4f50-4a6b-8c7d-9e0f1a2b3c4d',
+    };
+    const text = serializeMapFile({
+      name: 'Cripta',
+      model: editedMap(),
+      tokens: [uploaded],
+      fog: null,
+    });
+    expect(unwrap(parseMapFile(text)).tokens).toEqual([uploaded]);
+    expect(
+      unwrap(
+        parseMapFile(
+          serializeMapFile({ name: 'A', model: editedMap(), tokens: [token], fog: null }),
+        ),
+      ).tokens?.[0]?.modelAssetId,
+    ).toBeUndefined();
+  });
+
   it('sem tokens nem névoa, o arquivo não leva esses campos', () => {
     const file = createMapFile({ name: 'Vazio', model: createEmptyMap(size) });
     expect(file).not.toHaveProperty('tokens');

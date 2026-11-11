@@ -14,8 +14,11 @@ export const MAX_TOKEN_HP = 100000;
 export const MAX_TOKEN_NAME_LENGTH = 60;
 export const MAX_TOKEN_NOTES_LENGTH = 2000;
 
-/** Imagem em pé numa base ou boneco 3D com cores (coluna tokens.kind). */
-export const TOKEN_KINDS = ['image', 'model'] as const;
+/**
+ * Imagem em pé numa base, boneco 3D pronto ou modelo .glb enviado pelo mestre (coluna
+ * tokens.kind, tabela token_kinds).
+ */
+export const TOKEN_KINDS = ['image', 'model', 'asset'] as const;
 export type TokenKind = (typeof TOKEN_KINDS)[number];
 
 /**

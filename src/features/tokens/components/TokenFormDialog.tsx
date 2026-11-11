@@ -27,10 +27,12 @@ import { checkTokenImage, tokenColorSchema, tokenFormSchema } from '../schemas';
 import { tokenFailures } from '../services/token-errors';
 import type { TokenLook } from '../types';
 import styles from './tokens.module.css';
+import { UploadedModelField } from './UploadedModelField';
 
 const KIND_OPTIONS = [
   { value: 'model', label: 'Boneco 3D' },
   { value: 'image', label: 'Imagem' },
+  { value: 'asset', label: 'Modelo enviado' },
 ] as const satisfies ReadonlyArray<{ value: TokenKind; label: string }>;
 
 const SIZE_OPTIONS = Array.from(
@@ -80,7 +82,11 @@ export function TokenFormDialog({ open, onClose }: TokenFormDialogProps) {
   const [hpMax, setHpMax] = useState('');
   const [owner, setOwner] = useState(NO_OWNER);
   const [hidden, setHidden] = useState(false);
-  const [errors, setErrors] = useState<FieldErrors<FormFields & { image: string }>>({});
+  const [assetId, setAssetId] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors<FormFields & { image: string; asset: string }>>(
+    {},
+  );
   const [failure, setFailure] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const preview = useFilePreview(image);
@@ -91,7 +97,7 @@ export function TokenFormDialog({ open, onClose }: TokenFormDialogProps) {
   }, [open, nameId]);
 
   function handleClose() {
-    if (!pending) onClose();
+    if (!pending && !uploading) onClose();
   }
 
   function handlePick(event: ChangeEvent<HTMLInputElement>) {
@@ -109,6 +115,11 @@ export function TokenFormDialog({ open, onClose }: TokenFormDialogProps) {
       setErrors((current) => ({ ...current, image: 'Escolha a imagem do token.' }));
       return null;
     }
+    if (kind === 'asset') {
+      if (assetId) return { kind: 'asset', assetId };
+      setErrors((current) => ({ ...current, asset: 'Escolha ou envie o modelo do token.' }));
+      return null;
+    }
     const colors = [primary, secondary].map((color) => tokenColorSchema.safeParse(color));
     if (colors.some((color) => !color.success)) {
       setFailure('Escolha cores válidas para o boneco.');
@@ -119,7 +130,7 @@ export function TokenFormDialog({ open, onClose }: TokenFormDialogProps) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending || !actions) return;
+    if (pending || uploading || !actions) return;
     setFailure(null);
     const result = validateForm(tokenFormSchema, {
       name,
@@ -156,10 +167,16 @@ export function TokenFormDialog({ open, onClose }: TokenFormDialogProps) {
       description="Personagem, monstro ou NPC. Ele aparece no centro da câmera."
       footer={
         <>
-          <Button variant="ghost" disabled={pending} onClick={handleClose}>
+          <Button variant="ghost" disabled={pending || uploading} onClick={handleClose}>
             Cancelar
           </Button>
-          <Button type="submit" form={formId} loading={pending} icon={<Plus size={16} />}>
+          <Button
+            type="submit"
+            form={formId}
+            loading={pending}
+            disabled={uploading}
+            icon={<Plus size={16} />}
+          >
             Criar token
           </Button>
         </>
@@ -183,7 +200,19 @@ export function TokenFormDialog({ open, onClose }: TokenFormDialogProps) {
           value={kind}
           onChange={setKind}
         />
-        {kind === 'image' ? (
+        {kind === 'asset' && (
+          <UploadedModelField
+            value={assetId}
+            onChange={(picked) => {
+              setAssetId(picked);
+              if (picked) setErrors((current) => ({ ...current, asset: undefined }));
+            }}
+            error={errors.asset}
+            disabled={pending}
+            onBusyChange={setUploading}
+          />
+        )}
+        {kind === 'image' && (
           <div className={styles.field}>
             <input
               ref={fileRef}
@@ -214,7 +243,8 @@ export function TokenFormDialog({ open, onClose }: TokenFormDialogProps) {
               </p>
             )}
           </div>
-        ) : (
+        )}
+        {kind === 'model' && (
           <>
             <div className={styles.field}>
               <label htmlFor={modelId} className={styles.label}>

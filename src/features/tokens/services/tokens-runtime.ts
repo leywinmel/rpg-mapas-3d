@@ -193,6 +193,9 @@ export function createTokenActions(options: {
       announce((channel) => channel.announcePieceMoved(message));
     },
     getImageUrl: service.getImageUrl,
+    getModelUrl: service.getModelUrl,
+    listModels: service.listModels,
+    uploadModel: service.uploadModel,
     reload: options.reloader.soon,
   };
   return { actions, dispose: throttle.cancel };
