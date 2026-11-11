@@ -12,6 +12,7 @@ export type TokenErrorKind =
   | 'image-too-large'
   | 'image-type'
   | 'image-upload'
+  | 'model-upload'
   | 'unknown';
 
 export const TOKEN_ERROR_MESSAGES: Record<TokenErrorKind, string> = {
@@ -23,6 +24,7 @@ export const TOKEN_ERROR_MESSAGES: Record<TokenErrorKind, string> = {
   'image-too-large': `A imagem passa de ${TOKEN_IMAGE_MAX_MEGABYTES} MB. Escolha uma menor.`,
   'image-type': 'Use uma imagem PNG, JPEG ou WebP.',
   'image-upload': 'Não deu para enviar a imagem. Tente de novo.',
+  'model-upload': 'Não deu para enviar o modelo. Tente de novo.',
   unknown: 'Não deu para concluir agora. Tente de novo em instantes.',
 };
 

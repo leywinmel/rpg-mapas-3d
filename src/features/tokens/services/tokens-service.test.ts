@@ -1,3 +1,4 @@
+import type { AssetsService } from '@/features/map-editor/services/assets-service';
 import { setLogSink } from '@/lib/logger';
 import type { AppSupabaseClient } from '@/lib/supabase';
 import { TokenError } from './token-errors';
@@ -19,6 +20,7 @@ const TOKEN_ROW = {
   name: 'Goblin',
   image_path: null,
   model_key: 'creature',
+  model_asset_id: null,
   color_primary: '#336633',
   color_secondary: '#ccaa33',
   x: 3,
@@ -83,6 +85,26 @@ function fakeClient(queries: Result[], options: { uploadError?: unknown } = {}) 
 
 const argsOf = (calls: Call[], method: string) =>
   calls.filter((call) => call.method === method).map((call) => call.args);
+
+const ASSET_ID = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+
+function fakeAssets(urls: Record<string, string | null> = {}) {
+  const asset = {
+    id: ASSET_ID,
+    name: 'Fera Vermelha',
+    storagePath: `${USER_ID}/${ASSET_ID}.glb`,
+    sizeBytes: 100,
+    createdAt: '2026-11-11T00:00:00Z',
+  };
+  return {
+    listMyAssets: vi.fn(async () => [asset]),
+    uploadModel: vi.fn(async () => asset),
+    deleteAsset: vi.fn(async () => undefined),
+    signModelUrls: vi.fn(async (ids: readonly string[]) =>
+      Object.fromEntries(ids.map((id) => [id, urls[id] ?? null])),
+    ),
+  } satisfies AssetsService;
+}
 
 const png = () => new File([new Uint8Array(8)], 'heroi.png', { type: 'image/png' });
 
@@ -157,5 +179,52 @@ describe('tokensService', () => {
     await service.getImageUrl('a/b.png');
     await service.getImageUrl('a/b.png');
     expect(argsOf(calls, 'sign')).toHaveLength(1);
+  });
+
+  it('shouldCreateAModelTokenPointingToTheAsset', async () => {
+    const row = { ...TOKEN_ROW, kind: 'asset', model_key: null, model_asset_id: ASSET_ID };
+    const { client, calls } = fakeClient([{ data: row, error: null }]);
+    const service = createTokensService(client, { assets: fakeAssets() });
+    const token = await service.createToken({
+      ...imageInput(),
+      look: { kind: 'asset', assetId: ASSET_ID },
+    });
+    expect(argsOf(calls, 'upload')).toHaveLength(0);
+    expect(argsOf(calls, 'insert')[0]?.[0]).toMatchObject({
+      kind: 'asset',
+      model_asset_id: ASSET_ID,
+      model_key: null,
+      image_path: null,
+    });
+    expect(token).toMatchObject({ kind: 'asset', modelAssetId: ASSET_ID });
+  });
+
+  it('shouldReuseTheSignedModelUrlAndSayWhenTheModelIsGone', async () => {
+    const { client } = fakeClient([]);
+    const assets = fakeAssets({ [ASSET_ID]: 'https://files.test/fera.glb' });
+    const service = createTokensService(client, { now: () => 0, assets });
+    expect(await service.getModelUrl(ASSET_ID)).toBe('https://files.test/fera.glb');
+    await service.getModelUrl(ASSET_ID);
+    expect(assets.signModelUrls).toHaveBeenCalledTimes(1);
+    const gone = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+    expect(await service.getModelUrl(gone)).toBeNull();
+  });
+
+  it('shouldNameTheUploadedModelAfterTheFile', async () => {
+    const { client } = fakeClient([]);
+    const assets = fakeAssets();
+    const service = createTokensService(client, { assets });
+    const file = new File([new Uint8Array(8)], 'Fera_Vermelha.glb');
+    await service.uploadModel(file);
+    expect(assets.uploadModel).toHaveBeenCalledWith({ file, name: 'Fera Vermelha' });
+  });
+
+  it('shouldExplainAFailedModelUpload', async () => {
+    const { client } = fakeClient([]);
+    const assets = fakeAssets();
+    assets.uploadModel.mockRejectedValueOnce(new Error('boom'));
+    const service = createTokensService(client, { assets });
+    const upload = service.uploadModel(new File([new Uint8Array(8)], 'x.glb'));
+    await expect(upload).rejects.toMatchObject({ kind: 'model-upload' });
   });
 });

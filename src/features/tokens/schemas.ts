@@ -31,6 +31,7 @@ export const tokenRowSchema = z.object({
   name: z.string(),
   image_path: z.string().nullable(),
   model_key: z.enum(TOKEN_MODEL_KEYS).nullable(),
+  model_asset_id: z.uuid().nullable(),
   color_primary: z.string().regex(HEX_COLOR).nullable(),
   color_secondary: z.string().regex(HEX_COLOR).nullable(),
   x: cellCoordinate,

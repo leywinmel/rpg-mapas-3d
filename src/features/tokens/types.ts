@@ -10,6 +10,8 @@ export type Token = {
   name: string;
   imagePath: string | null;
   modelKey: TokenModelKey | null;
+  /** Modelo .glb da biblioteca do mestre (token "asset"); nulo se o modelo foi apagado. */
+  modelAssetId: string | null;
   colorPrimary: string | null;
   colorSecondary: string | null;
   x: number;
@@ -27,7 +29,8 @@ export type Token = {
 
 export type TokenLook =
   | { kind: 'image'; image: File }
-  | { kind: 'model'; modelKey: TokenModelKey; colorPrimary: string; colorSecondary: string };
+  | { kind: 'model'; modelKey: TokenModelKey; colorPrimary: string; colorSecondary: string }
+  | { kind: 'asset'; assetId: string };
 
 export type NewTokenInput = {
   mapId: string;

@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Component, Suspense, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Billboard, useAnimations, useGLTF } from '@react-three/drei';
 import {
+  Box3,
   Mesh,
   type Material,
   type Object3D,
@@ -13,7 +14,13 @@ import { DEFAULT_TOKEN_COLORS, tokenModelEntry, tokenModelUrl } from '../constan
 import { useTokensStore } from '../hooks/tokens-store';
 import { tokenFailures } from '../services/token-errors';
 import type { Token } from '../types';
-import { HIDDEN_TOKEN_OPACITY, TOKEN_SCENE_COLORS, TOKEN_SHAPE } from './token-scene';
+import {
+  fitUploadedModel,
+  HIDDEN_TOKEN_OPACITY,
+  TOKEN_SCENE_COLORS,
+  TOKEN_SHAPE,
+  UPLOADED_MODEL_FOOTPRINT,
+} from './token-scene';
 
 const loader = new TextureLoader();
 
@@ -209,6 +216,118 @@ function ModelLook({ token, transparent }: LookProps) {
   return <FigureLook token={token} transparent={transparent} />;
 }
 
+/**
+ * URL do modelo enviado: undefined enquanto resolve, null quando o modelo foi apagado da
+ * biblioteca ou a URL não veio.
+ */
+function useUploadedModelUrl(assetId: string | null): string | null | undefined {
+  const getModelUrl = useTokensStore((state) => state.actions?.getModelUrl ?? null);
+  const [resolved, setResolved] = useState<{ assetId: string; url: string | null } | null>(null);
+
+  useEffect(() => {
+    if (!assetId || !getModelUrl) return;
+    let alive = true;
+    getModelUrl(assetId)
+      .then((url) => {
+        if (alive) setResolved({ assetId, url });
+      })
+      .catch((error: unknown) => {
+        if (!alive) return;
+        tokenFailures.report(error, { action: 'load-model' });
+        setResolved({ assetId, url: null });
+      });
+    return () => {
+      alive = false;
+    };
+  }, [assetId, getModelUrl]);
+
+  if (!assetId) return null;
+  return resolved?.assetId === assetId ? resolved.url : undefined;
+}
+
+/** Caixa no lugar do modelo que sumiu ou não abriu: o token continua na mesa e jogável. */
+function MissingModelLook({ transparent }: { transparent: boolean }) {
+  const side = UPLOADED_MODEL_FOOTPRINT * 0.6;
+  const { baseHeight, figureHeight } = TOKEN_SHAPE;
+  return (
+    <mesh castShadow position={[0, baseHeight + (figureHeight * 0.7) / 2, 0]}>
+      <boxGeometry args={[side, figureHeight * 0.7, side]} />
+      <meshStandardMaterial
+        color={TOKEN_SCENE_COLORS.missingModel}
+        {...materialProps(transparent)}
+      />
+    </mesh>
+  );
+}
+
+type ModelBoundaryProps = { fallback: ReactNode; children: ReactNode };
+
+/** Um .glb quebrado vira a caixa; os outros tokens e a cena seguem de pé. */
+class UploadedModelBoundary extends Component<ModelBoundaryProps, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error: unknown): void {
+    tokenFailures.report(error, { action: 'load-model' });
+  }
+
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
+/** Modelo .glb enviado pelo mestre, encaixado no token (escala e origem variam por arquivo). */
+function LoadedUploadedModel({ url, transparent }: { url: string; transparent: boolean }) {
+  const gltf = useGLTF(url, false, true);
+  const { object, fit } = useMemo(() => {
+    const copy = cloneSkinned(gltf.scene);
+    copy.traverse((child) => {
+      if (!(child instanceof Mesh)) return;
+      child.material = Array.isArray(child.material)
+        ? child.material.map((material: Material) => material.clone())
+        : child.material.clone();
+    });
+    return { object: copy, fit: fitUploadedModel(new Box3().setFromObject(copy)) };
+  }, [gltf.scene]);
+  const { actions, names } = useAnimations(gltf.animations, object);
+
+  useEffect(() => {
+    // Modelo animado toca a primeira animação dele; o parado (o comum) fica como está.
+    const first = names[0] ? actions[names[0]] : null;
+    first?.reset().play();
+    return () => {
+      first?.stop();
+    };
+  }, [actions, names]);
+
+  useEffect(() => fadeMaterials(object, transparent), [object, transparent]);
+
+  return <primitive object={object} position={fit.position} scale={fit.scale} />;
+}
+
+function UploadedLook({ token, transparent }: LookProps) {
+  const url = useUploadedModelUrl(token.modelAssetId);
+  if (url === undefined) return null;
+  const fallback = <MissingModelLook transparent={transparent} />;
+  if (url === null) return fallback;
+  return (
+    <UploadedModelBoundary key={url} fallback={fallback}>
+      <Suspense fallback={null}>
+        <LoadedUploadedModel url={url} transparent={transparent} />
+      </Suspense>
+    </UploadedModelBoundary>
+  );
+}
+
+function BodyLook({ token, transparent }: LookProps) {
+  if (token.kind === 'image') return <CardLook token={token} transparent={transparent} />;
+  if (token.kind === 'asset') return <UploadedLook token={token} transparent={transparent} />;
+  return <ModelLook token={token} transparent={transparent} />;
+}
+
 /** Base redonda e o corpo do token (cartão ou boneco), no tamanho de um token 1×1. */
 export function TokenModel({ token, transparent }: LookProps) {
   const { baseRadius, baseHeight } = TOKEN_SHAPE;
@@ -218,11 +337,7 @@ export function TokenModel({ token, transparent }: LookProps) {
         <cylinderGeometry args={[baseRadius, baseRadius, baseHeight, 24]} />
         <meshStandardMaterial color={TOKEN_SCENE_COLORS.base} {...materialProps(transparent)} />
       </mesh>
-      {token.kind === 'image' ? (
-        <CardLook token={token} transparent={transparent} />
-      ) : (
-        <ModelLook token={token} transparent={transparent} />
-      )}
+      <BodyLook token={token} transparent={transparent} />
     </>
   );
 }

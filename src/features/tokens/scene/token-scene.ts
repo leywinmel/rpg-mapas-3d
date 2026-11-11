@@ -13,6 +13,8 @@ export const TOKEN_SCENE_COLORS = {
   eyes: '#ffd27a',
   selection: '#ffd27a',
   hiddenTint: '#8d82b0',
+  /** Caixa no lugar do modelo enviado que foi apagado ou não abriu. */
+  missingModel: '#5a5366',
 } as const;
 
 /** Medidas de um token 1×1; os maiores crescem na proporção do lado. */
@@ -40,4 +42,33 @@ export const TOKEN_CLICK_TOLERANCE_PX = 4;
 /** Ponto do mundo onde fica o centro da base do token. */
 export function tokenWorldPosition(anchor: Cell, size: number, level: number) {
   return { x: anchor.x + size / 2, y: stepsToWorld(level), z: anchor.z + size / 2 };
+}
+
+/** Lado máximo do modelo enviado no chão, em casas: cabe na casa do token sem invadir a vizinha. */
+export const UPLOADED_MODEL_FOOTPRINT = 0.95;
+
+type Point3 = { readonly x: number; readonly y: number; readonly z: number };
+export type ModelBounds = { readonly min: Point3; readonly max: Point3 };
+export type ModelFit = { scale: number; position: [number, number, number] };
+
+/**
+ * Encaixa um modelo .glb qualquer no token: cada arquivo vem numa escala e com a origem num
+ * lugar. A altura vira a de um boneco e a largura cabe na casa (o que apertar mais vale), e os
+ * pés ficam em cima da base, no centro.
+ */
+export function fitUploadedModel(bounds: ModelBounds): ModelFit {
+  const height = bounds.max.y - bounds.min.y;
+  const width = Math.max(bounds.max.x - bounds.min.x, bounds.max.z - bounds.min.z);
+  const limits = [
+    height > 0 ? TOKEN_SHAPE.figureHeight / height : Infinity,
+    width > 0 ? UPLOADED_MODEL_FOOTPRINT / width : Infinity,
+  ];
+  const fitted = Math.min(...limits);
+  const scale = Number.isFinite(fitted) ? fitted : 1;
+  const centerX = (bounds.min.x + bounds.max.x) / 2;
+  const centerZ = (bounds.min.z + bounds.max.z) / 2;
+  return {
+    scale,
+    position: [-centerX * scale, TOKEN_SHAPE.baseHeight - bounds.min.y * scale, -centerZ * scale],
+  };
 }

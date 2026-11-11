@@ -2,6 +2,13 @@ import { z } from 'zod';
 import type { Database } from '@/lib/database.types';
 import { getSupabase, type AppSupabaseClient } from '@/lib/supabase';
 import {
+  createSupabaseAssetsService,
+  SIGNED_URL_TTL_S,
+  type AssetsService,
+} from '@/features/map-editor/services/assets-service';
+import { assetNameFromFile } from '@/features/map-editor/upload/glb-validation';
+import type { MapAsset } from '@/features/map-editor/types';
+import {
   MS_PER_SECOND,
   TOKEN_IMAGE_EXTENSIONS,
   TOKEN_IMAGE_URL_REUSE_MARGIN_SECONDS,
@@ -17,7 +24,7 @@ type TokenInsert = Database['public']['Tables']['tokens']['Insert'];
 type TokenUpdate = Database['public']['Tables']['tokens']['Update'];
 
 const TOKEN_COLUMNS =
-  'id, map_id, owner_id, kind, name, image_path, model_key, color_primary, color_secondary, x, z, size, level, hp_current, hp_max, notes, hidden';
+  'id, map_id, owner_id, kind, name, image_path, model_key, model_asset_id, color_primary, color_secondary, x, z, size, level, hp_current, hp_max, notes, hidden';
 
 export function toToken(row: TokenRow): Token {
   return {
@@ -28,6 +35,7 @@ export function toToken(row: TokenRow): Token {
     name: row.name,
     imagePath: row.image_path,
     modelKey: row.model_key,
+    modelAssetId: row.model_asset_id,
     colorPrimary: row.color_primary,
     colorSecondary: row.color_secondary,
     x: row.x,
@@ -74,15 +82,20 @@ function parseRow(row: unknown): Token {
 export type TokensServiceOptions = {
   now?: () => number;
   newId?: () => string;
+  /** Biblioteca de modelos .glb do mestre (a mesma do editor de mapas). */
+  assets?: AssetsService;
 };
 
-type CachedImageUrl = { url: Promise<string>; reusableUntil: number };
+type CachedUrl<T> = { url: Promise<T>; reusableUntil: number };
+type CachedImageUrl = CachedUrl<string>;
 
 /** Tokens no Supabase (banco e Storage), atrás de uma interface mockável [#20][#45]. */
 export function createTokensService(client: AppSupabaseClient, options: TokensServiceOptions = {}) {
   const now = options.now ?? Date.now;
   const newId = options.newId ?? (() => crypto.randomUUID());
   const imageUrls = new Map<string, CachedImageUrl>();
+  const modelUrls = new Map<string, CachedUrl<string | null>>();
+  const assets = options.assets ?? createSupabaseAssetsService(client, newId);
   const images = () => client.storage.from(TOKEN_IMAGES_BUCKET);
 
   async function uploadImage(file: File): Promise<string> {
@@ -149,6 +162,7 @@ export function createTokensService(client: AppSupabaseClient, options: TokensSe
         name: input.name,
         image_path: imagePath,
         model_key: look.kind === 'model' ? look.modelKey : null,
+        model_asset_id: look.kind === 'asset' ? look.assetId : null,
         color_primary: look.kind === 'model' ? look.colorPrimary : null,
         color_secondary: look.kind === 'model' ? look.colorSecondary : null,
         x: input.x,
@@ -204,6 +218,39 @@ export function createTokensService(client: AppSupabaseClient, options: TokensSe
         if (imageUrls.get(path) === entry) imageUrls.delete(path);
       });
       return entry.url;
+    },
+
+    /** Modelos .glb da biblioteca de quem está logado (o mestre), para escolher o do token. */
+    listModels(): Promise<MapAsset[]> {
+      return assets.listMyAssets().catch((error: unknown) => {
+        throw toTokenError(error);
+      });
+    },
+
+    /** Envia um .glb para a biblioteca do mestre; quem chama já conferiu o arquivo. */
+    async uploadModel(file: File): Promise<MapAsset> {
+      try {
+        return await assets.uploadModel({ file, name: assetNameFromFile(file.name) });
+      } catch (error) {
+        throw toTokenError(error, 'model-upload');
+      }
+    },
+
+    /**
+     * URL assinada do modelo do token, reaproveitada enquanto vale. Null quando o modelo foi
+     * apagado da biblioteca: o token mostra uma caixa no lugar.
+     */
+    getModelUrl(assetId: string): Promise<string | null> {
+      const cached = modelUrls.get(assetId);
+      if (cached && cached.reusableUntil > now()) return cached.url;
+      const validForMs = (SIGNED_URL_TTL_S - TOKEN_IMAGE_URL_REUSE_MARGIN_SECONDS) * MS_PER_SECOND;
+      const url = assets.signModelUrls([assetId]).then((urls) => urls[assetId] ?? null);
+      const entry: CachedUrl<string | null> = { url, reusableUntil: now() + validForMs };
+      modelUrls.set(assetId, entry);
+      void url.catch(() => {
+        if (modelUrls.get(assetId) === entry) modelUrls.delete(assetId);
+      });
+      return url;
     },
   };
 }

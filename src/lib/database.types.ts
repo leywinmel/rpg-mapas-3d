@@ -421,14 +421,14 @@ isOneToOne: false
                   ]
                 },"tokens": {
                   Row: {
-                    "color_primary": string | null,"color_secondary": string | null,"created_at": string,"hidden": boolean,"hp_current": number | null,"hp_max": number | null,"id": string,"image_path": string | null,"kind": string,"level": number,"map_id": string,"model_key": string | null,"name": string,"notes": string,"owner_id": string | null,"rotation": number,"size": number,"updated_at": string,"x": number,"z": number
+                    "color_primary": string | null,"color_secondary": string | null,"created_at": string,"hidden": boolean,"hp_current": number | null,"hp_max": number | null,"id": string,"image_path": string | null,"kind": string,"level": number,"map_id": string,"model_asset_id": string | null,"model_key": string | null,"name": string,"notes": string,"owner_id": string | null,"rotation": number,"size": number,"updated_at": string,"x": number,"z": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "color_primary"?: string | null,"color_secondary"?: string | null,"created_at"?: string,"hidden"?: boolean,"hp_current"?: number | null,"hp_max"?: number | null,"id"?: string,"image_path"?: string | null,"kind": string,"level"?: number,"map_id": string,"model_key"?: string | null,"name": string,"notes"?: string,"owner_id"?: string | null,"rotation"?: number,"size"?: number,"updated_at"?: string,"x": number,"z": number
+                    "color_primary"?: string | null,"color_secondary"?: string | null,"created_at"?: string,"hidden"?: boolean,"hp_current"?: number | null,"hp_max"?: number | null,"id"?: string,"image_path"?: string | null,"kind": string,"level"?: number,"map_id": string,"model_asset_id"?: string | null,"model_key"?: string | null,"name": string,"notes"?: string,"owner_id"?: string | null,"rotation"?: number,"size"?: number,"updated_at"?: string,"x": number,"z": number
                   }
                   Update: {
-                    "color_primary"?: string | null,"color_secondary"?: string | null,"created_at"?: string,"hidden"?: boolean,"hp_current"?: number | null,"hp_max"?: number | null,"id"?: string,"image_path"?: string | null,"kind"?: string,"level"?: number,"map_id"?: string,"model_key"?: string | null,"name"?: string,"notes"?: string,"owner_id"?: string | null,"rotation"?: number,"size"?: number,"updated_at"?: string,"x"?: number,"z"?: number
+                    "color_primary"?: string | null,"color_secondary"?: string | null,"created_at"?: string,"hidden"?: boolean,"hp_current"?: number | null,"hp_max"?: number | null,"id"?: string,"image_path"?: string | null,"kind"?: string,"level"?: number,"map_id"?: string,"model_asset_id"?: string | null,"model_key"?: string | null,"name"?: string,"notes"?: string,"owner_id"?: string | null,"rotation"?: number,"size"?: number,"updated_at"?: string,"x"?: number,"z"?: number
                   }
                   Relationships: [
                     {
@@ -442,6 +442,12 @@ isOneToOne: false
       columns: ["map_id"]
 isOneToOne: false
       referencedRelation: "maps"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tokens_model_asset_id_fkey"
+      columns: ["model_asset_id"]
+isOneToOne: false
+      referencedRelation: "map_assets"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "tokens_model_fk"

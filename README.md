@@ -160,6 +160,12 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   `scripts/assets/convert-token.mjs` mais uma linha em `token_models` e em `TOKEN_MODELS`). O token nasce no ponto que a câmera olha, com nome,
   tamanho (1×1 a 4×4 casas), vida opcional e dono: só o mestre (NPC, monstro) ou um jogador. "Esconder
   dos jogadores" deixa o token só para o mestre (aparece meio apagado para ele).
+- **Modelo enviado:** a terceira aparência do token usa um modelo `.glb` seu (até 10 MB): escolha um
+  da sua biblioteca de modelos (a mesma do editor de mapas) ou envie um arquivo novo, que entra
+  nela na hora. O modelo fica em pé na base, com a altura de um boneco e cabendo na casa, qualquer
+  que seja a escala do arquivo; se ele tiver animação, a primeira toca. Os jogadores da mesa veem o
+  modelo normalmente. Apagar o modelo da biblioteca deixa o token na mesa com uma caixa no lugar.
+  No arquivo exportado o token guarda o modelo; importado por outro mestre, vira boneco simples.
 - **Jogador:** move só os próprios tokens e mexe na vida e nas notas curtas deles; os outros ele só vê.
 - **Mover:** arraste o token na cena; ele anda casa a casa e os outros veem o movimento ao vivo. Ao
   soltar, a posição é gravada (quem entra depois já vê o token no lugar novo). Se o banco recusar, o

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Cell } from '@/domain';
 import type { PieceMovedMessage } from '@/domain/map-v2';
 import type { MapView } from '@/features/map-editor';
+import type { MapAsset } from '@/features/map-editor/types';
 import type { NewTokenInput, Token, TokenPatch } from '../types';
 
 /** O mapa que está na tela agora (o do editor do mestre ou o da mesa, para o jogador). */
@@ -24,6 +25,11 @@ export type TokenActions = {
   /** Avisa a mesa que o mestre moveu um carro ou objeto solto (quem chama já conferiu a névoa). */
   announcePieceMoved: (message: PieceMovedMessage) => void;
   getImageUrl: (path: string) => Promise<string>;
+  /** URL do modelo .glb do token; null se o modelo foi apagado da biblioteca. */
+  getModelUrl: (assetId: string) => Promise<string | null>;
+  /** Modelos .glb do mestre e envio de um novo (janela de criar token). */
+  listModels: () => Promise<MapAsset[]>;
+  uploadModel: (file: File) => Promise<MapAsset>;
   reload: () => void;
 };
 
