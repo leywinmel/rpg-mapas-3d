@@ -43,7 +43,15 @@ export const MODEL_CREDITS: readonly Credit[] = [
     work: 'Car Kit',
     author: 'Kenney',
     url: 'https://kenney.nl/assets/car-kit',
-    usage: 'Carros, caminhões, tratores, veículos de serviço, o carro futurista e os karts.',
+    usage:
+      'Caminhão de lixo, furgão, caminhonete, SUV de luxo, carro de corrida, tratores, o carro futurista e os karts.',
+    ...CC0,
+  },
+  {
+    work: 'Free Low Poly Vehicles Pack',
+    author: 'Rgsdev',
+    url: 'https://rgsdev.itch.io/free-low-poly-vehicles-pack',
+    usage: 'Carros de rua, viaturas, ambulância, bombeiros, limusine e caminhões.',
     ...CC0,
   },
   {

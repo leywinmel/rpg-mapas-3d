@@ -72,8 +72,11 @@ export type StyleKit = {
 
 const ONE: Footprint = { width: 1, depth: 1 };
 const CAR: Footprint = { width: 2, depth: 3 };
-const VAN: Footprint = { width: 2, depth: 4 };
 const TRUCK: Footprint = { width: 3, depth: 6 };
+/** Carros realistas do moderno (RPG-50): em rua de 4 casas, só uma mão tem vaga para eles. */
+const REAL_CAR: Footprint = { width: 3, depth: 5 };
+const REAL_VAN: Footprint = { width: 3, depth: 6 };
+const REAL_TRUCK: Footprint = { width: 3, depth: 8 };
 const INNER_STAIRS: SizedPiece = { key: 'med-escada-interna', footprint: { width: 1, depth: 3 } };
 
 export const SINGLE_CELL = ONE;
@@ -149,22 +152,20 @@ const MODERN: StyleKit = {
   gableRoofs: [],
   stairs: INNER_STAIRS,
   vehicles: [
-    { key: 'mod-carro', footprint: CAR },
-    { key: 'mod-esportivo', footprint: CAR },
-    { key: 'mod-utilitario', footprint: CAR },
-    { key: 'mod-taxi', footprint: CAR },
-    { key: 'mod-van', footprint: CAR },
-    { key: 'mod-viatura', footprint: CAR },
-    { key: 'mod-hatch-esportivo', footprint: CAR },
-    { key: 'mod-suv-luxo', footprint: CAR },
-    { key: 'mod-caminhonete', footprint: VAN },
-    { key: 'mod-picape', footprint: VAN },
-    { key: 'mod-furgao', footprint: VAN },
-    { key: 'mod-ambulancia', footprint: VAN },
-    { key: 'mod-caminhao-carroceria', footprint: VAN },
+    { key: 'mod-carro', footprint: REAL_CAR },
+    { key: 'mod-esportivo', footprint: REAL_CAR },
+    { key: 'mod-utilitario', footprint: REAL_CAR },
+    { key: 'mod-taxi', footprint: REAL_CAR },
+    { key: 'mod-viatura', footprint: REAL_CAR },
+    { key: 'mod-hatch-esportivo', footprint: REAL_CAR },
+    { key: 'mod-picape', footprint: REAL_CAR },
+    { key: 'mod-conversivel', footprint: REAL_CAR },
+    { key: 'mod-van', footprint: REAL_VAN },
+    { key: 'mod-ambulancia', footprint: REAL_VAN },
+    { key: 'mod-muscle', footprint: REAL_VAN },
   ],
   bigVehicles: [
-    { key: 'mod-bombeiros', footprint: TRUCK },
+    { key: 'mod-bombeiros', footprint: REAL_TRUCK },
     { key: 'mod-caminhao-lixo', footprint: TRUCK },
   ],
   indoorProps: ['mesa', 'cadeira', 'mod-caixa-papelao', 'caixa'],

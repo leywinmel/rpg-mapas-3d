@@ -262,6 +262,10 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
   estica uma peça no comprimento (`stretch:<fator>`). Rode sempre a partir do modelo original.
 - `scripts/assets/brick-walls.mjs public/assets/modern`: gera as paredes de tijolo em relevo do
   estilo moderno (lisa e com janela) e a textura `textures/brick-relief.webp`.
+- Veículos do moderno (pacote Rgsdev, CC0, em FBX): o Blender passa para `.glb` com
+  `blender -b --factory-startup -P scripts/assets/fbx-to-glb.py -- <pasta do pacote> <saída>`, e
+  `scripts/assets/convert-vehicle.mjs <entrada.glb> <saída.gltf> [comprimento máximo]` põe na
+  escala do mapa (sedã com 3 × 5 casas).
 - `npm run db:reset`: recria o banco local do zero.
 - `npm run test:db`: testa as regras de acesso do banco (quem vê e altera o quê).
 
