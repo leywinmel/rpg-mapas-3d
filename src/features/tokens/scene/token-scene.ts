@@ -72,3 +72,25 @@ export function fitUploadedModel(bounds: ModelBounds): ModelFit {
     position: [-centerX * scale, TOKEN_SHAPE.baseHeight - bounds.min.y * scale, -centerZ * scale],
   };
 }
+
+/** Quanto do giro que falta o token faz por segundo ao mudar de rumo. */
+export const TOKEN_TURN_PER_SECOND = 10;
+
+/** Abaixo desta distância (em casas) até o destino o rumo fica como está: o token não treme ao chegar. */
+export const TOKEN_TURN_MIN_DISTANCE = 0.05;
+
+/**
+ * Giro em y de quem anda na direção (dx, dz). Zero olha para o sul (+z), a frente do token
+ * parado. Nulo quando o passo é curto demais para dizer um rumo.
+ */
+export function headingOf(dx: number, dz: number): number | null {
+  if (Math.hypot(dx, dz) < TOKEN_TURN_MIN_DISTANCE) return null;
+  return Math.atan2(dx, dz);
+}
+
+/** Vira `step` (0 a 1) do caminho de `current` até `target` pelo lado mais curto do círculo. */
+export function turnToward(current: number, target: number, step: number): number {
+  const full = Math.PI * 2;
+  const gap = ((((target - current) % full) + full * 1.5) % full) - Math.PI;
+  return current + gap * step;
+}

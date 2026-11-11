@@ -12,10 +12,13 @@ import { TokenLabel } from './TokenLabel';
 import { TokenModel } from './TokenModel';
 import {
   TOKEN_CLICK_TOLERANCE_PX,
+  headingOf,
   TOKEN_GLIDE_PER_SECOND,
   TOKEN_SCENE_COLORS,
   TOKEN_SHAPE,
+  TOKEN_TURN_PER_SECOND,
   tokenWorldPosition,
+  turnToward,
 } from './token-scene';
 
 /** Plano invisível do arraste, bem maior que o mapa: soltar perto da borda ainda acha a casa. */
@@ -38,11 +41,16 @@ type PieceProps = {
   onPointerDown: (event: ThreeEvent<PointerEvent>, token: Token) => void;
 };
 
-/** Um token na mesa. Anda deslizando até a casa nova (o arraste dos outros chega aos saltos). */
+/**
+ * Um token na mesa. Anda deslizando até a casa nova (o arraste dos outros chega aos saltos) e
+ * vira o corpo para onde anda. Todos veem o mesmo movimento, então cada um calcula o mesmo rumo.
+ */
 function TokenPiece({ token, anchor, selected, onPointerDown }: PieceProps) {
   const group = useRef<Group>(null);
+  const body = useRef<Group>(null);
   const target = tokenWorldPosition(anchor, token.size, token.level);
   const placed = useRef(false);
+  const heading = useRef(0);
 
   useFrame((_, delta) => {
     const current = group.current;
@@ -51,6 +59,12 @@ function TokenPiece({ token, anchor, selected, onPointerDown }: PieceProps) {
       current.position.set(target.x, target.y, target.z);
       placed.current = true;
       return;
+    }
+    const ahead = headingOf(target.x - current.position.x, target.z - current.position.z);
+    if (ahead !== null) heading.current = ahead;
+    if (body.current) {
+      const turn = Math.min(1, delta * TOKEN_TURN_PER_SECOND);
+      body.current.rotation.y = turnToward(body.current.rotation.y, heading.current, turn);
     }
     const step = Math.min(1, delta * TOKEN_GLIDE_PER_SECOND);
     current.position.x += (target.x - current.position.x) * step;
@@ -62,7 +76,7 @@ function TokenPiece({ token, anchor, selected, onPointerDown }: PieceProps) {
   const labelHeight = (TOKEN_SHAPE.cardHeight + TOKEN_SHAPE.labelGap) * scale;
   return (
     <group ref={group} onPointerDown={(event) => onPointerDown(event, token)}>
-      <group scale={scale}>
+      <group ref={body} scale={scale}>
         <TokenModel token={token} transparent={token.hidden} />
       </group>
       {selected && (

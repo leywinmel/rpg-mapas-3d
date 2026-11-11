@@ -119,6 +119,6 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 - [x] **RPG-49** Paredes iguais dos dois lados (nenhuma mostra o lado de dentro para a rua), escada que vai do começo ao fim das casas sem buraco e parede de tijolo com relevo de verdade, da mesma cor na parede lisa e na com janela.
 - [x] **RPG-50** Carros realistas sem marca (sedã, SUV, picape, van, caminhão, muscle car), maiores: 3×4 ou 3×5 casas.
 - [ ] **RPG-53** Ônibus e carreta do pacote Rgsdev (13 e 12 casas): pedem subir o limite de peça do mapa (hoje 8 casas).
-- [ ] **RPG-54** Token vira o rosto para onde anda, sozinho, ao ser movido.
+- [x] **RPG-54** Token vira o rosto para onde anda, sozinho, ao ser movido (o rumo não é salvo: ao recarregar, volta a olhar para o sul).
 - [ ] **RPG-51** Animais como tokens, numa categoria separada de jogadores e NPCs: gato, cachorro, cavalo, vaca, rato e outros.
 - [ ] **RPG-52** Mais casas modernas, menos secas, algumas com telhado, com as paredes da mesma cor das paredes com janela.
