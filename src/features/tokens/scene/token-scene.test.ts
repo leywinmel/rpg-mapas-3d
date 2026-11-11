@@ -4,6 +4,7 @@ import {
   TOKEN_SHAPE,
   turnToward,
   UPLOADED_MODEL_FOOTPRINT,
+  uploadedModelFacing,
 } from './token-scene';
 
 describe('fitUploadedModel', () => {
@@ -62,5 +63,32 @@ describe('turnToward', () => {
     const next = turnToward(from, -Math.PI + 0.17, 0.5);
     expect(next).toBeGreaterThan(from);
     expect(next).toBeCloseTo(Math.PI);
+  });
+});
+
+/** Boneco de palito: corpo no centro e os dedos dos pés para o lado `toes` (+1 sul, -1 norte). */
+function stickFigure(toes: number) {
+  return [
+    { x: 0, y: 2, z: -0.2 },
+    { x: 0, y: 2, z: 0.2 },
+    { x: 0, y: 1, z: -0.2 },
+    { x: 0, y: 1, z: 0.2 },
+    { x: 0, y: 0, z: 0 },
+    { x: 0, y: 0, z: toes * 0.3 },
+  ];
+}
+
+describe('uploadedModelFacing', () => {
+  it('shouldKeepAModelThatAlreadyFacesSouth', () => {
+    expect(uploadedModelFacing(stickFigure(1))).toBe(0);
+  });
+
+  it('shouldTurnAroundAModelExportedFacingNorth', () => {
+    expect(uploadedModelFacing(stickFigure(-1))).toBeCloseTo(Math.PI);
+  });
+
+  it('shouldLeaveAModelWithoutFeetAsItCame', () => {
+    expect(uploadedModelFacing([])).toBe(0);
+    expect(uploadedModelFacing([{ x: 0, y: 0, z: 0 }])).toBe(0);
   });
 });

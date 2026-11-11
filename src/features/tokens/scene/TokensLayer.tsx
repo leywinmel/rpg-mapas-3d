@@ -16,6 +16,7 @@ import {
   TOKEN_GLIDE_PER_SECOND,
   TOKEN_SCENE_COLORS,
   TOKEN_SHAPE,
+  TOKEN_TOP,
   TOKEN_TURN_PER_SECOND,
   tokenWorldPosition,
   turnToward,
@@ -73,7 +74,7 @@ function TokenPiece({ token, anchor, selected, onPointerDown }: PieceProps) {
   });
 
   const scale = token.size;
-  const labelHeight = (TOKEN_SHAPE.cardHeight + TOKEN_SHAPE.labelGap) * scale;
+  const labelHeight = (TOKEN_TOP + TOKEN_SHAPE.labelGap) * scale;
   return (
     <group ref={group} onPointerDown={(event) => onPointerDown(event, token)}>
       <group ref={body} scale={scale}>
