@@ -74,10 +74,10 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 
 **Fase A: correções**
 
-- [x] **RPG-31** Telhados imunes à névoa: na área escondida o jogador vê os telhados e as paredes (o lado de fora dos prédios); chão, relevo, interior e tokens continuam escondidos e nem saem do banco.
-- [x] **RPG-30** Só o mestre escolhe o andar (corte de altura) que a mesa vê; o controle do jogador sai (muda a decisão do RPG-24).
 - [x] **RPG-28** Telhado fecha com a parede: oitão triangular nas pontas do telhado de duas águas, também nas casas prontas e no gerador. (O oitão de tijolo do kit entrou dentro dos três telhados; `scripts/assets/close-roofs.mjs`.)
 - [x] **RPG-29** Andares com acabamento igual: sem cores ou texturas diferentes entre andares nem faixas soltas sobre as janelas; quinas que se fecham. (A parede "Tijolo com janela" trocou de modelo: mesmo tijolo da parede lisa e sem a faixa; `scripts/assets/convert-wall.mjs`.)
+- [x] **RPG-30** Só o mestre escolhe o andar (corte de altura) que a mesa vê; o controle do jogador sai (muda a decisão do RPG-24).
+- [x] **RPG-31** Telhados imunes à névoa: na área escondida o jogador vê os telhados e as paredes (o lado de fora dos prédios); chão, relevo, interior e tokens continuam escondidos e nem saem do banco.
 
 **Fase B: tokens**
 
