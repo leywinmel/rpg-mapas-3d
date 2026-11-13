@@ -28,9 +28,9 @@ import { SCENE_PALETTE as C } from './palette';
 
 /** Camada pronta para desenhar: geometria + material (procedural ou vindo de um .glb). */
 export type PieceLayer = { geometry: BufferGeometry; material: Material };
-type ProceduralLayer = { geometry: BufferGeometry; material: MaterialKind };
+export type ProceduralLayer = { geometry: BufferGeometry; material: MaterialKind };
 
-type Placement = {
+export type Placement = {
   x?: number;
   y?: number;
   z?: number;
@@ -42,7 +42,7 @@ type Placement = {
   sz?: number;
 };
 
-type Part = { geometry: BufferGeometry; color: string };
+export type Part = { geometry: BufferGeometry; color: string };
 
 /** Variação de tom por face: dá o ar facetado sem textura. */
 const FACE_JITTER = 0.08;
@@ -51,7 +51,7 @@ const ROUND_SEGMENTS = 8;
 const LOW_SEGMENTS = 6;
 
 /** Gerador pseudoaleatório com semente: a mesma peça sai igual em todo navegador. */
-function seededRandom(seedText: string): () => number {
+export function seededRandom(seedText: string): () => number {
   let seed = 0;
   for (const char of seedText) seed = (seed * 31 + char.charCodeAt(0)) >>> 0;
   return () => {
@@ -63,7 +63,7 @@ function seededRandom(seedText: string): () => number {
   };
 }
 
-function place(geometry: BufferGeometry, color: string, at: Placement = {}): Part {
+export function place(geometry: BufferGeometry, color: string, at: Placement = {}): Part {
   const matrix = new Matrix4().compose(
     new Vector3(at.x ?? 0, at.y ?? 0, at.z ?? 0),
     new Quaternion().setFromEuler(new Euler(at.rx ?? 0, at.ry ?? 0, at.rz ?? 0)),
@@ -74,7 +74,7 @@ function place(geometry: BufferGeometry, color: string, at: Placement = {}): Par
 }
 
 /** Caixa apoiada pela base (y = fundo), que é como as peças são pensadas. */
-function box(size: [number, number, number], color: string, at: Placement = {}): Part {
+export function box(size: [number, number, number], color: string, at: Placement = {}): Part {
   const [width, height, depth] = size;
   return place(new BoxGeometry(width, height, depth), color, {
     ...at,
@@ -82,7 +82,7 @@ function box(size: [number, number, number], color: string, at: Placement = {}):
   });
 }
 
-function cylinder(
+export function cylinder(
   dims: { top: number; bottom: number; height: number; segments?: number },
   color: string,
   at: Placement = {},
@@ -96,7 +96,7 @@ function cylinder(
   return place(geometry, color, { ...at, y: (at.y ?? 0) + dims.height / 2 });
 }
 
-function cone(
+export function cone(
   dims: { radius: number; height: number; segments?: number },
   color: string,
   at: Placement = {},
@@ -105,12 +105,12 @@ function cone(
   return place(geometry, color, { ...at, y: (at.y ?? 0) + dims.height / 2 });
 }
 
-function lump(radius: number, color: string, at: Placement = {}): Part {
+export function lump(radius: number, color: string, at: Placement = {}): Part {
   return place(new DodecahedronGeometry(radius, 0), color, at);
 }
 
 /** Junta as partes numa geometria só, sem índice, com cor por vértice. */
-function mergeParts(parts: Part[], seed: string): BufferGeometry {
+export function mergeParts(parts: Part[], seed: string): BufferGeometry {
   const random = seededRandom(seed);
   const prepared = parts.map(({ geometry, color }) => {
     const flat = geometry.index ? geometry.toNonIndexed() : geometry;
@@ -139,7 +139,7 @@ function mergeParts(parts: Part[], seed: string): BufferGeometry {
   return merged;
 }
 
-function matte(parts: Part[], seed: string): ProceduralLayer {
+export function matte(parts: Part[], seed: string): ProceduralLayer {
   return { geometry: mergeParts(parts, seed), material: 'matte' };
 }
 
@@ -661,6 +661,18 @@ export function getFallbackLayers(): PieceLayer[] {
 
 export function hasProceduralBuilder(key: string): boolean {
   return key in PROCEDURAL_BUILDERS;
+}
+
+/**
+ * Geometria montada fora do catálogo (ex: as peças da paisagem do fundo), guardada no mesmo
+ * cache: a chave precisa ser diferente das peças do catálogo.
+ */
+export function getBuiltLayers(key: string, build: () => ProceduralLayer[]): PieceLayer[] {
+  const cached = layerCache.get(key);
+  if (cached) return cached;
+  const layers = toPieceLayers(build());
+  layerCache.set(key, layers);
+  return layers;
 }
 
 /** Geometria da peça, montada uma vez e reaproveitada por todas as instâncias. */

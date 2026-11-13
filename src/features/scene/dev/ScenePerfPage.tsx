@@ -7,8 +7,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Button, Panel } from '@/components';
+import { BACKDROPS, type Backdrop } from '@/domain';
 import { SETTLEMENT_STYLE_LABELS, SETTLEMENT_STYLES, type SettlementStyle } from '@/domain/map-gen';
 import { cutawayShowingUpToStory, NO_CUTAWAY, type Cutaway, type MapModel } from '@/domain/map-v2';
+import { BACKDROP_LABELS } from '../backdrop/backdrop';
 import { MapRenderer } from '../components/MapRenderer';
 import type { PerfSample } from '../components/PerfMeter';
 import { SceneCanvas } from '../components/SceneCanvas';
@@ -19,7 +21,7 @@ import { QUALITY_MODE_LABELS } from '../quality/quality';
 import { countCity, generateCity, type CityCounts } from './city-generator';
 import styles from './ScenePerfPage.module.css';
 
-const SIZES = [100, 250, 500, 1000] as const;
+const SIZES = [30, 100, 250, 500, 1000] as const;
 const LARGEST_SIZE = 1000;
 const SEED = 2026;
 /** Distância da câmera no modo "perto": a altura de quem joga numa sala da cidade. */
@@ -119,6 +121,7 @@ export default function ScenePerfPage() {
   const [sample, setSample] = useState<PerfSample | null>(null);
   const [preset, setPreset] = useState<CameraPreset>('overview');
   const [cutaway, setCutaway] = useState<Cutaway>(NO_CUTAWAY);
+  const [backdrop, setBackdrop] = useState<Backdrop>('none');
   const level = useQualityLevel();
   const { counts } = current;
 
@@ -134,7 +137,7 @@ export default function ScenePerfPage() {
       <SceneCanvas
         key={current.readyAt}
         size={current.model.size}
-        ambience={current.model.header.ambience}
+        ambience={{ ...current.model.header.ambience, backdrop }}
         onPerfSample={setSample}
         label="Cidade de teste"
       >
@@ -191,6 +194,18 @@ export default function ScenePerfPage() {
             </Button>
           ))}
           <QualityButton />
+        </div>
+        <div className={styles.row}>
+          {BACKDROPS.map((option) => (
+            <Button
+              key={option}
+              size="sm"
+              variant={option === backdrop ? 'secondary' : 'ghost'}
+              onClick={() => setBackdrop(option)}
+            >
+              {BACKDROP_LABELS[option]}
+            </Button>
+          ))}
         </div>
         <dl className={styles.stats} aria-label="Números da medição">
           <Stat label="Qualidade" value={QUALITY_MODE_LABELS[level]} />

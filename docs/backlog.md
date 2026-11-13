@@ -99,7 +99,7 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 
 - [x] **RPG-38** Dia e noite (luz e céu), escolhidos pelo mestre.
 - [x] **RPG-39** Chuva passando na tela; cada jogador pode desligar na própria tela.
-- [ ] **RPG-40** Fundos temáticos no lugar da cor única: floresta com folhas, deserto, cidade, masmorra, mar.
+- [x] **RPG-40** Fundos temáticos no lugar da cor única: floresta com folhas, deserto, cidade, masmorra, mar. Campo "Fundo" na aba Ambiente; paisagem espalhada com semente em volta do mapa, mar com ondas, folhas caindo; o gerador escolhe pelo estilo.
 - [x] **RPG-41** Pisos novos: areia, deserto, poça e lama.
 
 **Fase F: estilos, mapas e interação**

@@ -46,10 +46,24 @@ describe('map header', () => {
   const ambience = { preset: 'masmorra', fogColor: '#0d0b14', light: 0.6 };
 
   it('shouldAcceptAValidHeader', () => {
+    const withBackdrop = { ...ambience, backdrop: 'forest' };
+    expect(parseMapHeader({ version: 2, ambience: withBackdrop })).toEqual({
+      ok: true,
+      value: { version: 2, ambience: withBackdrop },
+    });
+  });
+
+  it('shouldOpenAHeaderSavedBeforeBackdropsWithThePlainBackground', () => {
     expect(parseMapHeader({ version: 2, ambience })).toEqual({
       ok: true,
-      value: { version: 2, ambience },
+      value: { version: 2, ambience: { ...ambience, backdrop: 'none' } },
     });
+  });
+
+  it('shouldRejectAnUnknownBackdrop', () => {
+    expect(parseMapHeader({ version: 2, ambience: { ...ambience, backdrop: 'lua' } }).ok).toBe(
+      false,
+    );
   });
 
   it('shouldExplainWhyAHeaderWasRejected', () => {

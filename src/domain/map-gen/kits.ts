@@ -3,6 +3,7 @@
  * (src/features/scene/catalog): o domínio não conhece o catálogo, e um teste do lado da cena
  * confere que cada chave existe, é do tipo certo e tem o tamanho em casas que está aqui [#30].
  */
+import type { Backdrop } from '../map-document';
 import type { Footprint } from '../map-v2';
 
 export type SettlementStyle = 'medieval' | 'modern' | 'futurist';
@@ -55,6 +56,8 @@ export type StyleKit = {
     readonly shop: readonly WallSet[];
   };
   readonly roof: RoofKind;
+  /** Paisagem em volta do mapa gerado (RPG-40). */
+  readonly backdrop: Backdrop;
   /** Telhados de duas águas, do maior para o menor (só no estilo com `roof: 'gable'`). */
   readonly gableRoofs: readonly SizedPiece[];
   /** Escada interna de um andar (1×3). */
@@ -124,6 +127,7 @@ const MEDIEVAL: StyleKit = {
     shop: [{ plain: 'med-parede-enxaimel', door: 'med-arco', window: 'med-reboco-janela' }],
   },
   roof: 'gable',
+  backdrop: 'forest',
   gableRoofs: [
     { key: 'med-telhado-4x4', footprint: { width: 4, depth: 4 } },
     { key: 'med-telhado-2x4', footprint: { width: 2, depth: 4 } },
@@ -174,6 +178,7 @@ const MODERN: StyleKit = {
     ],
   },
   roof: 'flat',
+  backdrop: 'city',
   gableRoofs: [],
   stairs: INNER_STAIRS,
   vehicles: [
@@ -231,6 +236,7 @@ const FUTURIST: StyleKit = {
     shop: [{ plain: 'fut-painel-faixa', door: 'fut-portal', window: 'fut-painel-janela' }],
   },
   roof: 'flat',
+  backdrop: 'city',
   gableRoofs: [],
   stairs: INNER_STAIRS,
   vehicles: [{ key: 'fut-carro', footprint: CAR }],

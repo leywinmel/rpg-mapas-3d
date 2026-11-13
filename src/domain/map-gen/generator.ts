@@ -18,6 +18,7 @@ import {
   wallKey,
   wallOwnerChunk,
   type MapChunk,
+  type MapHeader,
   type MapModel,
   type MapPiece,
   type MapWall,
@@ -219,6 +220,12 @@ function stampBuildings(builder: Builder, plan: SettlementPlan): void {
   }
 }
 
+/** Cabeçalho do mapa gerado: o clima padrão com a paisagem do estilo em volta. */
+function headerFor(kit: StyleKit): MapHeader {
+  const header = createDefaultHeader();
+  return { ...header, ambience: { ...header.ambience, backdrop: kit.backdrop } };
+}
+
 /** O mapa a partir da planta. */
 export function buildSettlement(plan: SettlementPlan): GeneratedSettlement {
   const kit = STYLE_KITS[plan.style];
@@ -245,7 +252,7 @@ export function buildSettlement(plan: SettlementPlan): GeneratedSettlement {
     });
   }
   return {
-    model: { size: { ...size }, header: createDefaultHeader(), chunks },
+    model: { size: { ...size }, header: headerFor(kit), chunks },
     stats: { buildings: plan.buildings.length, walls, pieces, dropped: builder.dropped },
   };
 }

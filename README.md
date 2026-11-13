@@ -10,6 +10,7 @@ em tempo real, com dados 3D, névoa e anotações enviadas pelo mestre.
 
 - Salas por link: o jogador entra com um apelido, e a conta é opcional.
 - Editor de mapas 3D com peças prontas (uso livre) e envio de modelos `.glb` próprios.
+- Fundos temáticos em volta do mapa: floresta com folhas caindo, deserto, cidade, masmorra ou mar.
 - Gerador de vilas e cidades (medieval, moderna ou futurista) e casas prontas para pôr com um clique.
 - Tokens com imagem ou boneco 3D, barra de vida e notas.
 - Névoa que o mestre pinta e revela.
@@ -209,6 +210,10 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   tempo (limpo, chuva ou tempestade) e a hora (a do mapa, dia, entardecer ou noite); a mesa toda vê
   na hora, e a escolha fica salva na mesa. Cada pessoa pode desligar a chuva só na própria tela
   ("Mostrar a chuva na minha tela"). Quem pediu menos movimento no sistema não vê os relâmpagos.
+- **Fundo do mapa:** no editor, a aba "Ambiente" tem o campo "Fundo". Em vez da cor lisa, a cena
+  ganha uma paisagem em volta do tabuleiro (floresta, deserto, cidade, masmorra ou mar), que some na
+  neblina. Vila medieval gerada já vem com floresta; bairro e cidade, com prédios. Em qualidade baixa
+  a paisagem fica mais rala, e quem pediu menos movimento no sistema não vê as folhas caindo.
 
 ### Exportar e importar
 

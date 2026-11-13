@@ -56,12 +56,21 @@ const propSchema = z.object({
   scale: z.number().min(0.25).max(4).default(1),
 });
 
+/**
+ * Paisagem em volta do mapa, no lugar da cor única do fundo (RPG-40). "none" mantém o fundo
+ * liso de sempre.
+ */
+export const BACKDROPS = ['none', 'forest', 'desert', 'city', 'dungeon', 'sea'] as const;
+export type Backdrop = (typeof BACKDROPS)[number];
+
 const ambienceSchema = z.object({
   /** Clima pronto da cena (ex: "masmorra"); a cena traduz em luzes e cores. */
   preset: catalogKey,
   fogColor: hexColor,
   /** Intensidade geral da luz, 0 = breu, 1 = normal, 2 = muito claro. */
   light: z.number().min(0).max(2),
+  /** Mapa salvo antes do RPG-40 não tem o campo: abre com o fundo liso que já tinha. */
+  backdrop: z.enum(BACKDROPS).default('none'),
 });
 
 export const mapDocumentSchema = z.object({
@@ -78,7 +87,12 @@ export type Wall = MapDocument['walls'][number];
 export type Prop = MapDocument['props'][number];
 export type Ambience = MapDocument['ambience'];
 
-export const DEFAULT_AMBIENCE: Ambience = { preset: 'masmorra', fogColor: '#0d0b14', light: 0.6 };
+export const DEFAULT_AMBIENCE: Ambience = {
+  preset: 'masmorra',
+  fogColor: '#0d0b14',
+  light: 0.6,
+  backdrop: 'none',
+};
 
 export type MapResult<T> = { ok: true; value: T } | { ok: false; errors: string[] };
 

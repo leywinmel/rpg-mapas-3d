@@ -1,6 +1,6 @@
 import { useId, type Dispatch } from 'react';
-import type { Ambience } from '@/domain';
-import { AMBIENCE_PRESETS, resolvePreset } from '@/features/scene';
+import { BACKDROPS, type Ambience, type Backdrop } from '@/domain';
+import { AMBIENCE_PRESETS, BACKDROP_LABELS, resolvePreset } from '@/features/scene';
 import type { EditorAction } from '../editor/editor-reducer';
 import styles from './SidePanel.module.css';
 
@@ -13,9 +13,13 @@ const FOG_COALESCE_KEY = 'ambience-fog';
 
 type Props = { ambience: Ambience; dispatch: Dispatch<EditorAction> };
 
+function isBackdrop(value: string): value is Backdrop {
+  return (BACKDROPS as readonly string[]).includes(value);
+}
+
 /** Clima do mapa: escolher um clima também sugere a cor da neblina dele. */
 export function AmbienceControls({ ambience, dispatch }: Props) {
-  const ids = { preset: useId(), fog: useId(), light: useId() };
+  const ids = { preset: useId(), backdrop: useId(), fog: useId(), light: useId() };
   const preset = resolvePreset(ambience.preset);
   return (
     <div className={styles.form}>
@@ -38,6 +42,26 @@ export function AmbienceControls({ ambience, dispatch }: Props) {
           {AMBIENCE_PRESETS.map((item) => (
             <option key={item.key} value={item.key}>
               {item.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className={styles.field}>
+        <label htmlFor={ids.backdrop} className={styles.label}>
+          Fundo
+        </label>
+        <select
+          id={ids.backdrop}
+          className={styles.select}
+          value={ambience.backdrop}
+          onChange={(event) => {
+            const backdrop = event.target.value;
+            if (isBackdrop(backdrop)) dispatch({ type: 'set-ambience', patch: { backdrop } });
+          }}
+        >
+          {BACKDROPS.map((item) => (
+            <option key={item} value={item}>
+              {BACKDROP_LABELS[item]}
             </option>
           ))}
         </select>
