@@ -74,7 +74,7 @@ function richDocument(): MapDocument {
   ];
   return {
     ...empty,
-    ambience: { preset: 'taverna', fogColor: '#221a10', light: 1.2 },
+    ambience: { preset: 'taverna', fogColor: '#221a10', light: 1.2, backdrop: 'sea' },
     floors,
     walls,
     props,

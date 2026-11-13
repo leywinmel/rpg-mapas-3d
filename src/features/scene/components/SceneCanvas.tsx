@@ -7,6 +7,7 @@ import { fogRange, sceneLook } from '../ambience';
 import { cameraFrame } from '../layout';
 import { useQualitySettings } from '../quality/quality-store';
 import type { ModelUrls } from './AssetPieces';
+import { BackdropLayer } from './BackdropLayer';
 import { CameraRig, type CameraMode } from './CameraRig';
 import { MapRenderer } from './MapRenderer';
 import { PerfMeter, type PerfSample } from './PerfMeter';
@@ -68,6 +69,7 @@ export function SceneCanvas({
       <color attach="background" args={[look.fogColor]} />
       <fog attach="fog" args={[look.fogColor, fog.near, fog.far]} />
       <SceneLights look={look} size={size} />
+      <BackdropLayer backdrop={ambience.backdrop} size={size} />
       {table.weather !== 'clear' && showsRain(table.weather, rainEnabled) && (
         <RainLayer kind={table.weather} size={size} />
       )}

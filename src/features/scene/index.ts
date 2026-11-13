@@ -2,6 +2,7 @@
 // Os componentes 3D ficam em ./components e devem ser importados sob demanda (React.lazy),
 // para o three.js não pesar na tela inicial.
 export * from './ambience';
+export * from './backdrop/backdrop';
 export * from './catalog/catalog';
 export * from './catalog/movable';
 export type * from './catalog/catalog-types';

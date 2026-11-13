@@ -183,8 +183,14 @@ describe('camera on a giant map', () => {
 describe('ambience', () => {
   it('shouldFallBackToTheDefaultPresetAndScaleFogWithTheMap', () => {
     expect(resolvePreset('nao-existe')).toBe(AMBIENCE_PRESETS[0]);
-    const small = fogRange({ preset: 'masmorra', fogColor: '#000000', light: 1 }, 10);
-    const big = fogRange({ preset: 'masmorra', fogColor: '#000000', light: 1 }, 100);
+    const small = fogRange(
+      { preset: 'masmorra', fogColor: '#000000', light: 1, backdrop: 'none' },
+      10,
+    );
+    const big = fogRange(
+      { preset: 'masmorra', fogColor: '#000000', light: 1, backdrop: 'none' },
+      100,
+    );
     expect(big.far).toBeGreaterThan(small.far);
     expect(small.near).toBeLessThan(small.far);
   });
