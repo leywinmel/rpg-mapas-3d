@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { pieceRect, STORY_HEIGHT_STEPS } from '../map-v2';
 import { buildBlueprint, doorOutside, rotateBlueprint, type BuildingSpec } from './blueprint';
-import { STYLE_KITS } from './kits';
+import { roofFor, STYLE_KITS } from './kits';
 
 const medieval = STYLE_KITS.medieval;
 const modern = STYLE_KITS.modern;
@@ -53,6 +53,30 @@ describe('building blueprint', () => {
     }, 0);
     expect(area).toBe(36);
     expect(roofs.every((piece) => piece.level === STORY_HEIGHT_STEPS)).toBe(true);
+  });
+
+  it('shouldGiveTheModernPlasterHouseItsOwnGableRoofOnEvenSides', () => {
+    const plaster = modern.walls.house.find((set) => set.roofs)!;
+    expect(roofFor(modern, plaster, { width: 6, depth: 8 })).toBe('gable');
+    expect(roofFor(modern, plaster, { width: 5, depth: 8 })).toBe('flat');
+    expect(roofFor(modern, modern.walls.house[0]!, { width: 6, depth: 8 })).toBe('flat');
+    expect(roofFor(medieval, medieval.walls.house[0]!, { width: 6, depth: 6 })).toBe('gable');
+    const blueprint = buildBlueprint(
+      spec({ walls: plaster, stories: 1, floor: 'mod-piso-interno' }),
+      modern,
+    );
+    const roofKeys = new Set(plaster.roofs!.map((roof) => roof.key));
+    const roofs = blueprint.pieces.filter((piece) => roofKeys.has(piece.key));
+    const area = roofs.reduce((sum, piece) => {
+      const rect = pieceRect(piece);
+      return sum + rect.width * rect.depth;
+    }, 0);
+    expect(area).toBe(48);
+    // Telhado no lugar da laje: nada de piso interno em cima do térreo.
+    const slab = blueprint.pieces.filter(
+      (piece) => piece.key === 'mod-piso-interno' && piece.level === STORY_HEIGHT_STEPS,
+    );
+    expect(slab).toHaveLength(0);
   });
 
   it('shouldUseAFlatRoofSlabAndAShopfrontForModernShops', () => {

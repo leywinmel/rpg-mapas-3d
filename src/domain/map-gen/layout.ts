@@ -10,11 +10,13 @@ import type { GridSize } from '../grid';
 import { QUARTER_TURNS, type CellRect, type Footprint } from '../map-v2';
 import { doorColumn, type BuildingSpec, type BuildingUse } from './blueprint';
 import {
+  roofFor,
   STYLE_KITS,
   SINGLE_CELL,
   type SettlementStyle,
   type SizedPiece,
   type StyleKit,
+  type WallSet,
 } from './kits';
 import type { SettlementProfile } from './presets';
 import { createRandom, deriveSeed, type Random } from './random';
@@ -263,20 +265,36 @@ function side(planner: Planner, max: number): number {
 
 type Frontage = 'north' | 'south';
 
+/**
+ * A casa com telhado próprio num estilo de laje (a de reboco do moderno) encolhe uma casa nos
+ * lados ímpares, para o telhado de duas águas fechar; a frente do lote (onde fica a porta) não
+ * sai do lugar. Se encolher deixar o lote menor que o mínimo, a casa fica com laje.
+ */
+function lotFor(planner: Planner, lot: CellRect, walls: WallSet, front: Frontage): CellRect {
+  if (!walls.roofs) return lot;
+  const width = lot.width - (lot.width % 2);
+  const depth = lot.depth - (lot.depth % 2);
+  if (Math.min(width, depth) < planner.profile.minSide) return lot;
+  const z = front === 'south' ? lot.z + (lot.depth - depth) : lot.z;
+  return { x: lot.x, z, width, depth };
+}
+
 /** O prédio, com a porta virada para a frente do lote, e a casa da porta (lado de fora) livre. */
-function addBuilding(planner: Planner, rect: CellRect, front: Frontage): void {
+function addBuilding(planner: Planner, lot: CellRect, front: Frontage): void {
   const { kit, random } = planner;
-  const stories = storiesFor(planner, rect);
+  const stories = storiesFor(planner, lot);
   const use = buildingUse(planner, stories);
+  const walls = random.pick(kit.walls[use]);
+  const rect = lotFor(planner, lot, walls, front);
   const rotation = front === 'north' ? 0 : 2;
   const spec: BuildingSpec = {
     width: rect.width,
     depth: rect.depth,
     stories,
     use,
-    walls: random.pick(kit.walls[use]),
+    walls,
     floor: random.pick(kit.tiles.indoor),
-    roof: kit.roof,
+    roof: roofFor(kit, walls, rect),
     seed: deriveSeed(planner.seed, random.between(0, INTERIOR_VARIANTS - 1)),
   };
   fillClass(planner, rect, TERRAIN_CLASS.building);

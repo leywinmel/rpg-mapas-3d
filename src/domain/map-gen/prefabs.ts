@@ -4,7 +4,7 @@
  * pronta sair sempre igual.
  */
 import { buildBlueprint, type Blueprint, type BuildingUse } from './blueprint';
-import { STYLE_KITS, type SettlementStyle } from './kits';
+import { roofFor, STYLE_KITS, type SettlementStyle } from './kits';
 
 export type PrefabDefinition = {
   readonly id: string;
@@ -61,6 +61,10 @@ export const PREFABS: readonly PrefabDefinition[] = [
     ['loja', 'Loja de esquina', 8, 6, 1, 'shop', 0, 23],
     ['predio', 'Prédio residencial', 10, 10, 4, 'tower', 0, 24],
     ['escritorio', 'Escritório envidraçado', 12, 8, 3, 'tower', 1, 25],
+    ['casa-branca', 'Casa branca com telhado', 6, 6, 1, 'house', 1, 26],
+    ['casa-amarela', 'Casa amarela', 6, 8, 1, 'house', 2, 27],
+    ['sobrado-azul', 'Sobrado azul', 8, 8, 2, 'house', 3, 28],
+    ['chale-verde', 'Chalé verde', 4, 6, 1, 'house', 4, 29],
   ]),
   ...rows('futurist', [
     ['modulo', 'Módulo habitacional', 6, 6, 1, 'house', 0, 31],
@@ -83,15 +87,16 @@ export function prefabBlueprint(prefab: PrefabDefinition): Blueprint {
   if (cached) return cached;
   const kit = STYLE_KITS[prefab.style];
   const sets = kit.walls[prefab.use];
+  const walls = sets[prefab.wallSet % sets.length]!;
   const blueprint = buildBlueprint(
     {
       width: prefab.width,
       depth: prefab.depth,
       stories: prefab.stories,
       use: prefab.use,
-      walls: sets[prefab.wallSet % sets.length]!,
+      walls,
       floor: kit.tiles.indoor[prefab.floor % kit.tiles.indoor.length]!,
-      roof: kit.roof,
+      roof: roofFor(kit, walls, prefab),
       seed: prefab.seed,
     },
     kit,
