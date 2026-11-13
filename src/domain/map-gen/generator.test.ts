@@ -84,6 +84,21 @@ describe('settlement generator', () => {
     expect(walls.some((wall) => wall.level === 4)).toBe(true);
   });
 
+  it('shouldMixPlasterHousesWithGableRoofsIntoTheModernTown', () => {
+    const { model } = generateSettlement({ style: 'modern', size: side(TOWN), seed: 3 });
+    const kit = STYLE_KITS.modern;
+    const keys = new Set(allPieces(model).map(keyOf));
+    const roofs = kit.walls.house.flatMap((set) => set.roofs ?? []);
+    expect(roofs.some((roof) => keys.has(roof.key))).toBe(true);
+    const styles = new Set(
+      [...model.chunks.values()].flatMap((chunk) => chunk.walls).map((wall) => wall.style),
+    );
+    // A casa de reboco usa janela e porta da mesma cor da parede.
+    for (const set of kit.walls.house.filter((house) => house.roofs && styles.has(house.plain))) {
+      expect(styles.has(set.window), set.plain).toBe(true);
+    }
+  });
+
   it('shouldParkVehiclesInsideTheRoadAndKeepDoorsClear', () => {
     const size = side(TOWN);
     const plan = planSettlement({ style: 'modern', size, seed: 4, profile: TOWN.profile });

@@ -124,4 +124,4 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 - [x] **RPG-57** Modelo enviado pode dizer no próprio arquivo para onde olha (extras da cena, `rpgmapsFront`); o app confia nisso antes de adivinhar pelos pés, que erra em bicho de tentáculos ou galhos. O `clean-model.mjs` ganhou `--smooth`, que tira o facetado dos rostos gerados por IA.
 - [x] **RPG-54** Token vira o rosto para onde anda, sozinho, ao ser movido (o rumo não é salvo: ao recarregar, volta a olhar para o sul).
 - [ ] **RPG-51** Animais como tokens, numa categoria separada de jogadores e NPCs: gato, cachorro, cavalo, vaca, rato e outros.
-- [ ] **RPG-52** Mais casas modernas, menos secas, algumas com telhado, com as paredes da mesma cor das paredes com janela.
+- [x] **RPG-52** Mais casas modernas, menos secas, algumas com telhado, com as paredes da mesma cor das paredes com janela. Casas de reboco (branca, amarela, azul e verde) com janela de veneziana e porta na mesma cor, telhado de duas águas de ardósia ou barro, arbusto e caixa de correio no quintal; quatro casas prontas novas. A parede lisa marrom deixou de sair com janela de tijolo.

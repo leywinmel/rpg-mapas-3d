@@ -9,7 +9,14 @@
 import type { Cell, GridEdge } from '../grid';
 import { QUARTER_TURNS, STORY_HEIGHT_STEPS, type Footprint } from '../map-v2';
 import { createRandom } from './random';
-import { SINGLE_CELL, type RoofKind, type SizedPiece, type StyleKit, type WallSet } from './kits';
+import {
+  gableRoofsFor,
+  SINGLE_CELL,
+  type RoofKind,
+  type SizedPiece,
+  type StyleKit,
+  type WallSet,
+} from './kits';
 
 export type BlueprintWall = GridEdge & {
   readonly style: string;
@@ -307,9 +314,10 @@ export function buildBlueprint(spec: BuildingSpec, kit: StyleKit): Blueprint {
     }
     pieces.push(...furnish(context, story));
   }
+  const gableRoofs = gableRoofsFor(kit, spec.walls);
   const roof =
-    spec.roof === 'gable' && kit.gableRoofs.length > 0
-      ? gableRoof(built, kit.gableRoofs)
+    spec.roof === 'gable' && gableRoofs.length > 0
+      ? gableRoof(built, gableRoofs)
       : flatRoof(context);
   pieces.push(...roof);
   return {

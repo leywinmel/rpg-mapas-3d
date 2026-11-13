@@ -23,6 +23,11 @@ export type WallSet = {
   readonly window: string;
   /** Fachada de loja no térreo (vitrine); sem ela, a loja usa janelas. */
   readonly shopfront?: string;
+  /**
+   * Telhados de duas águas desta casa, do maior para o menor: a casa de reboco do moderno tem
+   * telhado mesmo num estilo de laje. Sem eles, vale o telhado do estilo.
+   */
+  readonly roofs?: readonly SizedPiece[];
 };
 
 /** Peça com tamanho em casas (antes de girar). */
@@ -79,6 +84,23 @@ const REAL_VAN: Footprint = { width: 3, depth: 6 };
 const REAL_TRUCK: Footprint = { width: 3, depth: 8 };
 const INNER_STAIRS: SizedPiece = { key: 'med-escada-interna', footprint: { width: 1, depth: 3 } };
 
+/** Telhados de duas águas do moderno (RPG-52), do maior para o menor. */
+const modernRoofs = (material: string): SizedPiece[] => [
+  { key: `mod-telhado-${material}-4x4`, footprint: { width: 4, depth: 4 } },
+  { key: `mod-telhado-${material}-2x4`, footprint: { width: 2, depth: 4 } },
+  { key: `mod-telhado-${material}-2x2`, footprint: { width: 2, depth: 2 } },
+];
+const SLATE_ROOFS = modernRoofs('ardosia');
+const CLAY_ROOFS = modernRoofs('barro');
+
+/** Casa de bairro: parede, janela e porta no mesmo reboco, com telhado de duas águas. */
+const plasterHouse = (color: string, roofs: readonly SizedPiece[]): WallSet => ({
+  plain: `mod-reboco-${color}`,
+  door: `mod-reboco-${color}-porta`,
+  window: `mod-reboco-${color}-janela`,
+  roofs,
+});
+
 export const SINGLE_CELL = ONE;
 
 const MEDIEVAL: StyleKit = {
@@ -133,7 +155,10 @@ const MODERN: StyleKit = {
   walls: {
     house: [
       { plain: 'mod-parede-tijolo', door: 'mod-porta-madeira', window: 'mod-tijolo-janela' },
-      { plain: 'mod-parede-lisa', door: 'mod-porta-madeira', window: 'mod-tijolo-janela' },
+      plasterHouse('branco', SLATE_ROOFS),
+      plasterHouse('amarelo', CLAY_ROOFS),
+      plasterHouse('azul', SLATE_ROOFS),
+      plasterHouse('verde', CLAY_ROOFS),
     ],
     tower: [
       { plain: 'mod-parede-lisa', door: 'mod-porta-vidro', window: 'mod-parede-vidro' },
@@ -174,7 +199,13 @@ const MODERN: StyleKit = {
   lamp: null,
   plazaCenter: 'estatua',
   trees: ['arvore'],
-  yardProps: ['mod-canteiro', 'mod-caixa-papelao'],
+  yardProps: [
+    'mod-canteiro',
+    'mod-arbusto',
+    'mod-arbusto',
+    'mod-caixa-correio',
+    'mod-caixa-papelao',
+  ],
   fence: null,
 };
 
@@ -220,6 +251,22 @@ export const STYLE_KITS: Readonly<Record<SettlementStyle, StyleKit>> = {
   futurist: FUTURIST,
 };
 
+/** Telhados de duas águas que servem a esta casa: os das paredes ou, sem eles, os do estilo. */
+export function gableRoofsFor(kit: StyleKit, walls: WallSet): readonly SizedPiece[] {
+  if (walls.roofs && walls.roofs.length > 0) return walls.roofs;
+  return kit.roof === 'gable' ? kit.gableRoofs : [];
+}
+
+/** Telhado da casa: o de duas águas só fecha com os dois lados pares (o menor modelo é 2×2). */
+export function roofFor(
+  kit: StyleKit,
+  walls: WallSet,
+  size: { readonly width: number; readonly depth: number },
+): RoofKind {
+  const even = size.width % 2 === 0 && size.depth % 2 === 0;
+  return even && gableRoofsFor(kit, walls).length > 0 ? 'gable' : 'flat';
+}
+
 /** Toda chave que algum kit usa, para o teste conferir contra o catálogo. */
 export function kitKeys(kit: StyleKit): { floors: string[]; walls: string[]; props: SizedPiece[] } {
   const wallSets = [...kit.walls.house, ...kit.walls.tower, ...kit.walls.shop];
@@ -227,6 +274,7 @@ export function kitKeys(kit: StyleKit): { floors: string[]; walls: string[]; pro
   const single = (keys: readonly string[]) => keys.map((key) => ({ key, footprint: ONE }));
   const props: SizedPiece[] = [
     ...kit.gableRoofs,
+    ...wallSets.flatMap((set) => set.roofs ?? []),
     kit.stairs,
     ...kit.vehicles,
     ...kit.bigVehicles,

@@ -262,6 +262,9 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
   estica uma peça no comprimento (`stretch:<fator>`). Rode sempre a partir do modelo original.
 - `scripts/assets/brick-walls.mjs public/assets/modern`: gera as paredes de tijolo em relevo do
   estilo moderno (lisa e com janela) e a textura `textures/brick-relief.webp`.
+- `scripts/assets/house-pieces.mjs public/assets/modern`: gera as casas de bairro do moderno
+  (reboco em quatro cores, liso, com janela e com porta; telhados de ardósia e de barro em 2×2,
+  2×4 e 4×4) e os enfeites do quintal (cerca branca, arbusto e caixa de correio).
 - Veículos do moderno (pacote Rgsdev, CC0, em FBX): o Blender passa para `.glb` com
   `blender -b --factory-startup -P scripts/assets/fbx-to-glb.py -- <pasta do pacote> <saída>`, e
   `scripts/assets/convert-vehicle.mjs <entrada.glb> <saída.gltf> [comprimento máximo]` põe na
