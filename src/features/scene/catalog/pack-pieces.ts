@@ -6,7 +6,7 @@
 
 import { STORY_HEIGHT_STEPS, HEIGHT_STEP } from '@/domain/map-v2';
 import type { CatalogEntry } from './catalog-types';
-import { NATURE_PIECES } from './nature-pieces';
+import { GENERIC_PIECES } from './generic-pieces';
 
 /** Parede de pacote cobre um andar inteiro (porta e janela não se repetem empilhadas). */
 const STORY_SPAN = STORY_HEIGHT_STEPS * HEIGHT_STEP;
@@ -2188,5 +2188,5 @@ export const PACK_PIECES: readonly CatalogEntry[] = [
     height: 18.0,
     footprint: { width: 6, depth: 6 },
   },
-  ...NATURE_PIECES,
+  ...GENERIC_PIECES,
 ];

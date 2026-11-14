@@ -1,15 +1,14 @@
 /**
- * Vegetação genérica (RPG-37), gerada por scripts/assets/vegetation-pieces.mjs em
- * public/assets/nature/. Serve a qualquer estilo: árvore e pedra não mudam de era.
- * As alturas saem do próprio modelo (topo da copa, das folhas ou da pedra).
+ * Peças genéricas geradas por script, que servem a qualquer estilo: a vegetação (RPG-37, de
+ * scripts/assets/vegetation-pieces.mjs em public/assets/nature/) e os enfeites de praça
+ * (RPG-35, de scripts/assets/plaza-pieces.mjs em public/assets/plaza/). Árvore, pedra e
+ * fonte não mudam de era. As alturas saem do próprio modelo.
  */
 
 import type { Footprint } from '@/domain/map-v2';
-import type { CatalogEntry, PieceIcon } from './catalog-types';
+import type { CatalogEntry, PieceCategory, PieceIcon } from './catalog-types';
 
-const FOLDER = '/assets/nature';
-
-type NatureSpec = {
+type GenericSpec = {
   key: string;
   label: string;
   keywords: readonly string[];
@@ -18,20 +17,25 @@ type NatureSpec = {
   footprint?: Footprint;
 };
 
-function naturePiece({ key, footprint, ...spec }: NatureSpec): CatalogEntry {
-  return {
+/** Monta as entradas de uma pasta de public/assets, todas da mesma categoria. */
+function genericPieces(
+  folder: string,
+  category: PieceCategory,
+  specs: readonly GenericSpec[],
+): CatalogEntry[] {
+  return specs.map(({ key, footprint, ...spec }) => ({
     key,
     kind: 'prop',
     style: 'generic',
-    category: 'nature',
-    visual: { type: 'model', url: `${FOLDER}/${key}.gltf` },
-    thumbnail: `${FOLDER}/thumbs/${key}.webp`,
+    category,
+    visual: { type: 'model', url: `${folder}/${key}.gltf` },
+    thumbnail: `${folder}/thumbs/${key}.webp`,
     ...spec,
     ...(footprint ? { footprint } : {}),
-  };
+  }));
 }
 
-const SPECS: readonly NatureSpec[] = [
+const NATURE: readonly GenericSpec[] = [
   {
     key: 'nat-pinheiro',
     label: 'Pinheiro',
@@ -148,4 +152,56 @@ const SPECS: readonly NatureSpec[] = [
   },
 ];
 
-export const NATURE_PIECES: readonly CatalogEntry[] = SPECS.map(naturePiece);
+const PLAZA: readonly GenericSpec[] = [
+  {
+    key: 'pra-fonte',
+    label: 'Fonte grande',
+    keywords: ['chafariz', 'praça', 'água', 'monumento'],
+    icon: 'waves',
+    height: 1.85,
+    footprint: { width: 3, depth: 3 },
+  },
+  {
+    key: 'pra-chafariz',
+    label: 'Chafariz',
+    keywords: ['fonte', 'praça', 'água'],
+    icon: 'waves',
+    height: 1.16,
+    footprint: { width: 2, depth: 2 },
+  },
+  {
+    key: 'pra-estatua-grande',
+    label: 'Estátua do herói',
+    keywords: ['monumento', 'praça', 'bronze', 'pedestal'],
+    icon: 'statue',
+    height: 4,
+    footprint: { width: 2, depth: 2 },
+  },
+  {
+    key: 'pra-obelisco',
+    label: 'Obelisco',
+    keywords: ['monumento', 'praça', 'coluna'],
+    icon: 'pillar',
+    height: 3,
+  },
+  {
+    key: 'pra-banco-pedra',
+    label: 'Banco de pedra',
+    keywords: ['banco', 'assento', 'praça', 'jardim'],
+    icon: 'armchair',
+    height: 0.47,
+  },
+  {
+    key: 'pra-canteiro',
+    label: 'Canteiro elevado',
+    keywords: ['jardim', 'flores', 'praça', 'floreira'],
+    icon: 'flower',
+    height: 0.57,
+    footprint: { width: 2, depth: 1 },
+  },
+];
+
+export const GENERIC_PIECES: readonly CatalogEntry[] = [
+  ...genericPieces('/assets/nature', 'nature', NATURE),
+  ...genericPieces('/assets/plaza', 'structure', PLAZA),
+];

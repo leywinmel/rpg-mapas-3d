@@ -11,7 +11,7 @@ import {
   type MapPiece,
 } from '../map-v2';
 import { generateSettlement } from './generator';
-import { STYLE_KITS, SETTLEMENT_STYLES } from './kits';
+import { GARDEN_BED, STYLE_KITS, SETTLEMENT_STYLES } from './kits';
 import { planSettlement, TERRAIN_CLASS } from './layout';
 import { EXAMPLE_MAPS, sizePreset, SIZE_PRESETS } from './presets';
 
@@ -86,9 +86,24 @@ describe('settlement generator', () => {
     expect(styles.has(kit.walls.house[0]!.window)).toBe(true);
     const keys = new Set(allPieces(model).map(keyOf));
     expect(kit.gableRoofs.some((roof) => keys.has(roof.key))).toBe(true);
-    expect(keys.has(kit.plazaCenter)).toBe(true);
+    // A praça ganha um monumento (fonte, estátua) ou, se nenhum couber, o enfeite do centro.
+    const monuments = [kit.plazaCenter, ...kit.plazaMonuments.map((piece) => piece.key)];
+    expect(monuments.some((key) => keys.has(key))).toBe(true);
+    expect(keys.has(kit.plazaBench)).toBe(true);
     // Andares de cima: paredes empilhadas de 4 em 4 degraus.
     expect(walls.some((wall) => wall.level === 4)).toBe(true);
+  });
+
+  it('shouldTurnABigPlazaIntoAGardenWithFountainBedsAndBenches', () => {
+    const { model } = generateSettlement({
+      style: 'medieval',
+      size: { width: 100, depth: 100 },
+      seed: 3,
+    });
+    const keys = new Set(allPieces(model).map(keyOf));
+    expect(keys.has('pra-fonte')).toBe(true);
+    expect(keys.has(GARDEN_BED.key)).toBe(true);
+    expect(keys.has(STYLE_KITS.medieval.plazaBench)).toBe(true);
   });
 
   it('shouldMixPlasterHousesWithGableRoofsIntoTheModernTown', () => {

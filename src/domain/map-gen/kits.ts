@@ -82,6 +82,10 @@ export type StyleKit = {
   /** Poste ou tocha ao longo da rua; nulo = o estilo não tem. */
   readonly lamp: string | null;
   readonly plazaCenter: string;
+  /** Monumentos da praça (fonte, estátua), do maior para o menor: entra o maior que couber. */
+  readonly plazaMonuments: readonly SizedPiece[];
+  /** Banco dos caminhos da praça. */
+  readonly plazaBench: string;
   readonly trees: readonly string[];
   readonly yardProps: readonly string[];
   /** Plantinhas e pedrinhas soltas no gramado (capim, flores, folhas): o chão não fica liso. */
@@ -97,6 +101,12 @@ const TRUCK: Footprint = { width: 3, depth: 6 };
 const REAL_CAR: Footprint = { width: 3, depth: 5 };
 const REAL_VAN: Footprint = { width: 3, depth: 6 };
 const REAL_TRUCK: Footprint = { width: 3, depth: 8 };
+const FOUNTAIN: SizedPiece = { key: 'pra-fonte', footprint: { width: 3, depth: 3 } };
+const SMALL_FOUNTAIN: SizedPiece = { key: 'pra-chafariz', footprint: { width: 2, depth: 2 } };
+const HERO_STATUE: SizedPiece = { key: 'pra-estatua-grande', footprint: { width: 2, depth: 2 } };
+const OBELISK: SizedPiece = { key: 'pra-obelisco', footprint: ONE };
+/** Canteiro elevado dos jardins de praça: o mesmo em todo estilo. */
+export const GARDEN_BED: SizedPiece = { key: 'pra-canteiro', footprint: { width: 2, depth: 1 } };
 const INNER_STAIRS: SizedPiece = { key: 'med-escada-interna', footprint: { width: 1, depth: 3 } };
 
 /** Telhados de duas águas do moderno (RPG-52), do maior para o menor. */
@@ -154,6 +164,8 @@ const MEDIEVAL: StyleKit = {
   streetProps: ['barril', 'med-caixote', 'caixa'],
   lamp: 'tocha',
   plazaCenter: 'estatua',
+  plazaMonuments: [FOUNTAIN, HERO_STATUE, SMALL_FOUNTAIN],
+  plazaBench: 'pra-banco-pedra',
   trees: ['arvore', 'nat-carvalho', 'nat-pinheiro', 'nat-betula'],
   yardProps: ['barril', 'med-caixote', 'rocha', 'nat-arbusto', 'nat-toco'],
   groundCover: ['nat-capim', 'nat-capim', 'nat-flores', 'nat-seixos', 'nat-folhas'],
@@ -245,6 +257,8 @@ const MODERN: StyleKit = {
   ],
   lamp: 'mod-poste',
   plazaCenter: 'estatua',
+  plazaMonuments: [FOUNTAIN, HERO_STATUE, OBELISK],
+  plazaBench: 'mod-banco-praca',
   trees: ['nat-carvalho', 'nat-betula', 'arvore'],
   groundCover: ['nat-flores', 'nat-roseira', 'nat-capim', 'nat-arbusto'],
   yardProps: [
@@ -293,6 +307,8 @@ const FUTURIST: StyleKit = {
   streetProps: ['fut-luz-piso', 'fut-tambor', 'fut-caixa-carga'],
   lamp: 'fut-coluna',
   plazaCenter: 'fut-terminal',
+  plazaMonuments: [OBELISK],
+  plazaBench: 'pra-banco-pedra',
   trees: ['nat-betula', 'arvore'],
   yardProps: ['fut-caixa-carga', 'fut-tambor', 'fut-bau-carga'],
   groundCover: ['nat-capim', 'nat-seixos'],
@@ -335,6 +351,9 @@ const CYBERPUNK: StyleKit = {
   streetProps: ['cyb-maquina-venda', 'cyb-letreiro', 'fut-tambor', 'cyb-holograma'],
   lamp: 'cyb-poste-neon',
   plazaCenter: 'cyb-holograma',
+  // O holograma é o monumento do cyberpunk: fonte de pedra destoaria do neon.
+  plazaMonuments: [],
+  plazaBench: 'mod-banco-praca',
   // Cidade cansada: palmeira de avenida e árvore morta no lugar do bosque.
   trees: ['nat-palmeira', 'nat-arvore-seca'],
   yardProps: ['cyb-maquina-venda', 'fut-caixa-carga', 'fut-tambor'],
@@ -374,6 +393,8 @@ export function kitKeys(kit: StyleKit): { floors: string[]; walls: string[]; pro
     ...kit.gableRoofs,
     ...wallSets.flatMap((set) => set.roofs ?? []),
     kit.stairs,
+    GARDEN_BED,
+    ...kit.plazaMonuments,
     ...kit.vehicles,
     ...kit.bigVehicles,
     ...single([
@@ -385,6 +406,7 @@ export function kitKeys(kit: StyleKit): { floors: string[]; walls: string[]; pro
       ...kit.yardProps,
       ...kit.groundCover,
       kit.plazaCenter,
+      kit.plazaBench,
       ...(kit.lamp ? [kit.lamp] : []),
       ...(kit.fence ? [kit.fence] : []),
     ]),
