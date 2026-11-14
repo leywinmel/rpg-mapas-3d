@@ -11,7 +11,8 @@ em tempo real, com dados 3D, névoa e anotações enviadas pelo mestre.
 - Salas por link: o jogador entra com um apelido, e a conta é opcional.
 - Editor de mapas 3D com peças prontas (uso livre) e envio de modelos `.glb` próprios.
 - Fundos temáticos em volta do mapa: floresta com folhas caindo, deserto, cidade, masmorra ou mar.
-- Gerador de vilas e cidades (medieval, moderna, sci-fi ou cyberpunk) e casas prontas para pôr com um clique.
+- Gerador de vilas e cidades (medieval, moderna, sci-fi ou cyberpunk), masmorras, cavernas e
+  desertos, e casas prontas para pôr com um clique.
 - Tokens com imagem ou boneco 3D, barra de vida e notas.
 - Névoa que o mestre pinta e revela.
 - Ferramentas da mesa: régua em casas e metros, ping ao vivo e ordem de iniciativa com vez e rodada.
@@ -79,13 +80,17 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   arrastar. A barra de baixo troca a ferramenta: chão, parede, objeto, apagar e elevar ou abaixar o
   chão. A tecla `R` gira a peça, e o botão de atalhos mostra todas as teclas.
   Entre os chãos há areia, chão rachado de deserto, lama e poças d'água sobre a pedra.
-- **Gerar vila ou cidade:** em "Novo mapa", a opção "Vila ou cidade" monta o mapa inteiro com ruas,
+- **Gerar mapa pronto:** em "Novo mapa", a opção "Mapa pronto" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
   Escolha o estilo, o tamanho (vila 64, cidadezinha 160, cidade 400 ou metrópole 1000 casas de lado) e a semente: a mesma
   semente gera sempre o mesmo mapa, e "Sortear" troca por outra. A prévia mostra a planta antes de
   salvar. Mapas grandes são salvos em partes, com barra de progresso; se uma parte falhar, dá para
   tentar de novo, deixar o mapa como está ou apagá-lo. Os exemplos prontos usam sementes fixas.
+  "Masmorra" cava salas de pedra ligadas por corredores, com tochas, pilares, barris e baús;
+  "Caverna" abre galerias tortas na rocha, com poças de água, lama, pedras e tochas; "Deserto"
+  espalha areia e chão rachado com ruínas, oásis e rochas. Os três usam o mesmo tamanho e a mesma
+  semente, e todo chão da masmorra e da caverna se alcança andando.
 - **Casas prontas:** a aba "Casas" (atalho `H`) traz casas inteiras de cada estilo, com móveis e
   telhado. Um clique põe a casa no cursor, `R` gira, e `Ctrl+Z` desfaz a casa toda de uma vez.
 - **Mover carros e objetos durante o jogo:** com a ferramenta de seleção (`V`), o mestre arrasta um

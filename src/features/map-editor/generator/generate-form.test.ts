@@ -8,17 +8,36 @@ describe('formulário do gerador', () => {
     const parsed = parseGenerateMap(exampleValues(EXAMPLE_MAPS[0]!));
     expect(parsed).toEqual({
       ok: true,
-      value: { name: 'Vila medieval', style: 'medieval', preset: 'village', seed: 1201 },
+      value: {
+        name: 'Vila medieval',
+        kind: 'settlement',
+        style: 'medieval',
+        preset: 'village',
+        seed: 1201,
+      },
     });
   });
 
   it('shouldExplainEachInvalidField', () => {
-    const parsed = parseGenerateMap({ name: ' ', style: 'gótico', preset: 'village', seed: '-1' });
+    const parsed = parseGenerateMap({
+      name: ' ',
+      kind: 'pântano',
+      style: 'gótico',
+      preset: 'village',
+      seed: '-1',
+    });
     expect(parsed.ok).toBe(false);
     if (parsed.ok) return;
     expect(parsed.errors.name).toBe('Dê um nome ao mapa.');
     expect(parsed.errors.style).toBeDefined();
+    expect(parsed.errors.kind).toBeDefined();
     expect(parsed.errors.seed).toBe('A semente não pode ser negativa.');
+  });
+
+  it('shouldAcceptTheWildExamples', () => {
+    const wilds = EXAMPLE_MAPS.filter((example) => example.kind !== 'settlement');
+    expect(wilds.map((example) => example.kind)).toEqual(['dungeon', 'cave', 'desert']);
+    for (const example of wilds) expect(parseGenerateMap(exampleValues(example)).ok).toBe(true);
   });
 
   it('shouldDrawSeedsInsideTheRange', () => {

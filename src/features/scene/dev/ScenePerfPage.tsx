@@ -8,7 +8,14 @@ import { useEffect, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Button, Panel } from '@/components';
 import { BACKDROPS, type Backdrop } from '@/domain';
-import { SETTLEMENT_STYLE_LABELS, SETTLEMENT_STYLES, type SettlementStyle } from '@/domain/map-gen';
+import {
+  MAP_KIND_LABELS,
+  MAP_KINDS,
+  SETTLEMENT_STYLE_LABELS,
+  SETTLEMENT_STYLES,
+  type MapKind,
+  type SettlementStyle,
+} from '@/domain/map-gen';
 import { cutawayShowingUpToStory, NO_CUTAWAY, type Cutaway, type MapModel } from '@/domain/map-v2';
 import { BACKDROP_LABELS } from '../backdrop/backdrop';
 import { MapRenderer } from '../components/MapRenderer';
@@ -46,9 +53,9 @@ type Build = {
   readyAt: number;
 };
 
-function build(side: number, style: SettlementStyle): Build {
+function build(side: number, style: SettlementStyle, kind: MapKind): Build {
   const startedAt = performance.now();
-  const model = generateCity({ size: { width: side, depth: side }, seed: SEED, style });
+  const model = generateCity({ size: { width: side, depth: side }, seed: SEED, style, kind });
   const readyAt = performance.now();
   return { model, counts: countCity(model), generateMs: readyAt - startedAt, readyAt };
 }
@@ -116,7 +123,8 @@ function Stat({ label, value }: { label: string; value: string }) {
 export default function ScenePerfPage() {
   const [side, setSide] = useState<number>(LARGEST_SIZE);
   const [style, setStyle] = useState<SettlementStyle>('medieval');
-  const [current, setCurrent] = useState<Build>(() => build(side, style));
+  const [kind, setKind] = useState<MapKind>('settlement');
+  const [current, setCurrent] = useState<Build>(() => build(side, style, kind));
   const [mountMs, setMountMs] = useState<number | null>(null);
   const [sample, setSample] = useState<PerfSample | null>(null);
   const [preset, setPreset] = useState<CameraPreset>('overview');
@@ -125,11 +133,12 @@ export default function ScenePerfPage() {
   const level = useQualityLevel();
   const { counts } = current;
 
-  const regenerate = (next: number, nextStyle: SettlementStyle = style) => {
+  const regenerate = (next: number, nextStyle: SettlementStyle = style, nextKind = kind) => {
     setSide(next);
     setStyle(nextStyle);
+    setKind(nextKind);
     setMountMs(null);
-    setCurrent(build(next, nextStyle));
+    setCurrent(build(next, nextStyle, nextKind));
   };
 
   return (
@@ -155,6 +164,18 @@ export default function ScenePerfPage() {
               onClick={() => regenerate(option)}
             >
               {option}×{option}
+            </Button>
+          ))}
+        </div>
+        <div className={styles.row}>
+          {MAP_KINDS.map((option) => (
+            <Button
+              key={option}
+              size="sm"
+              variant={option === kind ? 'secondary' : 'ghost'}
+              onClick={() => regenerate(side, style, option)}
+            >
+              {MAP_KIND_LABELS[option]}
             </Button>
           ))}
         </div>

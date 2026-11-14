@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { generateSettlement } from '@/domain/map-gen';
+import { generateMap } from '@/domain/map-gen';
 import type { MapModel } from '@/domain/map-v2';
 import { PartialMapError, type MapActions } from '../hooks/useMapActions';
 import { BatchSaveError, type SaveProgress } from '../services/batch-save';
@@ -34,7 +34,7 @@ function partialMessage(pending: Pending): string {
 type Actions = Pick<MapActions, 'createFromModel' | 'resumeSave' | 'remove'>;
 
 /**
- * Gera a vila ou cidade e grava em lotes, com progresso. Se um lote falha, o estado guarda o
+ * Gera o mapa (vila, cidade, masmorra, caverna ou deserto) e grava em lotes, com progresso. Se um lote falha, o estado guarda o
  * que já foi gravado: "Tentar de novo" manda só o resto, e "Apagar" desiste do mapa.
  */
 export function useGenerateMap(actions: Actions, onDone: (summary: MapSummary) => void) {
@@ -66,7 +66,7 @@ export function useGenerateMap(actions: Actions, onDone: (summary: MapSummary) =
       let model: MapModel;
       try {
         const size = presetSize(input.preset);
-        model = generateSettlement({ style: input.style, size, seed: input.seed }).model;
+        model = generateMap({ ...input, size }).model;
       } catch (error) {
         return fail(error, null);
       }

@@ -49,7 +49,7 @@ type CreateMode = 'blank' | 'generate';
 
 const MODE_OPTIONS: ReadonlyArray<SegmentOption<CreateMode>> = [
   { value: 'blank', label: 'Mapa vazio' },
-  { value: 'generate', label: 'Vila ou cidade' },
+  { value: 'generate', label: 'Mapa pronto' },
 ];
 
 const MODE_DESCRIPTIONS: Readonly<Record<CreateMode, string>> = {
@@ -168,7 +168,7 @@ function GenerateFooter({ generation, onClose }: GenerateFooterProps) {
   );
 }
 
-/** Novo mapa: vazio (nome, tamanho e chão) ou gerado (vila ou cidade inteira). */
+/** Novo mapa: vazio (nome, tamanho e chão) ou gerado (vila, cidade, masmorra, caverna, deserto). */
 export function CreateMapDialog({ open, onClose, onCreate, generator }: CreateProps) {
   const [mode, setMode] = useState<CreateMode>('blank');
   const [values, setValues] = useState({
