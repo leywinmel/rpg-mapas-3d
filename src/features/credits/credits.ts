@@ -59,7 +59,7 @@ export const MODEL_CREDITS: readonly Credit[] = [
     work: 'Free Low Poly Vehicles Pack',
     author: 'Rgsdev',
     url: 'https://rgsdev.itch.io/free-low-poly-vehicles-pack',
-    usage: 'Carros de rua, viaturas, ambulância, bombeiros, limusine e caminhões.',
+    usage: 'Carros de rua, viaturas, ambulância, bombeiros, limusine, caminhões, ônibus e carreta.',
     ...CC0,
   },
   {

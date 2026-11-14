@@ -41,10 +41,11 @@ export const MAX_WALL_HEIGHT_STEPS = 16;
 
 /**
  * Lado máximo do retângulo de uma peça, em casas (RPG-26: carros 2×4, carroças, fontes e
- * árvores grandes). Também limita até onde, a oeste e ao norte, uma peça de outro pedaço
- * pode chegar a uma casa: a busca olha no máximo 7 casas para trás.
+ * árvores grandes; RPG-53: ônibus de 13 e carreta de 12). Também limita até onde, a oeste e
+ * ao norte, uma peça de outro pedaço pode chegar a uma casa: a busca olha no máximo 15 casas
+ * para trás, menos que um pedaço (32), então só o vizinho de cada lado entra na conta.
  */
-export const MAX_FOOTPRINT = 8;
+export const MAX_FOOTPRINT = 16;
 
 /** Giros em quartos de volta de 90°: 0, 1, 2 ou 3. */
 export const QUARTER_TURNS = 4;
