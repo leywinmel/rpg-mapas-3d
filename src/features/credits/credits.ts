@@ -68,6 +68,20 @@ export const MODEL_CREDITS: readonly Credit[] = [
     usage: 'Bonecos de token: esqueletos guerreiro, mago, ladino e servo.',
     ...CC0,
   },
+  {
+    work: 'RPG Characters',
+    author: 'Quaternius',
+    url: 'https://opengameart.org/content/lowpoly-rpg-characters',
+    usage: 'Bonecos de token: clérigo, monge, patrulheira, assassino, guerreiro e arquimago.',
+    ...CC0,
+  },
+  {
+    work: 'Animated Monster Pack',
+    author: 'Quaternius',
+    url: 'https://opengameart.org/content/lowpoly-animated-monsters',
+    usage: 'Bonecos de token: morcego gigante e dragão filhote.',
+    ...CC0,
+  },
 ];
 
 export const FONT_CREDITS: readonly Credit[] = [

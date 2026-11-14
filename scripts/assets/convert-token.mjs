@@ -1,5 +1,5 @@
-// Converte um personagem .glb (KayKit, CC0) num token do rpgmaps: só a animação parada
-// ("Idle"), geometria quantizada e comprimida (meshopt) e textura em webp de 512 px.
+// Converte um personagem .glb (KayKit ou Quaternius, CC0) num token do rpgmaps: só a animação
+// parada ("Idle", "Slime_Idle"; bicho que só voa fica com a de voo), geometria quantizada e comprimida (meshopt) e textura em webp de 512 px.
 // uso: node scripts/assets/convert-token.mjs <personagem.glb> <chave> <public/assets/tokens>
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
@@ -12,7 +12,9 @@ import { dedup, prune, quantize, reorder, resample } from '@gltf-transform/funct
 import { MeshoptEncoder } from 'meshoptimizer';
 
 const [SOURCE, KEY, OUT] = process.argv.slice(2);
-const IDLE = /^idle$/i;
+const IDLE = /(^|_)idle$/i;
+/** Morcego e dragão não têm animação parada: pairar voando faz o papel dela. */
+const HOVER = /(^|_)flying$/i;
 const TEXTURE_SIZE = 512;
 
 await MeshoptEncoder.ready;
@@ -21,7 +23,9 @@ const doc = await io.readBinary(readFileSync(SOURCE));
 const root = doc.getRoot();
 
 const animations = root.listAnimations();
-const idle = animations.find((animation) => IDLE.test(animation.getName()));
+const idle =
+  animations.find((animation) => IDLE.test(animation.getName())) ??
+  animations.find((animation) => HOVER.test(animation.getName()));
 if (!idle) throw new Error(`${SOURCE}: sem animação Idle (${animations.map((a) => a.getName()).join(', ')})`);
 // Canais e amostradores também: só descartar a animação deixaria os acessores órfãos no arquivo.
 for (const animation of animations) {
