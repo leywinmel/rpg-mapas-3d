@@ -198,6 +198,12 @@ if (SMOOTH) {
 await doc.transform(weld());
 if (SMOOTH) for (const mesh of root.listMeshes()) mesh.listPrimitives().forEach(smoothNormals);
 for (const mesh of root.listMeshes()) mesh.listPrimitives().forEach(cleanPrimitive);
+// O gerador marca o material como metal puro sem mapa de metal. Sem reflexo de ambiente na
+// mesa, metal puro sai quase preto: o bicho escuro virava uma mancha. Pele, pano e pelo não
+// são metal.
+for (const material of root.listMaterials()) {
+  if (!material.getMetallicRoughnessTexture()) material.setMetallicFactor(0);
+}
 if (DRY) process.exit(0);
 
 // Texturas em webp num processo à parte (ver texture-webp.mjs).
