@@ -119,6 +119,11 @@ select {
   pointer-events: auto;
 }
 
+/* O mestre escondeu o HUD: barras, painéis e ferramentas saem; a cena e os dados ficam. */
+.room[data-hud='hidden'] .hud-chrome {
+  display: none;
+}
+
 /*
  * Coluna direita: o painel do topo (quem está na mesa, anotações, iniciativa...) e o painel dos
  * dados (que cresce de baixo para cima) têm a mesma altura máxima e se cobririam. Com os dois

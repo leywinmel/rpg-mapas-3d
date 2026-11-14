@@ -15,9 +15,10 @@ import { useMapActions } from '../hooks/useMapActions';
 import { useMapModel } from '../hooks/useMapModel';
 import { uploadedAssetIds, useModelUrls } from '../hooks/useModelUrls';
 import { useRoomMaps } from '../hooks/useRoomMaps';
-import { EditorSidebar } from './EditorSidebar';
+import { EditorSidebar, HUD_CHROME_CLASS } from './EditorSidebar';
 import { MapEditor } from './MapEditor';
 import { MapListDialogs, MapListPanel, useMapDialogs } from './MapListPanel';
+import { cx } from '@/lib/cx';
 import layout from './MapWorkspace.module.css';
 
 const MapViewport = lazy(() => import('./MapViewport'));
@@ -121,7 +122,7 @@ function PlayerView({
           />
         </Suspense>
       </ErrorBoundary>
-      <span className={layout.mapTag}>{name ?? summary.name}</span>
+      <span className={cx(layout.mapTag, HUD_CHROME_CLASS)}>{name ?? summary.name}</span>
       <MapCornerHud>
         {showsMinimap(state.map.model) && <Minimap model={state.map.model} />}
       </MapCornerHud>

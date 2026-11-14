@@ -125,4 +125,4 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 - [x] **RPG-54** Token vira o rosto para onde anda, sozinho, ao ser movido (o rumo não é salvo: ao recarregar, volta a olhar para o sul).
 - [ ] **RPG-51** Animais como tokens, numa categoria separada de jogadores e NPCs: gato, cachorro, cavalo, vaca, rato e outros.
 - [x] **RPG-52** Mais casas modernas, menos secas, algumas com telhado, com as paredes da mesma cor das paredes com janela. Casas de reboco (branca, amarela, azul e verde) com janela de veneziana e porta na mesma cor, telhado de duas águas de ardósia ou barro, arbusto e caixa de correio no quintal; quatro casas prontas novas. A parede lisa marrom deixou de sair com janela de tijolo.
-- [ ] **RPG-58** Mestre esconde o HUD (barras, painéis e ferramentas de construção) com um botão ou atalho, para ver a cena limpa. Jogador nunca vê as ferramentas de construção do mestre.
+- [x] **RPG-58** Mestre esconde o HUD (barras, painéis e ferramentas de construção) com um botão ou atalho, para ver a cena limpa. Jogador nunca vê as ferramentas de construção do mestre.

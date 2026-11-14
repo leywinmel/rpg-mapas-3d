@@ -2,7 +2,11 @@ import { useId, useState, type ReactNode } from 'react';
 import { Hammer } from 'lucide-react';
 import { Panel } from '@/components';
 import styles from './SidePanel.module.css';
+import { cx } from '@/lib/cx';
 import layout from './MapWorkspace.module.css';
+
+/** Gancho do global.css: some quando o mestre esconde o HUD da mesa. */
+export const HUD_CHROME_CLASS = 'hud-chrome';
 
 export type SidebarTab = { id: string; label: string; content: ReactNode };
 
@@ -12,7 +16,7 @@ export function EditorSidebar({ title, tabs }: { title: string; tabs: readonly S
   const [chosen, setChosen] = useState(tabs[0]?.id ?? '');
   const current = tabs.find((tab) => tab.id === chosen) ?? tabs[0];
   return (
-    <div className={layout.sidebar}>
+    <div className={cx(layout.sidebar, HUD_CHROME_CLASS)}>
       <Panel title={title} icon={<Hammer size={16} />} className={layout.sidebarPanel}>
         <div className={styles.stack}>
           {tabs.length > 1 && (

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import { MapPinOff } from 'lucide-react';
 import { ButtonLink, EmptyState, ErrorBoundary, ErrorState, LoadingState } from '@/components';
@@ -8,6 +8,7 @@ import { RoomEntryScreen } from '../components/RoomEntryScreen';
 import { RoomHud } from '../components/RoomHud';
 import { RoomMap } from '../components/RoomMap';
 import { RoomSessionProvider } from '../components/RoomSessionProvider';
+import { useHudStore } from '../hooks/hud-store';
 import { useRoomEntry } from '../hooks/useRoomEntry';
 import { LOBBY_PATH, roomPath } from '../paths';
 import { roomErrorMessage } from '../services/room-errors';
@@ -31,6 +32,16 @@ function RoomNotFound() {
 }
 
 /** /sala/:slug — entrada pelo link de convite e, para membros, a mesa em si. */
+/** O `<main>` da sala; `data-hud` esconde o HUD inteiro pelo global.css quando o mestre pede. */
+function RoomMain({ children }: { children: ReactNode }) {
+  const hidden = useHudStore((state) => state.hidden);
+  return (
+    <main className="room" data-hud={hidden ? 'hidden' : undefined}>
+      {children}
+    </main>
+  );
+}
+
 export default function RoomPage() {
   const { slug: rawSlug } = useParams();
   const session = useSession();
@@ -78,7 +89,7 @@ export default function RoomPage() {
       membership={entry.membership}
       user={session.user}
     >
-      <main className="room">
+      <RoomMain>
         <ErrorBoundary area="o mapa da mesa" fill>
           <RoomMap />
         </ErrorBoundary>
@@ -88,7 +99,7 @@ export default function RoomPage() {
             <DiceTray />
           </Suspense>
         </ErrorBoundary>
-      </main>
+      </RoomMain>
     </RoomSessionProvider>
   );
 }

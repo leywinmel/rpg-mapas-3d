@@ -31,13 +31,14 @@ import type { LoadedMap } from '../hooks/useMapModel';
 import { uploadedAssetIds, useModelUrls } from '../hooks/useModelUrls';
 import { useMapEditorServices } from '../services/services-context';
 import { AmbienceControls } from './AmbienceControls';
-import { EditorSidebar } from './EditorSidebar';
+import { EditorSidebar, HUD_CHROME_CLASS } from './EditorSidebar';
 import { EditorToolbar } from './EditorToolbar';
 import type { EditorSceneActions, EditorViewState } from './EditorInteraction';
 import { LibraryPanel } from './LibraryPanel';
 import { MapSizeControls } from './MapSizeControls';
 import { PrefabPanel } from './PrefabPanel';
 import { SaveIndicator } from './SaveIndicator';
+import { cx } from '@/lib/cx';
 import layout from './MapWorkspace.module.css';
 import panel from './SidePanel.module.css';
 
@@ -239,7 +240,7 @@ export function MapEditor({ map, mapsPanel, name, cutaway, onPerfSample, table }
         {showsMinimap(model) && <Minimap model={model} />}
         <CutawayControl binding={cutaway} top={top} />
       </MapCornerHud>
-      <div className={layout.bottomBar}>
+      <div className={cx(layout.bottomBar, HUD_CHROME_CLASS)}>
         <EditorToolbar state={state} dispatch={dispatch} />
         <div className={layout.saveSlot}>
           <SaveIndicator status={autosave.status} onRetry={() => void autosave.flush()} />
