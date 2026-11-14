@@ -221,8 +221,8 @@ describe('piece operations', () => {
   });
 
   it('shouldExplainInvalidPiecesInPortuguese', () => {
-    const wide = placePiece(base, makePiece({ footprint: { width: 9, depth: 1 } }));
-    expect(errorsOf(wide)[0]).toMatch(/A largura da peça precisa ser um número inteiro de 1 a 8/);
+    const wide = placePiece(base, makePiece({ footprint: { width: 17, depth: 1 } }));
+    expect(errorsOf(wide)[0]).toMatch(/A largura da peça precisa ser um número inteiro de 1 a 16/);
     expect(errorsOf(placePiece(base, makePiece({ level: 256 })))[0]).toMatch(/O degrau da base/);
     expect(errorsOf(placePiece(base, makePiece({ rotation: 4 })))[0]).toMatch(/O giro da peça/);
     expect(errorsOf(placePiece(base, makePiece({ scale: 5 })))[0]).toMatch(/escala da peça/);

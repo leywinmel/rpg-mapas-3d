@@ -142,9 +142,9 @@ describe('chunk document', () => {
       /walls\.0\.height: A altura da parede precisa ser um número inteiro de 1 a 16/,
     );
     const piecesErrors = errorsOf(
-      chunkDoc({ pieces: [piece({ footprint: { width: 9, depth: 1 } })] }),
+      chunkDoc({ pieces: [piece({ footprint: { width: 17, depth: 1 } })] }),
     );
-    expect(piecesErrors[0]).toMatch(/A largura da peça precisa ser um número inteiro de 1 a 8/);
+    expect(piecesErrors[0]).toMatch(/A largura da peça precisa ser um número inteiro de 1 a 16/);
   });
 
   it('shouldRejectUnsafeCatalogKeys', () => {

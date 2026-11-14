@@ -173,14 +173,14 @@ describe('pieces that occupy a cell', () => {
     expect(piecesOccupyingCell(map, { x: 33, z: 7 })).toEqual([]);
   });
 
-  it('shouldReachTheLargestFootprintFromSevenCellsAway', () => {
-    const tree = piece({ id: 'arvore-1', x: 25, z: 25, footprint: { width: 8, depth: 8 } });
-    const map = mapWithPieces(size, [tree]);
-    // A casa (32, 32) é do pedaço (1, 1) e a âncora (25, 25) está 7 casas a oeste e ao norte.
-    expect(MAX_FOOTPRINT - 1).toBe(7);
-    expect(piecesOccupyingCell(map, { x: 32, z: 32 })).toEqual([tree]);
-    expect(piecesOccupyingCell(map, { x: 32, z: 25 })).toEqual([tree]);
-    expect(piecesOccupyingCell(map, { x: 25, z: 32 })).toEqual([tree]);
+  it('shouldReachTheLargestFootprintFromFifteenCellsAway', () => {
+    const bus = piece({ id: 'onibus-1', x: 17, z: 17, footprint: { width: 16, depth: 16 } });
+    const map = mapWithPieces(size, [bus]);
+    // A casa (32, 32) é do pedaço (1, 1) e a âncora (17, 17) está 15 casas a oeste e ao norte.
+    expect(MAX_FOOTPRINT - 1).toBe(15);
+    expect(piecesOccupyingCell(map, { x: 32, z: 32 })).toEqual([bus]);
+    expect(piecesOccupyingCell(map, { x: 32, z: 17 })).toEqual([bus]);
+    expect(piecesOccupyingCell(map, { x: 17, z: 32 })).toEqual([bus]);
     expect(piecesOccupyingCell(map, { x: 33, z: 32 })).toEqual([]);
   });
 
@@ -207,8 +207,8 @@ describe('pieces that occupy a cell', () => {
     expect(anchorWindow({ x: 2, z: 2 })).toEqual({ x: 0, z: 0, width: 3, depth: 3 });
   });
 
-  it('shouldSearchOnlySevenCellsBackAndNeverOutsideTheMap', () => {
-    expect(anchorWindow({ x: 40, z: 5 })).toEqual({ x: 33, z: 0, width: 8, depth: 6 });
+  it('shouldSearchOnlyFifteenCellsBackAndNeverOutsideTheMap', () => {
+    expect(anchorWindow({ x: 40, z: 5 })).toEqual({ x: 25, z: 0, width: 16, depth: 6 });
     const map = mapWithPieces(size, [piece({ x: 3, z: 3 })]);
     expect(piecesOccupyingCell(map, { x: -1, z: 0 })).toEqual([]);
     expect(piecesOccupyingCell(map, { x: 100, z: 0 })).toEqual([]);

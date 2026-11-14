@@ -283,7 +283,8 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
 - Veículos do moderno (pacote Rgsdev, CC0, em FBX): o Blender passa para `.glb` com
   `blender -b --factory-startup -P scripts/assets/fbx-to-glb.py -- <pasta do pacote> <saída>`, e
   `scripts/assets/convert-vehicle.mjs <entrada.glb> <saída.gltf> [comprimento máximo]` põe na
-  escala do mapa (sedã com 3 × 5 casas).
+  escala do mapa (sedã com 3 × 5 casas, ônibus com 4 × 13 e carreta com 3 × 12). Uma peça pode
+  ter até 16 casas de lado.
 - `npm run db:reset`: recria o banco local do zero.
 - `npm run test:db`: testa as regras de acesso do banco (quem vê e altera o quê).
 
