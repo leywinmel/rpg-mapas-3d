@@ -112,7 +112,7 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 
 - [ ] **RPG-45** Lugares prontos de verdade, mobiliados e com adereços: escola (100×100), posto de gasolina (50×50), hospital (200×200), delegacia, prédios inteiros; entram como "casa pronta" de um clique e como mapa pronto. O usuário vai mandar a lista de mapas que quer para uma sessão.
 - [ ] **RPG-46** Barcos e navios (pequeno, pesqueiro, navio grande) e um gerador de porto/cais com água.
-- [ ] **RPG-47** Muito mais adereços em cada lugar (dentro e fora): o gerador e as casas prontas enchem os cômodos, as calçadas e os pátios, em vez de deixar cenário vazio.
+- [x] **RPG-47** Muito mais adereços em cada lugar (dentro e fora): o gerador e as casas prontas enchem os cômodos, as calçadas e os pátios, em vez de deixar cenário vazio.
 
 **Fase H: correções e modelos mais limpos (pedido do usuário em 11/11)**
 

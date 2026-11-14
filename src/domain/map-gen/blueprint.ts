@@ -66,8 +66,11 @@ export type BuildingSpec = {
 /** Escada de um andar: 1×3 casas. Prédio mais estreito que isto não tem andar de cima. */
 export const MIN_SIDE_FOR_STAIRS = 4;
 /** Uma peça de mobília para cada tantas casas do andar. */
-const CELLS_PER_FURNITURE = 9;
-const MAX_FURNITURE_PER_STORY = 6;
+/** Uma peça de mobília a cada tantas casas do andar (RPG-47: cômodos cheios, não vazios). */
+const CELLS_PER_FURNITURE = 4;
+const MAX_FURNITURE_PER_STORY = 16;
+/** Parte da mobília que vai encostada na parede; o resto fica solto no meio do cômodo. */
+const WALL_FURNITURE_SHARE = 0.7;
 /** Tentativas de achar casa livre para cada móvel antes de desistir. */
 const PLACEMENT_TRIES = 6;
 const ROOFTOP_PROPS_MAX = 2;
@@ -212,30 +215,45 @@ type StoryContext = {
   readonly stairs: readonly Cell[];
 };
 
-/** Mobília solta num andar, longe da porta e da escada, sem duas peças na mesma casa. */
+/**
+ * Giro que vira a frente do móvel (os modelos olham para +z) para dentro do cômodo, na casa
+ * encostada na parede; nulo no meio do andar. Giro 1 olha para +x (convenção da cena).
+ */
+function inwardTurn(spec: BuildingSpec, x: number, z: number): number | null {
+  if (z === spec.depth - 1) return 2;
+  if (x === 0) return 1;
+  if (x === spec.width - 1) return 3;
+  if (z === 0) return 0;
+  return null;
+}
+
+/** Mobília do andar (a de loja no térreo da loja), longe da porta e da escada, uma por casa. */
 function furnish(context: StoryContext, story: number): BlueprintPiece[] {
   const { spec, kit, random } = context;
   const taken = new Set(context.stairs.map((cell) => `${cell.x},${cell.z}`));
   const door = doorColumn(spec.width);
   // A casa da porta e a da frente dela ficam livres: o boneco entra sem tropeçar.
   taken.add(`${door},0`).add(`${door},1`);
+  const props = spec.use === 'shop' && story === 0 ? kit.shopProps : kit.indoorProps;
   const count = Math.min(
     MAX_FURNITURE_PER_STORY,
     Math.max(1, Math.floor((spec.width * spec.depth) / CELLS_PER_FURNITURE)),
   );
   const pieces: BlueprintPiece[] = [];
   for (let item = 0; item < count; item += 1) {
+    const againstWall = random.chance(WALL_FURNITURE_SHARE);
     for (let attempt = 0; attempt < PLACEMENT_TRIES; attempt += 1) {
       const x = random.between(0, spec.width - 1);
       const z = random.between(0, spec.depth - 1);
-      if (taken.has(`${x},${z}`)) continue;
+      const turn = inwardTurn(spec, x, z);
+      if (taken.has(`${x},${z}`) || (againstWall && turn === null)) continue;
       taken.add(`${x},${z}`);
       pieces.push({
-        key: random.pick(kit.indoorProps),
+        key: random.pick(props),
         x,
         z,
         level: story * STORY_HEIGHT_STEPS,
-        rotation: random.between(0, QUARTER_TURNS - 1),
+        rotation: turn ?? random.between(0, QUARTER_TURNS - 1),
         footprint: SINGLE_CELL,
         scale: 1,
       });

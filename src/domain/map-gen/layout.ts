@@ -69,11 +69,11 @@ export type PlanOptions = {
 /** Mobílias diferentes por combinação de prédio: repetir deixa o gerador rápido (plantas em cache). */
 const INTERIOR_VARIANTS = 24;
 const LAMP_SPACING = 8;
-const STREET_PROP_CHANCE = 0.03;
+const STREET_PROP_CHANCE = 0.07;
 const CELLS_PER_PARK_TREE = 10;
 const CELLS_PER_YARD_TREE = 24;
-const CELLS_PER_YARD_PROP = 40;
-const CELLS_PER_MARKET_PROP = 30;
+const CELLS_PER_YARD_PROP = 18;
+const CELLS_PER_MARKET_PROP = 16;
 const PLAZA_TREE_INSET = 2;
 const TREE_SCALE = { min: 0.8, spread: 0.6 } as const;
 /** Andar mínimo para o prédio virar "torre" (janelas em toda a fachada). */

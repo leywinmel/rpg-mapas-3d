@@ -73,7 +73,10 @@ export type StyleKit = {
   readonly vehicles: readonly SizedPiece[];
   /** Veículos grandes (largura 3), só nas avenidas. */
   readonly bigVehicles: readonly SizedPiece[];
+  /** Mobília de casa e de prédio, encostada nas paredes. */
   readonly indoorProps: readonly string[];
+  /** Mobília de loja (balcão, prateleira): o térreo do prédio de uso `shop`. */
+  readonly shopProps: readonly string[];
   readonly rooftopProps: readonly string[];
   readonly streetProps: readonly string[];
   /** Poste ou tocha ao longo da rua; nulo = o estilo não tem. */
@@ -144,6 +147,7 @@ const MEDIEVAL: StyleKit = {
   vehicles: [{ key: 'med-carroca', footprint: CAR }],
   bigVehicles: [],
   indoorProps: ['mesa', 'cadeira', 'bau', 'barril', 'med-caixote'],
+  shopProps: ['mesa', 'barril', 'med-caixote', 'bau'],
   rooftopProps: [],
   streetProps: ['barril', 'med-caixote', 'caixa'],
   lamp: 'tocha',
@@ -205,10 +209,36 @@ const MODERN: StyleKit = {
     { key: 'mod-bombeiros', footprint: REAL_TRUCK },
     { key: 'mod-caminhao-lixo', footprint: TRUCK },
   ],
-  indoorProps: ['mesa', 'cadeira', 'mod-caixa-papelao', 'caixa'],
+  indoorProps: [
+    'mod-sofa',
+    'mod-cama',
+    'mod-armario',
+    'mod-estante',
+    'mod-geladeira',
+    'mod-fogao',
+    'mod-tv',
+    'mod-vaso-planta',
+    'mesa',
+    'cadeira',
+  ],
+  shopProps: [
+    'mod-balcao',
+    'mod-prateleira',
+    'mod-prateleira',
+    'mod-caixa-papelao',
+    'mod-vaso-planta',
+  ],
   rooftopProps: ['mod-ar-condicionado'],
-  streetProps: ['mod-balizador', 'mod-bueiro', 'mod-cone', 'mod-canteiro'],
-  lamp: null,
+  streetProps: [
+    'mod-balizador',
+    'mod-bueiro',
+    'mod-cone',
+    'mod-canteiro',
+    'mod-hidrante',
+    'mod-lixeira',
+    'mod-banco-praca',
+  ],
+  lamp: 'mod-poste',
   plazaCenter: 'estatua',
   trees: ['arvore'],
   yardProps: [
@@ -217,6 +247,9 @@ const MODERN: StyleKit = {
     'mod-arbusto',
     'mod-caixa-correio',
     'mod-caixa-papelao',
+    'mod-churrasqueira',
+    'mod-vaso-planta',
+    'mod-lixeira',
   ],
   fence: null,
 };
@@ -249,6 +282,7 @@ const FUTURIST: StyleKit = {
   vehicles: [{ key: 'fut-carro', footprint: CAR }],
   bigVehicles: [],
   indoorProps: ['fut-terminal', 'fut-bau-carga', 'fut-caixa-carga', 'fut-tambor'],
+  shopProps: ['fut-terminal', 'fut-caixa-carga', 'fut-bau-carga'],
   rooftopProps: ['fut-ventilador', 'fut-tambor'],
   streetProps: ['fut-luz-piso', 'fut-tambor', 'fut-caixa-carga'],
   lamp: 'fut-coluna',
@@ -289,6 +323,7 @@ const CYBERPUNK: StyleKit = {
   vehicles: [{ key: 'fut-carro', footprint: CAR }],
   bigVehicles: [],
   indoorProps: ['cyb-maquina-venda', 'fut-terminal', 'fut-caixa-carga', 'mesa'],
+  shopProps: ['cyb-maquina-venda', 'fut-terminal', 'mesa', 'fut-caixa-carga'],
   rooftopProps: ['cyb-letreiro', 'fut-ventilador', 'fut-tambor'],
   streetProps: ['cyb-maquina-venda', 'cyb-letreiro', 'fut-tambor', 'cyb-holograma'],
   lamp: 'cyb-poste-neon',
@@ -334,6 +369,7 @@ export function kitKeys(kit: StyleKit): { floors: string[]; walls: string[]; pro
     ...kit.bigVehicles,
     ...single([
       ...kit.indoorProps,
+      ...kit.shopProps,
       ...kit.rooftopProps,
       ...kit.streetProps,
       ...kit.trees,
