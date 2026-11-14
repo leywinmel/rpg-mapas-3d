@@ -4,6 +4,7 @@
  */
 import type { GridSize } from '../grid';
 import type { SettlementStyle } from './kits';
+import type { MapKind } from './wilds';
 
 /** Como o lugar é: muda o tamanho dos quarteirões, a largura das ruas e a altura dos prédios. */
 export type SettlementProfile = {
@@ -132,6 +133,7 @@ export function profileForSize(size: GridSize): SettlementProfile {
 export type ExampleMap = {
   readonly id: string;
   readonly name: string;
+  readonly kind: MapKind;
   readonly style: SettlementStyle;
   readonly preset: SizePresetId;
   readonly seed: number;
@@ -139,11 +141,26 @@ export type ExampleMap = {
 
 /** Mapas de exemplo: saem do gerador com semente fixa (sempre o mesmo mapa). */
 export const EXAMPLE_MAPS: readonly ExampleMap[] = [
-  { id: 'vila-medieval', name: 'Vila medieval', style: 'medieval', preset: 'village', seed: 1201 },
-  { id: 'bairro-moderno', name: 'Bairro moderno', style: 'modern', preset: 'town', seed: 2024 },
+  {
+    id: 'vila-medieval',
+    name: 'Vila medieval',
+    kind: 'settlement',
+    style: 'medieval',
+    preset: 'village',
+    seed: 1201,
+  },
+  {
+    id: 'bairro-moderno',
+    name: 'Bairro moderno',
+    kind: 'settlement',
+    style: 'modern',
+    preset: 'town',
+    seed: 2024,
+  },
   {
     id: 'cidade-futurista',
     name: 'Cidade futurista',
+    kind: 'settlement',
     style: 'futurist',
     preset: 'town',
     seed: 2077,
@@ -151,8 +168,27 @@ export const EXAMPLE_MAPS: readonly ExampleMap[] = [
   {
     id: 'cidade-cyberpunk',
     name: 'Cidade cyberpunk',
+    kind: 'settlement',
     style: 'cyberpunk',
     preset: 'town',
     seed: 2088,
   },
+  {
+    id: 'masmorra',
+    name: 'Masmorra',
+    kind: 'dungeon',
+    style: 'medieval',
+    preset: 'town',
+    seed: 666,
+  },
+  { id: 'caverna', name: 'Caverna', kind: 'cave', style: 'medieval', preset: 'town', seed: 1313 },
+  { id: 'deserto', name: 'Deserto', kind: 'desert', style: 'medieval', preset: 'town', seed: 1890 },
 ];
+
+/** Nome do tamanho fora da cidade: "Cidade grande" não faz sentido numa caverna. */
+export const WILD_SIZE_LABELS: Readonly<Record<SizePresetId, string>> = {
+  village: 'Pequeno',
+  town: 'Médio',
+  city: 'Grande',
+  metropolis: 'Enorme',
+};

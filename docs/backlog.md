@@ -105,7 +105,7 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 **Fase F: estilos, mapas e interação**
 
 - [x] **RPG-42** Estilo cyberpunk (neon, letreiros, hologramas, megaprédios, máquinas de venda) como estilo novo; o futurista atual continua como "sci-fi".
-- [ ] **RPG-43** Mapas prontos de masmorra, caverna e deserto no gerador, além de vilas e cidades.
+- [x] **RPG-43** Mapas prontos de masmorra, caverna e deserto no gerador, além de vilas e cidades.
 - [ ] **RPG-44** Peças com interação: garra do trator, portas traseiras de ambulância e van; só o mestre aciona e a mesa vê.
 
 **Fase G: lugares grandes prontos (pedido do usuário em 10/11)**

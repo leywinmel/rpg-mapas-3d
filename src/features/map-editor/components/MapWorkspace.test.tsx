@@ -209,7 +209,7 @@ describe('MapWorkspace', () => {
     renderWorkspace(fake, true);
     fireEvent.click(await screen.findByRole('button', { name: 'Novo mapa' }));
     const dialog = screen.getByRole('dialog', { name: 'Novo mapa' });
-    fireEvent.click(within(dialog).getByRole('radio', { name: 'Vila ou cidade' }));
+    fireEvent.click(within(dialog).getByRole('radio', { name: 'Mapa pronto' }));
     expect(within(dialog).getByLabelText('Nome')).toHaveValue('Vila medieval');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Gerar mapa' }));
 

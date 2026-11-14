@@ -3,10 +3,15 @@ import { Dices } from 'lucide-react';
 import { Button, IconButton, SegmentedControl, TextField, type SegmentOption } from '@/components';
 import {
   EXAMPLE_MAPS,
+  isWildKind,
+  MAP_KIND_LABELS,
+  MAP_KINDS,
   MAX_SEED,
   SETTLEMENT_STYLE_LABELS,
   SETTLEMENT_STYLES,
   SIZE_PRESETS,
+  WILD_SIZE_LABELS,
+  type MapKind,
   type SettlementStyle,
   type SizePresetId,
 } from '@/domain/map-gen';
@@ -26,8 +31,20 @@ import styles from './GenerateMap.module.css';
 const STYLE_OPTIONS: ReadonlyArray<SegmentOption<SettlementStyle>> = SETTLEMENT_STYLES.map(
   (style) => ({ value: style, label: SETTLEMENT_STYLE_LABELS[style] }),
 );
+const KIND_OPTIONS: ReadonlyArray<SegmentOption<MapKind>> = MAP_KINDS.map((kind) => ({
+  value: kind,
+  label: MAP_KIND_LABELS[kind],
+}));
 /** Tamanhos que pesam no banco gratuito e na cena: a tela avisa antes de gerar. */
 const HEAVY_PRESETS: ReadonlySet<SizePresetId> = new Set(['metropolis']);
+const HEAVY_WARNING = {
+  settlement:
+    'Cidade grande tem centenas de milhares de peças: leva alguns minutos para gravar, ocupa ' +
+    'uns 85 MB do banco e pode deixar a cena lenta em computadores modestos.',
+  wild:
+    'Mapa enorme tem centenas de milhares de peças e paredes: leva alguns minutos para gravar ' +
+    'e pode deixar a cena lenta em computadores modestos.',
+} as const;
 const PERCENT = 100;
 
 type FieldsProps = {
@@ -42,12 +59,12 @@ type FieldsProps = {
 /** Prévia só com valores válidos: a semente sendo digitada pode estar pela metade. */
 function previewInput(values: GenerateFormValues) {
   const parsed = generateMapSchema
-    .pick({ style: true, preset: true, seed: true })
+    .pick({ kind: true, style: true, preset: true, seed: true })
     .safeParse(values);
   return parsed.success ? parsed.data : null;
 }
 
-/** Estilo, tamanho, semente (com sorteio), exemplos prontos e a prévia do alto. */
+/** Tipo, estilo (só vila ou cidade), tamanho, semente (com sorteio), exemplos prontos e a prévia do alto. */
 export function GenerateMapFields({
   formId,
   values,
@@ -59,6 +76,7 @@ export function GenerateMapFields({
   const sizeId = useId();
   const set = (patch: Partial<GenerateFormValues>) => onChange({ ...values, ...patch });
   const preview = previewInput(values);
+  const wild = isWildKind(values.kind as MapKind);
   const submit = (event: FormEvent) => {
     event.preventDefault();
     onSubmit();
@@ -89,11 +107,19 @@ export function GenerateMapFields({
           onChange={(event) => set({ name: event.target.value })}
         />
         <SegmentedControl
-          label="Estilo"
-          options={STYLE_OPTIONS}
-          value={values.style as SettlementStyle}
-          onChange={(style) => set({ style })}
+          label="Tipo"
+          options={KIND_OPTIONS}
+          value={values.kind as MapKind}
+          onChange={(kind) => set({ kind })}
         />
+        {!wild && (
+          <SegmentedControl
+            label="Estilo"
+            options={STYLE_OPTIONS}
+            value={values.style as SettlementStyle}
+            onChange={(style) => set({ style })}
+          />
+        )}
         <div className={panel.row}>
           <div className={panel.field}>
             <label htmlFor={sizeId} className={panel.label}>
@@ -107,7 +133,8 @@ export function GenerateMapFields({
             >
               {SIZE_PRESETS.map((preset) => (
                 <option key={preset.id} value={preset.id}>
-                  {preset.label} ({preset.side} × {preset.side})
+                  {wild ? WILD_SIZE_LABELS[preset.id] : preset.label} ({preset.side} × {preset.side}
+                  )
                 </option>
               ))}
             </select>
@@ -134,10 +161,7 @@ export function GenerateMapFields({
           A mesma semente gera sempre o mesmo mapa. Depois de gerado, tudo é editável peça por peça.
         </p>
         {HEAVY_PRESETS.has(values.preset as SizePresetId) && (
-          <p className={styles.warning}>
-            Cidade grande tem centenas de milhares de peças: leva alguns minutos para gravar, ocupa
-            uns 85 MB do banco e pode deixar a cena lenta em computadores modestos.
-          </p>
+          <p className={styles.warning}>{wild ? HEAVY_WARNING.wild : HEAVY_WARNING.settlement}</p>
         )}
       </fieldset>
     </form>

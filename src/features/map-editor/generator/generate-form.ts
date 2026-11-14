@@ -1,9 +1,10 @@
 /**
- * Formulário "Gerar vila ou cidade": validação com zod (os mesmos limites do gerador) e os
+ * Formulário "Gerar mapa" (vila, cidade, masmorra, caverna ou deserto): validação com zod (os mesmos limites do gerador) e os
  * valores que um exemplo pronto preenche.
  */
 import { z } from 'zod';
 import {
+  MAP_KINDS,
   MAX_SEED,
   SETTLEMENT_STYLES,
   SIZE_PRESETS,
@@ -19,6 +20,7 @@ const presetIds = SIZE_PRESETS.map((preset) => preset.id) as [SizePresetId, ...S
 
 export const generateMapSchema = z.object({
   name: mapNameSchema,
+  kind: z.enum(MAP_KINDS),
   style: z.enum(SETTLEMENT_STYLES as [SettlementStyle, ...SettlementStyle[]]),
   preset: z.enum(presetIds),
   seed: z.coerce
@@ -58,6 +60,7 @@ export function randomSeed(random: () => number = Math.random): number {
 export function exampleValues(example: ExampleMap): GenerateFormValues {
   return {
     name: example.name,
+    kind: example.kind,
     style: example.style,
     preset: example.preset,
     seed: String(example.seed),
