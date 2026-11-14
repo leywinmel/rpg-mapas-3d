@@ -287,6 +287,11 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
   os estilos (pinheiro, carvalho, bétula, árvore seca, palmeira, cacto, arbusto, roseira, flores,
   capim, folhas no chão, seixos, pedregulho, cogumelos, tronco caído e toco). Os geradores de
   mapa espalham essas plantas nos quintais, parques, desertos, cavernas e portos.
+- `scripts/assets/plaza-pieces.mjs public/assets/plaza`: gera os enfeites de praça de qualquer
+  estilo (fonte grande 3×3, chafariz 2×2, estátua do herói 2×2, obelisco, banco de pedra e
+  canteiro elevado 2×1). Na cidade gerada, a praça grande vira jardim com caminhos em cruz até o
+  monumento, com bancos e canteiros, e a pequena ganha bancos em volta dele. As formas orgânicas
+  (troncos, copas, pedras) dos dois scripts ficam em `scripts/assets/organic-mesh.mjs`.
 - `scripts/assets/cyber-pieces.mjs public/assets/cyberpunk`: gera as peças do cyberpunk (paredes de
   concreto com faixa de neon rosa ou ciano, janela acesa, porta de enrolar e vitrine; asfalto com
   poças, calçada, piso de grade e praça de neon; poste de neon, letreiro, painel, holograma e

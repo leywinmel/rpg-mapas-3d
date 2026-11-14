@@ -17,6 +17,7 @@ import {
   type SizedPiece,
   type StyleKit,
   type WallSet,
+  GARDEN_BED,
 } from './kits';
 import type { SettlementProfile } from './presets';
 import { createRandom, deriveSeed, type Random } from './random';
@@ -77,6 +78,15 @@ const CELLS_PER_YARD_COVER = 14;
 const CELLS_PER_PARK_COVER = 6;
 const CELLS_PER_MARKET_PROP = 16;
 const PLAZA_TREE_INSET = 2;
+/** Praça com este lado ou mais vira jardim: canteiros de grama cortados por caminhos. */
+const GARDEN_MIN_SIDE = 12;
+/** Metade da largura do caminho em cruz (1 = caminho de 3 casas). */
+const GARDEN_PATH_HALF = 1;
+/** Folga de piso livre em volta do monumento, em casas. */
+const MONUMENT_CLEARANCE = 2;
+const BENCH_SPACING = 3;
+const CELLS_PER_GARDEN_BED = 14;
+const CELLS_PER_GARDEN_COVER = 4;
 const TREE_SCALE = { min: 0.8, spread: 0.6 } as const;
 /** Andar mínimo para o prédio virar "torre" (janelas em toda a fachada). */
 const TOWER_STORIES = 3;
@@ -339,7 +349,8 @@ function fillYard(planner: Planner, area: CellRect): void {
   );
 }
 
-function fillLots(planner: Planner, area: CellRect): void {
+/** Lotes com casas; `yards` diz onde espalhar o quintal (padrão: o lote inteiro). */
+function fillLots(planner: Planner, area: CellRect, yards: readonly CellRect[] = [area]): void {
   const { profile } = planner;
   fillClass(planner, area, TERRAIN_CLASS.yard);
   // Sem calçada, a porta precisa de uma casa de recuo livre na frente.
@@ -353,7 +364,7 @@ function fillLots(planner: Planner, area: CellRect): void {
   } else if (area.depth >= minRow) {
     fillRow(planner, area, 'north', setback);
   }
-  fillYard(planner, area);
+  for (const yard of yards) fillYard(planner, yard);
 }
 
 function fillPark(planner: Planner, area: CellRect): void {
@@ -369,13 +380,139 @@ function fillPark(planner: Planner, area: CellRect): void {
   );
 }
 
-/** Praça do centro: piso de praça, o monumento no meio, árvores nos cantos e o mercado. */
+type Cell = { readonly x: number; readonly z: number };
+
+/** O maior monumento do estilo que cabe no meio da praça, com folga; sem nenhum, o enfeite do centro. */
+function placeMonument(planner: Planner, area: CellRect, center: Cell): number {
+  const { kit, random } = planner;
+  const room = Math.min(area.width, area.depth) - 2 * MONUMENT_CLEARANCE;
+  for (const { key, footprint } of kit.plazaMonuments) {
+    if (Math.max(footprint.width, footprint.depth) > room) continue;
+    const x = center.x - Math.floor(footprint.width / 2);
+    const z = center.z - Math.floor(footprint.depth / 2);
+    const rotation = random.between(0, QUARTER_TURNS - 1);
+    if (tryPiece(planner, { key, x, z, rotation, footprint })) return footprint.width;
+  }
+  single(planner, kit.plazaCenter, center.x, center.z);
+  return 1;
+}
+
+/** Quatro bancos de frente para o monumento, um de cada lado (rotação 0 olha para +z). */
+function benchesAround(planner: Planner, center: Cell, reach: number): void {
+  const { kit } = planner;
+  const seats = [
+    { x: center.x, z: center.z - reach, rotation: 0 },
+    { x: center.x - reach, z: center.z, rotation: 1 },
+    { x: center.x, z: center.z + reach, rotation: 2 },
+    { x: center.x + reach, z: center.z, rotation: 3 },
+  ];
+  for (const seat of seats) {
+    tryPiece(planner, { key: kit.plazaBench, ...seat, footprint: SINGLE_CELL });
+  }
+}
+
+/**
+ * Jardim da praça grande: grama nos quatro cantos, caminho em cruz até o monumento e um
+ * largo de piso em volta dele. Os bancos ficam na beira do caminho, virados para ele.
+ */
+function plantGarden(planner: Planner, area: CellRect, center: Cell, clear: number): void {
+  const { kit, random } = planner;
+  const x0 = area.x + 1;
+  const z0 = area.z + 1;
+  const x1 = area.x + area.width - 2;
+  const z1 = area.z + area.depth - 2;
+  const near = GARDEN_PATH_HALF + 1;
+  const quadrants: CellRect[] = [
+    { x: x0, z: z0, width: center.x - near - x0 + 1, depth: center.z - near - z0 + 1 },
+    { x: center.x + near, z: z0, width: x1 - center.x - near + 1, depth: center.z - near - z0 + 1 },
+    { x: x0, z: center.z + near, width: center.x - near - x0 + 1, depth: z1 - center.z - near + 1 },
+    {
+      x: center.x + near,
+      z: center.z + near,
+      width: x1 - center.x - near + 1,
+      depth: z1 - center.z - near + 1,
+    },
+  ];
+  const inLargo = (x: number, z: number) =>
+    Math.abs(x - center.x) <= clear && Math.abs(z - center.z) <= clear;
+  for (const quadrant of quadrants) {
+    forRect(quadrant, (x, z) => {
+      if (!inLargo(x, z)) planner.classes[index(planner, x, z)] = TERRAIN_CLASS.ground;
+    });
+  }
+  // Bancos na beira dos dois caminhos, dos dois lados, fora do largo do monumento.
+  for (let x = x0; x <= x1; x += BENCH_SPACING) {
+    if (inLargo(x, center.z)) continue;
+    tryPiece(
+      planner,
+      { key: kit.plazaBench, x, z: center.z - near, rotation: 0, footprint: SINGLE_CELL },
+      TERRAIN_CLASS.ground,
+    );
+    tryPiece(
+      planner,
+      { key: kit.plazaBench, x, z: center.z + near, rotation: 2, footprint: SINGLE_CELL },
+      TERRAIN_CLASS.ground,
+    );
+  }
+  for (let z = z0; z <= z1; z += BENCH_SPACING) {
+    if (inLargo(center.x, z)) continue;
+    tryPiece(
+      planner,
+      { key: kit.plazaBench, x: center.x - near, z, rotation: 1, footprint: SINGLE_CELL },
+      TERRAIN_CLASS.ground,
+    );
+    tryPiece(
+      planner,
+      { key: kit.plazaBench, x: center.x + near, z, rotation: 3, footprint: SINGLE_CELL },
+      TERRAIN_CLASS.ground,
+    );
+  }
+  for (const quadrant of quadrants) {
+    if (quadrant.width < 2 || quadrant.depth < 2) continue;
+    const cells = quadrant.width * quadrant.depth;
+    scatter(planner, quadrant, Math.ceil(cells / CELLS_PER_GARDEN_BED), (x, z) =>
+      tryPiece(
+        planner,
+        {
+          key: GARDEN_BED.key,
+          x,
+          z,
+          rotation: 2 * random.between(0, 1),
+          footprint: GARDEN_BED.footprint,
+        },
+        TERRAIN_CLASS.ground,
+      ),
+    );
+    tree(
+      planner,
+      random.between(quadrant.x, quadrant.x + quadrant.width - 1),
+      quadrant.z,
+      TERRAIN_CLASS.ground,
+    );
+    scatter(planner, quadrant, Math.ceil(cells / CELLS_PER_GARDEN_COVER), (x, z) =>
+      single(planner, random.pick(kit.groundCover), x, z, TERRAIN_CLASS.ground),
+    );
+  }
+}
+
+/**
+ * Praça do centro: piso de praça e o monumento no meio. A grande vira jardim com caminhos e
+ * bancos; a pequena ganha bancos em volta do monumento. Árvores nos cantos e o mercado.
+ */
 function fillPlaza(planner: Planner, area: CellRect): void {
   const { kit, random } = planner;
   fillClass(planner, area, TERRAIN_CLASS.plaza);
-  const centerX = area.x + Math.floor(area.width / 2);
-  const centerZ = area.z + Math.floor(area.depth / 2);
-  single(planner, kit.plazaCenter, centerX, centerZ);
+  const center = {
+    x: area.x + Math.floor(area.width / 2),
+    z: area.z + Math.floor(area.depth / 2),
+  };
+  const monument = placeMonument(planner, area, center);
+  const reach = Math.ceil(monument / 2) + 1;
+  if (area.width >= GARDEN_MIN_SIDE && area.depth >= GARDEN_MIN_SIDE) {
+    plantGarden(planner, area, center, reach + 1);
+  } else {
+    benchesAround(planner, center, reach);
+  }
   const near = PLAZA_TREE_INSET;
   const farX = area.x + area.width - 1 - near;
   const farZ = area.z + area.depth - 1 - near;
@@ -389,7 +526,7 @@ function fillPlaza(planner: Planner, area: CellRect): void {
   }
   const cells = area.width * area.depth;
   scatter(planner, area, Math.ceil(cells / CELLS_PER_MARKET_PROP), (x, z) =>
-    single(planner, random.pick(kit.streetProps), x, z),
+    single(planner, random.pick(kit.streetProps), x, z, TERRAIN_CLASS.plaza),
   );
 }
 
@@ -411,7 +548,10 @@ function fillPlazaBlock(planner: Planner, area: CellRect): void {
   const rowDepth = planner.profile.lotDepth;
   const middle = area.depth - 2 * rowDepth;
   if (middle < MIN_PLAZA_DEPTH) return fillPlaza(planner, area);
-  fillLots(planner, area);
+  // O quintal fica só nas fileiras de casas: árvore solta no meio tomaria o lugar da fonte.
+  const north = { ...area, depth: rowDepth };
+  const south = { ...area, z: area.z + rowDepth + middle, depth: rowDepth };
+  fillLots(planner, area, [north, south]);
   fillPlaza(planner, { x: area.x, z: area.z + rowDepth, width: area.width, depth: middle });
 }
 
