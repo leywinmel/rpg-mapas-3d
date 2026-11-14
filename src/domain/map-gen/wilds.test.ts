@@ -103,6 +103,27 @@ describe('wilds generator', () => {
     expect(planWilds({ kind: 'desert', size: SIZE, seed: 5 }).tiles).not.toContain(null);
   });
 
+  it('shouldBuildAPortWithPiersBoatsAndOpenSea', () => {
+    const plan = planWilds({ kind: 'port', size: SIZE, seed: 4 });
+    const { width, depth } = SIZE;
+    expect(plan.features).toBeGreaterThan(1);
+    expect(plan.tiles[0]).toBe('terra');
+    expect(plan.tiles[(depth - 1) * width]).toBe('agua');
+    expect(plan.tiles).toContain('piso-madeira');
+    const boats = plan.pieces.filter(
+      (piece) => piece.key.startsWith('med-') && piece.footprint.depth > 1,
+    );
+    expect(boats.length).toBeGreaterThan(0);
+    // O barco fica inteiro na água, nunca em cima do cais ou da praia.
+    for (const boat of boats) {
+      for (let z = boat.z; z < boat.z + boat.footprint.depth; z += 1) {
+        for (let x = boat.x; x < boat.x + boat.footprint.width; x += 1) {
+          expect(plan.tiles[z * width + x]).toBe('agua');
+        }
+      }
+    }
+  });
+
   it('shouldFallBackToPlainFloorOnTinyMaps', () => {
     const plan = planWilds({ kind: 'dungeon', size: { width: 5, depth: 5 }, seed: 1 });
     expect(plan.tiles.every((tile) => tile === 'piso-pedra')).toBe(true);
