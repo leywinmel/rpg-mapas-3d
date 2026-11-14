@@ -1,6 +1,8 @@
-/* Grupo de opções lado a lado. Cores só dos tokens. */
+/* Grupo de opções lado a lado. Cores só dos tokens. Quebra linha quando as opções não
+   cabem na largura (ex: filtro de estilo no painel lateral), em vez de cortar o texto. */
 .group {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1);
   padding: var(--space-1);
   border: 1px solid var(--color-border);
@@ -9,10 +11,11 @@
 }
 
 .segment {
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 1 0 auto;
   height: var(--control-sm);
-  padding: 0 var(--space-2);
+  /* Folga curta: os segmentos crescem para preencher a linha, e assim cabem mais opções
+     antes de quebrar. */
+  padding: 0 var(--space-1);
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;

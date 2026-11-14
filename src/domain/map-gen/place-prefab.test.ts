@@ -31,7 +31,7 @@ describe('prefabs', () => {
       expect(blueprint.stories).toBe(prefab.stories);
     }
     expect(new Set(PREFABS.map((prefab) => prefab.style))).toEqual(
-      new Set(['medieval', 'modern', 'futurist']),
+      new Set(['medieval', 'modern', 'futurist', 'cyberpunk']),
     );
   });
 

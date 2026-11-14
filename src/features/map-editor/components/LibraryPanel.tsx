@@ -16,7 +16,8 @@ const STYLE_OPTIONS: ReadonlyArray<SegmentOption<StyleFilter>> = [
   { value: 'all', label: 'Todos' },
   { value: 'medieval', label: 'Medieval' },
   { value: 'modern', label: 'Moderno' },
-  { value: 'futurist', label: 'Futurista' },
+  { value: 'futurist', label: 'Sci-fi' },
+  { value: 'cyberpunk', label: 'Cyberpunk' },
 ];
 
 /** Ordem dos grupos na biblioteca: do chão para cima, depois o que se põe dentro e em volta. */
