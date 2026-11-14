@@ -126,3 +126,17 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 - [ ] **RPG-51** Animais como tokens, numa categoria separada de jogadores e NPCs: gato, cachorro, cavalo, vaca, rato e outros.
 - [x] **RPG-52** Mais casas modernas, menos secas, algumas com telhado, com as paredes da mesma cor das paredes com janela. Casas de reboco (branca, amarela, azul e verde) com janela de veneziana e porta na mesma cor, telhado de duas águas de ardósia ou barro, arbusto e caixa de correio no quintal; quatro casas prontas novas. A parede lisa marrom deixou de sair com janela de tijolo.
 - [x] **RPG-58** Mestre esconde o HUD (barras, painéis e ferramentas de construção) com um botão ou atalho, para ver a cena limpa. Jogador nunca vê as ferramentas de construção do mestre.
+
+### Para a semana de 17/11 (pedidos do usuário em 14/11)
+
+- [ ] **RPG-59** Tokens andando de costas: os 5 heróis e os 2 monstros novos andam virados para trás. Conferir a frente de cada modelo e corrigir o giro.
+- [ ] **RPG-60** O rosto do lobisomem continua virado para o lado errado (o RPG-42 não resolveu). Conferir o modelo na cena e corrigir.
+- [ ] **RPG-61** Relevo nos mapas: quem gera ou monta um mapa pensa na altura do terreno. No porto, a água fica abaixo do cais de madeira, e não no mesmo nível. Vale para o gerador e para os mapas prontos.
+- [ ] **RPG-62** Barcos de verdade: os barcos atuais são pequenos e só estruturas soltas. Fazer barcos em tamanho de mapa: casco, convés, cabine, mastro e porão, montados para jogar dentro.
+- [ ] **RPG-63** Nova aba "Mapas prontos" no editor, separada do gerador: uma biblioteca de mapas pensados e montados à mão, peça por peça, sem sorteio. Primeira leva:
+  - 2 mapas diferentes de cada estilo de cidade (medieval, moderna, futurista, cyberpunk);
+  - 1 masmorra, 1 caverna, 1 deserto e 1 porto;
+  - 1 mapa de barco (ver RPG-62);
+  - 1 ilha gigante.
+- [ ] **RPG-64** Escola de feiticeiros grande, inspirada no estilo de Jujutsu Kaisen: campus de templos japoneses na montanha, com pátio, dormitórios, salas e campo de treino. Só a inspiração: nada de nome, personagem ou arte da obra.
+- [ ] **RPG-65** Escolas e hospitais (continuação do RPG-45): o mapa grande de cada um e versões menores que entram nas cidades geradas.
