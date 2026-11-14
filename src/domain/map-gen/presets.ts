@@ -148,4 +148,11 @@ export const EXAMPLE_MAPS: readonly ExampleMap[] = [
     preset: 'town',
     seed: 2077,
   },
+  {
+    id: 'cidade-cyberpunk',
+    name: 'Cidade cyberpunk',
+    style: 'cyberpunk',
+    preset: 'town',
+    seed: 2088,
+  },
 ];

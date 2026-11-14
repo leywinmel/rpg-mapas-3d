@@ -24,6 +24,8 @@ describe('CreditsPage', () => {
     }
     expect(screen.getAllByText(/por Quaternius/)).toHaveLength(5);
     expect(screen.getByText(/por Kenney/)).toBeInTheDocument();
+    expect(screen.getByText(/por papptimus/)).toBeInTheDocument();
+    expect(screen.getByText(/CC BY 4.0/)).toBeInTheDocument();
   });
 
   it('shouldOpenOutsideLinksSafelyInAnotherTab', () => {

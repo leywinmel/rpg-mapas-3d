@@ -11,7 +11,7 @@ em tempo real, com dados 3D, névoa e anotações enviadas pelo mestre.
 - Salas por link: o jogador entra com um apelido, e a conta é opcional.
 - Editor de mapas 3D com peças prontas (uso livre) e envio de modelos `.glb` próprios.
 - Fundos temáticos em volta do mapa: floresta com folhas caindo, deserto, cidade, masmorra ou mar.
-- Gerador de vilas e cidades (medieval, moderna ou futurista) e casas prontas para pôr com um clique.
+- Gerador de vilas e cidades (medieval, moderna, sci-fi ou cyberpunk) e casas prontas para pôr com um clique.
 - Tokens com imagem ou boneco 3D, barra de vida e notas.
 - Névoa que o mestre pinta e revela.
 - Ferramentas da mesa: régua em casas e metros, ping ao vivo e ordem de iniciativa com vez e rodada.
@@ -94,8 +94,8 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   tokens. Peça sob a névoa não é anunciada; ela aparece para o jogador quando a névoa sai.
 - **Desfazer e refazer:** `Ctrl+Z` desfaz; `Ctrl+Y` (ou `Ctrl+Shift+Z`) refaz. O mapa se salva
   sozinho, e o canto de baixo avisa quando está "Salvando…" e "Salvo".
-- **Estilos de peças:** a biblioteca tem peças medievais, modernas e futuristas, com filtro por
-  estilo, busca por nome e miniaturas. Os estilos se misturam livremente no mesmo mapa; terra,
+- **Estilos de peças:** a biblioteca tem peças medievais, modernas, sci-fi e cyberpunk, com filtro
+  por estilo, busca por nome e miniaturas. Os estilos se misturam livremente no mesmo mapa; terra,
   grama, água, árvore, rocha e caixa aparecem em todos os filtros. Objetos maiores (carros, ruas,
   telhados) já ocupam o número certo de casas.
 - **Modelos próprios:** em "Meus modelos", o botão "Enviar .glb" aceita modelos 3D `.glb` de até
@@ -272,6 +272,14 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
 - `scripts/assets/house-pieces.mjs public/assets/modern`: gera as casas de bairro do moderno
   (reboco em quatro cores, liso, com janela e com porta; telhados de ardósia e de barro em 2×2,
   2×4 e 4×4) e os enfeites do quintal (cerca branca, arbusto e caixa de correio).
+- `scripts/assets/cyber-pieces.mjs public/assets/cyberpunk`: gera as peças do cyberpunk (paredes de
+  concreto com faixa de neon rosa ou ciano, janela acesa, porta de enrolar e vitrine; asfalto com
+  poças, calçada, piso de grade e praça de neon; poste de neon, letreiro, painel, holograma e
+  máquina de venda). A malha e a gravação ficam em `scripts/assets/piece-mesh.mjs`, que também
+  serve ao `house-pieces.mjs`.
+- `scripts/assets/cyber-city.mjs <pasta dos .glb> public/assets/cyberpunk`: monta os prédios e os
+  megaprédios do cyberpunk empilhando as seções do pacote Cyber City (papptimus, CC BY 4.0), que o
+  Blender passa de FBX para `.glb` com o `fbx-to-glb.py`.
 - Veículos do moderno (pacote Rgsdev, CC0, em FBX): o Blender passa para `.glb` com
   `blender -b --factory-startup -P scripts/assets/fbx-to-glb.py -- <pasta do pacote> <saída>`, e
   `scripts/assets/convert-vehicle.mjs <entrada.glb> <saída.gltf> [comprimento máximo]` põe na
@@ -324,11 +332,14 @@ O `scripts/dev.bat start` cria o `.env.local` sozinho com os valores locais. Na 
 
 ## 🎨 Créditos
 
-Os modelos 3D dos estilos são gratuitos e de domínio público (CC0). O crédito é por cortesia e
-também aparece no site, na página `/creditos` (link no rodapé da tela inicial).
+Os modelos 3D dos estilos são gratuitos. Quase todos são de domínio público (CC0), com crédito por
+cortesia; o Cyber City é CC BY 4.0 e exige o crédito. Os créditos também aparecem no site, na página `/creditos` (link no rodapé da tela inicial).
 
 - **Quaternius** ([quaternius.com](https://quaternius.com)): Medieval Village MegaKit, Downtown
   City MegaKit e Modular Sci-Fi MegaKit.
+- **papptimus** ([papptimus.itch.io/cyber-city](https://papptimus.itch.io/cyber-city)): Cyber City,
+  sob [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Os prédios foram empilhados e
+  reduzidos para a escala do mapa.
 - **Kenney** ([kenney.nl](https://kenney.nl/assets/car-kit)): Car Kit.
 - **Inter**, de Rasmus Andersson: fonte da interface (SIL Open Font License 1.1).
 

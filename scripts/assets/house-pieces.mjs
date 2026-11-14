@@ -7,12 +7,8 @@
 // casa = 1 unidade, parede com 1 casa de largura e 2 de altura. Os dois lados das paredes são
 // iguais (a parede no mapa não tem frente nem verso).
 // uso: node scripts/assets/house-pieces.mjs <public/assets/modern>
-import { writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { Document, NodeIO, PropertyType } from '@gltf-transform/core';
-import { ALL_EXTENSIONS, EXTMeshoptCompression } from '@gltf-transform/extensions';
-import { dedup, prune, quantize, reorder, weld } from '@gltf-transform/functions';
 import { MeshoptEncoder } from 'meshoptimizer';
+import { layers, shade, wallCore, writePiece } from './piece-mesh.mjs';
 
 const [OUT] = process.argv.slice(2);
 if (!OUT) throw new Error('uso: node scripts/assets/house-pieces.mjs <public/assets/modern>');
@@ -30,10 +26,6 @@ const AWNING = { y0: 1.5, y1: 1.56, halfX: 0.34, out: 0.16 };
 /** Inclinação dos telhados: quanto o telhado sobe para cada casa de meia largura. */
 const ROOF_PITCH = 0.75;
 const ROOF = { eave: 0.2, gableOut: 0.15, thickness: 0.07, rows: 7, lip: 0.018 };
-
-/** sRGB (0 a 255) para a cor linear que o glTF espera no fator do material. */
-const linear = (rgb) => rgb.map((value) => ((value / 255 + 0.055) / 1.055) ** 2.4);
-const shade = (rgb, factor) => rgb.map((value) => Math.round(value * factor));
 
 const TRIM = [238, 236, 230];
 const GLASS = [140, 172, 190];
@@ -53,113 +45,10 @@ const ROOF_COLORS = [
 ];
 
 // ---------------------------------------------------------------------------
-// Malha
-// ---------------------------------------------------------------------------
-
-function sub(a, b) {
-  return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
-}
-
-function normalOf(a, b, c) {
-  const u = sub(b, a);
-  const v = sub(c, a);
-  const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
-  const length = Math.hypot(...n) || 1;
-  return n.map((value) => value / length);
-}
-
-/** Malha de faces chapadas (cada face com a própria normal: é o visual low-poly do site). */
-function builder() {
-  const positions = [];
-  const normals = [];
-  const tri = (a, b, c) => {
-    const normal = normalOf(a, b, c);
-    for (const point of [a, b, c]) {
-      positions.push(...point);
-      normals.push(...normal);
-    }
-  };
-  /** Quadrilátero em sentido anti-horário visto de fora. */
-  const quad = (a, b, c, d) => {
-    tri(a, b, c);
-    tri(a, c, d);
-  };
-  const box = ({ x0, x1, y0, y1, z0, z1 }, skip = []) => {
-    const faces = {
-      px: [
-        [x1, y0, z1],
-        [x1, y0, z0],
-        [x1, y1, z0],
-        [x1, y1, z1],
-      ],
-      nx: [
-        [x0, y0, z0],
-        [x0, y0, z1],
-        [x0, y1, z1],
-        [x0, y1, z0],
-      ],
-      py: [
-        [x0, y1, z1],
-        [x1, y1, z1],
-        [x1, y1, z0],
-        [x0, y1, z0],
-      ],
-      ny: [
-        [x0, y0, z0],
-        [x1, y0, z0],
-        [x1, y0, z1],
-        [x0, y0, z1],
-      ],
-      pz: [
-        [x0, y0, z1],
-        [x1, y0, z1],
-        [x1, y1, z1],
-        [x0, y1, z1],
-      ],
-      nz: [
-        [x1, y0, z0],
-        [x0, y0, z0],
-        [x0, y1, z0],
-        [x1, y1, z0],
-      ],
-    };
-    for (const [name, corners] of Object.entries(faces)) {
-      if (!skip.includes(name)) quad(...corners);
-    }
-  };
-  return { positions, normals, tri, quad, box };
-}
-
-/** Uma camada da peça: malha e cor do material. */
-function layers(spec) {
-  return Object.fromEntries(
-    Object.entries(spec).map(([name, color]) => [name, { color, mesh: builder() }]),
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Paredes de reboco
 // ---------------------------------------------------------------------------
 
 const HALF_W = WALL.width / 2;
-
-/** Reboco com um vão (ou sem); o vão corta a parede inteira na espessura. */
-function plasterCore(mesh, opening) {
-  const z = { z0: -WALL.half, z1: WALL.half };
-  const top = WALL.height;
-  if (!opening) {
-    mesh.box({ x0: -HALF_W, x1: HALF_W, y0: 0, y1: top, ...z }, ['ny']);
-    return;
-  }
-  const { x0, x1, y0, y1 } = opening;
-  mesh.box({ x0: -HALF_W, x1: x0, y0: 0, y1: top, ...z }, ['ny', 'px']);
-  mesh.box({ x0: x1, x1: HALF_W, y0: 0, y1: top, ...z }, ['ny', 'nx']);
-  if (y0 > 0) mesh.box({ x0, x1, y0: 0, y1: y0, ...z }, ['ny', 'px', 'nx']);
-  mesh.box({ x0, x1, y0: y1, y1: top, ...z }, ['px', 'nx']);
-  // Faces de dentro do vão (o "peitoril" e as laterais aparecem de perto).
-  mesh.box({ x0: x0 - 0.001, x1: x0, y0, y1, ...z }, ['nx', 'py', 'ny', 'pz', 'nz']);
-  mesh.box({ x0: x1, x1: x1 + 0.001, y0, y1, ...z }, ['px', 'py', 'ny', 'pz', 'nz']);
-}
 
 /** Rodapé, cortado pela porta quando houver. */
 function baseboard(mesh, door) {
@@ -190,7 +79,7 @@ function frameAround(mesh, { x0, x1, y0, y1 }, bottom) {
 }
 
 function windowWall(parts) {
-  plasterCore(parts.plaster.mesh, WINDOW);
+  wallCore(parts.plaster.mesh, WALL, WINDOW);
   const { x0, x1, y0, y1 } = WINDOW;
   frameAround(parts.trim.mesh, WINDOW, true);
   // Peitoril saltado e travessa no meio, como na janela de tijolo.
@@ -235,7 +124,7 @@ function windowWall(parts) {
 
 function doorWall(parts) {
   const opening = { x0: DOOR.x0, x1: DOOR.x1, y0: 0, y1: DOOR.y1 };
-  plasterCore(parts.plaster.mesh, opening);
+  wallCore(parts.plaster.mesh, WALL, opening);
   frameAround(parts.trim.mesh, opening, false);
   // Folha de madeira com almofadas em relevo e maçaneta nos dois lados.
   const leaf = { x0: DOOR.x0, x1: DOOR.x1, y0: 0, y1: DOOR.y1, z0: -0.02, z1: 0.02 };
@@ -265,7 +154,7 @@ function doorWall(parts) {
 }
 
 function plainWall(parts) {
-  plasterCore(parts.plaster.mesh, null);
+  wallCore(parts.plaster.mesh, WALL, null);
   baseboard(parts.base.mesh, null);
   frieze(parts.trim.mesh);
 }
@@ -450,72 +339,6 @@ function mailbox(parts) {
   parts.flag.mesh.box({ x0: 0.09, x1: 0.105, y0: 0.82, y1: 0.86, z0: 0.06, z1: 0.14 });
 }
 
-// ---------------------------------------------------------------------------
-// Gravação
-// ---------------------------------------------------------------------------
-
-async function write(key, parts) {
-  const doc = new Document();
-  const buffer = doc.createBuffer();
-  const mesh = doc.createMesh(key);
-  let triangles = 0;
-  for (const [name, { color, mesh: data }] of Object.entries(parts)) {
-    if (data.positions.length === 0) continue;
-    const glass = name === 'glass';
-    const material = doc
-      .createMaterial(`MI_${name}`)
-      .setBaseColorFactor([...linear(color), glass ? 0.45 : 1])
-      .setMetallicFactor(name === 'metal' ? 0.6 : 0)
-      .setRoughnessFactor(glass ? 0.15 : 0.9);
-    if (glass) material.setAlphaMode('BLEND');
-    mesh.addPrimitive(
-      doc
-        .createPrimitive()
-        .setMaterial(material)
-        .setAttribute(
-          'POSITION',
-          doc
-            .createAccessor()
-            .setType('VEC3')
-            .setArray(new Float32Array(data.positions))
-            .setBuffer(buffer),
-        )
-        .setAttribute(
-          'NORMAL',
-          doc
-            .createAccessor()
-            .setType('VEC3')
-            .setArray(new Float32Array(data.normals))
-            .setBuffer(buffer),
-        ),
-    );
-    triangles += data.positions.length / 9;
-  }
-  doc.createScene().addChild(doc.createNode(key).setMesh(mesh));
-  await doc.transform(
-    weld(),
-    dedup({ propertyTypes: [PropertyType.ACCESSOR] }),
-    prune(),
-    quantize({ pattern: /^(POSITION|NORMAL)$/, quantizePosition: 16, quantizeNormal: 8 }),
-    reorder({ encoder: MeshoptEncoder }),
-  );
-  doc
-    .createExtension(EXTMeshoptCompression)
-    .setRequired(true)
-    .setEncoderOptions({ method: EXTMeshoptCompression.EncoderMethod.FILTER });
-  doc
-    .getRoot()
-    .listBuffers()
-    .forEach((item) => item.setURI(`${key}.bin`));
-  const io = new NodeIO()
-    .registerExtensions(ALL_EXTENSIONS)
-    .registerDependencies({ 'meshopt.encoder': MeshoptEncoder });
-  const { json, resources } = await io.writeJSON(doc, { basename: key });
-  writeFileSync(join(OUT, `${key}.gltf`), JSON.stringify(json));
-  for (const [name, bytes] of Object.entries(resources)) writeFileSync(join(OUT, name), bytes);
-  console.log(key, 'triângulos', triangles);
-}
-
 await MeshoptEncoder.ready;
 
 for (const { key, plaster, shutter } of PLASTERS) {
@@ -532,13 +355,13 @@ for (const { key, plaster, shutter } of PLASTERS) {
     });
   const plain = wallLayers();
   plainWall(plain);
-  await write(`mod-reboco-${key}`, plain);
+  await writePiece(OUT, `mod-reboco-${key}`, plain);
   const windowed = wallLayers();
   windowWall(windowed);
-  await write(`mod-reboco-${key}-janela`, windowed);
+  await writePiece(OUT, `mod-reboco-${key}-janela`, windowed);
   const door = wallLayers();
   doorWall(door);
-  await write(`mod-reboco-${key}-porta`, door);
+  await writePiece(OUT, `mod-reboco-${key}-porta`, door);
 }
 
 for (const { key, tile } of ROOF_COLORS) {
@@ -549,18 +372,18 @@ for (const { key, tile } of ROOF_COLORS) {
   ]) {
     const parts = layers({ tile, trim: TRIM, gable: [232, 228, 218], ridge: shade(tile, 0.7) });
     gableRoof(parts, width, depth);
-    await write(`mod-telhado-${key}-${width}x${depth}`, parts);
+    await writePiece(OUT, `mod-telhado-${key}-${width}x${depth}`, parts);
   }
 }
 
 const fence = layers({ paint: TRIM });
 picketFence(fence);
-await write('mod-cerca-branca', fence);
+await writePiece(OUT, 'mod-cerca-branca', fence);
 
 const shrub = layers({ leaf: [92, 138, 70], leafDark: [64, 108, 56] });
 bush(shrub);
-await write('mod-arbusto', shrub);
+await writePiece(OUT, 'mod-arbusto', shrub);
 
 const mail = layers({ post: WOOD, box: [70, 74, 82], flag: [196, 52, 44] });
 mailbox(mail);
-await write('mod-caixa-correio', mail);
+await writePiece(OUT, 'mod-caixa-correio', mail);

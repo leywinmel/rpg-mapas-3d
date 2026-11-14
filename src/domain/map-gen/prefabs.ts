@@ -73,6 +73,13 @@ export const PREFABS: readonly PrefabDefinition[] = [
     ['torre', 'Torre corporativa', 10, 10, 6, 'tower', 0, 34],
     ['hangar', 'Hangar', 12, 10, 1, 'shop', 0, 35],
   ]),
+  ...rows('cyberpunk', [
+    ['cubiculo', 'Cubículo de aluguel', 4, 6, 1, 'house', 0, 41],
+    ['cortico', 'Cortiço de neon', 8, 8, 3, 'house', 1, 42],
+    ['bar', 'Bar de neon', 8, 6, 1, 'shop', 0, 43],
+    ['camelodromo', 'Camelódromo', 10, 8, 1, 'shop', 1, 44],
+    ['arranha-ceu', 'Arranha-céu corporativo', 10, 10, 7, 'tower', 0, 45],
+  ]),
 ];
 
 export function findPrefab(id: string): PrefabDefinition | undefined {

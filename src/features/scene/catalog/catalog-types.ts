@@ -8,7 +8,7 @@ import type { Footprint } from '@/domain/map-v2';
 export type PieceKind = 'floor' | 'wall' | 'prop';
 
 /** Estilo de mundo da peça. "generic" (terra, água, árvore...) aparece em qualquer filtro. */
-export type PieceStyle = 'medieval' | 'modern' | 'futurist' | 'generic';
+export type PieceStyle = 'medieval' | 'modern' | 'futurist' | 'cyberpunk' | 'generic';
 
 /** Grupo da peça na biblioteca. O comportamento no editor vem do `kind`, não daqui. */
 export type PieceCategory =

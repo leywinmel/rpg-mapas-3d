@@ -40,6 +40,14 @@ export const MODEL_CREDITS: readonly Credit[] = [
     ...CC0,
   },
   {
+    work: 'Cyber City',
+    author: 'papptimus',
+    url: 'https://papptimus.itch.io/cyber-city',
+    usage: 'Prédios e megaprédios do estilo cyberpunk (empilhados e reduzidos para o mapa).',
+    license: 'CC BY 4.0 (atribuição)',
+    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+  },
+  {
     work: 'Car Kit',
     author: 'Kenney',
     url: 'https://kenney.nl/assets/car-kit',

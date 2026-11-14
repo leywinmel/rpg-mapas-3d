@@ -6,15 +6,22 @@
 import type { Backdrop } from '../map-document';
 import type { Footprint } from '../map-v2';
 
-export type SettlementStyle = 'medieval' | 'modern' | 'futurist';
+export type SettlementStyle = 'medieval' | 'modern' | 'futurist' | 'cyberpunk';
 
-export const SETTLEMENT_STYLES: readonly SettlementStyle[] = ['medieval', 'modern', 'futurist'];
+export const SETTLEMENT_STYLES: readonly SettlementStyle[] = [
+  'medieval',
+  'modern',
+  'futurist',
+  'cyberpunk',
+];
 
 /** Nome de cada estilo na tela. */
 export const SETTLEMENT_STYLE_LABELS: Readonly<Record<SettlementStyle, string>> = {
   medieval: 'Medieval',
   modern: 'Moderno',
-  futurist: 'Futurista',
+  // O futurista de metal limpo virou "sci-fi" quando o cyberpunk de neon chegou (RPG-42).
+  futurist: 'Sci-fi',
+  cyberpunk: 'Cyberpunk',
 };
 
 /** As três paredes de um prédio: lisa, com porta e com janela (cada uma cobre um andar). */
@@ -251,10 +258,51 @@ const FUTURIST: StyleKit = {
   fence: null,
 };
 
+/** Concreto escuro com a faixa, a moldura da porta e o letreiro da vitrine na cor do neon. */
+const neonWalls = (neon: 'rosa' | 'ciano'): WallSet => ({
+  plain: `cyb-concreto-${neon}`,
+  door: `cyb-concreto-${neon}-porta`,
+  window: `cyb-concreto-${neon}-janela`,
+  shopfront: `cyb-vitrine-${neon}`,
+});
+
+/** Cidade cyberpunk (RPG-42): asfalto molhado, neon, letreiros, hologramas e máquinas de venda. */
+const CYBERPUNK: StyleKit = {
+  tiles: {
+    ground: 'cyb-asfalto',
+    road: 'cyb-asfalto',
+    lane: 'cyb-asfalto',
+    sidewalk: 'cyb-calcada',
+    plaza: 'cyb-praca-neon',
+    indoor: ['cyb-piso-grade', 'fut-piso-liso'],
+    yard: 'cyb-calcada',
+  },
+  walls: {
+    house: [neonWalls('rosa'), neonWalls('ciano')],
+    tower: [neonWalls('ciano'), neonWalls('rosa')],
+    shop: [neonWalls('rosa'), neonWalls('ciano')],
+  },
+  roof: 'flat',
+  backdrop: 'city',
+  gableRoofs: [],
+  stairs: INNER_STAIRS,
+  vehicles: [{ key: 'fut-carro', footprint: CAR }],
+  bigVehicles: [],
+  indoorProps: ['cyb-maquina-venda', 'fut-terminal', 'fut-caixa-carga', 'mesa'],
+  rooftopProps: ['cyb-letreiro', 'fut-ventilador', 'fut-tambor'],
+  streetProps: ['cyb-maquina-venda', 'cyb-letreiro', 'fut-tambor', 'cyb-holograma'],
+  lamp: 'cyb-poste-neon',
+  plazaCenter: 'cyb-holograma',
+  trees: ['arvore'],
+  yardProps: ['cyb-maquina-venda', 'fut-caixa-carga', 'fut-tambor'],
+  fence: null,
+};
+
 export const STYLE_KITS: Readonly<Record<SettlementStyle, StyleKit>> = {
   medieval: MEDIEVAL,
   modern: MODERN,
   futurist: FUTURIST,
+  cyberpunk: CYBERPUNK,
 };
 
 /** Telhados de duas águas que servem a esta casa: os das paredes ou, sem eles, os do estilo. */
