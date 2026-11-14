@@ -1,6 +1,6 @@
 // Gera os móveis e adereços do estilo moderno (RPG-47): dentro de casa (sofá, cama, guarda-roupa,
 // estante, geladeira, fogão, rack com TV, vaso de planta), na loja (balcão e prateleira), na
-// rua (poste, hidrante, lixeira, banco de praça) e no quintal (churrasqueira). Servem ao
+// rua (poste, hidrante, lixeira, banco de praça, placa de rua e banca de jornal, RPG-36) e no quintal (churrasqueira). Servem ao
 // gerador de vila/cidade e às casas prontas, que antes quase só tinham mesa e cadeira.
 // Cada peça ocupa 1 casa e olha para +z (a frente do móvel); o gerador encosta na parede e
 // vira a frente para dentro do cômodo.
@@ -254,6 +254,30 @@ async function grill() {
   await writePiece(OUT, 'mod-churrasqueira', p);
 }
 
+async function streetSign() {
+  const p = layers({ metal: STEEL, sign: [40, 110, 70], letters: WHITE });
+  p.metal.mesh.box(block(0.06, 0.06, 0, 2.3, 0, -0.2), ['ny']);
+  // Duas placas cruzadas no alto, como numa esquina.
+  p.sign.mesh.box(block(0.7, 0.03, 2.0, 2.2, 0.2, -0.2));
+  p.sign.mesh.box(block(0.03, 0.7, 2.24, 2.44, 0, 0.0));
+  p.letters.mesh.box(block(0.5, 0.01, 2.07, 2.13, 0.2, -0.18), ['ny', 'nz']);
+  p.letters.mesh.box(block(0.01, 0.5, 2.31, 2.37, 0.02, 0.0), ['ny', 'nx']);
+  await writePiece(OUT, 'mod-placa-rua', p);
+}
+
+async function newsstand() {
+  const p = layers({ body: [46, 84, 120], roof: [190, 60, 48], paper: LINEN, metal: STEEL_DARK });
+  p.body.mesh.box(block(0.84, 0.6, 0, 1.1, 0, -0.12), ['ny']);
+  p.roof.mesh.box(block(0.92, 0.84, 1.1, 1.2, 0, 0.0));
+  p.metal.mesh.box(block(0.8, 0.22, 0.5, 0.56, 0, 0.29), ['ny']);
+  // Revistas e jornais à mostra na frente.
+  for (const [index, x] of [-0.28, -0.08, 0.12, 0.3].entries()) {
+    p.paper.mesh.box(block(0.16, 0.18, 0.56, 0.58 + (index % 2) * 0.02, x, 0.29), ['ny']);
+    p.paper.mesh.box(block(0.16, 0.01, 0.62, 0.86, x, 0.19), ['nz']);
+  }
+  await writePiece(OUT, 'mod-banca', p);
+}
+
 for (const make of [
   sofa,
   bed,
@@ -270,6 +294,8 @@ for (const make of [
   trashBin,
   bench,
   grill,
+  streetSign,
+  newsstand,
 ]) {
   await make();
 }
