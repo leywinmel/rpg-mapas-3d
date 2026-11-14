@@ -84,6 +84,8 @@ export type StyleKit = {
   readonly plazaCenter: string;
   readonly trees: readonly string[];
   readonly yardProps: readonly string[];
+  /** Plantinhas e pedrinhas soltas no gramado (capim, flores, folhas): o chão não fica liso. */
+  readonly groundCover: readonly string[];
   /** Cerca dos quintais da vila; nulo = sem cerca. */
   readonly fence: string | null;
 };
@@ -152,8 +154,9 @@ const MEDIEVAL: StyleKit = {
   streetProps: ['barril', 'med-caixote', 'caixa'],
   lamp: 'tocha',
   plazaCenter: 'estatua',
-  trees: ['arvore'],
-  yardProps: ['barril', 'med-caixote', 'rocha'],
+  trees: ['arvore', 'nat-carvalho', 'nat-pinheiro', 'nat-betula'],
+  yardProps: ['barril', 'med-caixote', 'rocha', 'nat-arbusto', 'nat-toco'],
+  groundCover: ['nat-capim', 'nat-capim', 'nat-flores', 'nat-seixos', 'nat-folhas'],
   fence: 'med-cerca-madeira',
 };
 
@@ -242,7 +245,8 @@ const MODERN: StyleKit = {
   ],
   lamp: 'mod-poste',
   plazaCenter: 'estatua',
-  trees: ['arvore'],
+  trees: ['nat-carvalho', 'nat-betula', 'arvore'],
+  groundCover: ['nat-flores', 'nat-roseira', 'nat-capim', 'nat-arbusto'],
   yardProps: [
     'mod-canteiro',
     'mod-arbusto',
@@ -289,8 +293,9 @@ const FUTURIST: StyleKit = {
   streetProps: ['fut-luz-piso', 'fut-tambor', 'fut-caixa-carga'],
   lamp: 'fut-coluna',
   plazaCenter: 'fut-terminal',
-  trees: ['arvore'],
+  trees: ['nat-betula', 'arvore'],
   yardProps: ['fut-caixa-carga', 'fut-tambor', 'fut-bau-carga'],
+  groundCover: ['nat-capim', 'nat-seixos'],
   fence: null,
 };
 
@@ -330,8 +335,10 @@ const CYBERPUNK: StyleKit = {
   streetProps: ['cyb-maquina-venda', 'cyb-letreiro', 'fut-tambor', 'cyb-holograma'],
   lamp: 'cyb-poste-neon',
   plazaCenter: 'cyb-holograma',
-  trees: ['arvore'],
+  // Cidade cansada: palmeira de avenida e árvore morta no lugar do bosque.
+  trees: ['nat-palmeira', 'nat-arvore-seca'],
   yardProps: ['cyb-maquina-venda', 'fut-caixa-carga', 'fut-tambor'],
+  groundCover: ['nat-seixos', 'nat-capim'],
   fence: null,
 };
 
@@ -376,6 +383,7 @@ export function kitKeys(kit: StyleKit): { floors: string[]; walls: string[]; pro
       ...kit.streetProps,
       ...kit.trees,
       ...kit.yardProps,
+      ...kit.groundCover,
       kit.plazaCenter,
       ...(kit.lamp ? [kit.lamp] : []),
       ...(kit.fence ? [kit.fence] : []),

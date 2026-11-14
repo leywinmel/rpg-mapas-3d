@@ -124,6 +124,16 @@ describe('wilds generator', () => {
     }
   });
 
+  // Cada paisagem tem a sua planta: cacto no deserto, cogumelo na caverna, palmeira no porto.
+  it.each([
+    ['desert', 'nat-cacto'],
+    ['cave', 'nat-cogumelos'],
+    ['port', 'nat-capim'],
+  ] as const)('shouldGrowTheVegetationOfEachLandscape (%s)', (kind, key) => {
+    const big = { width: 120, depth: 120 };
+    expect(keysOf(planWilds({ kind, size: big, seed: 21 })).has(key)).toBe(true);
+  });
+
   it('shouldFallBackToPlainFloorOnTinyMaps', () => {
     const plan = planWilds({ kind: 'dungeon', size: { width: 5, depth: 5 }, seed: 1 });
     expect(plan.tiles.every((tile) => tile === 'piso-pedra')).toBe(true);

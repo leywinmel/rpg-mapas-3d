@@ -283,6 +283,10 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
 - `scripts/assets/furniture-pieces.mjs public/assets/modern`: gera os móveis e adereços do moderno
   (sofá, cama, guarda-roupa, estante, geladeira, fogão, rack com TV, vaso de planta, balcão,
   prateleira de loja, poste de luz, hidrante, lixeira, banco de praça, placa de rua, banca de jornal e churrasqueira).
+- `scripts/assets/vegetation-pieces.mjs public/assets/nature`: gera a vegetação que serve a todos
+  os estilos (pinheiro, carvalho, bétula, árvore seca, palmeira, cacto, arbusto, roseira, flores,
+  capim, folhas no chão, seixos, pedregulho, cogumelos, tronco caído e toco). Os geradores de
+  mapa espalham essas plantas nos quintais, parques, desertos, cavernas e portos.
 - `scripts/assets/cyber-pieces.mjs public/assets/cyberpunk`: gera as peças do cyberpunk (paredes de
   concreto com faixa de neon rosa ou ciano, janela acesa, porta de enrolar e vitrine; asfalto com
   poças, calçada, piso de grade e praça de neon; poste de neon, letreiro, painel, holograma e
