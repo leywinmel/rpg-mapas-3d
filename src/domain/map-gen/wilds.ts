@@ -57,6 +57,13 @@ const PIECE = {
   pillar: 'pilar',
   rock: 'rocha',
   tree: 'arvore',
+  palm: 'nat-palmeira',
+  cactus: 'nat-cacto',
+  deadTree: 'nat-arvore-seca',
+  mushrooms: 'nat-cogumelos',
+  pebbles: 'nat-seixos',
+  grass: 'nat-capim',
+  bush: 'nat-arbusto',
   chest: 'bau',
   barrel: 'barril',
   crate: 'caixa',
@@ -91,6 +98,8 @@ const CAVE_STEPS = 4;
 const CAVE_SOLID_NEIGHBORS = 5;
 const CAVE_ROCK_CHANCE = 0.025;
 const CAVE_TORCH_CHANCE = 0.002;
+const CAVE_MUSHROOM_CHANCE = 0.012;
+const CAVE_PEBBLE_CHANCE = 0.01;
 const CAVE_WALL_MIN = 3;
 const CAVE_WALL_MAX = 6;
 
@@ -101,6 +110,8 @@ const CAVE_WATER_ABOVE = 0.86;
 
 const DESERT_CRACKED_ABOVE = 0.62;
 const DESERT_ROCK_CHANCE = 0.012;
+const DESERT_CACTUS_CHANCE = 0.007;
+const DESERT_DEAD_TREE_CHANCE = 0.0015;
 const CELLS_PER_RUIN = 1400;
 const RUIN_MIN = 4;
 const RUIN_MAX = 9;
@@ -441,6 +452,10 @@ function planCave(canvas: Canvas): number {
         addPiece(canvas, PIECE.rock, x, z, ROCK_SCALE_MIN + random.next() * ROCK_SCALE_RANGE);
       } else if (random.chance(CAVE_TORCH_CHANCE)) {
         addPiece(canvas, PIECE.torch, x, z);
+      } else if (random.chance(CAVE_MUSHROOM_CHANCE)) {
+        addPiece(canvas, PIECE.mushrooms, x, z);
+      } else if (random.chance(CAVE_PEBBLE_CHANCE)) {
+        addPiece(canvas, PIECE.pebbles, x, z);
       }
     }
   }
@@ -494,7 +509,7 @@ function placeOasis(canvas: Canvas): void {
       const distance = Math.hypot(x - cx, z - cz);
       if (distance <= radius) paint(canvas, x, z, TILE.water);
       else if (distance <= radius + 1 && random.chance(OASIS_TREE_CHANCE)) {
-        addPiece(canvas, PIECE.tree, x, z);
+        addPiece(canvas, PIECE.palm, x, z);
       }
     }
   }
@@ -521,10 +536,26 @@ function planDesert(canvas: Canvas): number {
       if (tile === TILE.water || tile === TILE.stone || busy.has(`${x},${z}`)) continue;
       if (random.chance(DESERT_ROCK_CHANCE)) {
         addPiece(canvas, PIECE.rock, x, z, ROCK_SCALE_MIN + random.next() * ROCK_SCALE_RANGE);
+      } else if (random.chance(DESERT_CACTUS_CHANCE)) {
+        addPiece(canvas, PIECE.cactus, x, z);
+      } else if (random.chance(DESERT_DEAD_TREE_CHANCE)) {
+        addPiece(canvas, PIECE.deadTree, x, z);
       }
     }
   }
   return ruins;
+}
+
+/** Mato na terra firme do porto (só no chão de terra: piso de armazém e cais ficam livres). */
+function greenLand(canvas: Canvas, busy: ReadonlySet<string>): void {
+  const { size, random } = canvas;
+  for (let z = 0; z < size.depth; z += 1) {
+    for (let x = 0; x < size.width; x += 1) {
+      if (tileAt(canvas, x, z) !== TILE.dirt || busy.has(`${x},${z}`)) continue;
+      if (random.chance(PORT_TREE_CHANCE)) addPiece(canvas, random.pick(PORT_TREES), x, z);
+      else if (random.chance(PORT_GREEN_CHANCE)) addPiece(canvas, random.pick(PORT_GREENS), x, z);
+    }
+  }
 }
 
 /** Porto: terra firme perto de z = 0, mar no fundo, cais de madeira entrando na água. */
@@ -538,6 +569,10 @@ const PIER_MAX = 14;
 const DOCK_PROP_CHANCE = 0.12;
 const DOCK_TORCH_EVERY = 6;
 const CELLS_PER_WAREHOUSE = 900;
+const PORT_TREE_CHANCE = 0.006;
+const PORT_GREEN_CHANCE = 0.02;
+const PORT_TREES: readonly string[] = [PIECE.palm, PIECE.tree, PIECE.palm];
+const PORT_GREENS: readonly string[] = [PIECE.grass, PIECE.grass, PIECE.bush, PIECE.pebbles];
 const WAREHOUSE_MIN = 5;
 const WAREHOUSE_MAX = 9;
 
@@ -645,6 +680,7 @@ function planPort(canvas: Canvas): number {
     if (x % DOCK_TORCH_EVERY === 0) addPiece(canvas, PIECE.torch, x, z);
     else if (random.chance(DOCK_PROP_CHANCE)) addPiece(canvas, random.pick(DOCK_PROPS), x, z);
   }
+  greenLand(canvas, busy);
   return piers;
 }
 

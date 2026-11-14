@@ -73,6 +73,8 @@ const STREET_PROP_CHANCE = 0.07;
 const CELLS_PER_PARK_TREE = 10;
 const CELLS_PER_YARD_TREE = 24;
 const CELLS_PER_YARD_PROP = 18;
+const CELLS_PER_YARD_COVER = 14;
+const CELLS_PER_PARK_COVER = 6;
 const CELLS_PER_MARKET_PROP = 16;
 const PLAZA_TREE_INSET = 2;
 const TREE_SCALE = { min: 0.8, spread: 0.6 } as const;
@@ -332,6 +334,9 @@ function fillYard(planner: Planner, area: CellRect): void {
   scatter(planner, area, Math.floor(cells / CELLS_PER_YARD_PROP), (x, z) =>
     single(planner, random.pick(kit.yardProps), x, z, TERRAIN_CLASS.yard),
   );
+  scatter(planner, area, Math.floor(cells / CELLS_PER_YARD_COVER), (x, z) =>
+    single(planner, random.pick(kit.groundCover), x, z, TERRAIN_CLASS.yard),
+  );
 }
 
 function fillLots(planner: Planner, area: CellRect): void {
@@ -358,6 +363,9 @@ function fillPark(planner: Planner, area: CellRect): void {
   scatter(planner, area, Math.ceil(cells / CELLS_PER_PARK_TREE), (x, z) => tree(planner, x, z));
   scatter(planner, area, Math.ceil(cells / CELLS_PER_YARD_PROP), (x, z) =>
     single(planner, random.pick(kit.yardProps), x, z),
+  );
+  scatter(planner, area, Math.ceil(cells / CELLS_PER_PARK_COVER), (x, z) =>
+    single(planner, random.pick(kit.groundCover), x, z),
   );
 }
 
