@@ -80,8 +80,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   chão. A tecla `R` gira a peça, e o botão de atalhos mostra todas as teclas.
   Entre os chãos há areia, chão rachado de deserto, lama e poças d'água sobre a pedra.
 - **Gerar vila ou cidade:** em "Novo mapa", a opção "Vila ou cidade" monta o mapa inteiro com ruas,
-  casas mobiliadas com portas, janelas e telhados, praças, árvores e veículos. Escolha o estilo, o
-  tamanho (vila 64, cidadezinha 160, cidade 400 ou metrópole 1000 casas de lado) e a semente: a mesma
+  casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
+  janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
+  Escolha o estilo, o tamanho (vila 64, cidadezinha 160, cidade 400 ou metrópole 1000 casas de lado) e a semente: a mesma
   semente gera sempre o mesmo mapa, e "Sortear" troca por outra. A prévia mostra a planta antes de
   salvar. Mapas grandes são salvos em partes, com barra de progresso; se uma parte falhar, dá para
   tentar de novo, deixar o mapa como está ou apagá-lo. Os exemplos prontos usam sementes fixas.
@@ -272,6 +273,9 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
 - `scripts/assets/house-pieces.mjs public/assets/modern`: gera as casas de bairro do moderno
   (reboco em quatro cores, liso, com janela e com porta; telhados de ardósia e de barro em 2×2,
   2×4 e 4×4) e os enfeites do quintal (cerca branca, arbusto e caixa de correio).
+- `scripts/assets/furniture-pieces.mjs public/assets/modern`: gera os móveis e adereços do moderno
+  (sofá, cama, guarda-roupa, estante, geladeira, fogão, rack com TV, vaso de planta, balcão,
+  prateleira de loja, poste de luz, hidrante, lixeira, banco de praça e churrasqueira).
 - `scripts/assets/cyber-pieces.mjs public/assets/cyberpunk`: gera as peças do cyberpunk (paredes de
   concreto com faixa de neon rosa ou ciano, janela acesa, porta de enrolar e vitrine; asfalto com
   poças, calçada, piso de grade e praça de neon; poste de neon, letreiro, painel, holograma e
