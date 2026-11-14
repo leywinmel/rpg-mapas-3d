@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { cx } from '@/lib/cx';
+import { HUD_CHROME_CLASS } from './EditorSidebar';
 import styles from './MapCornerHud.module.css';
 
 /**
@@ -6,5 +8,5 @@ import styles from './MapCornerHud.module.css';
  * ferramentas do editor (embaixo) e do painel de quem está na mesa (em cima).
  */
 export function MapCornerHud({ children }: { children: ReactNode }) {
-  return <div className={styles.corner}>{children}</div>;
+  return <div className={cx(styles.corner, HUD_CHROME_CLASS)}>{children}</div>;
 }

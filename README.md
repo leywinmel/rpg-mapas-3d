@@ -79,6 +79,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
 - **Montar:** escolha uma peça na aba "Biblioteca" e clique na grade; para pintar o chão, dá para
   arrastar. A barra de baixo troca a ferramenta: chão, parede, objeto, apagar e elevar ou abaixar o
   chão. A tecla `R` gira a peça, e o botão de atalhos mostra todas as teclas.
+- **Cena limpa:** o mestre esconde barras, painéis e ferramentas com a tecla `U` ou o botão do
+  olho riscado na barra da mesa; um botão discreto no canto traz tudo de volta. Os jogadores nunca
+  veem as ferramentas de construção.
   Entre os chãos há areia, chão rachado de deserto, lama e poças d'água sobre a pedra.
 - **Gerar mapa pronto:** em "Novo mapa", a opção "Mapa pronto" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,

@@ -6,6 +6,8 @@ import {
   CloudRain,
   DoorOpen,
   Download,
+  Eye,
+  EyeOff,
   Link2,
   Pencil,
   Swords,
@@ -16,6 +18,7 @@ import {
 import { IconButton, notify, ThemeToggle, Toolbar, ToolbarSeparator } from '@/components';
 import { absoluteAppUrl } from '@/features/auth';
 import { ExportPanel } from '@/features/export';
+import { HUD_CHROME_CLASS } from '@/features/map-editor';
 import { NotesButton, NotesPanel, NotesProvider } from '@/features/notes';
 import { QualityButton } from '@/features/scene';
 import { FogPanel } from '@/features/fog';
@@ -24,6 +27,7 @@ import { TableToolButtons, ToolHint } from '@/features/table-tools';
 import { TokenBasesButton, TokensPanel, useTokensStore } from '@/features/tokens';
 import { cx } from '@/lib/cx';
 import { reportError } from '@/lib/report-error';
+import { useHudStore, useHudToggle } from '../hooks/hud-store';
 import { useRoomSession } from '../hooks/room-session-context';
 import { LOBBY_PATH, roomPath } from '../paths';
 import { PresencePanel } from './PresencePanel';
@@ -32,7 +36,7 @@ import { DeleteRoomDialog, LeaveRoomDialog, RenameRoomDialog } from './RoomAdmin
 import styles from './rooms.module.css';
 
 /** `room__side-panel` é o gancho do global.css para dividir a coluna direita com os dados. */
-const SIDE_PANEL_CLASS = cx(styles.sidePanel, 'room__side-panel');
+const SIDE_PANEL_CLASS = cx(styles.sidePanel, 'room__side-panel', HUD_CHROME_CLASS);
 
 type OpenDialog = 'rename' | 'delete' | 'leave' | null;
 
@@ -60,6 +64,9 @@ async function copyInviteLink(slug: string): Promise<void> {
 export function RoomHud() {
   const { room, isGameMaster } = useRoomSession();
   const navigate = useNavigate();
+  const hudHidden = useHudStore((state) => state.hidden);
+  const toggleHud = useHudStore((state) => state.toggle);
+  useHudToggle(isGameMaster);
   const [dialog, setDialog] = useState<OpenDialog>(null);
   const [sidePanel, setSidePanel] = useState<SidePanel>('presence');
   const closeDialog = () => setDialog(null);
@@ -78,7 +85,12 @@ export function RoomHud() {
   return (
     // O provider fica montado com o painel fechado: o aviso de anotação nova chega do mesmo jeito.
     <NotesProvider panelOpen={sidePanel === 'notes'}>
-      <div className="room__hud">
+      {isGameMaster && hudHidden && (
+        <div className={styles.hudReveal}>
+          <IconButton label="Mostrar o HUD (U)" icon={<Eye size={18} />} onClick={toggleHud} />
+        </div>
+      )}
+      <div className={cx('room__hud', HUD_CHROME_CLASS)}>
         <Toolbar label="Mesa" className={styles.hudGroup}>
           <IconButton
             label="Voltar ao início"
@@ -161,12 +173,21 @@ export function RoomHud() {
             />
           )}
           <ToolbarSeparator />
+          {isGameMaster && (
+            <IconButton
+              label="Esconder o HUD para ver a cena (U)"
+              icon={<EyeOff size={18} />}
+              onClick={toggleHud}
+            />
+          )}
           <TokenBasesButton />
           <QualityButton />
           <ThemeToggle />
         </Toolbar>
       </div>
-      <ToolHint />
+      <div className={HUD_CHROME_CLASS}>
+        <ToolHint />
+      </div>
       {sidePanel === 'presence' && (
         <div className={SIDE_PANEL_CLASS}>
           <PresencePanel onClose={closeSidePanel} />
