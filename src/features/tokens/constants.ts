@@ -26,6 +26,7 @@ export const TOKEN_MODEL_GROUPS = [
   { value: 'basic', label: 'Simples (com cores)' },
   { value: 'heroes', label: 'Heróis' },
   { value: 'undead', label: 'Mortos-vivos' },
+  { value: 'monsters', label: 'Monstros' },
 ] as const;
 export type TokenModelGroup = (typeof TOKEN_MODEL_GROUPS)[number]['value'];
 
@@ -48,6 +49,18 @@ export const TOKEN_MODELS = [
     file: 'rogue-hooded',
     height: 2.5,
   },
+  { value: 'cleric', label: 'Clérigo', group: 'heroes', file: 'cleric', height: 3 },
+  { value: 'monk', label: 'Monge', group: 'heroes', file: 'monk', height: 2.95 },
+  { value: 'ranger', label: 'Patrulheira', group: 'heroes', file: 'ranger', height: 3 },
+  {
+    value: 'thief',
+    label: 'Assassino encapuzado',
+    group: 'heroes',
+    file: 'thief',
+    height: 3,
+  },
+  { value: 'warrior', label: 'Guerreiro', group: 'heroes', file: 'warrior', height: 2.95 },
+  { value: 'wizard', label: 'Arquimago', group: 'heroes', file: 'wizard', height: 3.1 },
   {
     value: 'skeleton-warrior',
     label: 'Esqueleto guerreiro',
@@ -76,6 +89,9 @@ export const TOKEN_MODELS = [
     file: 'skeleton-minion',
     height: 2.4,
   },
+  // Morcego e dragão pairam voando: a altura conta o voo, para não ficarem gigantes.
+  { value: 'bat', label: 'Morcego gigante', group: 'monsters', file: 'bat', height: 4.1 },
+  { value: 'dragon', label: 'Dragão filhote', group: 'monsters', file: 'dragon', height: 3.9 },
 ] as const;
 export type TokenModelKey = (typeof TOKEN_MODELS)[number]['value'];
 export type TokenModelEntry = (typeof TOKEN_MODELS)[number];

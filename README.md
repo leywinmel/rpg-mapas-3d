@@ -156,8 +156,10 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   na tela. Clicar num token (na lista ou na cena) mostra os detalhes dele.
 - **Mestre:** "Novo" cria um boneco 3D ou uma imagem PNG, JPEG ou WebP (até 5 MB) em pé numa base
   de papel-cartão. Bonecos: os simples (aventureiro e criatura, com duas cores à escolha) e os
-  prontos, animados, com as cores deles: cavaleiro, bárbaro, mago, ladino, ladino encapuzado e os
-  esqueletos guerreiro, mago, ladino e servo (KayKit, CC0; novos entram por
+  prontos, animados, com as cores deles: cavaleiro, bárbaro, mago, ladino, ladino encapuzado,
+  clérigo, monge, patrulheira, assassino encapuzado, guerreiro, arquimago, os esqueletos guerreiro,
+  mago, ladino e servo e os monstros morcego gigante e dragão filhote (KayKit e Quaternius, CC0;
+  novos entram por
   `scripts/assets/convert-token.mjs` mais uma linha em `token_models` e em `TOKEN_MODELS`). O token nasce no ponto que a câmera olha, com nome,
   tamanho (1×1 a 4×4 casas), vida opcional e dono: só o mestre (NPC, monstro) ou um jogador. "Esconder
   dos jogadores" deixa o token só para o mestre (aparece meio apagado para ele).
