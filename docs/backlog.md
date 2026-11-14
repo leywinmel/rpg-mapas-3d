@@ -140,3 +140,4 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
   - 1 ilha gigante.
 - [ ] **RPG-64** Escola de feiticeiros grande, inspirada no estilo de Jujutsu Kaisen: campus de templos japoneses na montanha, com pátio, dormitórios, salas e campo de treino. Só a inspiração: nada de nome, personagem ou arte da obra.
 - [ ] **RPG-65** Escolas e hospitais (continuação do RPG-45): o mapa grande de cada um e versões menores que entram nas cidades geradas.
+- [ ] **RPG-66** Móveis na escala do personagem: cama, sofá e TV estão pequenos perto do boneco. Pensar o tamanho de cada um (ex: cama 1×2, sofá 2×1, TV larga) e refazer os que ficam em 1×1. Bancos de praça passam a 2×1. Estantes lado a lado se juntam numa estante só, sem a lateral dupla no meio.
