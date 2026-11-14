@@ -92,7 +92,7 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 
 - [ ] **RPG-34** Prédios públicos: delegacia, hospital, correios, lojinhas e mercado, nas casas prontas e no gerador de cidade.
 - [ ] **RPG-35** Praças com fonte, caminhos, bancos, canteiros e estátuas grandes; o gerador põe praça nas cidades.
-- [ ] **RPG-36** Decoração de rua: postes, hidrantes, lixeiras, placas, bancas, cones e caixas de correio.
+- [x] **RPG-36** Decoração de rua: postes, hidrantes, lixeiras, placas, bancas, cones e caixas de correio.
 - [ ] **RPG-37** Vegetação: tipos de árvores, arbustos, flores, folhas e pedras no chão.
 
 **Fase E: clima e ambiente**

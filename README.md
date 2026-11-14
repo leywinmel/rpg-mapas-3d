@@ -282,7 +282,7 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
   2×4 e 4×4) e os enfeites do quintal (cerca branca, arbusto e caixa de correio).
 - `scripts/assets/furniture-pieces.mjs public/assets/modern`: gera os móveis e adereços do moderno
   (sofá, cama, guarda-roupa, estante, geladeira, fogão, rack com TV, vaso de planta, balcão,
-  prateleira de loja, poste de luz, hidrante, lixeira, banco de praça e churrasqueira).
+  prateleira de loja, poste de luz, hidrante, lixeira, banco de praça, placa de rua, banca de jornal e churrasqueira).
 - `scripts/assets/cyber-pieces.mjs public/assets/cyberpunk`: gera as peças do cyberpunk (paredes de
   concreto com faixa de neon rosa ou ciano, janela acesa, porta de enrolar e vitrine; asfalto com
   poças, calçada, piso de grade e praça de neon; poste de neon, letreiro, painel, holograma e

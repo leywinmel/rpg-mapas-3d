@@ -237,6 +237,8 @@ const MODERN: StyleKit = {
     'mod-hidrante',
     'mod-lixeira',
     'mod-banco-praca',
+    'mod-placa-rua',
+    'mod-banca',
   ],
   lamp: 'mod-poste',
   plazaCenter: 'estatua',
