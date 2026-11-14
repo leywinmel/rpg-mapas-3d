@@ -25,6 +25,7 @@ const FEATURE_WORDS: Readonly<Record<MapKind, string>> = {
   dungeon: 'salas',
   cave: 'caverna ligada',
   desert: 'ruínas',
+  port: 'cais',
 };
 
 function farColor(key: string | null): string | null {

@@ -36,7 +36,7 @@ describe('formulário do gerador', () => {
 
   it('shouldAcceptTheWildExamples', () => {
     const wilds = EXAMPLE_MAPS.filter((example) => example.kind !== 'settlement');
-    expect(wilds.map((example) => example.kind)).toEqual(['dungeon', 'cave', 'desert']);
+    expect(wilds.map((example) => example.kind)).toEqual(['dungeon', 'cave', 'desert', 'port']);
     for (const example of wilds) expect(parseGenerateMap(exampleValues(example)).ok).toBe(true);
   });
 

@@ -21,7 +21,7 @@ import type { SettlementStyle } from './kits';
 import type { PlannedPiece } from './layout';
 import { createRandom, deriveSeed, type Random } from './random';
 
-export const WILD_KINDS = ['dungeon', 'cave', 'desert'] as const;
+export const WILD_KINDS = ['dungeon', 'cave', 'desert', 'port'] as const;
 export type WildKind = (typeof WILD_KINDS)[number];
 
 /** O que o gerador sabe fazer: vila ou cidade (com estilo) ou um dos mapas fora da cidade. */
@@ -33,6 +33,7 @@ export const MAP_KIND_LABELS: Readonly<Record<MapKind, string>> = {
   dungeon: 'Masmorra',
   cave: 'Caverna',
   desert: 'Deserto',
+  port: 'Porto',
 };
 
 export function isWildKind(kind: MapKind): kind is WildKind {
@@ -47,8 +48,10 @@ const TILE = {
   water: 'agua',
   sand: 'areia',
   cracked: 'chao-rachado',
+  planks: 'piso-madeira',
 } as const;
 const WALL_STYLE = 'parede-pedra';
+const WAREHOUSE_WALL = 'parede-madeira';
 const PIECE = {
   torch: 'tocha',
   pillar: 'pilar',
@@ -57,7 +60,16 @@ const PIECE = {
   chest: 'bau',
   barrel: 'barril',
   crate: 'caixa',
+  cargo: 'med-caixote',
 } as const;
+const DOCK_PROPS: readonly string[] = [PIECE.barrel, PIECE.crate, PIECE.cargo, PIECE.barrel];
+
+/** Barcos do maior para o menor: cada cais recebe o maior que couber ao lado dele. */
+const BOATS: readonly { key: string; width: number; depth: number }[] = [
+  { key: 'med-navio', width: 4, depth: 10 },
+  { key: 'med-pesqueiro', width: 2, depth: 4 },
+  { key: 'med-bote', width: 1, depth: 2 },
+];
 const DUNGEON_PROPS: readonly string[] = [PIECE.barrel, PIECE.crate, PIECE.barrel, PIECE.chest];
 
 const ONE_CELL = { width: 1, depth: 1 } as const;
@@ -515,10 +527,132 @@ function planDesert(canvas: Canvas): number {
   return ruins;
 }
 
+/** Porto: terra firme perto de z = 0, mar no fundo, cais de madeira entrando na água. */
+const SEA_SHARE = 0.45;
+const SHORE_WAVE = 3;
+const BOARDWALK = 2;
+const PIER_SPACING = 12;
+const PIER_WIDTH = 2;
+const PIER_MIN = 5;
+const PIER_MAX = 14;
+const DOCK_PROP_CHANCE = 0.12;
+const DOCK_TORCH_EVERY = 6;
+const CELLS_PER_WAREHOUSE = 900;
+const WAREHOUSE_MIN = 5;
+const WAREHOUSE_MAX = 9;
+
+/** Linha da praia em cada coluna: ondula devagar, com o mar ocupando o fundo do mapa. */
+function shoreline(canvas: Canvas): number[] {
+  const { size, random } = canvas;
+  const noise = patchNoise(size, random);
+  const base = Math.round(size.depth * (1 - SEA_SHARE));
+  return Array.from({ length: size.width }, (_, x) =>
+    Math.min(size.depth - 1, Math.max(1, base + Math.round((noise(x, 0) - 0.5) * 2 * SHORE_WAVE))),
+  );
+}
+
+/** Barco atracado à direita do cais, proa para o mar; nenhum se não houver água para ele. */
+function mooredBoat(canvas: Canvas, pierX: number, start: number, length: number): void {
+  const x = pierX + PIER_WIDTH;
+  for (const boat of BOATS) {
+    if (boat.depth > length) continue;
+    const rect = { x, z: start + length - boat.depth, width: boat.width, depth: boat.depth };
+    if (!rectIsWater(canvas, rect)) continue;
+    canvas.pieces.push({
+      key: boat.key,
+      x: rect.x,
+      z: rect.z,
+      rotation: 0,
+      footprint: { width: boat.width, depth: boat.depth },
+      scale: 1,
+    });
+    return;
+  }
+}
+
+function rectIsWater(canvas: Canvas, rect: Rect): boolean {
+  for (let z = rect.z; z < rect.z + rect.depth; z += 1) {
+    for (let x = rect.x; x < rect.x + rect.width; x += 1) {
+      if (tileAt(canvas, x, z) !== TILE.water) return false;
+    }
+  }
+  return true;
+}
+
+/** Armazém de madeira sem telhado (o diorama mostra o que tem dentro), porta virada para o mar. */
+function placeWarehouse(canvas: Canvas, landDepth: number): boolean {
+  const { random, size } = canvas;
+  const width = random.between(WAREHOUSE_MIN, WAREHOUSE_MAX);
+  const depth = random.between(WAREHOUSE_MIN, WAREHOUSE_MAX);
+  if (width + 2 >= size.width || depth + 2 >= landDepth) return false;
+  const x0 = random.between(1, size.width - width - 1);
+  const z0 = random.between(1, landDepth - depth - 1);
+  for (let z = z0 - 1; z <= z0 + depth; z += 1) {
+    for (let x = x0 - 1; x <= x0 + width; x += 1) {
+      if (tileAt(canvas, x, z) !== TILE.dirt) return false;
+    }
+  }
+  fillRect(canvas, { x: x0, z: z0, width, depth }, TILE.planks);
+  const door = x0 + Math.floor(width / 2);
+  const wall = (x: number, z: number, side: MapWall['side']) =>
+    canvas.walls.push({ x, z, side, style: WAREHOUSE_WALL, height: STORY_HEIGHT_STEPS, level: 0 });
+  for (let x = x0; x < x0 + width; x += 1) {
+    wall(x, z0, 'north');
+    if (x !== door) wall(x, z0 + depth, 'north');
+  }
+  for (let z = z0; z < z0 + depth; z += 1) {
+    wall(x0, z, 'west');
+    wall(x0 + width, z, 'west');
+  }
+  for (let x = x0; x < x0 + width; x += 2) addPiece(canvas, random.pick(DOCK_PROPS), x, z0);
+  return true;
+}
+
+function planPort(canvas: Canvas): number {
+  const { size, random } = canvas;
+  const shore = shoreline(canvas);
+  for (let x = 0; x < size.width; x += 1) {
+    const line = shore[x]!;
+    for (let z = 0; z < size.depth; z += 1) {
+      const tile =
+        z >= line
+          ? TILE.water
+          : z >= line - BOARDWALK
+            ? TILE.planks
+            : z === line - BOARDWALK - 1
+              ? TILE.sand
+              : TILE.dirt;
+      paint(canvas, x, z, tile);
+    }
+  }
+  let piers = 0;
+  for (let pierX = PIER_SPACING / 2; pierX + PIER_WIDTH < size.width; pierX += PIER_SPACING) {
+    const start = Math.max(...shore.slice(pierX, pierX + PIER_WIDTH));
+    const length = Math.min(random.between(PIER_MIN, PIER_MAX), size.depth - start - 1);
+    if (length < PIER_MIN) continue;
+    fillRect(canvas, { x: pierX, z: start, width: PIER_WIDTH, depth: length }, TILE.planks);
+    mooredBoat(canvas, pierX, start, length);
+    addPiece(canvas, PIECE.torch, pierX, start + length - 1);
+    piers += 1;
+  }
+  const landDepth = Math.min(...shore) - BOARDWALK - 1;
+  const houses = Math.floor((size.width * landDepth) / CELLS_PER_WAREHOUSE);
+  for (let index = 0; index < houses; index += 1) placeWarehouse(canvas, landDepth);
+  const busy = new Set(canvas.pieces.map((piece) => `${piece.x},${piece.z}`));
+  for (let x = 0; x < size.width; x += 1) {
+    const z = shore[x]! - BOARDWALK;
+    if (busy.has(`${x},${z}`)) continue;
+    if (x % DOCK_TORCH_EVERY === 0) addPiece(canvas, PIECE.torch, x, z);
+    else if (random.chance(DOCK_PROP_CHANCE)) addPiece(canvas, random.pick(DOCK_PROPS), x, z);
+  }
+  return piers;
+}
+
 const PLANNERS: Readonly<Record<WildKind, (canvas: Canvas) => number>> = {
   dungeon: planDungeon,
   cave: planCave,
   desert: planDesert,
+  port: planPort,
 };
 
 /** Chão de quem não tem onde cavar sala: masmorra e caverna pequenas viram um piso inteiro. */
@@ -526,11 +660,12 @@ const SMALL_MAP_FLOOR: Readonly<Record<WildKind, string>> = {
   dungeon: TILE.stone,
   cave: TILE.dirt,
   desert: TILE.sand,
+  port: TILE.dirt,
 };
 
 export function planWilds(options: WildOptions): WildPlan {
   const { kind, size, seed } = options;
-  const carved = kind !== 'desert';
+  const carved = kind === 'dungeon' || kind === 'cave';
   const tooSmall = Math.min(size.width, size.depth) < MIN_CARVED_SIDE;
   const canvas = canvasFor(size, deriveSeed(seed, WILD_KINDS.indexOf(kind)), null);
   const features =
@@ -544,6 +679,7 @@ const AMBIENCE: Readonly<
   dungeon: { preset: 'masmorra', backdrop: 'dungeon' },
   cave: { preset: 'caverna', fogColor: '#0c0908', light: 0.5, backdrop: 'dungeon' },
   desert: { light: 1, backdrop: 'desert' },
+  port: { light: 1, backdrop: 'sea' },
 };
 
 function headerFor(kind: WildKind): MapHeader {

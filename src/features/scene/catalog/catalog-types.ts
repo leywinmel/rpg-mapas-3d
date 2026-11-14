@@ -69,6 +69,7 @@ export type PieceIcon =
   | 'car'
   | 'truck'
   | 'wagon'
+  | 'boat'
   | 'road'
   | 'cone'
   | 'monitor'

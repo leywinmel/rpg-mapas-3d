@@ -183,6 +183,7 @@ export const EXAMPLE_MAPS: readonly ExampleMap[] = [
   },
   { id: 'caverna', name: 'Caverna', kind: 'cave', style: 'medieval', preset: 'town', seed: 1313 },
   { id: 'deserto', name: 'Deserto', kind: 'desert', style: 'medieval', preset: 'town', seed: 1890 },
+  { id: 'porto', name: 'Porto', kind: 'port', style: 'medieval', preset: 'town', seed: 1500 },
 ];
 
 /** Nome do tamanho fora da cidade: "Cidade grande" não faz sentido numa caverna. */
