@@ -7,6 +7,7 @@ import type { AssembledMap } from '../assemble';
 import { buildCaveMap, CAVE_SIZE } from './cave';
 import { buildCryptMap, CRYPT_SIZE } from './crypt';
 import { buildDesertMap, DESERT_SIZE } from './desert';
+import { buildPortMap, PORT_SIZE } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
 
 export type ReadyMap = {
@@ -50,6 +51,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Dunas em degraus com um oásis de palmeiras, as ruínas de um templo no platô, a caravana acampada e um rochedo com mirante.',
     size: DESERT_SIZE,
     build: buildDesertMap,
+  },
+  {
+    id: 'porto',
+    name: 'Porto da maré',
+    description:
+      'Cidade na encosta que desce até o mar: armazém, taverna, mercado de peixe, três píeres com navio e barcos, e o farol no pontal.',
+    size: PORT_SIZE,
+    build: buildPortMap,
   },
 ];
 
