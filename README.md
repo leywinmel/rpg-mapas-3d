@@ -108,6 +108,10 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   O "Bairro da Orla" (48 × 48) é um bairro moderno que desce o morro até o mar: casas de
   reboco com telhado e quintal no alto, a avenida e o mercado com estacionamento no meio, a
   praça da fonte e, embaixo, o calçadão de areia com palmeiras, píer e barcos.
+  O "Centro da Cidade" (48 × 48) é o miolo de uma cidade moderna: duas avenidas que se cruzam,
+  torres de escritório com estacionamento, a praça cívica um degrau acima da rua, lojas com o
+  beco das entregas, o prédio de apartamentos com jardim, o quartel dos bombeiros e o pátio da
+  polícia.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
