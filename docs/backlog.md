@@ -133,12 +133,14 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 - [ ] **RPG-60** O rosto do lobisomem continua virado para o lado errado (o RPG-42 não resolveu). Conferir o modelo na cena e corrigir. Conferido em 19/11: o arquivo no ar (v3) olha para +z e marca `rpgmapsFront: +z`; de cima, o focinho aponta para +z. Ele vira para onde anda. Falta o usuário dizer o que ainda vê errado (print com a direção do movimento).
 - [x] **RPG-61** Relevo nos mapas: quem gera ou monta um mapa pensa na altura do terreno. No porto, a água fica abaixo do cais de madeira, e não no mesmo nível. Vale para o gerador e para os mapas prontos.
       Feito no gerador: em mapa com água, a terra, a areia e o cais sobem um degrau (meio metro) e a água fica no zero; peças e paredes pousam na altura da casa delas. Os mapas prontos (RPG-63) seguem a mesma regra.
-- [ ] **RPG-62** Barcos de verdade: os barcos atuais são pequenos e só estruturas soltas. Fazer barcos em tamanho de mapa: casco, convés, cabine, mastro e porão, montados para jogar dentro.
+- [x] **RPG-62** Barcos de verdade: os barcos atuais são pequenos e só estruturas soltas. Fazer barcos em tamanho de mapa: casco, convés, cabine, mastro e porão, montados para jogar dentro.
+      Feito: "Navio de guerra" de 27 × 46 casas, montado à mão em três pisos: porão (redes, carga, paiol e cela de grades), convés com 12 canhões e dois mastros, e a cabine do capitão na popa com o tombadilho em cima (timão e mastro de mezena). Peças novas na biblioteca: mastro com velas, timão, canhão, gurupés e rede de dormir. É o primeiro mapa da aba "Mapas prontos" (RPG-63).
 - [ ] **RPG-63** Nova aba "Mapas prontos" no editor, separada do gerador: uma biblioteca de mapas pensados e montados à mão, peça por peça, sem sorteio. Primeira leva:
   - 2 mapas diferentes de cada estilo de cidade (medieval, moderna, futurista, cyberpunk);
   - 1 masmorra, 1 caverna, 1 deserto e 1 porto;
-  - 1 mapa de barco (ver RPG-62);
+  - 1 mapa de barco (ver RPG-62); feito;
   - 1 ilha gigante.
+    Base feita com o RPG-62: a aba "Mapas prontos" em "Novo mapa" (o gerador virou "Gerar mapa") e o esboço que monta chão, paredes e peças casa por casa (`src/domain/map-gen/ready/`).
 - [ ] **RPG-64** Escola de feiticeiros grande, inspirada no estilo de Jujutsu Kaisen: campus de templos japoneses na montanha, com pátio, dormitórios, salas e campo de treino. Só a inspiração: nada de nome, personagem ou arte da obra.
 - [ ] **RPG-65** Escolas e hospitais (continuação do RPG-45): o mapa grande de cada um e versões menores que entram nas cidades geradas.
 - [x] **RPG-66** Móveis na escala do personagem: cama, sofá e TV estão pequenos perto do boneco. Pensar o tamanho de cada um (ex: cama 1×2, sofá 2×1, TV larga) e refazer os que ficam em 1×1. Bancos de praça passam a 2×1. Estantes lado a lado se juntam numa estante só, sem a lateral dupla no meio.

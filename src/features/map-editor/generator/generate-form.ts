@@ -4,6 +4,7 @@
  */
 import { z } from 'zod';
 import {
+  generateMap,
   MAP_KINDS,
   MAX_SEED,
   SETTLEMENT_STYLES,
@@ -64,5 +65,13 @@ export function exampleValues(example: ExampleMap): GenerateFormValues {
     style: example.style,
     preset: example.preset,
     seed: String(example.seed),
+  };
+}
+
+/** Pedido de criação: o nome e o gerador com o tamanho do preset escolhido. */
+export function generatedMapRequest(input: GenerateMapInput) {
+  return {
+    name: input.name,
+    build: () => generateMap({ ...input, size: presetSize(input.preset) }).model,
   };
 }

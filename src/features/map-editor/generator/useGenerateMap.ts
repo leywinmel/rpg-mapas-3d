@@ -1,10 +1,11 @@
 import { useCallback, useRef, useState } from 'react';
-import { generateMap } from '@/domain/map-gen';
 import type { MapModel } from '@/domain/map-v2';
 import { PartialMapError, type MapActions } from '../hooks/useMapActions';
 import { BatchSaveError, type SaveProgress } from '../services/batch-save';
 import type { MapSummary } from '../types';
-import { presetSize, type GenerateMapInput } from './generate-form';
+
+/** O que criar: o nome do mapa e quem monta o modelo (o gerador ou um mapa pronto). */
+export type MapRequest = { readonly name: string; readonly build: () => MapModel };
 
 /** Mapa criado no banco que ainda não recebeu todos os pedaços. */
 type Pending = { summary: MapSummary; saved: MapModel; current: MapModel };
@@ -34,12 +35,12 @@ function partialMessage(pending: Pending): string {
 type Actions = Pick<MapActions, 'createFromModel' | 'resumeSave' | 'remove'>;
 
 /**
- * Gera o mapa (vila, cidade, masmorra, caverna ou deserto) e grava em lotes, com progresso. Se um lote falha, o estado guarda o
+ * Monta o mapa (gerado ou pronto) e grava em lotes, com progresso. Se um lote falha, o estado guarda o
  * que já foi gravado: "Tentar de novo" manda só o resto, e "Apagar" desiste do mapa.
  */
 export function useGenerateMap(actions: Actions, onDone: (summary: MapSummary) => void) {
   const [state, setState] = useState<GenerationState>(IDLE);
-  const lastInput = useRef<GenerateMapInput | null>(null);
+  const lastRequest = useRef<MapRequest | null>(null);
   const onProgress = (progress: SaveProgress) => setState({ phase: 'saving', progress });
 
   const fail = useCallback((error: unknown, pending: Pending | null, current?: MapModel) => {
@@ -59,20 +60,19 @@ export function useGenerateMap(actions: Actions, onDone: (summary: MapSummary) =
   }, []);
 
   const start = useCallback(
-    async (input: GenerateMapInput) => {
-      lastInput.current = input;
+    async (request: MapRequest) => {
+      lastRequest.current = request;
       setState({ phase: 'generating' });
       await yieldToPaint();
       let model: MapModel;
       try {
-        const size = presetSize(input.preset);
-        model = generateMap({ ...input, size }).model;
+        model = request.build();
       } catch (error) {
         return fail(error, null);
       }
       setState({ phase: 'saving', progress: NO_PROGRESS });
       try {
-        const summary = await actions.createFromModel({ name: input.name, model, onProgress });
+        const summary = await actions.createFromModel({ name: request.name, model, onProgress });
         setState(IDLE);
         onDone(summary);
       } catch (error) {
@@ -86,7 +86,7 @@ export function useGenerateMap(actions: Actions, onDone: (summary: MapSummary) =
     if (state.phase !== 'failed') return;
     const { pending } = state;
     if (!pending) {
-      if (lastInput.current) await start(lastInput.current);
+      if (lastRequest.current) await start(lastRequest.current);
       return;
     }
     setState({ phase: 'saving', progress: NO_PROGRESS });

@@ -11,9 +11,11 @@ import { BACKDROPS, type Backdrop } from '@/domain';
 import {
   MAP_KIND_LABELS,
   MAP_KINDS,
+  READY_MAPS,
   SETTLEMENT_STYLE_LABELS,
   SETTLEMENT_STYLES,
   type MapKind,
+  type ReadyMap,
   type SettlementStyle,
 } from '@/domain/map-gen';
 import { cutawayShowingUpToStory, NO_CUTAWAY, type Cutaway, type MapModel } from '@/domain/map-v2';
@@ -52,6 +54,13 @@ type Build = {
   /** Momento em que o modelo ficou pronto: a montagem conta daqui até o primeiro quadro. */
   readyAt: number;
 };
+
+function buildReady(ready: ReadyMap): Build {
+  const startedAt = performance.now();
+  const { model } = ready.build();
+  const readyAt = performance.now();
+  return { model, counts: countCity(model), generateMs: readyAt - startedAt, readyAt };
+}
 
 function build(side: number, style: SettlementStyle, kind: MapKind): Build {
   const startedAt = performance.now();
@@ -141,6 +150,14 @@ export default function ScenePerfPage() {
     setCurrent(build(next, nextStyle, nextKind));
   };
 
+  /** Mapa pronto da biblioteca, montado à mão: mostra como ele fica na cena. */
+  const showReady = (ready: ReadyMap) => {
+    const next = buildReady(ready);
+    setSide(Math.max(next.model.size.width, next.model.size.depth));
+    setMountMs(null);
+    setCurrent(next);
+  };
+
   return (
     <div className={styles.page}>
       <SceneCanvas
@@ -176,6 +193,13 @@ export default function ScenePerfPage() {
               onClick={() => regenerate(side, style, option)}
             >
               {MAP_KIND_LABELS[option]}
+            </Button>
+          ))}
+        </div>
+        <div className={styles.row}>
+          {READY_MAPS.map((ready) => (
+            <Button key={ready.id} size="sm" variant="ghost" onClick={() => showReady(ready)}>
+              {ready.name}
             </Button>
           ))}
         </div>
