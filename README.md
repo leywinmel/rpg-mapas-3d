@@ -284,14 +284,14 @@ endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
   (reboco em quatro cores, liso, com janela e com porta; telhados de ardósia e de barro em 2×2,
   2×4 e 4×4) e os enfeites do quintal (cerca branca, arbusto e caixa de correio).
 - `scripts/assets/furniture-pieces.mjs public/assets/modern`: gera os móveis e adereços do moderno
-  (sofá, cama, guarda-roupa, estante, geladeira, fogão, rack com TV, vaso de planta, balcão,
-  prateleira de loja, poste de luz, hidrante, lixeira, banco de praça, placa de rua, banca de jornal e churrasqueira).
+  (sofá 2×1, cama 1×2, guarda-roupa, estante, geladeira, fogão, rack com TV 2×1, vaso de planta, balcão,
+  prateleira de loja, poste de luz, hidrante, lixeira, banco de praça 2×1, placa de rua, banca de jornal e churrasqueira).
 - `scripts/assets/vegetation-pieces.mjs public/assets/nature`: gera a vegetação que serve a todos
   os estilos (pinheiro, carvalho, bétula, árvore seca, palmeira, cacto, arbusto, roseira, flores,
   capim, folhas no chão, seixos, pedregulho, cogumelos, tronco caído e toco). Os geradores de
   mapa espalham essas plantas nos quintais, parques, desertos, cavernas e portos.
 - `scripts/assets/plaza-pieces.mjs public/assets/plaza`: gera os enfeites de praça de qualquer
-  estilo (fonte grande 3×3, chafariz 2×2, estátua do herói 2×2, obelisco, banco de pedra e
+  estilo (fonte grande 3×3, chafariz 2×2, estátua do herói 2×2, obelisco, banco de pedra 2×1 e
   canteiro elevado 2×1). Na cidade gerada, a praça grande vira jardim com caminhos em cruz até o
   monumento, com bancos e canteiros, e a pequena ganha bancos em volta dele. As formas orgânicas
   (troncos, copas, pedras) dos dois scripts ficam em `scripts/assets/organic-mesh.mjs`.

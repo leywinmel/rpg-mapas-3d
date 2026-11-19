@@ -10,6 +10,7 @@ import type { GridSize } from '../grid';
 import { QUARTER_TURNS, type CellRect, type Footprint } from '../map-v2';
 import { doorColumn, type BuildingSpec, type BuildingUse } from './blueprint';
 import {
+  propFootprint,
   roofFor,
   STYLE_KITS,
   SINGLE_CELL,
@@ -165,7 +166,20 @@ function tryPiece(planner: Planner, piece: LoosePiece, allowed?: TerrainClass, s
 
 function single(planner: Planner, key: string, x: number, z: number, allowed?: TerrainClass) {
   const rotation = planner.random.between(0, QUARTER_TURNS - 1);
-  return tryPiece(planner, { key, x, z, rotation, footprint: SINGLE_CELL }, allowed);
+  return tryPiece(planner, { key, x, z, rotation, footprint: propFootprint(key) }, allowed);
+}
+
+/**
+ * Banco da praça olhando no giro pedido, com o meio do comprimento na casa `seat` (o banco de
+ * 2×1 desliza meia peça para trás no eixo em que é comprido).
+ */
+function bench(planner: Planner, seat: Cell & { rotation: number }, allowed?: TerrainClass) {
+  const key = planner.kit.plazaBench;
+  const footprint = propFootprint(key);
+  const size = rotatedSize(footprint, seat.rotation);
+  const x = seat.x - Math.floor((size.width - 1) / 2);
+  const z = seat.z - Math.floor((size.depth - 1) / 2);
+  return tryPiece(planner, { key, x, z, rotation: seat.rotation, footprint }, allowed);
 }
 
 function tree(planner: Planner, x: number, z: number, allowed?: TerrainClass): boolean {
@@ -399,16 +413,13 @@ function placeMonument(planner: Planner, area: CellRect, center: Cell): number {
 
 /** Quatro bancos de frente para o monumento, um de cada lado (rotação 0 olha para +z). */
 function benchesAround(planner: Planner, center: Cell, reach: number): void {
-  const { kit } = planner;
   const seats = [
     { x: center.x, z: center.z - reach, rotation: 0 },
     { x: center.x - reach, z: center.z, rotation: 1 },
     { x: center.x, z: center.z + reach, rotation: 2 },
     { x: center.x + reach, z: center.z, rotation: 3 },
   ];
-  for (const seat of seats) {
-    tryPiece(planner, { key: kit.plazaBench, ...seat, footprint: SINGLE_CELL });
-  }
+  for (const seat of seats) bench(planner, seat);
 }
 
 /**
@@ -441,31 +452,16 @@ function plantGarden(planner: Planner, area: CellRect, center: Cell, clear: numb
     });
   }
   // Bancos na beira dos dois caminhos, dos dois lados, fora do largo do monumento.
+  // A casa de terra exigida já impede o banco de invadir o caminho ou o largo.
   for (let x = x0; x <= x1; x += BENCH_SPACING) {
     if (inLargo(x, center.z)) continue;
-    tryPiece(
-      planner,
-      { key: kit.plazaBench, x, z: center.z - near, rotation: 0, footprint: SINGLE_CELL },
-      TERRAIN_CLASS.ground,
-    );
-    tryPiece(
-      planner,
-      { key: kit.plazaBench, x, z: center.z + near, rotation: 2, footprint: SINGLE_CELL },
-      TERRAIN_CLASS.ground,
-    );
+    bench(planner, { x, z: center.z - near, rotation: 0 }, TERRAIN_CLASS.ground);
+    bench(planner, { x, z: center.z + near, rotation: 2 }, TERRAIN_CLASS.ground);
   }
   for (let z = z0; z <= z1; z += BENCH_SPACING) {
     if (inLargo(center.x, z)) continue;
-    tryPiece(
-      planner,
-      { key: kit.plazaBench, x: center.x - near, z, rotation: 1, footprint: SINGLE_CELL },
-      TERRAIN_CLASS.ground,
-    );
-    tryPiece(
-      planner,
-      { key: kit.plazaBench, x: center.x + near, z, rotation: 3, footprint: SINGLE_CELL },
-      TERRAIN_CLASS.ground,
-    );
+    bench(planner, { x: center.x - near, z, rotation: 1 }, TERRAIN_CLASS.ground);
+    bench(planner, { x: center.x + near, z, rotation: 3 }, TERRAIN_CLASS.ground);
   }
   for (const quadrant of quadrants) {
     if (quadrant.width < 2 || quadrant.depth < 2) continue;
