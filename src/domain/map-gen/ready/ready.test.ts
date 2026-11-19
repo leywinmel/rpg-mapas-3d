@@ -13,6 +13,7 @@ import { chromeDocksFloors } from './chrome-docks';
 import { cityCenterFloors } from './city-center';
 import { colonyFloors } from './colony';
 import { desertFloors } from './desert';
+import { islandFloors } from './island';
 import { medievalTownFloors } from './medieval-town';
 import { modernTownFloors } from './modern-town';
 import { neonDistrictFloors } from './neon-district';
@@ -277,5 +278,19 @@ describe('cais cromo', () => {
     expect(floors.get('7,44')).toEqual({ tile: 'cyb-piso-grade', height: 1 });
     expect(floors.get('20,44')?.tile).toBe('agua');
     expect(floors.get('42,25')).toEqual({ tile: 'cyb-piso-grade', height: 2 });
+  });
+});
+
+describe('ilha do vulcão', () => {
+  it('shouldReachEveryDryCellFromTheVillage', () => {
+    expect(unreachableDryCells(islandFloors(), '60,88')).toEqual([]);
+  });
+
+  it('shouldRiseFromTheSeaToTheVolcanoPeak', () => {
+    const floors = islandFloors();
+    expect(waterHeights(floors)).toEqual([0]);
+    expect(floors.get('0,0')?.tile).toBe('agua');
+    expect(floors.get('60,60')).toEqual({ tile: 'chao-rachado', height: 8 });
+    expect(floors.get('60,100')).toEqual({ tile: 'piso-madeira', height: 1 });
   });
 });

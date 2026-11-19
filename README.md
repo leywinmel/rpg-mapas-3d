@@ -124,6 +124,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   O "Cais Cromo" (48 × 48) é um porto industrial cyberpunk: o beco das agulhas entre os
   megaprédios, a boate com o estacionamento, o armazém, o pátio de contêineres com a plataforma
   do guindaste e dois píeres sobre o mar escuro.
+  A "Ilha do Vulcão" (120 × 120) é o maior mapa pronto: a ilha cercada de mar, com praia de
+  palmeiras, baixada de carvalhos, morros de mata subindo em degraus até o cume de cinzas com o
+  ídolo, a vila de pescadores com píer e barcos, as ruínas do templo e o acampamento pirata.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

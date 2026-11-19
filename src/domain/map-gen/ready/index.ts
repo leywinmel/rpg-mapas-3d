@@ -8,6 +8,7 @@ import { buildCaveMap, CAVE_SIZE } from './cave';
 import { buildChromeDocksMap, CHROME_DOCKS_SIZE } from './chrome-docks';
 import { buildCryptMap, CRYPT_SIZE } from './crypt';
 import { buildDesertMap, DESERT_SIZE } from './desert';
+import { buildIslandMap, ISLAND_SIZE } from './island';
 import { buildMedievalTownMap, MEDIEVAL_TOWN_SIZE } from './medieval-town';
 import { buildCityCenterMap, CITY_CENTER_SIZE } from './city-center';
 import { buildColonyMap, COLONY_SIZE } from './colony';
@@ -131,6 +132,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Porto industrial cyberpunk: o beco das agulhas entre megaprédios, a boate com estacionamento, o armazém, o pátio de contêineres com a plataforma do guindaste e dois píeres sobre o mar escuro.',
     size: CHROME_DOCKS_SIZE,
     build: buildChromeDocksMap,
+  },
+  {
+    id: 'ilha-vulcao',
+    name: 'Ilha do Vulcão',
+    description:
+      'Ilha gigante cercada de mar: praia, baixada verde, morros de mata subindo em degraus até o cume do vulcão com o ídolo, vila de pescadores com píer, ruínas do templo e acampamento pirata.',
+    size: ISLAND_SIZE,
+    build: buildIslandMap,
   },
 ];
 
