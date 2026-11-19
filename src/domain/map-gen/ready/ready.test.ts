@@ -16,6 +16,7 @@ import { medievalTownFloors } from './medieval-town';
 import { modernTownFloors } from './modern-town';
 import { portFloors } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
+import { stationFloors } from './station';
 import { walledTownFloors } from './walled-town';
 
 function allPieces(model: MapModel): MapPiece[] {
@@ -230,5 +231,22 @@ describe('colônia astra', () => {
     expect(floors.get('36,10')).toEqual({ tile: 'fut-piso-quadriculado', height: 3 });
     expect(floors.get('23,23')).toEqual({ tile: 'fut-piso-metal', height: 2 });
     expect(floors.get('37,36')).toEqual({ tile: 'fut-piso-metal', height: 1 });
+  });
+});
+
+describe('estação vega', () => {
+  it('shouldReachEveryRoomFromTheBridge', () => {
+    expect(unreachableDryCells(stationFloors(), '21,5')).toEqual([]);
+  });
+
+  it('shouldRaiseTheCaptainDaisAndSinkTheReactorPit', () => {
+    const floors = stationFloors();
+    expect(floors.get('21,2')).toEqual({ tile: 'fut-piso-liso', height: 2 });
+    expect(floors.get('36,29')).toEqual({ tile: 'fut-piso-metal', height: 0 });
+    expect(floors.get('21,20')).toEqual({ tile: 'fut-piso-quadriculado', height: 1 });
+  });
+
+  it('shouldLeaveTheVoidOfSpaceWithoutFloor', () => {
+    expect(stationFloors().has('0,0')).toBe(false);
   });
 });
