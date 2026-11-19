@@ -8,6 +8,7 @@ import { buildCaveMap, CAVE_SIZE } from './cave';
 import { buildCryptMap, CRYPT_SIZE } from './crypt';
 import { buildDesertMap, DESERT_SIZE } from './desert';
 import { buildMedievalTownMap, MEDIEVAL_TOWN_SIZE } from './medieval-town';
+import { buildCityCenterMap, CITY_CENTER_SIZE } from './city-center';
 import { buildModernTownMap, MODERN_TOWN_SIZE } from './modern-town';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
@@ -86,6 +87,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Bairro moderno na encosta do lago: praia com píer e coqueiros, avenida da orla, parque da fonte, mercado com estacionamento e duas ruas de casas com quintal.',
     size: MODERN_TOWN_SIZE,
     build: buildModernTownMap,
+  },
+  {
+    id: 'centro-cidade',
+    name: 'Centro da Cidade',
+    description:
+      'Miolo de cidade moderna: duas avenidas que se cruzam, torres de escritório, praça cívica elevada com a estátua, lojas e beco, quartel dos bombeiros e pátio da polícia.',
+    size: CITY_CENTER_SIZE,
+    build: buildCityCenterMap,
   },
 ];
 

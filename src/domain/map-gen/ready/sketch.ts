@@ -14,6 +14,8 @@ export type SketchPiece = {
   readonly rotation?: number;
   /** Sem ele, o da tabela de peças grandes (ou uma casa). */
   readonly footprint?: Footprint;
+  /** Lajes grandes da planta (2×2, 4×4) são o mesmo piso esticado; sem ele, 1. */
+  readonly scale?: number;
 };
 
 /** Faixa de parede numa aresta: estilo, degrau da base e altura em degraus. */
@@ -63,7 +65,7 @@ export function createSketch(size: GridSize, baseTile: string | null): Sketch {
         level: options.level ?? 0,
         rotation: options.rotation ?? 0,
         footprint: options.footprint ?? propFootprint(key),
-        scale: 1,
+        scale: options.scale ?? 1,
       });
     }
     const { keys, index } = createTileKeys();
@@ -159,7 +161,12 @@ export function stampBuilding(sketch: Sketch, building: SketchBuilding): void {
     sketch.piece(
       piece.key,
       { x: piece.x + x, z: piece.z + z },
-      { level: piece.level + level, rotation: piece.rotation, footprint: piece.footprint },
+      {
+        level: piece.level + level,
+        rotation: piece.rotation,
+        footprint: piece.footprint,
+        scale: piece.scale,
+      },
     );
   }
 }

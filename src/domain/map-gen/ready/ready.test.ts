@@ -9,6 +9,7 @@ import {
 import { STYLE_KITS } from '../kits';
 import { READY_MAPS, readyMap } from '.';
 import { CAVE_SIZE, caveFloors } from './cave';
+import { cityCenterFloors } from './city-center';
 import { desertFloors } from './desert';
 import { medievalTownFloors } from './medieval-town';
 import { modernTownFloors } from './modern-town';
@@ -203,5 +204,17 @@ describe('bairro da orla', () => {
     expect(waterHeights(floors)).toEqual([0]);
     expect(floors.get('30,44')).toEqual({ tile: 'piso-madeira', height: 1 });
     expect(floors.get('23,5')).toEqual({ tile: 'mod-asfalto', height: 4 });
+  });
+});
+
+describe('centro da cidade', () => {
+  it('shouldReachEveryCellOneStepAtATime', () => {
+    expect(unreachableDryCells(cityCenterFloors(), '0,0')).toEqual([]);
+  });
+
+  it('shouldRaiseTheCivicPlazaOneStepAboveTheStreet', () => {
+    const floors = cityCenterFloors();
+    expect(floors.get('22,22')).toEqual({ tile: 'mod-asfalto', height: 1 });
+    expect(floors.get('35,10')).toEqual({ tile: 'piso-pedra', height: 2 });
   });
 });
