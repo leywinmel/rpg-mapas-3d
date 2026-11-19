@@ -124,6 +124,25 @@ describe('wilds generator', () => {
     }
   });
 
+  it('shouldKeepTheSeaBelowThePiersAndTheLand', () => {
+    const { model } = generateWilds({ kind: 'port', size: SIZE, seed: 4 });
+    for (let z = 0; z < SIZE.depth; z += 1) {
+      for (let x = 0; x < SIZE.width; x += 1) {
+        const cell = terrainAt(model, { x, z })!;
+        expect(cell.height, `${cell.tile} em ${x},${z}`).toBe(cell.tile === 'agua' ? 0 : 1);
+      }
+    }
+    // Cada peça pousa no chão da casa dela: o barco na água, a tocha no cais.
+    for (const piece of allPieces(model)) {
+      expect(piece.level).toBe(terrainAt(model, piece)!.height);
+    }
+  });
+
+  it('shouldLeaveMapsWithoutWaterFlat', () => {
+    const plan = planWilds({ kind: 'dungeon', size: SIZE, seed: 3 });
+    expect(new Set(plan.heights)).toEqual(new Set([0]));
+  });
+
   // Cada paisagem tem a sua planta: cacto no deserto, cogumelo na caverna, palmeira no porto.
   it.each([
     ['desert', 'nat-cacto'],

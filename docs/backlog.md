@@ -131,7 +131,8 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 
 - [x] **RPG-59** Tokens andando de costas: os 5 heróis e os 2 monstros novos andam virados para trás. Conferir a frente de cada modelo e corrigir o giro.
 - [ ] **RPG-60** O rosto do lobisomem continua virado para o lado errado (o RPG-42 não resolveu). Conferir o modelo na cena e corrigir. Conferido em 19/11: o arquivo no ar (v3) olha para +z e marca `rpgmapsFront: +z`; de cima, o focinho aponta para +z. Ele vira para onde anda. Falta o usuário dizer o que ainda vê errado (print com a direção do movimento).
-- [ ] **RPG-61** Relevo nos mapas: quem gera ou monta um mapa pensa na altura do terreno. No porto, a água fica abaixo do cais de madeira, e não no mesmo nível. Vale para o gerador e para os mapas prontos.
+- [x] **RPG-61** Relevo nos mapas: quem gera ou monta um mapa pensa na altura do terreno. No porto, a água fica abaixo do cais de madeira, e não no mesmo nível. Vale para o gerador e para os mapas prontos.
+      Feito no gerador: em mapa com água, a terra, a areia e o cais sobem um degrau (meio metro) e a água fica no zero; peças e paredes pousam na altura da casa delas. Os mapas prontos (RPG-63) seguem a mesma regra.
 - [ ] **RPG-62** Barcos de verdade: os barcos atuais são pequenos e só estruturas soltas. Fazer barcos em tamanho de mapa: casco, convés, cabine, mastro e porão, montados para jogar dentro.
 - [ ] **RPG-63** Nova aba "Mapas prontos" no editor, separada do gerador: uma biblioteca de mapas pensados e montados à mão, peça por peça, sem sorteio. Primeira leva:
   - 2 mapas diferentes de cada estilo de cidade (medieval, moderna, futurista, cyberpunk);
