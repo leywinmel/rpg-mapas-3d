@@ -135,7 +135,7 @@ export const BACKDROP_SPECS: Readonly<Record<SceneBackdrop, BackdropSpec>> = {
     leaves: false,
     groups: [
       { piece: 'predio-neon', perArea: 0.006, max: 220, scale: [2, 3] },
-      { piece: 'megatorre', perArea: 0.004, max: 160, scale: [2, 3.4] },
+      { piece: 'megatorre', perArea: 0.003, max: 120, scale: [1.1, 1.9] },
     ],
   },
 };

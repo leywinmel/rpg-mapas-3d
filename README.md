@@ -257,7 +257,7 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   na hora, e a escolha fica salva na mesa. Cada pessoa pode desligar a chuva só na própria tela
   ("Mostrar a chuva na minha tela"). Quem pediu menos movimento no sistema não vê os relâmpagos.
 - **Fundo do mapa:** no editor, a aba "Ambiente" tem o campo "Fundo". Em vez da cor lisa, a cena
-  ganha uma paisagem em volta do tabuleiro (floresta, deserto, cidade, masmorra ou mar), que some na
+  ganha uma paisagem em volta do tabuleiro (floresta, deserto, masmorra, mar, ou a cidade de cada estilo: vila medieval, cidade moderna, futurista ou cyberpunk), que some na
   neblina. Vila medieval gerada já vem com floresta; bairro e cidade, com prédios. Em qualidade baixa
   a paisagem fica mais rala, e quem pediu menos movimento no sistema não vê as folhas caindo.
 
