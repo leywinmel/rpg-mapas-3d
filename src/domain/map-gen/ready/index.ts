@@ -7,6 +7,7 @@ import type { AssembledMap } from '../assemble';
 import { buildCaveMap, CAVE_SIZE } from './cave';
 import { buildCryptMap, CRYPT_SIZE } from './crypt';
 import { buildDesertMap, DESERT_SIZE } from './desert';
+import { buildMedievalTownMap, MEDIEVAL_TOWN_SIZE } from './medieval-town';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
 
@@ -59,6 +60,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Cidade na encosta que desce até o mar: armazém, taverna, mercado de peixe, três píeres com navio e barcos, e o farol no pontal.',
     size: PORT_SIZE,
     build: buildPortMap,
+  },
+  {
+    id: 'vila-ponte',
+    name: 'Vila da Ponte Velha',
+    description:
+      'Vila medieval em degraus: o rio com a ponte e as roças, as casas da beira-rio, a praça da fonte com a taverna, a igreja no patamar e a torre do senhor no morro murado.',
+    size: MEDIEVAL_TOWN_SIZE,
+    build: buildMedievalTownMap,
   },
 ];
 
