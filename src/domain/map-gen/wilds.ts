@@ -138,6 +138,8 @@ export type WildPlan = {
   readonly kind: WildKind;
   /** Peça de chão de cada casa, linha a linha; null = rocha maciça. */
   readonly tiles: readonly (string | null)[];
+  /** Degraus de cada casa, linha a linha: a água fica embaixo, a terra e o cais acima dela. */
+  readonly heights: readonly number[];
   readonly walls: readonly MapWall[];
   readonly pieces: readonly PlannedPiece[];
   /** Salas da masmorra, ruínas do deserto, regiões da caverna: o número que a prévia mostra. */
@@ -699,6 +701,31 @@ const SMALL_MAP_FLOOR: Readonly<Record<WildKind, string>> = {
   port: TILE.dirt,
 };
 
+/**
+ * Degraus que a terra fica acima da água (RPG-61): o cais de madeira e a margem ficam meio
+ * metro acima do mar, e o poço da caverna ou o oásis afundam no chão em volta.
+ */
+const LAND_ABOVE_WATER_STEPS = 1;
+
+/** Relevo do mapa: só quem tem água ganha desnível; o resto fica todo no nível zero. */
+function reliefOf(tiles: readonly (string | null)[]): number[] {
+  const hasWater = tiles.includes(TILE.water);
+  return tiles.map((tile) =>
+    hasWater && tile !== null && tile !== TILE.water ? LAND_ABOVE_WATER_STEPS : 0,
+  );
+}
+
+/** Degrau do chão da casa; fora do mapa, zero. */
+function heightAt(plan: WildPlan, x: number, z: number): number {
+  return inside(plan.size, x, z) ? plan.heights[z * plan.size.width + x]! : 0;
+}
+
+/** A parede nasce no chão mais alto dos dois lados dela (rocha maciça conta como zero). */
+function wallLevel(plan: WildPlan, wall: MapWall): number {
+  const [dx, dz] = wall.side === 'north' ? [0, -1] : [-1, 0];
+  return Math.max(heightAt(plan, wall.x, wall.z), heightAt(plan, wall.x + dx, wall.z + dz));
+}
+
 export function planWilds(options: WildOptions): WildPlan {
   const { kind, size, seed } = options;
   const carved = kind === 'dungeon' || kind === 'cave';
@@ -706,7 +733,8 @@ export function planWilds(options: WildOptions): WildPlan {
   const canvas = canvasFor(size, deriveSeed(seed, WILD_KINDS.indexOf(kind)), null);
   const features =
     carved && tooSmall ? planOpenFloor(canvas, SMALL_MAP_FLOOR[kind]) : PLANNERS[kind](canvas);
-  return { size, kind, tiles: canvas.tiles, walls: canvas.walls, pieces: canvas.pieces, features };
+  const { tiles, walls, pieces } = canvas;
+  return { size, kind, tiles, heights: reliefOf(tiles), walls, pieces, features };
 }
 
 const AMBIENCE: Readonly<
@@ -727,17 +755,20 @@ export type GeneratedWilds = { readonly model: MapModel; readonly stats: Generat
 
 export function buildWilds(plan: WildPlan): GeneratedWilds {
   const assembler = createAssembler(plan.size);
-  for (const wall of plan.walls) assembler.addWall(wall);
+  for (const wall of plan.walls) assembler.addWall({ ...wall, level: wallLevel(plan, wall) });
   for (const piece of plan.pieces) {
     const { key, ...placement } = piece;
-    assembler.addPiece({ asset: { source: 'catalog', key }, level: 0, ...placement });
+    const level = heightAt(plan, piece.x, piece.z);
+    assembler.addPiece({ asset: { source: 'catalog', key }, level, ...placement });
   }
   const { keys, index } = createTileKeys();
   const tiles = new Uint16Array(plan.tiles.length);
   plan.tiles.forEach((tile, cell) => {
     tiles[cell] = index(tile);
   });
-  const { model, walls, pieces, dropped } = assembler.finish({ keys, tiles }, headerFor(plan.kind));
+  const heights = Uint8Array.from(plan.heights);
+  const terrain = { keys, tiles, heights };
+  const { model, walls, pieces, dropped } = assembler.finish(terrain, headerFor(plan.kind));
   return { model, stats: { buildings: plan.features, walls, pieces, dropped } };
 }
 

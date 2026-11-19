@@ -26,6 +26,8 @@ import {
 export type TerrainGrid = {
   readonly keys: readonly (string | null)[];
   readonly tiles: Uint16Array;
+  /** Degraus de cada casa do mapa todo, linha a linha; sem ele, tudo no nível zero. */
+  readonly heights?: Uint8Array;
 };
 
 export type AssembledMap = {
@@ -70,6 +72,7 @@ function chunkTerrain(
   const palette: string[] = [];
   const local = new Map<number, number>();
   const tiles = new Uint16Array(bounds.width * bounds.depth);
+  const heights = new Uint8Array(tiles.length);
   let offset = 0;
   for (let z = bounds.z; z < bounds.z + bounds.depth; z += 1) {
     for (let x = bounds.x; x < bounds.x + bounds.width; x += 1) {
@@ -82,10 +85,11 @@ function chunkTerrain(
         local.set(global, paletteIndex);
       }
       tiles[offset] = paletteIndex;
+      heights[offset] = terrain.heights?.[z * size.width + x] ?? 0;
       offset += 1;
     }
   }
-  return { palette, tiles, heights: new Uint8Array(tiles.length) };
+  return { palette, tiles, heights };
 }
 
 export function createAssembler(size: GridSize): MapAssembler {

@@ -95,7 +95,8 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   espalha areia e chão rachado com ruínas, oásis e rochas; "Porto" põe o mar no fundo do mapa,
   com calçadão de madeira, cais entrando na água, barcos atracados (bote, pesqueiro e navio) e
   armazéns. Todos usam o mesmo tamanho e a mesma semente, e todo chão da masmorra e da caverna se
-  alcança andando. Os barcos também ficam na biblioteca, em Veículos.
+  alcança andando. Os barcos também ficam na biblioteca, em Veículos. Onde há água, ela fica um
+  degrau abaixo do chão: o cais e a margem sobem sobre o mar, e a poça da caverna e o oásis afundam.
 - **Casas prontas:** a aba "Casas" (atalho `H`) traz casas inteiras de cada estilo, com móveis e
   telhado. Um clique põe a casa no cursor, `R` gira, e `Ctrl+Z` desfaz a casa toda de uma vez.
 - **Mover carros e objetos durante o jogo:** com a ferramenta de seleção (`V`), o mestre arrasta um
