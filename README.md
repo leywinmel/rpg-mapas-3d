@@ -105,6 +105,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   O "Burgo do Monte Alto" (48 × 48) é uma cidade murada que sobe a encosta em quatro degraus:
   roças e lago fora do muro, portões ao sul e a leste, a praça do mercado, as ruas de casas e
   lojas, a igreja no patamar e o castelo no topo, sobre o penhasco.
+  O "Bairro da Orla" (48 × 48) é um bairro moderno que desce o morro até o mar: casas de
+  reboco com telhado e quintal no alto, a avenida e o mercado com estacionamento no meio, a
+  praça da fonte e, embaixo, o calçadão de areia com palmeiras, píer e barcos.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

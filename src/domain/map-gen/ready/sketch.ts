@@ -7,7 +7,7 @@ import type { Cell, GridSize } from '../../grid';
 import type { CellRect, Footprint, MapHeader, MapWall } from '../../map-v2';
 import { createAssembler, createTileKeys, type AssembledMap } from '../assemble';
 import { buildBlueprint, rotateBlueprint, type Blueprint, type BuildingUse } from '../blueprint';
-import { propFootprint, STYLE_KITS, type SettlementStyle } from '../kits';
+import { propFootprint, roofFor, STYLE_KITS, type SettlementStyle } from '../kits';
 
 export type SketchPiece = {
   readonly level?: number;
@@ -121,14 +121,16 @@ export type SketchBuilding = {
 function buildingBlueprint(building: SketchBuilding): Blueprint {
   const kit = STYLE_KITS[building.style];
   const sets = kit.walls[building.use];
+  const walls = sets[building.variant % sets.length]!;
   const spec = {
     width: building.width,
     depth: building.depth,
     stories: building.stories,
     use: building.use,
-    walls: sets[building.variant % sets.length]!,
+    walls,
     floor: kit.tiles.indoor[building.variant % kit.tiles.indoor.length]!,
-    roof: kit.roof,
+    // Mesma regra do gerador: telhado de duas águas só onde o kit tem e as medidas são pares.
+    roof: roofFor(kit, walls, building),
     seed: building.variant + 1,
   };
   return rotateBlueprint(buildBlueprint(spec, kit), building.rotation);

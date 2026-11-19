@@ -6,10 +6,12 @@ import {
   type MapModel,
   type MapPiece,
 } from '../../map-v2';
+import { STYLE_KITS } from '../kits';
 import { READY_MAPS, readyMap } from '.';
 import { CAVE_SIZE, caveFloors } from './cave';
 import { desertFloors } from './desert';
 import { medievalTownFloors } from './medieval-town';
+import { modernTownFloors } from './modern-town';
 import { portFloors } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
 import { walledTownFloors } from './walled-town';
@@ -19,8 +21,10 @@ function allPieces(model: MapModel): MapPiece[] {
 }
 
 /** Pisos soltos (convés, laje) recebem as outras peças por cima: não contam como ocupação. */
+const SLABS = new Set(Object.values(STYLE_KITS).flatMap((kit) => kit.tiles.indoor));
 const isSlab = (piece: MapPiece) =>
-  piece.asset.source === 'catalog' && piece.asset.key.includes('assoalho');
+  piece.asset.source === 'catalog' &&
+  (piece.asset.key.includes('assoalho') || SLABS.has(piece.asset.key));
 
 describe('mapas prontos', () => {
   it.each(READY_MAPS)('shouldMakeChunksTheDomainAccepts ($id)', (ready) => {
@@ -186,5 +190,18 @@ describe('burgo do monte alto', () => {
     expect(waterHeights(floors)).toEqual([0]);
     expect(floors.get('23,39')).toEqual({ tile: 'med-calcamento', height: 2 });
     expect(floors.get('24,8')).toEqual({ tile: 'piso-pedra', height: 5 });
+  });
+});
+
+describe('bairro da orla', () => {
+  it('shouldReachEveryDryCellOneStepAtATime', () => {
+    expect(unreachableDryCells(modernTownFloors(), '0,0')).toEqual([]);
+  });
+
+  it('shouldKeepTheLakeOneStepBelowTheBeach', () => {
+    const floors = modernTownFloors();
+    expect(waterHeights(floors)).toEqual([0]);
+    expect(floors.get('30,44')).toEqual({ tile: 'piso-madeira', height: 1 });
+    expect(floors.get('23,5')).toEqual({ tile: 'mod-asfalto', height: 4 });
   });
 });
