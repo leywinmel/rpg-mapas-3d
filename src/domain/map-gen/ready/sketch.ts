@@ -6,7 +6,8 @@
 import type { Cell, GridSize } from '../../grid';
 import type { CellRect, Footprint, MapHeader, MapWall } from '../../map-v2';
 import { createAssembler, createTileKeys, type AssembledMap } from '../assemble';
-import { propFootprint } from '../kits';
+import { buildBlueprint, rotateBlueprint, type Blueprint, type BuildingUse } from '../blueprint';
+import { propFootprint, STYLE_KITS, type SettlementStyle } from '../kits';
 
 export type SketchPiece = {
   readonly level?: number;
@@ -95,5 +96,68 @@ export function outlineWalls(
     if (!has(x, z + 1)) raise({ x, z: z + 1, side: 'north' }, cell);
     if (!has(x - 1, z)) raise({ x, z, side: 'west' }, cell);
     if (!has(x + 1, z)) raise({ x: x + 1, z, side: 'west' }, cell);
+  }
+}
+
+/** Prédio desenhado à mão: onde fica, o tamanho e o estilo; a planta vem do gerador [#6]. */
+export type SketchBuilding = {
+  readonly style: SettlementStyle;
+  readonly use: BuildingUse;
+  /** Canto de menor x e z, já com o prédio girado. */
+  readonly x: number;
+  readonly z: number;
+  /** Largura e fundo antes de girar. */
+  readonly width: number;
+  readonly depth: number;
+  readonly stories: number;
+  /** Giro da planta: a porta fica ao norte (0), oeste (1), sul (2) ou leste (3); 1 e 3 trocam largura e fundo. */
+  readonly rotation: number;
+  /** Degrau do chão do prédio. */
+  readonly level: number;
+  /** Escolhe a fachada da lista do estilo e a mobília: o mesmo número sai sempre igual. */
+  readonly variant: number;
+};
+
+function buildingBlueprint(building: SketchBuilding): Blueprint {
+  const kit = STYLE_KITS[building.style];
+  const sets = kit.walls[building.use];
+  const spec = {
+    width: building.width,
+    depth: building.depth,
+    stories: building.stories,
+    use: building.use,
+    walls: sets[building.variant % sets.length]!,
+    floor: kit.tiles.indoor[building.variant % kit.tiles.indoor.length]!,
+    roof: kit.roof,
+    seed: building.variant + 1,
+  };
+  return rotateBlueprint(buildBlueprint(spec, kit), building.rotation);
+}
+
+/** O retângulo que o prédio ocupa no mapa, já girado. */
+export function buildingRect(building: SketchBuilding): CellRect {
+  const turned = building.rotation % 2 !== 0;
+  return {
+    x: building.x,
+    z: building.z,
+    width: turned ? building.depth : building.width,
+    depth: turned ? building.width : building.depth,
+  };
+}
+
+/** Põe o prédio no esboço: o piso, as paredes de cada andar, a mobília e o telhado. */
+export function stampBuilding(sketch: Sketch, building: SketchBuilding): void {
+  const blueprint = buildingBlueprint(building);
+  const { x, z, level } = building;
+  sketch.ground({ x, z, width: blueprint.width, depth: blueprint.depth }, blueprint.floor, level);
+  for (const wall of blueprint.walls) {
+    sketch.wall({ ...wall, x: wall.x + x, z: wall.z + z, level: wall.level + level });
+  }
+  for (const piece of blueprint.pieces) {
+    sketch.piece(
+      piece.key,
+      { x: piece.x + x, z: piece.z + z },
+      { level: piece.level + level, rotation: piece.rotation, footprint: piece.footprint },
+    );
   }
 }

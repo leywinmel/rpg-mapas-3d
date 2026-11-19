@@ -98,6 +98,10 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   grama, as ruínas de um templo num platô, a caravana acampada e um rochedo com mirante.
   O "Porto da maré" (48 × 48) desce a encosta da cidade alta até o calçadão do cais, com
   armazém, taverna, mercado de peixe, três píeres com navio e barcos, e o farol no pontal.
+  A "Vila da Ponte Velha" (48 × 48) é uma vila medieval em degraus: o rio um degrau abaixo das
+  margens, a ponte de tábuas e as roças, as casas da beira-rio, a praça da fonte com a taverna,
+  a igreja no patamar e a torre do senhor no morro murado. Os prédios usam a mesma planta do
+  gerador, com mobília, escada e telhado.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

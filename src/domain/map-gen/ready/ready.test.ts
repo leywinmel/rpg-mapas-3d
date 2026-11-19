@@ -9,6 +9,7 @@ import {
 import { READY_MAPS, readyMap } from '.';
 import { CAVE_SIZE, caveFloors } from './cave';
 import { desertFloors } from './desert';
+import { medievalTownFloors } from './medieval-town';
 import { portFloors } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
 
@@ -158,5 +159,18 @@ describe('porto da maré', () => {
     const floors = portFloors();
     expect(waterHeights(floors)).toEqual([0]);
     expect(floors.get('20,40')).toEqual({ tile: 'piso-madeira', height: 1 });
+  });
+});
+
+describe('vila da ponte velha', () => {
+  it('shouldReachEveryDryCellOneStepAtATime', () => {
+    expect(unreachableDryCells(medievalTownFloors(), '0,0')).toEqual([]);
+  });
+
+  it('shouldCrossTheRiverOnABridgeOneStepAboveTheWater', () => {
+    const floors = medievalTownFloors();
+    expect(waterHeights(floors)).toEqual([0]);
+    expect(floors.get('8,23')).toEqual({ tile: 'piso-madeira', height: 1 });
+    expect(floors.get('33,6')).toEqual({ tile: 'piso-pedra', height: 4 });
   });
 });
