@@ -146,6 +146,8 @@ export const PROP_FOOTPRINTS: Readonly<Record<string, Footprint>> = {
   'nat-pedregulho': { width: 2, depth: 2 },
   'nat-tronco': { width: 2, depth: 1 },
   'med-bote': { width: 1, depth: 2 },
+  'pra-estatua-grande': { width: 2, depth: 2 },
+  'med-carroca': { width: 2, depth: 3 },
 };
 
 /** Footprint de uma peça solta (sem giro): o da tabela ou uma casa. */

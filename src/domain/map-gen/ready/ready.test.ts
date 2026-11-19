@@ -8,6 +8,7 @@ import {
 } from '../../map-v2';
 import { READY_MAPS, readyMap } from '.';
 import { CAVE_SIZE, caveFloors } from './cave';
+import { desertFloors } from './desert';
 import { buildShipMap, SHIP_SIZE } from './ship';
 
 function allPieces(model: MapModel): MapPiece[] {
@@ -90,38 +91,59 @@ describe('navio de guerra', () => {
   });
 });
 
+type Floors = ReadonlyMap<string, { readonly tile: string; readonly height: number }>;
+
+/** Casas de chão seco que não se alcançam a partir de `start`, um degrau por passo. */
+function unreachableDryCells(floors: Floors, start: string): string[] {
+  const seen = new Set([start]);
+  const queue = [start];
+  while (queue.length > 0) {
+    const [x, z] = queue.shift()!.split(',').map(Number);
+    const height = floors.get(`${x},${z}`)!.height;
+    for (const [nx, nz] of [
+      [x! + 1, z!],
+      [x! - 1, z!],
+      [x!, z! + 1],
+      [x!, z! - 1],
+    ]) {
+      const next = `${nx},${nz}`;
+      const floor = floors.get(next);
+      if (!floor || seen.has(next) || Math.abs(floor.height - height) > 1) continue;
+      seen.add(next);
+      queue.push(next);
+    }
+  }
+  return [...floors]
+    .filter(([cell, floor]) => floor.tile !== 'agua' && !seen.has(cell))
+    .map(([cell]) => cell);
+}
+
+const waterHeights = (floors: Floors) => [
+  ...new Set([...floors.values()].filter((floor) => floor.tile === 'agua').map((f) => f.height)),
+];
+
 describe('caverna dos ecos', () => {
   // Ninguém fica preso: da boca do túnel se chega a todo chão seco subindo ou descendo um
   // degrau por vez.
   it('shouldReachEveryDryFloorFromTheMouthOneStepAtATime', () => {
     const floors = caveFloors();
     const mouth = [...floors.keys()].find((cell) => cell.endsWith(`,${CAVE_SIZE.depth - 1}`))!;
-    const seen = new Set([mouth]);
-    const queue = [mouth];
-    while (queue.length > 0) {
-      const [x, z] = queue.shift()!.split(',').map(Number);
-      const height = floors.get(`${x},${z}`)!.height;
-      for (const [nx, nz] of [
-        [x! + 1, z!],
-        [x! - 1, z!],
-        [x!, z! + 1],
-        [x!, z! - 1],
-      ]) {
-        const next = `${nx},${nz}`;
-        const floor = floors.get(next);
-        if (!floor || seen.has(next) || Math.abs(floor.height - height) > 1) continue;
-        seen.add(next);
-        queue.push(next);
-      }
-    }
-    const dry = [...floors].filter(([, floor]) => floor.tile !== 'agua').map(([cell]) => cell);
-    expect(dry.filter((cell) => !seen.has(cell))).toEqual([]);
+    expect(unreachableDryCells(floors, mouth)).toEqual([]);
   });
 
   it('shouldKeepTheLakeOneStepBelowItsShore', () => {
-    const heights = new Set(
-      [...caveFloors().values()].filter((floor) => floor.tile === 'agua').map((f) => f.height),
-    );
-    expect([...heights]).toEqual([0]);
+    expect(waterHeights(caveFloors())).toEqual([0]);
+  });
+});
+
+describe('areias do sol', () => {
+  it('shouldReachEveryDryCellOneStepAtATime', () => {
+    expect(unreachableDryCells(desertFloors(), '0,0')).toEqual([]);
+  });
+
+  it('shouldKeepTheOasisOneStepBelowItsShore', () => {
+    const floors = desertFloors();
+    expect(waterHeights(floors)).toEqual([0]);
+    expect(floors.get('11,12')?.tile).toBe('agua');
   });
 });
