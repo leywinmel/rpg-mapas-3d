@@ -2,8 +2,9 @@
 // estante, geladeira, fogão, rack com TV, vaso de planta), na loja (balcão e prateleira), na
 // rua (poste, hidrante, lixeira, banco de praça, placa de rua e banca de jornal, RPG-36) e no quintal (churrasqueira). Servem ao
 // gerador de vila/cidade e às casas prontas, que antes quase só tinham mesa e cadeira.
-// Cada peça ocupa 1 casa e olha para +z (a frente do móvel); o gerador encosta na parede e
-// vira a frente para dentro do cômodo.
+// Cada peça olha para +z (a frente do móvel); o gerador encosta na parede e vira a frente para
+// dentro do cômodo. Quase todas ocupam 1 casa; sofá, rack com TV e banco de praça têm 2×1 e a
+// cama 1×2 (RPG-66), na escala do boneco de 1,5 de altura. A origem fica no centro do footprint.
 // uso: node scripts/assets/furniture-pieces.mjs <public/assets/modern>
 import { glow, layers, shade, writePiece } from './piece-mesh.mjs';
 
@@ -60,25 +61,30 @@ function legs(mesh, w, d, height, thick = 0.05) {
   }
 }
 
+/** Sofá de três lugares, 2×1: encosto atrás (-z), braços nas pontas e três almofadas. */
 async function sofa() {
   const p = layers({ fabric: FABRIC, cushion: shade(FABRIC, 1.25), wood: WOOD_DARK });
-  legs(p.wood.mesh, 0.8, 0.6, 0.08);
-  p.fabric.mesh.box(block(0.84, 0.62, 0.08, 0.32), ['ny']);
-  p.fabric.mesh.box(block(0.84, 0.16, 0.32, 0.75, 0, -0.23));
-  p.fabric.mesh.box(block(0.12, 0.46, 0.32, 0.52, -0.36, 0.08));
-  p.fabric.mesh.box(block(0.12, 0.46, 0.32, 0.52, 0.36, 0.08));
-  p.cushion.mesh.box(block(0.29, 0.44, 0.32, 0.42, -0.15, 0.07));
-  p.cushion.mesh.box(block(0.29, 0.44, 0.32, 0.42, 0.15, 0.07));
+  legs(p.wood.mesh, 1.68, 0.7, 0.08);
+  p.fabric.mesh.box(block(1.76, 0.76, 0.08, 0.36), ['ny']);
+  p.fabric.mesh.box(block(1.76, 0.2, 0.36, 0.86, 0, -0.28));
+  p.fabric.mesh.box(block(0.16, 0.56, 0.36, 0.6, -0.8, 0.1));
+  p.fabric.mesh.box(block(0.16, 0.56, 0.36, 0.6, 0.8, 0.1));
+  for (const x of [-0.48, 0, 0.48]) {
+    p.cushion.mesh.box(block(0.46, 0.54, 0.36, 0.47, x, 0.09));
+    p.cushion.mesh.box(block(0.44, 0.1, 0.47, 0.8, x, -0.14));
+  }
   await writePiece(OUT, 'mod-sofa', p);
 }
 
+/** Cama de solteiro, 1×2: cabeceira atrás (-z), o corpo deitado ao longo de z. */
 async function bed() {
   const p = layers({ wood: WOOD, linen: LINEN, blanket: [150, 60, 64] });
-  p.wood.mesh.box(block(0.7, 0.84, 0, 0.26), ['ny']);
-  p.wood.mesh.box(block(0.74, 0.06, 0, 0.62, 0, -0.41), ['ny']);
-  p.linen.mesh.box(block(0.66, 0.8, 0.26, 0.36), ['ny']);
-  p.linen.mesh.box(block(0.5, 0.16, 0.36, 0.44, 0, -0.28), ['ny']);
-  p.blanket.mesh.box(block(0.68, 0.48, 0.3, 0.38, 0, 0.17), ['ny']);
+  p.wood.mesh.box(block(0.86, 1.82, 0, 0.3), ['ny']);
+  p.wood.mesh.box(block(0.9, 0.08, 0, 0.86, 0, -0.88), ['ny']);
+  p.wood.mesh.box(block(0.9, 0.06, 0, 0.42, 0, 0.89), ['ny']);
+  p.linen.mesh.box(block(0.8, 1.72, 0.3, 0.44, 0, -0.01), ['ny']);
+  p.linen.mesh.box(block(0.6, 0.28, 0.44, 0.54, 0, -0.66), ['ny']);
+  p.blanket.mesh.box(block(0.84, 1.1, 0.36, 0.48, 0, 0.3), ['ny']);
   await writePiece(OUT, 'mod-cama', p);
 }
 
@@ -97,17 +103,20 @@ async function bookshelf() {
     wood: WOOD,
     ...Object.fromEntries(BOOKS.map((color, index) => [`book${index}`, color])),
   });
+  // Ocupa a casa inteira, de borda a borda: duas estantes lado a lado viram uma só, com as
+  // prateleiras e o fundo contínuos e só um montante fino no meio (RPG-66).
+  const E = 0.5;
   const back = { z0: -0.22, z1: 0.06 };
-  p.wood.mesh.box({ x0: -H, x1: H, y0: 0, y1: 1.6, z0: back.z0, z1: back.z0 + 0.03 }, ['ny']);
-  p.wood.mesh.box({ x0: -H, x1: -H + 0.04, y0: 0, y1: 1.6, ...back }, ['ny']);
-  p.wood.mesh.box({ x0: H - 0.04, x1: H, y0: 0, y1: 1.6, ...back }, ['ny']);
+  p.wood.mesh.box({ x0: -E, x1: E, y0: 0, y1: 1.6, z0: back.z0, z1: back.z0 + 0.03 }, ['ny']);
+  p.wood.mesh.box({ x0: -E, x1: -E + 0.02, y0: 0, y1: 1.6, ...back }, ['ny']);
+  p.wood.mesh.box({ x0: E - 0.02, x1: E, y0: 0, y1: 1.6, ...back }, ['ny']);
   const shelves = [0, 0.4, 0.8, 1.2, 1.56];
-  for (const y of shelves) p.wood.mesh.box({ x0: -H, x1: H, y0: y, y1: y + 0.04, ...back });
+  for (const y of shelves) p.wood.mesh.box({ x0: -E, x1: E, y0: y, y1: y + 0.04, ...back });
   // Livros em fileira, de alturas e cores variadas (sequência fixa: a peça sai sempre igual).
   for (const [row, y] of shelves.slice(0, -1).entries()) {
-    let x = -H + 0.06;
+    let x = -E + 0.04;
     let index = row;
-    while (x < H - 0.12) {
+    while (x < E - 0.1) {
       const width = 0.05 + (index % 3) * 0.015;
       const height = 0.24 + ((index * 7) % 5) * 0.02;
       p[`book${index % BOOKS.length}`].mesh.box(
@@ -148,12 +157,14 @@ async function stove() {
   await writePiece(OUT, 'mod-fogao', p);
 }
 
+/** Rack comprido com TV grande, 2×1: a tela fica de frente (+z), encostada atrás. */
 async function tvRack() {
   const p = layers({ wood: WOOD_DARK, frame: BLACK, screen: glow([30, 52, 84]) });
-  p.wood.mesh.box(block(0.84, 0.4, 0, 0.42, 0, -0.2), ['ny']);
-  p.frame.mesh.box(block(0.08, 0.08, 0.42, 0.5, 0, -0.24), ['ny']);
-  p.frame.mesh.box(block(0.72, 0.05, 0.5, 0.94, 0, -0.24), ['ny']);
-  p.screen.mesh.box(block(0.66, 0.01, 0.53, 0.91, 0, -0.21), ['ny', 'nz']);
+  p.wood.mesh.box(block(1.7, 0.44, 0, 0.44, 0, -0.18), ['ny']);
+  p.frame.mesh.box(block(0.3, 0.16, 0.44, 0.47, 0, -0.24), ['ny']);
+  p.frame.mesh.box(block(0.08, 0.06, 0.47, 0.6, 0, -0.26), ['ny']);
+  p.frame.mesh.box(block(1.24, 0.05, 0.6, 1.32, 0, -0.26), ['ny']);
+  p.screen.mesh.box(block(1.18, 0.01, 0.63, 1.29, 0, -0.23), ['ny', 'nz']);
   await writePiece(OUT, 'mod-tv', p);
 }
 
@@ -227,14 +238,15 @@ async function trashBin() {
   await writePiece(OUT, 'mod-lixeira', p);
 }
 
+/** Banco de praça de três lugares, 2×1: senta-se olhando para +z. */
 async function bench() {
   const p = layers({ wood: WOOD, metal: STEEL_DARK });
-  for (const x of [-0.34, 0.34]) {
-    p.metal.mesh.box(block(0.05, 0.36, 0, 0.4, x, 0), ['ny']);
-    p.metal.mesh.box(block(0.05, 0.05, 0.4, 0.78, x, -0.17), ['ny']);
+  for (const x of [-0.7, 0, 0.7]) {
+    p.metal.mesh.box(block(0.06, 0.44, 0, 0.4, x, 0), ['ny']);
+    p.metal.mesh.box(block(0.06, 0.06, 0.4, 0.86, x, -0.2), ['ny']);
   }
-  for (const z of [-0.1, 0.02, 0.14]) p.wood.mesh.box(block(0.86, 0.1, 0.4, 0.45, 0, z));
-  for (const y of [0.55, 0.68]) p.wood.mesh.box(block(0.86, 0.04, y, y + 0.09, 0, -0.18));
+  for (const z of [-0.12, 0.02, 0.16]) p.wood.mesh.box(block(1.74, 0.12, 0.4, 0.46, 0, z));
+  for (const y of [0.56, 0.72]) p.wood.mesh.box(block(1.74, 0.05, y, y + 0.1, 0, -0.21));
   await writePiece(OUT, 'mod-banco-praca', p);
 }
 

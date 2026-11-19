@@ -7,10 +7,11 @@
  * Escala: uma casa ~1,5 m (um boneco 1×1) e um andar = 4 degraus = 2 casas de altura.
  */
 import type { Cell, GridEdge } from '../grid';
-import { QUARTER_TURNS, STORY_HEIGHT_STEPS, type Footprint } from '../map-v2';
+import { QUARTER_TURNS, rotatedFootprint, STORY_HEIGHT_STEPS, type Footprint } from '../map-v2';
 import { createRandom } from './random';
 import {
   gableRoofsFor,
+  propFootprint,
   SINGLE_CELL,
   type RoofKind,
   type SizedPiece,
@@ -227,7 +228,29 @@ function inwardTurn(spec: BuildingSpec, x: number, z: number): number | null {
   return null;
 }
 
-/** Mobília do andar (a de loja no térreo da loja), longe da porta e da escada, uma por casa. */
+type FloorSpot = { readonly x: number; readonly z: number; readonly size: Footprint };
+
+/**
+ * Âncora do móvel girado que cobre a casa sorteada sem sair do prédio. Encostado numa parede, o
+ * móvel comprido continua colado nela: a casa sorteada já está na borda e o recuo só desliza ao
+ * longo da parede. Nulo se o móvel não cabe no prédio.
+ */
+function floorSpot(spec: BuildingSpec, cell: Cell, size: Footprint): FloorSpot | null {
+  const maxX = spec.width - size.width;
+  const maxZ = spec.depth - size.depth;
+  if (maxX < 0 || maxZ < 0) return null;
+  return { x: Math.min(cell.x, maxX), z: Math.min(cell.z, maxZ), size };
+}
+
+function spotCells(spot: FloorSpot): string[] {
+  const cells: string[] = [];
+  for (let dx = 0; dx < spot.size.width; dx += 1) {
+    for (let dz = 0; dz < spot.size.depth; dz += 1) cells.push(`${spot.x + dx},${spot.z + dz}`);
+  }
+  return cells;
+}
+
+/** Mobília do andar (a de loja no térreo da loja), longe da porta e da escada, sem sobrepor. */
 function furnish(context: StoryContext, story: number): BlueprintPiece[] {
   const { spec, kit, random } = context;
   const taken = new Set(context.stairs.map((cell) => `${cell.x},${cell.z}`));
@@ -242,19 +265,25 @@ function furnish(context: StoryContext, story: number): BlueprintPiece[] {
   const pieces: BlueprintPiece[] = [];
   for (let item = 0; item < count; item += 1) {
     const againstWall = random.chance(WALL_FURNITURE_SHARE);
+    const key = random.pick(props);
+    const footprint = propFootprint(key);
     for (let attempt = 0; attempt < PLACEMENT_TRIES; attempt += 1) {
-      const x = random.between(0, spec.width - 1);
-      const z = random.between(0, spec.depth - 1);
-      const turn = inwardTurn(spec, x, z);
-      if (taken.has(`${x},${z}`) || (againstWall && turn === null)) continue;
-      taken.add(`${x},${z}`);
+      const cell = { x: random.between(0, spec.width - 1), z: random.between(0, spec.depth - 1) };
+      const turn = inwardTurn(spec, cell.x, cell.z);
+      if (againstWall && turn === null) continue;
+      const rotation = turn ?? random.between(0, QUARTER_TURNS - 1);
+      const spot = floorSpot(spec, cell, rotatedFootprint(footprint, rotation));
+      if (spot === null) continue;
+      const cells = spotCells(spot);
+      if (cells.some((cellKey) => taken.has(cellKey))) continue;
+      for (const cellKey of cells) taken.add(cellKey);
       pieces.push({
-        key: random.pick(props),
-        x,
-        z,
+        key,
+        x: spot.x,
+        z: spot.z,
         level: story * STORY_HEIGHT_STEPS,
-        rotation: turn ?? random.between(0, QUARTER_TURNS - 1),
-        footprint: SINGLE_CELL,
+        rotation,
+        footprint,
         scale: 1,
       });
       break;

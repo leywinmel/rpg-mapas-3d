@@ -128,6 +128,24 @@ const plasterHouse = (color: string, roofs: readonly SizedPiece[]): WallSet => (
 
 export const SINGLE_CELL = ONE;
 
+/**
+ * Peças soltas maiores que uma casa, na escala do boneco (RPG-66): sofá, rack com TV e bancos
+ * de três lugares têm 2×1; a cama, 1×2. O catálogo da cena repete a medida para desenhar; um
+ * teste garante que os dois batem.
+ */
+export const PROP_FOOTPRINTS: Readonly<Record<string, Footprint>> = {
+  'mod-sofa': { width: 2, depth: 1 },
+  'mod-tv': { width: 2, depth: 1 },
+  'mod-cama': { width: 1, depth: 2 },
+  'mod-banco-praca': { width: 2, depth: 1 },
+  'pra-banco-pedra': { width: 2, depth: 1 },
+};
+
+/** Footprint de uma peça solta (sem giro): o da tabela ou uma casa. */
+export function propFootprint(key: string): Footprint {
+  return PROP_FOOTPRINTS[key] ?? ONE;
+}
+
 const MEDIEVAL: StyleKit = {
   tiles: {
     ground: 'grama',
@@ -388,7 +406,8 @@ export function roofFor(
 export function kitKeys(kit: StyleKit): { floors: string[]; walls: string[]; props: SizedPiece[] } {
   const wallSets = [...kit.walls.house, ...kit.walls.tower, ...kit.walls.shop];
   const walls = wallSets.flatMap((set) => [set.plain, set.door, set.window, set.shopfront ?? []]);
-  const single = (keys: readonly string[]) => keys.map((key) => ({ key, footprint: ONE }));
+  const single = (keys: readonly string[]) =>
+    keys.map((key) => ({ key, footprint: propFootprint(key) }));
   const props: SizedPiece[] = [
     ...kit.gableRoofs,
     ...wallSets.flatMap((set) => set.roofs ?? []),

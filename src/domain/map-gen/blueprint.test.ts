@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { pieceRect, STORY_HEIGHT_STEPS } from '../map-v2';
+import { occupiedCells, pieceRect, STORY_HEIGHT_STEPS } from '../map-v2';
 import { buildBlueprint, doorOutside, rotateBlueprint, type BuildingSpec } from './blueprint';
-import { roofFor, STYLE_KITS } from './kits';
+import { propFootprint, roofFor, STYLE_KITS } from './kits';
 
 const medieval = STYLE_KITS.medieval;
 const modern = STYLE_KITS.modern;
@@ -100,6 +100,37 @@ describe('building blueprint', () => {
       );
       expect(inside).toEqual([]);
     }
+  });
+
+  it('shouldFitBigFurnitureInsideTheHouseWithoutOverlapping', () => {
+    const furniture = new Set(modern.indoorProps);
+    let bigOnes = 0;
+    for (let seed = 0; seed < 40; seed += 1) {
+      const house = spec({
+        seed,
+        walls: modern.walls.house[0]!,
+        floor: modern.tiles.indoor[0]!,
+      });
+      const pieces = buildBlueprint(house, modern).pieces.filter((piece) =>
+        furniture.has(piece.key),
+      );
+      const used = new Set<string>();
+      for (const piece of pieces) {
+        expect(piece.footprint).toEqual(propFootprint(piece.key));
+        if (piece.footprint.width * piece.footprint.depth > 1) bigOnes += 1;
+        const rect = pieceRect(piece);
+        expect(rect.x).toBeGreaterThanOrEqual(0);
+        expect(rect.z).toBeGreaterThanOrEqual(0);
+        expect(rect.x + rect.width).toBeLessThanOrEqual(house.width);
+        expect(rect.z + rect.depth).toBeLessThanOrEqual(house.depth);
+        for (const cell of occupiedCells(piece)) {
+          const key = `${piece.level}:${cell.x},${cell.z}`;
+          expect(used.has(key), `${piece.key} em ${key}`).toBe(false);
+          used.add(key);
+        }
+      }
+    }
+    expect(bigOnes).toBeGreaterThan(0);
   });
 
   it('shouldFallBackToOneStoryWhenThereIsNoRoomForStairs', () => {

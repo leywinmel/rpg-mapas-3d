@@ -1,5 +1,5 @@
 // Gera os enfeites de praça (RPG-35): fonte grande (3×3), chafariz (2×2), estátua grande com
-// pedestal (2×2), obelisco, banco de pedra e canteiro elevado (2×1). Servem a todos os estilos
+// pedestal (2×2), obelisco, banco de pedra (2×1) e canteiro elevado (2×1). Servem a todos os estilos
 // e ao gerador, que monta a praça com jardim, caminhos e bancos em volta do monumento.
 // Peças olham para +z; o pedestal e a fonte são simétricos, então girar só muda a estátua.
 // uso: node scripts/assets/plaza-pieces.mjs <public/assets/plaza>
@@ -141,14 +141,13 @@ async function obelisk() {
   await writePiece(OUT, 'pra-obelisco', p);
 }
 
-/** Banco de pedra sem encosto, comprido no eixo x: senta-se de frente para +z ou -z. */
+/** Banco de pedra sem encosto, 2×1 (RPG-66), comprido no eixo x: senta-se para +z ou -z. */
 async function stoneBench() {
   const p = layers({ stone: STONE, dark: STONE_DARK, wood: WOOD });
-  p.dark.mesh.box(block(0.14, 0.32, 0, 0.36, -0.3), ['ny']);
-  p.dark.mesh.box(block(0.14, 0.32, 0, 0.36, 0.3), ['ny']);
-  p.stone.mesh.box(block(0.86, 0.38, 0.36, 0.44), []);
+  for (const x of [-0.62, 0.62]) p.dark.mesh.box(block(0.2, 0.4, 0, 0.38, x), ['ny']);
+  p.stone.mesh.box(block(1.72, 0.46, 0.38, 0.47), []);
   // Tábua do assento por cima da pedra: dá a cor de madeira que lê como "banco" de longe.
-  p.wood.mesh.box(block(0.8, 0.3, 0.44, 0.47), ['ny']);
+  p.wood.mesh.box(block(1.64, 0.36, 0.47, 0.5), ['ny']);
   await writePiece(OUT, 'pra-banco-pedra', p);
 }
 

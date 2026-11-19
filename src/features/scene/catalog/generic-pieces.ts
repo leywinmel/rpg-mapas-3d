@@ -189,7 +189,8 @@ const PLAZA: readonly GenericSpec[] = [
     label: 'Banco de pedra',
     keywords: ['banco', 'assento', 'praça', 'jardim'],
     icon: 'armchair',
-    height: 0.47,
+    height: 0.5,
+    footprint: { width: 2, depth: 1 },
   },
   {
     key: 'pra-canteiro',

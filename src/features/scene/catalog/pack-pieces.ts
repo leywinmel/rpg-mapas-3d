@@ -1084,7 +1084,8 @@ export const PACK_PIECES: readonly CatalogEntry[] = [
     icon: 'armchair',
     visual: { type: 'model', url: '/assets/modern/mod-sofa.gltf' },
     thumbnail: '/assets/modern/thumbs/mod-sofa.webp',
-    height: 0.75,
+    height: 0.86,
+    footprint: { width: 2, depth: 1 },
   },
   {
     key: 'mod-cama',
@@ -1096,7 +1097,8 @@ export const PACK_PIECES: readonly CatalogEntry[] = [
     icon: 'box',
     visual: { type: 'model', url: '/assets/modern/mod-cama.gltf' },
     thumbnail: '/assets/modern/thumbs/mod-cama.webp',
-    height: 0.62,
+    height: 0.86,
+    footprint: { width: 1, depth: 2 },
   },
   {
     key: 'mod-armario',
@@ -1156,7 +1158,8 @@ export const PACK_PIECES: readonly CatalogEntry[] = [
     icon: 'monitor',
     visual: { type: 'model', url: '/assets/modern/mod-tv.gltf' },
     thumbnail: '/assets/modern/thumbs/mod-tv.webp',
-    height: 0.94,
+    height: 1.32,
+    footprint: { width: 2, depth: 1 },
   },
   {
     key: 'mod-vaso-planta',
@@ -1265,7 +1268,8 @@ export const PACK_PIECES: readonly CatalogEntry[] = [
     icon: 'armchair',
     visual: { type: 'model', url: '/assets/modern/mod-banco-praca.gltf' },
     thumbnail: '/assets/modern/thumbs/mod-banco-praca.webp',
-    height: 0.77,
+    height: 0.86,
+    footprint: { width: 2, depth: 1 },
   },
   {
     key: 'mod-churrasqueira',
