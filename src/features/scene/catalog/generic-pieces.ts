@@ -242,8 +242,36 @@ const SHIP: readonly GenericSpec[] = [
   },
 ];
 
+/** Peças dos mapas prontos de masmorra (RPG-63, de scripts/assets/dungeon-pieces.mjs). */
+const DUNGEON: readonly GenericSpec[] = [
+  {
+    key: 'mas-sarcofago',
+    label: 'Sarcófago',
+    keywords: ['masmorra', 'cripta', 'tumba', 'caixão', 'morto'],
+    icon: 'box',
+    height: 0.94,
+    footprint: { width: 1, depth: 2 },
+  },
+  {
+    key: 'mas-altar',
+    label: 'Altar de pedra',
+    keywords: ['masmorra', 'templo', 'ritual', 'velas', 'culto'],
+    icon: 'table',
+    height: 1.33,
+    footprint: { width: 2, depth: 1 },
+  },
+  {
+    key: 'mas-ossos',
+    label: 'Monte de ossos',
+    keywords: ['masmorra', 'crânio', 'esqueleto', 'caveira', 'cripta'],
+    icon: 'rock',
+    height: 0.26,
+  },
+];
+
 export const GENERIC_PIECES: readonly CatalogEntry[] = [
   ...genericPieces('/assets/nature', 'nature', NATURE),
   ...genericPieces('/assets/plaza', 'structure', PLAZA),
   ...genericPieces('/assets/ship', 'structure', SHIP),
+  ...genericPieces('/assets/dungeon', 'furniture', DUNGEON),
 ];

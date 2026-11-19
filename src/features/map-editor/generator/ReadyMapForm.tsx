@@ -9,6 +9,7 @@ import styles from './GenerateMap.module.css';
 /** Imagem vista de cima de cada mapa pronto, feita na própria cena. */
 const READY_MAP_IMAGES: Readonly<Record<string, string>> = {
   navio: '/assets/ready/navio.webp',
+  cripta: '/assets/ready/cripta.webp',
 };
 
 type FieldsProps = {
