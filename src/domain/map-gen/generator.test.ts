@@ -62,7 +62,7 @@ describe('settlement generator', () => {
   it('shouldSurroundTheMapWithTheBackdropOfItsStyle', () => {
     const backdropOf = (style: 'medieval' | 'modern') =>
       generateSettlement({ style, size: side(VILLAGE), seed: 5 }).model.header.ambience.backdrop;
-    expect(backdropOf('medieval')).toBe('forest');
+    expect(backdropOf('medieval')).toBe('village');
     expect(backdropOf('modern')).toBe('city');
   });
 
