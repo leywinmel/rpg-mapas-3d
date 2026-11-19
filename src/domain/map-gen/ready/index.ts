@@ -9,6 +9,7 @@ import { buildCryptMap, CRYPT_SIZE } from './crypt';
 import { buildDesertMap, DESERT_SIZE } from './desert';
 import { buildMedievalTownMap, MEDIEVAL_TOWN_SIZE } from './medieval-town';
 import { buildCityCenterMap, CITY_CENTER_SIZE } from './city-center';
+import { buildColonyMap, COLONY_SIZE } from './colony';
 import { buildModernTownMap, MODERN_TOWN_SIZE } from './modern-town';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
@@ -95,6 +96,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Miolo de cidade moderna: duas avenidas que se cruzam, torres de escritório, praça cívica elevada com a estátua, lojas e beco, quartel dos bombeiros e pátio da polícia.',
     size: CITY_CENTER_SIZE,
     build: buildCityCenterMap,
+  },
+  {
+    id: 'colonia-astra',
+    name: 'Colônia Astra',
+    description:
+      'Posto avançado futurista em três conveses: torres de habitação e a praça do terminal no alto, avenida com lojas e garagens no meio, pátio de carga e pista de kart embaixo.',
+    size: COLONY_SIZE,
+    build: buildColonyMap,
   },
 ];
 
