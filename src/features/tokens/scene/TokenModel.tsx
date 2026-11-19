@@ -160,8 +160,6 @@ function PrimitiveFigure({ token, transparent }: LookProps) {
 
 /** Nome da animação parada que o conversor deixa em cada boneco pronto. */
 const IDLE_CLIP = 'Idle';
-/** Boneco pronto olha para o sul do mapa (+z), de frente para a câmera padrão. */
-const FACE_SOUTH_Y = Math.PI;
 
 function fadeMaterials(object: Object3D, transparent: boolean): void {
   object.traverse((child) => {
@@ -213,14 +211,9 @@ function ReadyLook({
   useEffect(() => fadeMaterials(object, transparent), [object, transparent]);
 
   const scale = TOKEN_SHAPE.figureHeight / height;
-  return (
-    <primitive
-      object={object}
-      position={[0, TOKEN_SHAPE.baseHeight, 0]}
-      rotation={[0, FACE_SOUTH_Y, 0]}
-      scale={scale}
-    />
-  );
+  // Todos os bonecos prontos (KayKit e Quaternius) já vêm olhando para +z, a frente do token:
+  // o rumo de quem anda (headingOf) gira o corpo a partir daí, sem meia-volta.
+  return <primitive object={object} position={[0, TOKEN_SHAPE.baseHeight, 0]} scale={scale} />;
 }
 
 function ModelLook({ token, transparent }: LookProps) {
