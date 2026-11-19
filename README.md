@@ -91,6 +91,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Cripta esquecida" (40 × 40 casas) desce em degraus: a entrada no alto, o salão de colunas, a
   prisão de grades e a capela do altar, e lá embaixo a cripta dos sarcófagos e uma sala secreta.
   Sarcófago, altar com velas e monte de ossos também entram na biblioteca.
+  A "Caverna dos ecos" (44 × 44) tem o lago subterrâneo um degrau abaixo da margem, o acampamento
+  dos saqueadores num patamar alto e a gruta dos cristais que brilham; estalagmites, cristais e
+  fogueira entram na biblioteca.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

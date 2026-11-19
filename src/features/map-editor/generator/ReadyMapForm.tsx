@@ -10,6 +10,7 @@ import styles from './GenerateMap.module.css';
 const READY_MAP_IMAGES: Readonly<Record<string, string>> = {
   navio: '/assets/ready/navio.webp',
   cripta: '/assets/ready/cripta.webp',
+  caverna: '/assets/ready/caverna.webp',
 };
 
 type FieldsProps = {
