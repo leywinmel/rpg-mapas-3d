@@ -4,6 +4,7 @@
  */
 import type { GridSize } from '../../grid';
 import type { AssembledMap } from '../assemble';
+import { buildCryptMap, CRYPT_SIZE } from './crypt';
 import { buildShipMap, SHIP_SIZE } from './ship';
 
 export type ReadyMap = {
@@ -23,6 +24,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Um navio inteiro no mar: porão com redes e cela, convés com canhões e mastros, cabine do capitão e tombadilho com o timão.',
     size: SHIP_SIZE,
     build: buildShipMap,
+  },
+  {
+    id: 'cripta',
+    name: 'Cripta esquecida',
+    description:
+      'Masmorra que desce em degraus: salão de pilares, prisão com celas, sala do altar e a cripta funda dos sarcófagos, com uma sala secreta.',
+    size: CRYPT_SIZE,
+    build: buildCryptMap,
   },
 ];
 

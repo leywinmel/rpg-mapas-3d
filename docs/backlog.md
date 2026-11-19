@@ -137,7 +137,7 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
       Feito: "Navio de guerra" de 27 × 46 casas, montado à mão em três pisos: porão (redes, carga, paiol e cela de grades), convés com 12 canhões e dois mastros, e a cabine do capitão na popa com o tombadilho em cima (timão e mastro de mezena). Peças novas na biblioteca: mastro com velas, timão, canhão, gurupés e rede de dormir. É o primeiro mapa da aba "Mapas prontos" (RPG-63).
 - [ ] **RPG-63** Nova aba "Mapas prontos" no editor, separada do gerador: uma biblioteca de mapas pensados e montados à mão, peça por peça, sem sorteio. Primeira leva:
   - 2 mapas diferentes de cada estilo de cidade (medieval, moderna, futurista, cyberpunk);
-  - 1 masmorra, 1 caverna, 1 deserto e 1 porto;
+  - 1 masmorra (feita: "Cripta esquecida", 40 × 40, com sarcófago, altar e ossos novos na biblioteca), 1 caverna, 1 deserto e 1 porto;
   - 1 mapa de barco (ver RPG-62); feito;
   - 1 ilha gigante.
     Base feita com o RPG-62: a aba "Mapas prontos" em "Novo mapa" (o gerador virou "Gerar mapa") e o esboço que monta chão, paredes e peças casa por casa (`src/domain/map-gen/ready/`).
