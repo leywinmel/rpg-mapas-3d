@@ -2,7 +2,7 @@
  * Peças genéricas geradas por script, que servem a qualquer estilo: a vegetação (RPG-37, de
  * scripts/assets/vegetation-pieces.mjs em public/assets/nature/) e os enfeites de praça
  * (RPG-35, de scripts/assets/plaza-pieces.mjs em public/assets/plaza/). Árvore, pedra e
- * fonte não mudam de era. As alturas saem do próprio modelo.
+ * fonte não mudam de era; as peças de navio (RPG-62) também. As alturas saem do próprio modelo.
  */
 
 import type { Footprint } from '@/domain/map-v2';
@@ -202,7 +202,48 @@ const PLAZA: readonly GenericSpec[] = [
   },
 ];
 
+/** Peças do navio de mapa inteiro (RPG-62, de scripts/assets/ship-pieces.mjs). */
+const SHIP: readonly GenericSpec[] = [
+  {
+    key: 'nav-mastro',
+    label: 'Mastro com velas',
+    keywords: ['navio', 'barco', 'vela', 'gávea', 'pirata'],
+    icon: 'boat',
+    height: 9,
+  },
+  {
+    key: 'nav-timao',
+    label: 'Timão',
+    keywords: ['navio', 'leme', 'roda', 'pirata'],
+    icon: 'boat',
+    height: 1.59,
+  },
+  {
+    key: 'nav-canhao',
+    label: 'Canhão',
+    keywords: ['navio', 'arma', 'pirata', 'forte'],
+    icon: 'cylinder',
+    height: 0.67,
+  },
+  {
+    key: 'nav-gurupes',
+    label: 'Gurupés',
+    keywords: ['navio', 'proa', 'vela', 'bujarrona'],
+    icon: 'boat',
+    height: 4.6,
+  },
+  {
+    key: 'nav-rede',
+    label: 'Rede de dormir',
+    keywords: ['navio', 'porão', 'cama', 'marujo'],
+    icon: 'box',
+    height: 1.3,
+    footprint: { width: 1, depth: 2 },
+  },
+];
+
 export const GENERIC_PIECES: readonly CatalogEntry[] = [
   ...genericPieces('/assets/nature', 'nature', NATURE),
   ...genericPieces('/assets/plaza', 'structure', PLAZA),
+  ...genericPieces('/assets/ship', 'structure', SHIP),
 ];

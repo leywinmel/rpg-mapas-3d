@@ -209,7 +209,7 @@ describe('MapWorkspace', () => {
     renderWorkspace(fake, true);
     fireEvent.click(await screen.findByRole('button', { name: 'Novo mapa' }));
     const dialog = screen.getByRole('dialog', { name: 'Novo mapa' });
-    fireEvent.click(within(dialog).getByRole('radio', { name: 'Mapa pronto' }));
+    fireEvent.click(within(dialog).getByRole('radio', { name: 'Gerar mapa' }));
     expect(within(dialog).getByLabelText('Nome')).toHaveValue('Vila medieval');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Gerar mapa' }));
 
@@ -229,6 +229,25 @@ describe('MapWorkspace', () => {
       const pieces = [...fake.db.maps[0]!.model.chunks.values()].flatMap((chunk) => chunk.pieces);
       expect(pieces.length).toBeGreaterThan(100);
     }, GENERATION);
+  });
+
+  it('shouldCreateAReadyMapFromTheLibrary', async () => {
+    const fake = createFakeServices({ activeMapId: null, maps: [] });
+    renderWorkspace(fake, true);
+    fireEvent.click(await screen.findByRole('button', { name: 'Novo mapa' }));
+    const dialog = screen.getByRole('dialog', { name: 'Novo mapa' });
+    fireEvent.click(within(dialog).getByRole('radio', { name: 'Mapas prontos' }));
+    expect(within(dialog).getByRole('radio', { name: /Navio de guerra/ })).toBeChecked();
+    fireEvent.change(within(dialog).getByLabelText('Nome'), { target: { value: 'Pérola' } });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Criar mapa' }));
+
+    expect(await screen.findByTestId('viewport', {}, GENERATION)).toHaveTextContent(
+      'Mapa 3D: Pérola',
+    );
+    const pieces = [...fake.db.maps[0]!.model.chunks.values()].flatMap((chunk) => chunk.pieces);
+    expect(
+      pieces.some((piece) => piece.asset.source === 'catalog' && piece.asset.key === 'nav-timao'),
+    ).toBe(true);
   });
 
   it('shouldShowADeleteFailureInsideTheDialog', async () => {

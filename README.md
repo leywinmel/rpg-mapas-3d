@@ -83,7 +83,12 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   olho riscado na barra da mesa; um botão discreto no canto traz tudo de volta. Os jogadores nunca
   veem as ferramentas de construção.
   Entre os chãos há areia, chão rachado de deserto, lama e poças d'água sobre a pedra.
-- **Gerar mapa pronto:** em "Novo mapa", a opção "Mapa pronto" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
+- **Mapas prontos:** em "Novo mapa", a opção "Mapas prontos" abre a biblioteca de mapas montados à
+  mão, casa por casa, sem sorteio. Escolha um, dê um nome e ele abre pronto para jogar ou editar.
+  O primeiro é o "Navio de guerra" (27 × 46 casas, no mar): porão com redes, carga, paiol e cela,
+  convés com canhões e dois mastros, e a cabine do capitão com o tombadilho e o timão em cima. As
+  peças do navio (mastro com velas, timão, canhão, gurupés e rede de dormir) ficam na biblioteca.
+- **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
   Escolha o estilo, o tamanho (vila 64, cidadezinha 160, cidade 400 ou metrópole 1000 casas de lado) e a semente: a mesma

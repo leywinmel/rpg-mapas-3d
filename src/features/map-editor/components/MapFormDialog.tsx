@@ -12,10 +12,13 @@ import {
 } from '../editor/map-list';
 import {
   exampleValues,
+  generatedMapRequest,
   parseGenerateMap,
   type GenerateFieldErrors,
 } from '../generator/generate-form';
 import { GenerateMapFields, GenerationStatus } from '../generator/GenerateMapForm';
+import { DEFAULT_READY_VALUES, parseReadyMap } from '../generator/ready-form';
+import { ReadyMapFields } from '../generator/ReadyMapForm';
 import { useGenerateMap } from '../generator/useGenerateMap';
 import type { MapActions } from '../hooks/useMapActions';
 import type { MapSummary } from '../types';
@@ -25,6 +28,7 @@ import styles from './SidePanel.module.css';
 const DEFAULT_SIDE = 12;
 const FORM_ID = 'map-form';
 const GENERATE_FORM_ID = 'map-generate-form';
+const READY_FORM_ID = 'map-ready-form';
 
 type Feedback = { errors: FieldErrors; failure: string | null; busy: boolean };
 
@@ -45,16 +49,24 @@ function useSubmit<T>(onSubmit: (value: T) => Promise<void>, failureMessage: str
   return { feedback, run, invalid, reset: () => setFeedback(IDLE) };
 }
 
-type CreateMode = 'blank' | 'generate';
+type CreateMode = 'blank' | 'ready' | 'generate';
 
 const MODE_OPTIONS: ReadonlyArray<SegmentOption<CreateMode>> = [
   { value: 'blank', label: 'Mapa vazio' },
-  { value: 'generate', label: 'Mapa pronto' },
+  { value: 'ready', label: 'Mapas prontos' },
+  { value: 'generate', label: 'Gerar mapa' },
 ];
 
 const MODE_DESCRIPTIONS: Readonly<Record<CreateMode, string>> = {
   blank: `Até ${MAX_MAP_SIZE_V2} × ${MAX_MAP_SIZE_V2} casas. Dá para mudar o chão depois, casa por casa.`,
-  generate: 'Ruas, casas com móveis e telhados, praças e veículos, prontos para editar.',
+  ready: 'Mapas montados à mão, prontos para jogar. Depois dá para editar tudo.',
+  generate:
+    'Ruas, casas com móveis e telhados, praças e veículos, sorteados e prontos para editar.',
+};
+
+const FORM_OF_MODE: Readonly<Record<Exclude<CreateMode, 'blank'>, string>> = {
+  ready: READY_FORM_ID,
+  generate: GENERATE_FORM_ID,
 };
 
 export type MapGeneratorBinding = {
@@ -137,11 +149,13 @@ function BlankMapFields({ values, errors, failure, onChange, onSubmit }: BlankFo
 
 type GenerateFooterProps = {
   generation: ReturnType<typeof useGenerateMap>;
+  formId: string;
+  submitLabel: string;
   onClose: () => void;
 };
 
 /** Botões da geração: depois de uma falha no meio, completar o mapa ou desistir dele. */
-function GenerateFooter({ generation, onClose }: GenerateFooterProps) {
+function GenerateFooter({ generation, formId, submitLabel, onClose }: GenerateFooterProps) {
   const { state, busy } = generation;
   if (state.phase === 'failed' && state.pending) {
     return (
@@ -161,14 +175,14 @@ function GenerateFooter({ generation, onClose }: GenerateFooterProps) {
       <Button variant="ghost" onClick={onClose} disabled={busy}>
         Cancelar
       </Button>
-      <Button type="submit" form={GENERATE_FORM_ID} loading={busy}>
-        {state.phase === 'failed' ? 'Tentar de novo' : 'Gerar mapa'}
+      <Button type="submit" form={formId} loading={busy}>
+        {state.phase === 'failed' ? 'Tentar de novo' : submitLabel}
       </Button>
     </>
   );
 }
 
-/** Novo mapa: vazio (nome, tamanho e chão) ou gerado (vila, cidade, masmorra, caverna, deserto). */
+/** Novo mapa: vazio (nome, tamanho e chão), pronto (da biblioteca) ou gerado (vila, cidade, masmorra…). */
 export function CreateMapDialog({ open, onClose, onCreate, generator }: CreateProps) {
   const [mode, setMode] = useState<CreateMode>('blank');
   const [values, setValues] = useState({
@@ -179,6 +193,8 @@ export function CreateMapDialog({ open, onClose, onCreate, generator }: CreatePr
   });
   const [generateValues, setGenerateValues] = useState(() => exampleValues(EXAMPLE_MAPS[0]!));
   const [generateErrors, setGenerateErrors] = useState<GenerateFieldErrors>({});
+  const [readyValues, setReadyValues] = useState(DEFAULT_READY_VALUES);
+  const [readyError, setReadyError] = useState<string | undefined>();
   const generation = useGenerateMap(generator.actions, generator.onGenerated);
   const { feedback, run, invalid, reset } = useSubmit(
     onCreate,
@@ -205,12 +221,24 @@ export function CreateMapDialog({ open, onClose, onCreate, generator }: CreatePr
     const parsed = parseGenerateMap(generateValues);
     if (!parsed.ok) return setGenerateErrors(parsed.errors);
     setGenerateErrors({});
-    void generation.start(parsed.value);
+    void generation.start(generatedMapRequest(parsed.value));
+  };
+  const createReady = () => {
+    if (failed) return void generation.retry();
+    const parsed = parseReadyMap(readyValues);
+    if (!parsed.ok) return setReadyError(parsed.error);
+    setReadyError(undefined);
+    void generation.start(parsed.request);
   };
 
   const footer =
-    mode === 'generate' ? (
-      <GenerateFooter generation={generation} onClose={close} />
+    mode !== 'blank' ? (
+      <GenerateFooter
+        generation={generation}
+        formId={FORM_OF_MODE[mode]}
+        submitLabel={mode === 'ready' ? 'Criar mapa' : 'Gerar mapa'}
+        onClose={close}
+      />
     ) : (
       <>
         <Button variant="ghost" onClick={close} disabled={feedback.busy}>
@@ -247,6 +275,18 @@ export function CreateMapDialog({ open, onClose, onCreate, generator }: CreatePr
             onChange={(field, value) => setValues((current) => ({ ...current, [field]: value }))}
             onSubmit={submit}
           />
+        ) : mode === 'ready' ? (
+          <>
+            <ReadyMapFields
+              formId={READY_FORM_ID}
+              values={readyValues}
+              error={readyError}
+              disabled={generation.busy || failed}
+              onChange={setReadyValues}
+              onSubmit={createReady}
+            />
+            <GenerationStatus state={generation.state} />
+          </>
         ) : (
           <>
             <GenerateMapFields

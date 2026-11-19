@@ -11,4 +11,5 @@ export * from './prefabs';
 export * from './presets';
 export * from './preview';
 export * from './random';
+export * from './ready';
 export * from './wilds';
