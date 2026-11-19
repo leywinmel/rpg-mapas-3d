@@ -14,6 +14,7 @@ const READY_MAP_IMAGES: Readonly<Record<string, string>> = {
   deserto: '/assets/ready/deserto.webp',
   porto: '/assets/ready/porto.webp',
   'vila-ponte': '/assets/ready/vila-ponte.webp',
+  'burgo-monte': '/assets/ready/burgo-monte.webp',
 };
 
 type FieldsProps = {

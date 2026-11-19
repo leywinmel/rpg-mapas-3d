@@ -11,10 +11,9 @@ import type { Cell } from '../../grid';
 import { createDefaultHeader, type CellRect } from '../../map-v2';
 import type { AssembledMap } from '../assemble';
 import {
-  buildingRect,
   createSketch,
   outlineWalls,
-  stampBuilding,
+  stampBuildings,
   type Sketch,
   type SketchBuilding,
   type SketchPiece,
@@ -381,19 +380,6 @@ function keepWalls(sketch: Sketch): void {
   );
 }
 
-/** Põe cada prédio e devolve as casas de dentro, que não recebem peça de rua. */
-function raiseBuildings(sketch: Sketch): Set<string> {
-  const indoors = new Set<string>();
-  for (const spec of BUILDINGS) {
-    stampBuilding(sketch, spec);
-    const rect = buildingRect(spec);
-    for (let z = rect.z; z < rect.z + rect.depth; z += 1) {
-      for (let x = rect.x; x < rect.x + rect.width; x += 1) indoors.add(key({ x, z }));
-    }
-  }
-  return indoors;
-}
-
 export function buildMedievalTownMap(): AssembledMap {
   const sketch = createSketch(MEDIEVAL_TOWN_SIZE, null);
   const floors = medievalTownFloors();
@@ -401,7 +387,7 @@ export function buildMedievalTownMap(): AssembledMap {
     const [x, z] = text.split(',').map(Number);
     sketch.ground({ x: x!, z: z!, width: 1, depth: 1 }, floor.tile, floor.height);
   }
-  const indoors = raiseBuildings(sketch);
+  const indoors = stampBuildings(sketch, BUILDINGS);
   keepWalls(sketch);
   const place: Place = (piece, cell, options = {}) => {
     const floor = floors.get(key(cell));

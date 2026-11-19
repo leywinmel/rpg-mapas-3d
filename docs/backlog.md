@@ -136,7 +136,7 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 - [x] **RPG-62** Barcos de verdade: os barcos atuais são pequenos e só estruturas soltas. Fazer barcos em tamanho de mapa: casco, convés, cabine, mastro e porão, montados para jogar dentro.
       Feito: "Navio de guerra" de 27 × 46 casas, montado à mão em três pisos: porão (redes, carga, paiol e cela de grades), convés com 12 canhões e dois mastros, e a cabine do capitão na popa com o tombadilho em cima (timão e mastro de mezena). Peças novas na biblioteca: mastro com velas, timão, canhão, gurupés e rede de dormir. É o primeiro mapa da aba "Mapas prontos" (RPG-63).
 - [ ] **RPG-63** Nova aba "Mapas prontos" no editor, separada do gerador: uma biblioteca de mapas pensados e montados à mão, peça por peça, sem sorteio. Primeira leva:
-  - 2 mapas diferentes de cada estilo de cidade (medieval, moderna, futurista, cyberpunk); medieval 1 feito: "Vila da Ponte Velha", 48 × 48, rio com ponte, roças, praça da fonte, igreja e torre murada;
+  - 2 mapas diferentes de cada estilo de cidade (medieval, moderna, futurista, cyberpunk); medievais feitos: "Vila da Ponte Velha" (48 × 48, rio com ponte, roças, praça da fonte, igreja e torre murada) e "Burgo do Monte Alto" (48 × 48, cidade murada em degraus com mercado, igreja e castelo no penhasco);
   - 1 masmorra (feita: "Cripta esquecida", 40 × 40, com sarcófago, altar e ossos novos na biblioteca), 1 caverna (feita: "Caverna dos ecos", 44 × 44, com lago, patamar e gruta de cristais), 1 deserto (feito: "Areias do sol", 48 × 48, dunas, oásis, templo, caravana e rochedo) e 1 porto (feito: "Porto da maré", 48 × 48, encosta, cais, píeres e farol);
   - 1 mapa de barco (ver RPG-62); feito;
   - 1 ilha gigante.

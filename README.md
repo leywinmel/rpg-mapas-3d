@@ -102,6 +102,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   margens, a ponte de tábuas e as roças, as casas da beira-rio, a praça da fonte com a taverna,
   a igreja no patamar e a torre do senhor no morro murado. Os prédios usam a mesma planta do
   gerador, com mobília, escada e telhado.
+  O "Burgo do Monte Alto" (48 × 48) é uma cidade murada que sobe a encosta em quatro degraus:
+  roças e lago fora do muro, portões ao sul e a leste, a praça do mercado, as ruas de casas e
+  lojas, a igreja no patamar e o castelo no topo, sobre o penhasco.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
