@@ -11,6 +11,7 @@ import { buildMedievalTownMap, MEDIEVAL_TOWN_SIZE } from './medieval-town';
 import { buildCityCenterMap, CITY_CENTER_SIZE } from './city-center';
 import { buildColonyMap, COLONY_SIZE } from './colony';
 import { buildModernTownMap, MODERN_TOWN_SIZE } from './modern-town';
+import { buildNeonDistrictMap, NEON_DISTRICT_SIZE } from './neon-district';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
 import { buildStationMap, STATION_SIZE } from './station';
@@ -113,6 +114,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Estação espacial por dentro: ponte de comando com o estrado do capitão, mirante, alojamentos, refeitório, laboratório, o reator com o poço do núcleo e o hangar das naves.',
     size: STATION_SIZE,
     build: buildStationMap,
+  },
+  {
+    id: 'distrito-neon',
+    name: 'Distrito Neon',
+    description:
+      'Bairro cyberpunk à noite: rua dos letreiros com lojas e torres, mercado noturno de barracas, praça do holograma um degrau acima e o canal sujo com a ponte da avenida.',
+    size: NEON_DISTRICT_SIZE,
+    build: buildNeonDistrictMap,
   },
 ];
 
