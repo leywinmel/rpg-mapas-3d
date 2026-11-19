@@ -9,6 +9,7 @@ import {
 import { STYLE_KITS } from '../kits';
 import { READY_MAPS, readyMap } from '.';
 import { CAVE_SIZE, caveFloors } from './cave';
+import { chromeDocksFloors } from './chrome-docks';
 import { cityCenterFloors } from './city-center';
 import { colonyFloors } from './colony';
 import { desertFloors } from './desert';
@@ -262,5 +263,19 @@ describe('distrito neon', () => {
     expect(waterHeights(floors)).toEqual([0]);
     expect(floors.get('23,34')).toEqual({ tile: 'cyb-asfalto', height: 1 });
     expect(floors.get('36,24')).toEqual({ tile: 'cyb-praca-neon', height: 2 });
+  });
+});
+
+describe('cais cromo', () => {
+  it('shouldReachEveryDryCellOneStepAtATime', () => {
+    expect(unreachableDryCells(chromeDocksFloors(), '0,0')).toEqual([]);
+  });
+
+  it('shouldKeepTheSeaBelowTheQuayAndThePiersOverIt', () => {
+    const floors = chromeDocksFloors();
+    expect(waterHeights(floors)).toEqual([0]);
+    expect(floors.get('7,44')).toEqual({ tile: 'cyb-piso-grade', height: 1 });
+    expect(floors.get('20,44')?.tile).toBe('agua');
+    expect(floors.get('42,25')).toEqual({ tile: 'cyb-piso-grade', height: 2 });
   });
 });

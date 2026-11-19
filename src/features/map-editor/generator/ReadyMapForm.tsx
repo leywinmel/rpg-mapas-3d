@@ -20,6 +20,7 @@ const READY_MAP_IMAGES: Readonly<Record<string, string>> = {
   'colonia-astra': '/assets/ready/colonia-astra.webp',
   'estacao-vega': '/assets/ready/estacao-vega.webp',
   'distrito-neon': '/assets/ready/distrito-neon.webp',
+  'cais-cromo': '/assets/ready/cais-cromo.webp',
 };
 
 type FieldsProps = {

@@ -5,6 +5,7 @@
 import type { GridSize } from '../../grid';
 import type { AssembledMap } from '../assemble';
 import { buildCaveMap, CAVE_SIZE } from './cave';
+import { buildChromeDocksMap, CHROME_DOCKS_SIZE } from './chrome-docks';
 import { buildCryptMap, CRYPT_SIZE } from './crypt';
 import { buildDesertMap, DESERT_SIZE } from './desert';
 import { buildMedievalTownMap, MEDIEVAL_TOWN_SIZE } from './medieval-town';
@@ -122,6 +123,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Bairro cyberpunk à noite: rua dos letreiros com lojas e torres, mercado noturno de barracas, praça do holograma um degrau acima e o canal sujo com a ponte da avenida.',
     size: NEON_DISTRICT_SIZE,
     build: buildNeonDistrictMap,
+  },
+  {
+    id: 'cais-cromo',
+    name: 'Cais Cromo',
+    description:
+      'Porto industrial cyberpunk: o beco das agulhas entre megaprédios, a boate com estacionamento, o armazém, o pátio de contêineres com a plataforma do guindaste e dois píeres sobre o mar escuro.',
+    size: CHROME_DOCKS_SIZE,
+    build: buildChromeDocksMap,
   },
 ];
 

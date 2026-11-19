@@ -121,6 +121,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   O "Distrito Neon" (48 × 48) é um bairro cyberpunk à noite: a rua dos letreiros com lojas e
   torres de vitrine acesa, o mercado noturno de barracas, a praça do holograma um degrau acima
   da rua e o canal sujo, que a avenida cruza pela ponte.
+  O "Cais Cromo" (48 × 48) é um porto industrial cyberpunk: o beco das agulhas entre os
+  megaprédios, a boate com o estacionamento, o armazém, o pátio de contêineres com a plataforma
+  do guindaste e dois píeres sobre o mar escuro.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
