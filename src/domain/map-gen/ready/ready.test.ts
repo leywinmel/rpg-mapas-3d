@@ -14,6 +14,7 @@ import { colonyFloors } from './colony';
 import { desertFloors } from './desert';
 import { medievalTownFloors } from './medieval-town';
 import { modernTownFloors } from './modern-town';
+import { neonDistrictFloors } from './neon-district';
 import { portFloors } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
 import { stationFloors } from './station';
@@ -248,5 +249,18 @@ describe('estação vega', () => {
 
   it('shouldLeaveTheVoidOfSpaceWithoutFloor', () => {
     expect(stationFloors().has('0,0')).toBe(false);
+  });
+});
+
+describe('distrito neon', () => {
+  it('shouldReachEveryDryCellOneStepAtATime', () => {
+    expect(unreachableDryCells(neonDistrictFloors(), '0,0')).toEqual([]);
+  });
+
+  it('shouldKeepTheCanalBelowTheStreetAndThePlazaAbove', () => {
+    const floors = neonDistrictFloors();
+    expect(waterHeights(floors)).toEqual([0]);
+    expect(floors.get('23,34')).toEqual({ tile: 'cyb-asfalto', height: 1 });
+    expect(floors.get('36,24')).toEqual({ tile: 'cyb-praca-neon', height: 2 });
   });
 });

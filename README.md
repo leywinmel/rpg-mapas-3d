@@ -118,6 +118,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Estação Vega" (44 × 44) é uma estação espacial vista por dentro, cercada pelo vazio: ponte
   de comando com o estrado do capitão, mirante, depósito, alojamentos, refeitório, laboratório,
   o reator com o poço do núcleo e o hangar com as naves e os jipes de superfície.
+  O "Distrito Neon" (48 × 48) é um bairro cyberpunk à noite: a rua dos letreiros com lojas e
+  torres de vitrine acesa, o mercado noturno de barracas, a praça do holograma um degrau acima
+  da rua e o canal sujo, que a avenida cruza pela ponte.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
