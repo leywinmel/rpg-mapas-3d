@@ -10,6 +10,12 @@ const GRID_LIFT = 0.006;
 const GRID_OPACITY = 0.22;
 const BORDER_OPACITY = 0.55;
 const FLOATS_PER_VERTEX = 3;
+/**
+ * A grade e a água são transparentes, e o three ordena os transparentes pela distância de cada
+ * objeto à câmera: sem ordem fixa, num pedaço a água cobria a grade e no vizinho não, e o mar
+ * ficava com um quadrado mais escuro que mudava conforme a câmera. A grade vem sempre depois.
+ */
+const GRID_RENDER_ORDER = 1;
 
 function buildBorderGeometry(size: GridSize): BufferGeometry {
   const y = GRID_LIFT;
@@ -45,7 +51,14 @@ export function ChunkGrid({ chunk }: { chunk: MapChunk }) {
     return built;
   }, [chunk]);
   useEffect(() => () => geometry.dispose(), [geometry]);
-  return <lineSegments geometry={geometry} material={gridMaterial} dispose={null} />;
+  return (
+    <lineSegments
+      geometry={geometry}
+      material={gridMaterial}
+      renderOrder={GRID_RENDER_ORDER}
+      dispose={null}
+    />
+  );
 }
 
 /** A moldura do mapa inteiro. */
