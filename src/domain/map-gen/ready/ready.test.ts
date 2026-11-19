@@ -10,6 +10,7 @@ import { STYLE_KITS } from '../kits';
 import { READY_MAPS, readyMap } from '.';
 import { CAVE_SIZE, caveFloors } from './cave';
 import { cityCenterFloors } from './city-center';
+import { colonyFloors } from './colony';
 import { desertFloors } from './desert';
 import { medievalTownFloors } from './medieval-town';
 import { modernTownFloors } from './modern-town';
@@ -216,5 +217,18 @@ describe('centro da cidade', () => {
     const floors = cityCenterFloors();
     expect(floors.get('22,22')).toEqual({ tile: 'mod-asfalto', height: 1 });
     expect(floors.get('35,10')).toEqual({ tile: 'piso-pedra', height: 2 });
+  });
+});
+
+describe('colônia astra', () => {
+  it('shouldReachEveryCellOneStepAtATime', () => {
+    expect(unreachableDryCells(colonyFloors(), '0,0')).toEqual([]);
+  });
+
+  it('shouldStackTheThreeDecksFromNorthToSouth', () => {
+    const floors = colonyFloors();
+    expect(floors.get('36,10')).toEqual({ tile: 'fut-piso-quadriculado', height: 3 });
+    expect(floors.get('23,23')).toEqual({ tile: 'fut-piso-metal', height: 2 });
+    expect(floors.get('37,36')).toEqual({ tile: 'fut-piso-metal', height: 1 });
   });
 });

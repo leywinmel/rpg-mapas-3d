@@ -112,6 +112,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   torres de escritório com estacionamento, a praça cívica um degrau acima da rua, lojas com o
   beco das entregas, o prédio de apartamentos com jardim, o quartel dos bombeiros e o pátio da
   polícia.
+  A "Colônia Astra" (48 × 48) é um posto avançado futurista em três conveses: torres e casas de
+  habitação com a praça do terminal no alto, a avenida com lojas e garagens no meio, e o pátio
+  de carga com o armazém e a pista de kart embaixo.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
