@@ -8,8 +8,9 @@
  * aqui só se escolhe onde cada um fica e para que lado abre a porta.
  */
 import type { Cell } from '../../grid';
-import { createDefaultHeader, type CellRect } from '../../map-v2';
+import { type CellRect } from '../../map-v2';
 import type { AssembledMap } from '../assemble';
+import { STYLE_KITS, styleHeader } from '../kits';
 import {
   createSketch,
   outlineWalls,
@@ -401,9 +402,5 @@ export function buildMedievalTownMap(): AssembledMap {
   furnishStreets(place);
   furnishTerrace(place);
   furnishKeep(place);
-  const header = createDefaultHeader();
-  return sketch.build({
-    ...header,
-    ambience: { ...header.ambience, light: 1, backdrop: 'forest' },
-  });
+  return sketch.build(styleHeader(STYLE_KITS.medieval));
 }

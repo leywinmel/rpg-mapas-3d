@@ -7,8 +7,9 @@
  * Os prédios vêm da planta do gerador no estilo moderno (reboco colorido, telhado, mobília) [#6].
  */
 import type { Cell } from '../../grid';
-import { createDefaultHeader, type CellRect, type Footprint } from '../../map-v2';
+import { type CellRect, type Footprint } from '../../map-v2';
 import type { AssembledMap } from '../assemble';
+import { STYLE_KITS, styleHeader } from '../kits';
 import { createSketch, stampBuildings, type SketchBuilding, type SketchPiece } from './sketch';
 
 export const MODERN_TOWN_SIZE = { width: 48, depth: 48 } as const;
@@ -289,9 +290,5 @@ export function buildModernTownMap(): AssembledMap {
   furnishParking(place);
   furnishYards(place);
   furnishShore(place);
-  const header = createDefaultHeader();
-  return sketch.build({
-    ...header,
-    ambience: { ...header.ambience, light: 1, backdrop: 'city' },
-  });
+  return sketch.build(styleHeader(STYLE_KITS.modern));
 }

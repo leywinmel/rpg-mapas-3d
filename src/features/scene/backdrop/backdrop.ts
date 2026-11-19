@@ -17,7 +17,14 @@ export type BackdropPiece =
   | 'estalagmite'
   | 'predio-baixo'
   | 'predio-medio'
-  | 'predio-alto';
+  | 'predio-alto'
+  | 'casebre'
+  | 'torre-pedra'
+  | 'torre-futurista'
+  | 'cupula'
+  | 'agulha'
+  | 'megatorre'
+  | 'predio-neon';
 
 export type ScatterGroup = {
   piece: BackdropPiece;
@@ -44,9 +51,12 @@ export const BACKDROP_LABELS: Readonly<Record<Backdrop, string>> = {
   none: 'Nenhum (cor lisa)',
   forest: 'Floresta',
   desert: 'Deserto',
-  city: 'Cidade',
+  city: 'Cidade moderna',
   dungeon: 'Masmorra',
   sea: 'Mar',
+  village: 'Vila medieval',
+  futurist: 'Cidade futurista',
+  cyberpunk: 'Cidade cyberpunk',
 };
 
 export const BACKDROP_SPECS: Readonly<Record<SceneBackdrop, BackdropSpec>> = {
@@ -94,6 +104,39 @@ export const BACKDROP_SPECS: Readonly<Record<SceneBackdrop, BackdropSpec>> = {
     water: true,
     leaves: false,
     groups: [{ piece: 'rocha', perArea: 0.003, max: 110, scale: [2.2, 4.2] }],
+  },
+  // Campo em volta da vila: casebres e torres de pedra espalhados entre bosques.
+  village: {
+    groundColor: '#2c3a1d',
+    water: false,
+    leaves: true,
+    groups: [
+      { piece: 'arvore', perArea: 0.03, max: 600, scale: [1.6, 3.2] },
+      { piece: 'casebre', perArea: 0.004, max: 150, scale: [1.6, 2.4] },
+      { piece: 'torre-pedra', perArea: 0.0008, max: 30, scale: [1.8, 2.6] },
+      { piece: 'rocha', perArea: 0.003, max: 80, scale: [0.8, 1.8] },
+    ],
+  },
+  // Metrópole limpa: torres claras com anéis de luz, cúpulas e agulhas.
+  futurist: {
+    groundColor: '#2a3340',
+    water: false,
+    leaves: false,
+    groups: [
+      { piece: 'cupula', perArea: 0.004, max: 150, scale: [2, 3.4] },
+      { piece: 'torre-futurista', perArea: 0.004, max: 160, scale: [2, 3.2] },
+      { piece: 'agulha', perArea: 0.0015, max: 60, scale: [2.2, 3.4] },
+    ],
+  },
+  // Paredão de megatorres escuras com faixas de neon e letreiros acesos.
+  cyberpunk: {
+    groundColor: '#17121f',
+    water: false,
+    leaves: false,
+    groups: [
+      { piece: 'predio-neon', perArea: 0.006, max: 220, scale: [2, 3] },
+      { piece: 'megatorre', perArea: 0.003, max: 120, scale: [1.1, 1.9] },
+    ],
   },
 };
 

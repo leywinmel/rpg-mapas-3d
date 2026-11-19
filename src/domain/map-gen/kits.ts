@@ -4,7 +4,7 @@
  * confere que cada chave existe, é do tipo certo e tem o tamanho em casas que está aqui [#30].
  */
 import type { Backdrop } from '../map-document';
-import type { Footprint } from '../map-v2';
+import { createDefaultHeader, type Footprint, type MapHeader } from '../map-v2';
 
 export type SettlementStyle = 'medieval' | 'modern' | 'futurist' | 'cyberpunk';
 
@@ -65,6 +65,8 @@ export type StyleKit = {
   readonly roof: RoofKind;
   /** Paisagem em volta do mapa gerado (RPG-40). */
   readonly backdrop: Backdrop;
+  /** Clima da cena (chave do clima pronto) e a cor da neblina que combina com ele. */
+  readonly climate: { readonly preset: string; readonly fogColor: string; readonly light: number };
   /** Telhados de duas águas, do maior para o menor (só no estilo com `roof: 'gable'`). */
   readonly gableRoofs: readonly SizedPiece[];
   /** Escada interna de um andar (1×3). */
@@ -180,7 +182,8 @@ const MEDIEVAL: StyleKit = {
     shop: [{ plain: 'med-parede-enxaimel', door: 'med-arco', window: 'med-reboco-janela' }],
   },
   roof: 'gable',
-  backdrop: 'forest',
+  backdrop: 'village',
+  climate: { preset: 'vila', fogColor: '#141009', light: 1 },
   gableRoofs: [
     { key: 'med-telhado-4x4', footprint: { width: 4, depth: 4 } },
     { key: 'med-telhado-2x4', footprint: { width: 2, depth: 4 } },
@@ -236,6 +239,7 @@ const MODERN: StyleKit = {
   },
   roof: 'flat',
   backdrop: 'city',
+  climate: { preset: 'cidade', fogColor: '#0e0f16', light: 1 },
   gableRoofs: [],
   stairs: INNER_STAIRS,
   vehicles: [
@@ -327,7 +331,8 @@ const FUTURIST: StyleKit = {
     shop: [{ plain: 'fut-painel-faixa', door: 'fut-portal', window: 'fut-painel-janela' }],
   },
   roof: 'flat',
-  backdrop: 'city',
+  backdrop: 'futurist',
+  climate: { preset: 'colonia', fogColor: '#0a1622', light: 1.1 },
   gableRoofs: [],
   stairs: INNER_STAIRS,
   vehicles: [{ key: 'fut-carro', footprint: CAR }],
@@ -371,7 +376,8 @@ const CYBERPUNK: StyleKit = {
     shop: [neonWalls('rosa'), neonWalls('ciano')],
   },
   roof: 'flat',
-  backdrop: 'city',
+  backdrop: 'cyberpunk',
+  climate: { preset: 'neon', fogColor: '#150a1f', light: 0.8 },
   gableRoofs: [],
   stairs: INNER_STAIRS,
   vehicles: [{ key: 'fut-carro', footprint: CAR }],
@@ -413,6 +419,12 @@ export function roofFor(
 ): RoofKind {
   const even = size.width % 2 === 0 && size.depth % 2 === 0;
   return even && gableRoofsFor(kit, walls).length > 0 ? 'gable' : 'flat';
+}
+
+/** Cabeçalho de um mapa do estilo: o clima e a paisagem em volta que combinam com ele. */
+export function styleHeader(kit: StyleKit): MapHeader {
+  const header = createDefaultHeader();
+  return { ...header, ambience: { ...header.ambience, ...kit.climate, backdrop: kit.backdrop } };
 }
 
 /** Toda chave que algum kit usa, para o teste conferir contra o catálogo. */

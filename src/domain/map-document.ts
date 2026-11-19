@@ -58,9 +58,20 @@ const propSchema = z.object({
 
 /**
  * Paisagem em volta do mapa, no lugar da cor única do fundo (RPG-40). "none" mantém o fundo
- * liso de sempre.
+ * liso de sempre. Cada estilo de cidade tem a sua: vila medieval, cidade (moderna), futurista e
+ * cyberpunk.
  */
-export const BACKDROPS = ['none', 'forest', 'desert', 'city', 'dungeon', 'sea'] as const;
+export const BACKDROPS = [
+  'none',
+  'forest',
+  'desert',
+  'city',
+  'dungeon',
+  'sea',
+  'village',
+  'futurist',
+  'cyberpunk',
+] as const;
 export type Backdrop = (typeof BACKDROPS)[number];
 
 const ambienceSchema = z.object({

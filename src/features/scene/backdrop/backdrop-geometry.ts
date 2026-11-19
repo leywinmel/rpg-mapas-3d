@@ -32,6 +32,19 @@ const COLORS = {
   roof: '#1e1e25',
   windowWarm: '#ffcf7a',
   windowCool: '#a8d4ff',
+  cottageWall: '#8a7458',
+  cottageRoof: '#4a3024',
+  stone: '#6b6660',
+  stoneRoof: '#3b2a22',
+  doorDark: '#2a1e16',
+  futureWhite: '#c9d2dc',
+  futureLight: '#dfe6ee',
+  futureDark: '#4a5562',
+  futureGlow: '#5ff0ff',
+  neonBody: '#1f1a28',
+  neonBodyLow: '#27202f',
+  neonPink: '#ff3fb4',
+  neonCyan: '#3ff0ff',
 } as const;
 
 const DUNE_SEGMENTS = { width: 9, height: 3 };
@@ -172,6 +185,176 @@ function building(height: number, seed: string): () => ProceduralLayer[] {
 
 const BUILDING_HEIGHTS = { low: 2.5, medium: 4.5, tall: 8 } as const;
 
+const PYRAMID_SIDES = 4;
+const ROUND_SIDES = 8;
+/** Pirâmide de quatro lados girada 45° para as águas do telhado acompanharem as paredes. */
+const EIGHTH_TURN = Math.PI / 4;
+/** Plano de enfeite um fio à frente da parede, para não brigar com ela na profundidade. */
+const FACE_GAP = 0.005;
+
+function glow(parts: Part[], seed: string): ProceduralLayer {
+  return { geometry: mergeParts(parts, `${seed}-luz`), material: 'glow' };
+}
+
+/** Casebre do campo: paredes de taipa, telhado de quatro águas, chaminé e uma janela acesa. */
+function cottage(): ProceduralLayer[] {
+  const half = 0.4;
+  return [
+    matte(
+      [
+        box([2 * half, 0.55, 2 * half], COLORS.cottageWall),
+        cone({ radius: 0.66, height: 0.45, segments: PYRAMID_SIDES }, COLORS.cottageRoof, {
+          y: 0.55,
+          ry: EIGHTH_TURN,
+        }),
+        box([0.12, 0.3, 0.12], COLORS.stone, { x: 0.2, y: 0.7, z: -0.15 }),
+        place(new PlaneGeometry(0.16, 0.3), COLORS.doorDark, {
+          x: -0.15,
+          y: 0.15,
+          z: half + FACE_GAP,
+        }),
+      ],
+      'fundo-casebre',
+    ),
+    glow(
+      [
+        place(new PlaneGeometry(0.14, 0.14), COLORS.windowWarm, {
+          x: 0.17,
+          y: 0.3,
+          z: half + FACE_GAP,
+        }),
+      ],
+      'fundo-casebre',
+    ),
+  ];
+}
+
+/** Torre de vigia de pedra com o telhado cônico e a seteira acesa. */
+function stoneTower(): ProceduralLayer[] {
+  const height = 1.6;
+  return [
+    matte(
+      [
+        cylinder({ top: 0.32, bottom: 0.38, height, segments: ROUND_SIDES }, COLORS.stone),
+        cone({ radius: 0.45, height: 0.6, segments: ROUND_SIDES }, COLORS.stoneRoof, { y: height }),
+      ],
+      'fundo-torre-pedra',
+    ),
+    glow(
+      [
+        place(new PlaneGeometry(0.08, 0.18), COLORS.windowWarm, {
+          y: 1.2,
+          z: 0.34,
+        }),
+      ],
+      'fundo-torre-pedra',
+    ),
+  ];
+}
+
+/** Anel de luz em volta de um tronco redondo, na altura pedida. */
+function lightRing(radius: number, y: number, color: string): Part {
+  return cylinder({ top: radius, bottom: radius, height: 0.07, segments: ROUND_SIDES }, color, {
+    y,
+  });
+}
+
+/** Torre clara e afinada no topo, com anéis de luz ciano. */
+function futureTower(): ProceduralLayer[] {
+  const height = 4;
+  return [
+    matte(
+      [
+        cylinder({ top: 0.28, bottom: 0.4, height, segments: ROUND_SIDES }, COLORS.futureWhite),
+        cylinder(
+          { top: 0.45, bottom: 0.3, height: 0.25, segments: ROUND_SIDES },
+          COLORS.futureDark,
+          { y: height },
+        ),
+      ],
+      'fundo-torre-futurista',
+    ),
+    glow(
+      [1, 2, 3].map((floor) => lightRing(0.42 - floor * 0.03, floor, COLORS.futureGlow)),
+      'fundo-torre-futurista',
+    ),
+  ];
+}
+
+/** Cúpula de habitação sobre um anel escuro, com a faixa de luz no pé. */
+function dome(): ProceduralLayer[] {
+  const segments = { width: 10, height: 5 };
+  return [
+    matte(
+      [
+        cylinder({ top: 0.82, bottom: 0.86, height: 0.15, segments: 10 }, COLORS.futureDark),
+        place(
+          new SphereGeometry(0.8, segments.width, segments.height, 0, Math.PI * 2, 0, Math.PI / 2),
+          COLORS.futureWhite,
+          { y: 0.15 },
+        ),
+      ],
+      'fundo-cupula',
+    ),
+    glow([lightRing(0.87, 0.04, COLORS.futureGlow)], 'fundo-cupula'),
+  ];
+}
+
+/** Agulha: o arranha-céu fino da colônia, com a ponta acesa. */
+function spire(): ProceduralLayer[] {
+  const height = 5;
+  return [
+    matte(
+      [
+        cylinder({ top: 0.4, bottom: 0.5, height: 0.4, segments: 6 }, COLORS.futureDark),
+        cone({ radius: 0.36, height, segments: 6 }, COLORS.futureLight, { y: 0.4 }),
+      ],
+      'fundo-agulha',
+    ),
+    glow(
+      [
+        cone({ radius: 0.07, height: 0.5, segments: 6 }, COLORS.futureGlow, { y: height + 0.2 }),
+        lightRing(0.3, 1.6, COLORS.futureGlow),
+      ],
+      'fundo-agulha',
+    ),
+  ];
+}
+
+const CORNERS = [
+  [-0.5, -0.5],
+  [0.5, -0.5],
+  [0.5, 0.5],
+  [-0.5, 0.5],
+] as const;
+
+/** Prédio escuro de neon: quinas acesas, faixa no topo, letreiro na fachada e janelas. */
+function neonBuilding(height: number, seed: string, body: string): () => ProceduralLayer[] {
+  return () => {
+    const strips = CORNERS.map(([x, z], index) =>
+      box([0.05, height - 0.2, 0.05], index % 2 === 0 ? COLORS.neonPink : COLORS.neonCyan, {
+        x,
+        z,
+        y: 0.1,
+      }),
+    );
+    return [
+      matte([box([1, height, 1], body), box([0.86, 0.12, 0.86], COLORS.roof, { y: height })], seed),
+      glow(
+        [
+          ...strips,
+          box([1.02, 0.08, 1.02], COLORS.neonCyan, { y: height - 0.3 }),
+          box([0.62, 0.4, 0.04], COLORS.neonPink, { y: height * 0.6, z: 0.52 }),
+          ...litWindows(height * 0.5, seed),
+        ],
+        seed,
+      ),
+    ];
+  };
+}
+
+const NEON_HEIGHTS = { low: 3.5, tall: 9 } as const;
+
 const BUILDERS: Readonly<Record<BackdropPiece, () => PieceLayer[]>> = {
   arvore: () => getPieceLayers('arvore'),
   rocha: () => getPieceLayers('rocha'),
@@ -185,6 +368,21 @@ const BUILDERS: Readonly<Record<BackdropPiece, () => PieceLayer[]>> = {
     getBuiltLayers('fundo-predio-medio', building(BUILDING_HEIGHTS.medium, 'fundo-predio-medio')),
   'predio-alto': () =>
     getBuiltLayers('fundo-predio-alto', building(BUILDING_HEIGHTS.tall, 'fundo-predio-alto')),
+  casebre: () => getBuiltLayers('fundo-casebre', cottage),
+  'torre-pedra': () => getBuiltLayers('fundo-torre-pedra', stoneTower),
+  'torre-futurista': () => getBuiltLayers('fundo-torre-futurista', futureTower),
+  cupula: () => getBuiltLayers('fundo-cupula', dome),
+  agulha: () => getBuiltLayers('fundo-agulha', spire),
+  megatorre: () =>
+    getBuiltLayers(
+      'fundo-megatorre',
+      neonBuilding(NEON_HEIGHTS.tall, 'fundo-megatorre', COLORS.neonBody),
+    ),
+  'predio-neon': () =>
+    getBuiltLayers(
+      'fundo-predio-neon',
+      neonBuilding(NEON_HEIGHTS.low, 'fundo-predio-neon', COLORS.neonBodyLow),
+    ),
 };
 
 /** Camadas de uma peça da paisagem, montadas uma vez e reaproveitadas. */

@@ -5,17 +5,10 @@
  * mestre edita como qualquer outro.
  */
 import type { GridSize } from '../grid';
-import {
-  createDefaultHeader,
-  isValidMapSizeV2,
-  MAX_MAP_SIZE_V2,
-  type MapHeader,
-  type MapPiece,
-  type MapModel,
-} from '../map-v2';
+import { isValidMapSizeV2, MAX_MAP_SIZE_V2, type MapPiece, type MapModel } from '../map-v2';
 import { createAssembler, createTileKeys, type MapAssembler, type TerrainGrid } from './assemble';
 import { buildBlueprint, rotateBlueprint, type Blueprint, type BuildingSpec } from './blueprint';
-import { STYLE_KITS, type SettlementStyle, type StyleKit } from './kits';
+import { STYLE_KITS, styleHeader, type SettlementStyle, type StyleKit } from './kits';
 import {
   planSettlement,
   TERRAIN_CLASS,
@@ -132,12 +125,6 @@ function stampBuildings(assembler: MapAssembler, plan: SettlementPlan, kit: Styl
   }
 }
 
-/** Cabeçalho do mapa gerado: o clima padrão com a paisagem do estilo em volta. */
-function headerFor(kit: StyleKit): MapHeader {
-  const header = createDefaultHeader();
-  return { ...header, ambience: { ...header.ambience, backdrop: kit.backdrop } };
-}
-
 /** O mapa a partir da planta. */
 export function buildSettlement(plan: SettlementPlan): GeneratedSettlement {
   const kit = STYLE_KITS[plan.style];
@@ -146,7 +133,7 @@ export function buildSettlement(plan: SettlementPlan): GeneratedSettlement {
   for (const piece of plan.pieces) assembler.addPiece(catalogPiece(piece));
   const { model, walls, pieces, dropped } = assembler.finish(
     terrainTiles(plan, kit),
-    headerFor(kit),
+    styleHeader(kit),
   );
   return { model, stats: { buildings: plan.buildings.length, walls, pieces, dropped } };
 }
