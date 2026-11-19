@@ -7,7 +7,7 @@ import type { Cell, GridSize } from '../../grid';
 import type { CellRect, Footprint, MapHeader, MapWall } from '../../map-v2';
 import { createAssembler, createTileKeys, type AssembledMap } from '../assemble';
 import { buildBlueprint, rotateBlueprint, type Blueprint, type BuildingUse } from '../blueprint';
-import { propFootprint, roofFor, STYLE_KITS, type SettlementStyle } from '../kits';
+import { propFootprint, roofFor, STYLE_KITS, type SettlementStyle, type WallSet } from '../kits';
 
 export type SketchPiece = {
   readonly level?: number;
@@ -118,12 +118,17 @@ export type SketchBuilding = {
   readonly level: number;
   /** Escolhe a fachada da lista do estilo e a mobília: o mesmo número sai sempre igual. */
   readonly variant: number;
+  /**
+   * Paredes (e telhados) próprias, fora da lista do estilo: o templo japonês usa a mobília e o
+   * piso do medieval com a madeira e o telhado de beiral curvo dele.
+   */
+  readonly walls?: WallSet;
 };
 
 function buildingBlueprint(building: SketchBuilding): Blueprint {
   const kit = STYLE_KITS[building.style];
   const sets = kit.walls[building.use];
-  const walls = sets[building.variant % sets.length]!;
+  const walls = building.walls ?? sets[building.variant % sets.length]!;
   const spec = {
     width: building.width,
     depth: building.depth,

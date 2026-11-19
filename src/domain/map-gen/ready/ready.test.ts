@@ -20,6 +20,7 @@ import { neonDistrictFloors } from './neon-district';
 import { portFloors } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
 import { stationFloors } from './station';
+import { templeSchoolFloors } from './temple-school';
 import { walledTownFloors } from './walled-town';
 
 function allPieces(model: MapModel): MapPiece[] {
@@ -292,5 +293,20 @@ describe('ilha do vulcão', () => {
     expect(floors.get('0,0')?.tile).toBe('agua');
     expect(floors.get('60,60')).toEqual({ tile: 'chao-rachado', height: 8 });
     expect(floors.get('60,100')).toEqual({ tile: 'piso-madeira', height: 1 });
+  });
+});
+
+describe('academia do monte kasumi', () => {
+  it('shouldReachEveryDryCellFromTheFootOfTheMountain', () => {
+    expect(unreachableDryCells(templeSchoolFloors(), '31,63')).toEqual([]);
+  });
+
+  it('shouldClimbTheTerracesByTheStoneStairs', () => {
+    const floors = templeSchoolFloors();
+    expect(waterHeights(floors)).toEqual([0]);
+    const path = [63, 53, 51, 40, 36, 34, 28, 20, 18, 16].map((z) => floors.get(`31,${z}`)?.height);
+    expect(path).toEqual([1, 2, 4, 5, 6, 8, 9, 10, 12, 13]);
+    expect(floors.get('29,51')).toEqual({ tile: 'grama', height: 1 });
+    expect(floors.get('10,45')?.tile).toBe('terra');
   });
 });

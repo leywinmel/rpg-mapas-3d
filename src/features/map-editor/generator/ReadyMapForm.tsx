@@ -22,6 +22,7 @@ const READY_MAP_IMAGES: Readonly<Record<string, string>> = {
   'distrito-neon': '/assets/ready/distrito-neon.webp',
   'cais-cromo': '/assets/ready/cais-cromo.webp',
   'ilha-vulcao': '/assets/ready/ilha-vulcao.webp',
+  'academia-kasumi': '/assets/ready/academia-kasumi.webp',
 };
 
 type FieldsProps = {

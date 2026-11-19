@@ -17,6 +17,7 @@ import { buildNeonDistrictMap, NEON_DISTRICT_SIZE } from './neon-district';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
 import { buildStationMap, STATION_SIZE } from './station';
+import { buildTempleSchoolMap, TEMPLE_SCHOOL_SIZE } from './temple-school';
 import { buildWalledTownMap, WALLED_TOWN_SIZE } from './walled-town';
 
 export type ReadyMap = {
@@ -140,6 +141,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Ilha gigante cercada de mar: praia, baixada verde, morros de mata subindo em degraus até o cume do vulcão com o ídolo, vila de pescadores com píer, ruínas do templo e acampamento pirata.',
     size: ISLAND_SIZE,
     build: buildIslandMap,
+  },
+  {
+    id: 'academia-kasumi',
+    name: 'Academia do Monte Kasumi',
+    description:
+      'Escola-templo japonesa na encosta: torii e lago no pé do monte, campo de treino e salas de aula, pátio do incensário entre os dormitórios e, no alto, o salão principal, o pagode e o bambuzal.',
+    size: TEMPLE_SCHOOL_SIZE,
+    build: buildTempleSchoolMap,
   },
 ];
 
