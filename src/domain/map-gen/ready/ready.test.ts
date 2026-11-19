@@ -9,6 +9,7 @@ import {
 import { READY_MAPS, readyMap } from '.';
 import { CAVE_SIZE, caveFloors } from './cave';
 import { desertFloors } from './desert';
+import { portFloors } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
 
 function allPieces(model: MapModel): MapPiece[] {
@@ -145,5 +146,17 @@ describe('areias do sol', () => {
     const floors = desertFloors();
     expect(waterHeights(floors)).toEqual([0]);
     expect(floors.get('11,12')?.tile).toBe('agua');
+  });
+});
+
+describe('porto da maré', () => {
+  it('shouldReachEveryDryCellOneStepAtATime', () => {
+    expect(unreachableDryCells(portFloors(), '0,0')).toEqual([]);
+  });
+
+  it('shouldKeepTheSeaOneStepBelowTheDocks', () => {
+    const floors = portFloors();
+    expect(waterHeights(floors)).toEqual([0]);
+    expect(floors.get('20,40')).toEqual({ tile: 'piso-madeira', height: 1 });
   });
 });

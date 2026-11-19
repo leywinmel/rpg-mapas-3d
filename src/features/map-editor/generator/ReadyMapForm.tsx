@@ -12,6 +12,7 @@ const READY_MAP_IMAGES: Readonly<Record<string, string>> = {
   cripta: '/assets/ready/cripta.webp',
   caverna: '/assets/ready/caverna.webp',
   deserto: '/assets/ready/deserto.webp',
+  porto: '/assets/ready/porto.webp',
 };
 
 type FieldsProps = {
