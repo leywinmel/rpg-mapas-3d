@@ -161,3 +161,16 @@ export function stampBuilding(sketch: Sketch, building: SketchBuilding): void {
     );
   }
 }
+
+/** Põe cada prédio e devolve as casas de dentro ("x,z"), que não recebem peça de rua. */
+export function stampBuildings(sketch: Sketch, buildings: readonly SketchBuilding[]): Set<string> {
+  const indoors = new Set<string>();
+  for (const building of buildings) {
+    stampBuilding(sketch, building);
+    const rect = buildingRect(building);
+    for (let z = rect.z; z < rect.z + rect.depth; z += 1) {
+      for (let x = rect.x; x < rect.x + rect.width; x += 1) indoors.add(cellKey({ x, z }));
+    }
+  }
+  return indoors;
+}

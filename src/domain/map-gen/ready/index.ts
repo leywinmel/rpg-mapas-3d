@@ -10,6 +10,7 @@ import { buildDesertMap, DESERT_SIZE } from './desert';
 import { buildMedievalTownMap, MEDIEVAL_TOWN_SIZE } from './medieval-town';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
+import { buildWalledTownMap, WALLED_TOWN_SIZE } from './walled-town';
 
 export type ReadyMap = {
   readonly id: string;
@@ -68,6 +69,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Vila medieval em degraus: o rio com a ponte e as roças, as casas da beira-rio, a praça da fonte com a taverna, a igreja no patamar e a torre do senhor no morro murado.',
     size: MEDIEVAL_TOWN_SIZE,
     build: buildMedievalTownMap,
+  },
+  {
+    id: 'burgo-monte',
+    name: 'Burgo do Monte Alto',
+    description:
+      'Cidade murada que sobe a encosta em degraus: roças e lago fora do muro, praça do mercado, ruas de casas e lojas, a igreja no patamar e o castelo no topo, sobre o penhasco.',
+    size: WALLED_TOWN_SIZE,
+    build: buildWalledTownMap,
   },
 ];
 

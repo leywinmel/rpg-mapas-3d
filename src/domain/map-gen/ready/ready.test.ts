@@ -12,6 +12,7 @@ import { desertFloors } from './desert';
 import { medievalTownFloors } from './medieval-town';
 import { portFloors } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
+import { walledTownFloors } from './walled-town';
 
 function allPieces(model: MapModel): MapPiece[] {
   return [...model.chunks.values()].flatMap((chunk) => chunk.pieces);
@@ -172,5 +173,18 @@ describe('vila da ponte velha', () => {
     expect(waterHeights(floors)).toEqual([0]);
     expect(floors.get('8,23')).toEqual({ tile: 'piso-madeira', height: 1 });
     expect(floors.get('33,6')).toEqual({ tile: 'piso-pedra', height: 4 });
+  });
+});
+
+describe('burgo do monte alto', () => {
+  it('shouldReachEveryDryCellOneStepAtATime', () => {
+    expect(unreachableDryCells(walledTownFloors(), '0,0')).toEqual([]);
+  });
+
+  it('shouldClimbFromTheLakeToTheCastle', () => {
+    const floors = walledTownFloors();
+    expect(waterHeights(floors)).toEqual([0]);
+    expect(floors.get('23,39')).toEqual({ tile: 'med-calcamento', height: 2 });
+    expect(floors.get('24,8')).toEqual({ tile: 'piso-pedra', height: 5 });
   });
 });
