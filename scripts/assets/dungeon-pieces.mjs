@@ -1,5 +1,6 @@
-// Gera as peças dos mapas prontos de masmorra (RPG-63): sarcófago de pedra com tampa entalhada,
-// altar de pedra com velas e um monte de ossos com crânio. Escala do boneco de 1,5 de altura.
+// Gera as peças dos mapas prontos de masmorra e caverna (RPG-63): sarcófago de pedra com tampa
+// entalhada, altar de pedra com velas, monte de ossos com crânio, estalagmites, cristais que
+// brilham e fogueira de acampamento. Escala do boneco de 1,5 de altura.
 // Cada peça olha para +z e tem a base em y = 0.
 // uso: node scripts/assets/dungeon-pieces.mjs <public/assets/dungeon>
 import { mkdirSync } from 'node:fs';
@@ -17,6 +18,10 @@ const WAX = [226, 214, 182];
 const FLAME = [255, 176, 72];
 const CLOTH = [104, 28, 30];
 const GOLD = [178, 142, 62];
+const CAVE_ROCK = [96, 88, 82];
+const CRYSTAL = [96, 214, 236];
+const EMBER = [255, 120, 40];
+const LOG = [92, 62, 40];
 
 /** Caixa centrada em x e z, apoiada em y0. */
 const block = (w, d, y0, y1, cx = 0, cz = 0) => ({
@@ -96,4 +101,93 @@ async function bones() {
   await writePiece(OUT, 'mas-ossos', p);
 }
 
-for (const make of [sarcophagus, altar, bones]) await make();
+/** Estalagmites: três cones de rocha de alturas diferentes, pingando do teto que não se vê. */
+async function stalagmites() {
+  const p = layers({ rock: CAVE_ROCK, dark: shade(CAVE_ROCK, 0.7) });
+  const spikes = [
+    { at: [-0.12, 0, -0.08], height: 1.25, radius: 0.2 },
+    { at: [0.2, 0, 0.12], height: 0.75, radius: 0.15 },
+    { at: [-0.22, 0, 0.24], height: 0.45, radius: 0.11 },
+  ];
+  for (const { at, height, radius } of spikes) {
+    segment(p.rock.mesh, { from: at, to: [at[0], height, at[2]], r0: radius, r1: 0, sides: 7 });
+  }
+  blob(p.dark.mesh, {
+    center: [0, 0.02, 0],
+    radius: [0.42, 0.08, 0.42],
+    rand: random(5),
+    flatBottom: true,
+  });
+  await writePiece(OUT, 'cav-estalagmites', p);
+}
+
+/** Cristais: pontas tortas que brilham sozinhas, a luz fria da caverna. */
+async function crystals() {
+  const p = layers({ rock: CAVE_ROCK, crystal: glow(CRYSTAL, 0.85) });
+  blob(p.rock.mesh, {
+    center: [0, 0.05, 0],
+    radius: [0.3, 0.12, 0.3],
+    rand: random(9),
+    flatBottom: true,
+  });
+  const shards = [
+    { tip: [0.02, 0.85, -0.05], radius: 0.09 },
+    { tip: [0.28, 0.55, 0.1], radius: 0.07 },
+    { tip: [-0.25, 0.6, 0.12], radius: 0.07 },
+    { tip: [0.1, 0.42, 0.3], radius: 0.06 },
+    { tip: [-0.12, 0.38, -0.3], radius: 0.06 },
+  ];
+  for (const { tip, radius } of shards) {
+    const base = [tip[0] * 0.3, 0.08, tip[2] * 0.3];
+    const neck = [
+      base[0] + (tip[0] - base[0]) * 0.75,
+      base[1] + (tip[1] - base[1]) * 0.75,
+      base[2] + (tip[2] - base[2]) * 0.75,
+    ];
+    segment(p.crystal.mesh, {
+      from: base,
+      to: neck,
+      r0: radius,
+      r1: radius,
+      sides: 6,
+      caps: false,
+    });
+    segment(p.crystal.mesh, { from: neck, to: tip, r0: radius, r1: 0, sides: 6 });
+  }
+  await writePiece(OUT, 'cav-cristais', p);
+}
+
+/** Fogueira: roda de pedras, lenha cruzada e a brasa acesa no meio. */
+async function campfire() {
+  const p = layers({ rock: CAVE_ROCK, log: LOG, ember: glow(EMBER), flame: glow(FLAME) });
+  const rand = random(23);
+  const stones = 9;
+  for (let index = 0; index < stones; index += 1) {
+    const angle = (index / stones) * Math.PI * 2;
+    const center = [Math.cos(angle) * 0.32, 0.05, Math.sin(angle) * 0.32];
+    blob(p.rock.mesh, { center, radius: [0.08, 0.06, 0.08], rand, flatBottom: true });
+  }
+  for (let index = 0; index < 4; index += 1) {
+    const angle = (index / 4) * Math.PI * 2 + 0.4;
+    const out = [Math.cos(angle) * 0.24, 0.04, Math.sin(angle) * 0.24];
+    segment(p.log.mesh, {
+      from: out,
+      to: [out[0] * 0.15, 0.2, out[2] * 0.15],
+      r0: 0.045,
+      r1: 0.035,
+      sides: 5,
+    });
+  }
+  blob(p.ember.mesh, { center: [0, 0.05, 0], radius: [0.14, 0.05, 0.14], rand, flatBottom: true });
+  segment(p.flame.mesh, { from: [0, 0.08, 0], to: [0, 0.42, 0], r0: 0.11, r1: 0, sides: 5 });
+  segment(p.flame.mesh, {
+    from: [0.06, 0.08, 0.04],
+    to: [0.08, 0.3, 0.05],
+    r0: 0.06,
+    r1: 0,
+    sides: 5,
+  });
+  await writePiece(OUT, 'cav-fogueira', p);
+}
+
+for (const make of [sarcophagus, altar, bones, stalagmites, crystals, campfire]) await make();

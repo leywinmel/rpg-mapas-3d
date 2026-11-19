@@ -4,6 +4,7 @@
  */
 import type { GridSize } from '../../grid';
 import type { AssembledMap } from '../assemble';
+import { buildCaveMap, CAVE_SIZE } from './cave';
 import { buildCryptMap, CRYPT_SIZE } from './crypt';
 import { buildShipMap, SHIP_SIZE } from './ship';
 
@@ -32,6 +33,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Masmorra que desce em degraus: salão de pilares, prisão com celas, sala do altar e a cripta funda dos sarcófagos, com uma sala secreta.',
     size: CRYPT_SIZE,
     build: buildCryptMap,
+  },
+  {
+    id: 'caverna',
+    name: 'Caverna dos ecos',
+    description:
+      'Gruta em degraus: salão de estalagmites, lago subterrâneo com bote, acampamento de saqueadores no patamar alto e a gruta dos cristais que brilham.',
+    size: CAVE_SIZE,
+    build: buildCaveMap,
   },
 ];
 

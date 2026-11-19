@@ -269,9 +269,35 @@ const DUNGEON: readonly GenericSpec[] = [
   },
 ];
 
+/** Peças da caverna (RPG-63): moram junto das da masmorra, mas entram como natureza. */
+const CAVE: readonly GenericSpec[] = [
+  {
+    key: 'cav-estalagmites',
+    label: 'Estalagmites',
+    keywords: ['caverna', 'rocha', 'gruta', 'pedra', 'espinho'],
+    icon: 'mountain',
+    height: 1.25,
+  },
+  {
+    key: 'cav-cristais',
+    label: 'Cristais',
+    keywords: ['caverna', 'gruta', 'brilho', 'mina', 'joia'],
+    icon: 'rock',
+    height: 0.85,
+  },
+  {
+    key: 'cav-fogueira',
+    label: 'Fogueira',
+    keywords: ['acampamento', 'fogo', 'caverna', 'brasa', 'lenha'],
+    icon: 'flame',
+    height: 0.42,
+  },
+];
+
 export const GENERIC_PIECES: readonly CatalogEntry[] = [
   ...genericPieces('/assets/nature', 'nature', NATURE),
   ...genericPieces('/assets/plaza', 'structure', PLAZA),
   ...genericPieces('/assets/ship', 'structure', SHIP),
   ...genericPieces('/assets/dungeon', 'furniture', DUNGEON),
+  ...genericPieces('/assets/dungeon', 'nature', CAVE),
 ];

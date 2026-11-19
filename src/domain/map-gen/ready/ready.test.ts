@@ -7,6 +7,7 @@ import {
   type MapPiece,
 } from '../../map-v2';
 import { READY_MAPS, readyMap } from '.';
+import { CAVE_SIZE, caveFloors } from './cave';
 import { buildShipMap, SHIP_SIZE } from './ship';
 
 function allPieces(model: MapModel): MapPiece[] {
@@ -86,5 +87,41 @@ describe('navio de guerra', () => {
       for (let dz = 0; dz < 3; dz += 1)
         expect(deck.has(`${stairs.x},${stairs.z + dz}`)).toBe(false);
     }
+  });
+});
+
+describe('caverna dos ecos', () => {
+  // Ninguém fica preso: da boca do túnel se chega a todo chão seco subindo ou descendo um
+  // degrau por vez.
+  it('shouldReachEveryDryFloorFromTheMouthOneStepAtATime', () => {
+    const floors = caveFloors();
+    const mouth = [...floors.keys()].find((cell) => cell.endsWith(`,${CAVE_SIZE.depth - 1}`))!;
+    const seen = new Set([mouth]);
+    const queue = [mouth];
+    while (queue.length > 0) {
+      const [x, z] = queue.shift()!.split(',').map(Number);
+      const height = floors.get(`${x},${z}`)!.height;
+      for (const [nx, nz] of [
+        [x! + 1, z!],
+        [x! - 1, z!],
+        [x!, z! + 1],
+        [x!, z! - 1],
+      ]) {
+        const next = `${nx},${nz}`;
+        const floor = floors.get(next);
+        if (!floor || seen.has(next) || Math.abs(floor.height - height) > 1) continue;
+        seen.add(next);
+        queue.push(next);
+      }
+    }
+    const dry = [...floors].filter(([, floor]) => floor.tile !== 'agua').map(([cell]) => cell);
+    expect(dry.filter((cell) => !seen.has(cell))).toEqual([]);
+  });
+
+  it('shouldKeepTheLakeOneStepBelowItsShore', () => {
+    const heights = new Set(
+      [...caveFloors().values()].filter((floor) => floor.tile === 'agua').map((f) => f.height),
+    );
+    expect([...heights]).toEqual([0]);
   });
 });
