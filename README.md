@@ -115,6 +115,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Colônia Astra" (48 × 48) é um posto avançado futurista em três conveses: torres e casas de
   habitação com a praça do terminal no alto, a avenida com lojas e garagens no meio, e o pátio
   de carga com o armazém e a pista de kart embaixo.
+  A "Estação Vega" (44 × 44) é uma estação espacial vista por dentro, cercada pelo vazio: ponte
+  de comando com o estrado do capitão, mirante, depósito, alojamentos, refeitório, laboratório,
+  o reator com o poço do núcleo e o hangar com as naves e os jipes de superfície.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

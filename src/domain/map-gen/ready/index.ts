@@ -13,6 +13,7 @@ import { buildColonyMap, COLONY_SIZE } from './colony';
 import { buildModernTownMap, MODERN_TOWN_SIZE } from './modern-town';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
+import { buildStationMap, STATION_SIZE } from './station';
 import { buildWalledTownMap, WALLED_TOWN_SIZE } from './walled-town';
 
 export type ReadyMap = {
@@ -104,6 +105,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Posto avançado futurista em três conveses: torres de habitação e a praça do terminal no alto, avenida com lojas e garagens no meio, pátio de carga e pista de kart embaixo.',
     size: COLONY_SIZE,
     build: buildColonyMap,
+  },
+  {
+    id: 'estacao-vega',
+    name: 'Estação Vega',
+    description:
+      'Estação espacial por dentro: ponte de comando com o estrado do capitão, mirante, alojamentos, refeitório, laboratório, o reator com o poço do núcleo e o hangar das naves.',
+    size: STATION_SIZE,
+    build: buildStationMap,
   },
 ];
 
