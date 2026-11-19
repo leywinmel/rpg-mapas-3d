@@ -94,6 +94,8 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Caverna dos ecos" (44 × 44) tem o lago subterrâneo um degrau abaixo da margem, o acampamento
   dos saqueadores num patamar alto e a gruta dos cristais que brilham; estalagmites, cristais e
   fogueira entram na biblioteca.
+  As "Areias do sol" (48 × 48) têm dunas em degraus, o oásis de palmeiras com a água abaixo da
+  grama, as ruínas de um templo num platô, a caravana acampada e um rochedo com mirante.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

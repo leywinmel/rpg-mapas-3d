@@ -6,6 +6,7 @@ import type { GridSize } from '../../grid';
 import type { AssembledMap } from '../assemble';
 import { buildCaveMap, CAVE_SIZE } from './cave';
 import { buildCryptMap, CRYPT_SIZE } from './crypt';
+import { buildDesertMap, DESERT_SIZE } from './desert';
 import { buildShipMap, SHIP_SIZE } from './ship';
 
 export type ReadyMap = {
@@ -41,6 +42,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Gruta em degraus: salão de estalagmites, lago subterrâneo com bote, acampamento de saqueadores no patamar alto e a gruta dos cristais que brilham.',
     size: CAVE_SIZE,
     build: buildCaveMap,
+  },
+  {
+    id: 'deserto',
+    name: 'Areias do sol',
+    description:
+      'Dunas em degraus com um oásis de palmeiras, as ruínas de um templo no platô, a caravana acampada e um rochedo com mirante.',
+    size: DESERT_SIZE,
+    build: buildDesertMap,
   },
 ];
 
