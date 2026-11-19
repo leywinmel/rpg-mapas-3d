@@ -8,6 +8,7 @@ import { buildCaveMap, CAVE_SIZE } from './cave';
 import { buildCryptMap, CRYPT_SIZE } from './crypt';
 import { buildDesertMap, DESERT_SIZE } from './desert';
 import { buildMedievalTownMap, MEDIEVAL_TOWN_SIZE } from './medieval-town';
+import { buildModernTownMap, MODERN_TOWN_SIZE } from './modern-town';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildShipMap, SHIP_SIZE } from './ship';
 import { buildWalledTownMap, WALLED_TOWN_SIZE } from './walled-town';
@@ -77,6 +78,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Cidade murada que sobe a encosta em degraus: roças e lago fora do muro, praça do mercado, ruas de casas e lojas, a igreja no patamar e o castelo no topo, sobre o penhasco.',
     size: WALLED_TOWN_SIZE,
     build: buildWalledTownMap,
+  },
+  {
+    id: 'bairro-orla',
+    name: 'Bairro da Orla',
+    description:
+      'Bairro moderno na encosta do lago: praia com píer e coqueiros, avenida da orla, parque da fonte, mercado com estacionamento e duas ruas de casas com quintal.',
+    size: MODERN_TOWN_SIZE,
+    build: buildModernTownMap,
   },
 ];
 
