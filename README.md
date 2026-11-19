@@ -127,6 +127,12 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Ilha do Vulcão" (120 × 120) é o maior mapa pronto: a ilha cercada de mar, com praia de
   palmeiras, baixada de carvalhos, morros de mata subindo em degraus até o cume de cinzas com o
   ídolo, a vila de pescadores com píer e barcos, as ruínas do templo e o acampamento pirata.
+  A "Academia do Monte Kasumi" (64 × 64) é uma escola-templo japonesa na encosta, em quatro
+  patamares ligados por uma escadaria de pedra: o torii e o lago no pé do monte, o campo de treino
+  com bonecos e as salas de aula, o pátio do incensário e do campanário entre os dormitórios e, no
+  alto, o salão principal, o pagode e o bambuzal. As peças japonesas (paredes de madeira e reboco,
+  telhados de beiral curvo, torii, lanterna de pedra, cerejeira, bambu, pagode, campanário,
+  incensário e boneco de treino) também ficam na biblioteca do editor.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

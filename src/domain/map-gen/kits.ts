@@ -154,6 +154,9 @@ export const PROP_FOOTPRINTS: Readonly<Record<string, Footprint>> = {
   'med-pesqueiro': { width: 2, depth: 4 },
   'pra-fonte': { width: 3, depth: 3 },
   'pra-canteiro': { width: 2, depth: 1 },
+  'jap-torii': { width: 3, depth: 1 },
+  'jap-pagode': { width: 3, depth: 3 },
+  'jap-campanario': { width: 2, depth: 2 },
 };
 
 /** Footprint de uma peça solta (sem giro): o da tabela ou uma casa. */

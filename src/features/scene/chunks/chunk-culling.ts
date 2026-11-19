@@ -4,6 +4,7 @@
  * pedaço inteiro (o grupo dele) poupa o three de visitar cada malha dele, na imagem e na sombra.
  */
 import { pieceRect, stepsToWorld, type MapChunk } from '@/domain/map-v2';
+import { pieceCatalog } from '../catalog/catalog';
 import { FLOOR_BASE_DEPTH, MODEL_MAX_HEIGHT, type Box, type Vec3 } from '../layout';
 
 /**
@@ -11,8 +12,17 @@ import { FLOOR_BASE_DEPTH, MODEL_MAX_HEIGHT, type Box, type Vec3 } from '../layo
  * pouco da casa. Melhor sobrar que um pedaço sumir com um pedaço de parede ainda na tela.
  */
 const BOX_MARGIN = 1;
-/** Altura que se reserva acima da base de cada peça (o pilar, a mais alta do catálogo, tem ~2,1). */
+/**
+ * Altura que se reserva acima da base de cada peça: a do catálogo quando ela passa disto (o
+ * pagode e os megaprédios), senão esta, que cobre o modelo enviado e as peças comuns.
+ */
 const PIECE_HEIGHT_ALLOWANCE = MODEL_MAX_HEIGHT + 1;
+
+function pieceHeight(piece: MapChunk['pieces'][number]): number {
+  const fromCatalog =
+    piece.asset.source === 'catalog' ? (pieceCatalog.get(piece.asset.key)?.height ?? 0) : 0;
+  return Math.max(PIECE_HEIGHT_ALLOWANCE, fromCatalog);
+}
 
 /** Caixa do mundo que contém tudo que o pedaço desenha, inclusive a peça que avança no vizinho. */
 export function chunkWorldBox(chunk: MapChunk): Box {
@@ -27,7 +37,7 @@ export function chunkWorldBox(chunk: MapChunk): Box {
     const rect = pieceRect(piece);
     maxX = Math.max(maxX, rect.x + rect.width);
     maxZ = Math.max(maxZ, rect.z + rect.depth);
-    top = Math.max(top, stepsToWorld(piece.level) + PIECE_HEIGHT_ALLOWANCE * piece.scale);
+    top = Math.max(top, stepsToWorld(piece.level) + pieceHeight(piece) * piece.scale);
   }
   return {
     min: { x: bounds.x - BOX_MARGIN, y: -FLOOR_BASE_DEPTH, z: bounds.z - BOX_MARGIN },
