@@ -4,7 +4,7 @@
  * desenho, e deixa trocar qualidade, corte de andares e câmera. Fica fora do site publicado
  * (a rota só existe com import.meta.env.DEV). Não precisa de conta nem do Supabase.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Button, Panel } from '@/components';
 import { BACKDROPS, type Backdrop } from '@/domain';
@@ -18,7 +18,13 @@ import {
   type ReadyMap,
   type SettlementStyle,
 } from '@/domain/map-gen';
-import { cutawayShowingUpToStory, NO_CUTAWAY, type Cutaway, type MapModel } from '@/domain/map-v2';
+import {
+  cutawayShowingUpToStory,
+  dominantEdgeTile,
+  NO_CUTAWAY,
+  type Cutaway,
+  type MapModel,
+} from '@/domain/map-v2';
 import { BACKDROP_LABELS } from '../backdrop/backdrop';
 import { MapRenderer } from '../components/MapRenderer';
 import type { PerfSample } from '../components/PerfMeter';
@@ -141,6 +147,7 @@ export default function ScenePerfPage() {
   const [backdrop, setBackdrop] = useState<Backdrop>('none');
   const level = useQualityLevel();
   const { counts } = current;
+  const edgeTile = useMemo(() => dominantEdgeTile(current.model), [current.model]);
 
   const regenerate = (next: number, nextStyle: SettlementStyle = style, nextKind = kind) => {
     setSide(next);
@@ -164,6 +171,7 @@ export default function ScenePerfPage() {
         key={current.readyAt}
         size={current.model.size}
         ambience={{ ...current.model.header.ambience, backdrop }}
+        edgeTile={edgeTile}
         onPerfSample={setSample}
         label="Cidade de teste"
       >

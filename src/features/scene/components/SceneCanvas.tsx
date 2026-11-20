@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { showsRain, type Ambience, type GridSize } from '@/domain';
-import type { Cutaway, MapModel } from '@/domain/map-v2';
+import { dominantEdgeTile, type Cutaway, type MapModel } from '@/domain/map-v2';
 import { cx } from '@/lib/cx';
 import { fogRange, sceneLook } from '../ambience';
 import { cameraFrame } from '../layout';
@@ -28,6 +28,8 @@ export type SceneCanvasProps = {
   className?: string;
   /** Nome da cena para o leitor de tela. */
   label?: string;
+  /** Piso da borda do mapa: pinta o chão da paisagem em volta. */
+  edgeTile?: string | null;
   children?: ReactNode;
 };
 
@@ -43,6 +45,7 @@ export function SceneCanvas({
   onPerfSample,
   className,
   label = 'Mapa 3D',
+  edgeTile,
   children,
 }: SceneCanvasProps) {
   const { maxPixelRatio } = useQualitySettings();
@@ -69,7 +72,7 @@ export function SceneCanvas({
       <color attach="background" args={[look.fogColor]} />
       <fog attach="fog" args={[look.fogColor, fog.near, fog.far]} />
       <SceneLights look={look} size={size} />
-      <BackdropLayer backdrop={ambience.backdrop} size={size} />
+      <BackdropLayer backdrop={ambience.backdrop} size={size} edgeTile={edgeTile} />
       {table.weather !== 'clear' && showsRain(table.weather, rainEnabled) && (
         <RainLayer kind={table.weather} size={size} />
       )}
@@ -81,7 +84,7 @@ export function SceneCanvas({
   );
 }
 
-export type MapSceneProps = Omit<SceneCanvasProps, 'ambience' | 'size'> & {
+export type MapSceneProps = Omit<SceneCanvasProps, 'ambience' | 'size' | 'edgeTile'> & {
   model: MapModel;
   modelUrls?: ModelUrls;
   showGrid?: boolean;
@@ -98,8 +101,9 @@ export function MapScene({
   children,
   ...canvas
 }: MapSceneProps) {
+  const edgeTile = useMemo(() => dominantEdgeTile(model), [model]);
   return (
-    <SceneCanvas {...canvas} size={model.size} ambience={model.header.ambience}>
+    <SceneCanvas {...canvas} size={model.size} ambience={model.header.ambience} edgeTile={edgeTile}>
       <MapRenderer model={model} cutaway={cutaway} modelUrls={modelUrls} showGrid={showGrid} />
       {children}
     </SceneCanvas>

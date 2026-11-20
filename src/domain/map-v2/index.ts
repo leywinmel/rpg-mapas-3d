@@ -8,6 +8,7 @@ export * from './constants';
 export * from './convert-v1';
 export * from './cutaway';
 export * from './document';
+export * from './edge-tile';
 export * from './footprint';
 export * from './height';
 export * from './model';

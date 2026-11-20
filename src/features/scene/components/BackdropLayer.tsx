@@ -28,6 +28,8 @@ import {
   type BackdropSpec,
 } from '../backdrop/backdrop';
 import { getBackdropLayers } from '../backdrop/backdrop-geometry';
+import { pieceCatalog } from '../catalog/catalog';
+import { SCENE_PALETTE } from '../catalog/palette';
 import { useQualityLevel } from '../quality/quality-store';
 import { InstancedLayer } from './PieceInstances';
 
@@ -71,14 +73,15 @@ function Ground({ radius, color, center, y }: GroundProps) {
 
 type Center = { x: number; z: number };
 
+/** Mesma cor do piso de água do mapa: o mar continua o ladrilho sem emenda. */
 const WATER = {
-  color: '#3f86a8',
+  color: SCENE_PALETTE.waterTop,
   opacity: 0.86,
   /** Lado de cada quadrado da malha da água: menor deixa a onda mais redonda e custa mais. */
   cellSize: 2,
   maxSegments: 160,
-  /** Brilho próprio fraco: no escuro, o mar ainda se separa da cor da neblina. */
-  glow: '#0b2734',
+  /** Fosco como os ladrilhos (piece-geometry): brilho a mais clareava o mar perto do piso. */
+  roughness: 0.92,
 };
 
 /** As ondas sobem e descem no shader: a CPU só soma o tempo. */
@@ -104,9 +107,8 @@ function Water({ radius, center }: { radius: number; center: Center }) {
     const water = new MeshStandardMaterial({
       color: WATER.color,
       // Sem mapa de ambiente, metal e brilho alto deixavam a água preta como o fundo.
-      roughness: 0.55,
+      roughness: WATER.roughness,
       metalness: 0,
-      emissive: WATER.glow,
       transparent: true,
       opacity: WATER.opacity,
       flatShading: true,
@@ -276,10 +278,26 @@ function Scatter({ backdrop, size }: { backdrop: keyof typeof BACKDROP_SPECS; si
   );
 }
 
-export type BackdropLayerProps = { backdrop: Backdrop; size: GridSize };
+export type BackdropLayerProps = {
+  backdrop: Backdrop;
+  size: GridSize;
+  /** Piso que mais aparece na borda do mapa: o chão em volta ganha a cor dele. */
+  edgeTile?: string | null;
+};
+
+/**
+ * Cor do chão da paisagem. No mar, o fundo fica na cor da água, para a lâmina translúcida
+ * não escurecer por cima dele; nos outros, vale a cor do piso da borda, e a do fundo escolhido
+ * só quando a borda não tem piso conhecido.
+ */
+function landColor(spec: BackdropSpec, edgeTile: string | null | undefined): string {
+  if (spec.water) return WATER.color;
+  const edge = edgeTile ? pieceCatalog.get(edgeTile)?.farColor : undefined;
+  return edge ?? spec.groundColor;
+}
 
 /** Paisagem em volta do mapa (RPG-40): chão, peças espalhadas, água ou folhas, conforme o fundo. */
-export function BackdropLayer({ backdrop, size }: BackdropLayerProps) {
+export function BackdropLayer({ backdrop, size, edgeTile }: BackdropLayerProps) {
   const stableSize = useMemo(
     () => ({ width: size.width, depth: size.depth }),
     [size.width, size.depth],
@@ -292,7 +310,7 @@ export function BackdropLayer({ backdrop, size }: BackdropLayerProps) {
     <group>
       <Ground
         radius={radius}
-        color={spec.groundColor}
+        color={landColor(spec, edgeTile)}
         center={ring.center}
         y={backdropGroundY(spec)}
       />
