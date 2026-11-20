@@ -167,6 +167,7 @@ export const PROP_FOOTPRINTS: Readonly<Record<string, Footprint>> = {
   'hos-maca': { width: 1, depth: 2 },
   'hos-balcao': { width: 2, depth: 1 },
   'hos-heliponto': { width: 4, depth: 4 },
+  'pos-cobertura': { width: 12, depth: 8 },
 };
 
 /** Footprint de uma peça solta (sem giro): o da tabela ou uma casa. */

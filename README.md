@@ -143,6 +143,12 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   estacionamentos lotados. As peças de escola e hospital (carteira, lousa, armário de aço, tabela
   de basquete, trave, bebedouro, mastro, leito, soro, monitor, biombo, cadeira de rodas, maca,
   balcão de recepção e heliponto) também ficam na biblioteca do editor.
+  O "Posto da Rodovia" (50 × 50) é um posto de gasolina na beira da estrada: duas coberturas sobre
+  oito bombas com carros abastecendo, totem de preços, calibrador, loja de conveniência com o
+  mercadinho montado, oficina e a carreta parada no canto. A cobertura fica três casas acima do
+  pátio, apoiada nos pilares; o corte de andar a esconde para ver as bombas. As peças do posto
+  (bomba, pilar, cobertura, calibrador, totem de preços e freezer de gelo) também ficam na
+  biblioteca do editor.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

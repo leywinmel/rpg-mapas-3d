@@ -8,6 +8,7 @@ import { buildCaveMap, CAVE_SIZE } from './cave';
 import { buildChromeDocksMap, CHROME_DOCKS_SIZE } from './chrome-docks';
 import { buildCryptMap, CRYPT_SIZE } from './crypt';
 import { buildDesertMap, DESERT_SIZE } from './desert';
+import { buildGasStationMap, GAS_STATION_SIZE } from './gas-station';
 import { buildHospitalMap, HOSPITAL_SIZE } from './hospital';
 import { buildIslandMap, ISLAND_SIZE } from './island';
 import { buildMedievalTownMap, MEDIEVAL_TOWN_SIZE } from './medieval-town';
@@ -167,6 +168,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Complexo hospitalar gigante: alas de internação de cinco andares com as enfermarias montadas, torre principal com recepção, pronto-socorro com a baía das ambulâncias, heliponto, parque com lago e estacionamentos lotados.',
     size: HOSPITAL_SIZE,
     build: buildHospitalMap,
+  },
+  {
+    id: 'posto-rodovia',
+    name: 'Posto da Rodovia',
+    description:
+      'Posto de gasolina na beira da estrada: duas coberturas sobre oito bombas, carros abastecendo, totem de preços, loja de conveniência com o mercadinho montado, oficina e a carreta parada no canto.',
+    size: GAS_STATION_SIZE,
+    build: buildGasStationMap,
   },
 ];
 
