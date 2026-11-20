@@ -2,6 +2,10 @@
  * Cômodos com arrumação própria (RPG-65): a sala de aula (lousa no fundo, mesa do professor,
  * fileiras de carteiras com corredor e armários na parede da porta) e a enfermaria (leitos
  * encostados nas paredes dos lados, soro e monitor ao lado de cada um, recepção no térreo).
+ * Os prédios públicos (RPG-34) seguem a mesma ideia: a delegacia tem o balcão do plantão,
+ * as mesas dos investigadores e os arquivos no fundo; os correios, o balcão de atendimento
+ * e a triagem atrás dele; o mercado, os caixas na entrada, os corredores de prateleiras e as
+ * geladeiras na parede do fundo.
  * Diferente da mobília sorteada da casa comum, a arrumação segue o uso do cômodo: a mesma
  * planta sai sempre igual, sem sorteio.
  */
@@ -9,7 +13,7 @@ import type { Cell } from '../grid';
 import { rotatedFootprint, type Footprint } from '../map-v2';
 import { propFootprint } from './kits';
 
-export type Interior = 'classroom' | 'ward';
+export type Interior = 'classroom' | 'ward' | 'police' | 'post' | 'market';
 
 export const INTERIOR_PIECES = {
   desk: 'esc-carteira',
@@ -22,6 +26,13 @@ export const INTERIOR_PIECES = {
   reception: 'hos-balcao',
   wheelchair: 'hos-cadeira-rodas',
   cabinet: 'hos-armario',
+  counter: 'mod-balcao',
+  officeDesk: 'mesa',
+  chair: 'cadeira',
+  bookcase: 'mod-estante',
+  parcel: 'mod-caixa-papelao',
+  shelf: 'mod-prateleira',
+  fridge: 'mod-geladeira',
 } as const;
 
 /** Peça arrumada no cômodo, em coordenadas locais da planta. */
@@ -50,6 +61,15 @@ const TURN = { south: 0, east: 1, north: 2, west: 3 } as const;
 const DESK_AISLE_EVERY = 3;
 /** Casas entre um leito e o próximo na mesma parede (o leito e a do soro). */
 const BED_PITCH = 2;
+/** Mesas da delegacia: uma coluna livre a cada tantas (o corredor até o fundo). */
+const OFFICE_AISLE_EVERY = 3;
+/** Linha do balcão de atendimento (delegacia e correios): duas casas de fila na frente. */
+const COUNTER_ROW = 3;
+/** Caixas do mercado: um a cada tantas colunas, na linha logo depois da entrada. */
+const CHECKOUT_EVERY = 3;
+const CHECKOUT_ROW = 2;
+/** Primeira linha dos corredores de prateleira, depois dos caixas e da fila. */
+const FIRST_SHELF_ROW = 4;
 /** Menor cômodo que recebe a arrumação: menos que isto, não cabe a sala de aula nem a enfermaria. */
 export const MIN_INTERIOR_SIDE = 6;
 
@@ -119,11 +139,72 @@ function ward({ room, put }: Arranger): void {
   put(INTERIOR_PIECES.cabinet, { x: door, z: depth - 1 }, TURN.north);
 }
 
+/**
+ * Balcão de lado a lado na linha de atendimento, com uma passagem na ponta oposta à porta: o
+ * público fica na frente, os funcionários atrás.
+ */
+function counterRow({ room, put }: Arranger): void {
+  const passage = room.door < room.width / 2 ? room.width - 1 : 0;
+  for (let x = 0; x < room.width; x += 1) {
+    if (x !== passage) put(INTERIOR_PIECES.counter, { x, z: COUNTER_ROW }, TURN.north);
+  }
+}
+
+/** Plantão no balcão, mesas com cadeira em fileiras e arquivos encostados no fundo. */
+function police(context: Arranger): void {
+  const { room, put } = context;
+  const { width, depth } = room;
+  if (room.story === 0) counterRow(context);
+  const firstDesk = room.story === 0 ? COUNTER_ROW + 2 : 2;
+  for (let z = firstDesk; z + 1 <= depth - 2; z += 2) {
+    for (let x = 1; x <= width - 2; x += 1) {
+      if (x % OFFICE_AISLE_EVERY === 0) continue;
+      if (put(INTERIOR_PIECES.officeDesk, { x, z }, TURN.south)) {
+        put(INTERIOR_PIECES.chair, { x, z: z + 1 }, TURN.north);
+      }
+    }
+  }
+  for (let x = 0; x < width; x += 1) put(INTERIOR_PIECES.bookcase, { x, z: depth - 1 }, TURN.north);
+}
+
+/** Balcão de atendimento, estantes de triagem no fundo e pacotes empilhados entre elas. */
+function post(context: Arranger): void {
+  const { room, put } = context;
+  const { width, depth } = room;
+  if (room.story === 0) counterRow(context);
+  for (let x = 0; x < width; x += 1) put(INTERIOR_PIECES.bookcase, { x, z: depth - 1 }, TURN.north);
+  for (let z = COUNTER_ROW + 2; z < depth - 2; z += 2) {
+    for (let x = 1; x < width - 1; x += 2) put(INTERIOR_PIECES.parcel, { x, z }, TURN.south);
+  }
+}
+
+/** Caixas na entrada, corredores de prateleiras e geladeiras na parede do fundo. */
+function market({ room, put }: Arranger): void {
+  const { width, depth } = room;
+  for (let x = 1; x < width - 1; x += CHECKOUT_EVERY) {
+    put(INTERIOR_PIECES.counter, { x, z: CHECKOUT_ROW }, TURN.north);
+  }
+  for (let z = FIRST_SHELF_ROW; z < depth - 2; z += 1) {
+    for (let x = 1; x < width - 1; x += 1) {
+      if (x % OFFICE_AISLE_EVERY === 0) continue;
+      put(INTERIOR_PIECES.shelf, { x, z }, x % OFFICE_AISLE_EVERY === 1 ? TURN.west : TURN.east);
+    }
+  }
+  for (let x = 0; x < width; x += 1) put(INTERIOR_PIECES.fridge, { x, z: depth - 1 }, TURN.north);
+}
+
+const ARRANGERS: Readonly<Record<Interior, (context: Arranger) => void>> = {
+  classroom,
+  ward,
+  police,
+  post,
+  market,
+};
+
 /** A arrumação do cômodo; vazia se ele é pequeno demais para o uso. */
 export function arrangeInterior(interior: Interior, room: InteriorRoom): InteriorPiece[] {
   if (Math.min(room.width, room.depth) < MIN_INTERIOR_SIDE) return [];
   const context = arranger(room);
-  if (interior === 'classroom') classroom(context);
-  else ward(context);
+  ARRANGERS[interior](context);
   return context.pieces;
 }

@@ -122,12 +122,14 @@ describe('settlement generator', () => {
     }
   });
 
-  it('shouldGiveTheModernTownSchoolsOrHospitalsAndTheMedievalOneNone', () => {
+  it('shouldGiveTheModernTownPublicBuildingsAndTheMedievalOneNone', () => {
+    // Mesa e cadeira também mobiliam a casa comum medieval: não contam como prédio público.
+    const shared = new Set<string>([INTERIOR_PIECES.officeDesk, INTERIOR_PIECES.chair]);
     const institutional = (style: 'modern' | 'medieval') => {
       const keys = new Set(
         allPieces(generateSettlement({ style, size: side(TOWN), seed: 3 }).model).map(keyOf),
       );
-      return Object.values(INTERIOR_PIECES).filter((key) => keys.has(key));
+      return Object.values(INTERIOR_PIECES).filter((key) => !shared.has(key) && keys.has(key));
     };
     expect(institutional('modern').length).toBeGreaterThan(0);
     expect(institutional('medieval')).toEqual([]);

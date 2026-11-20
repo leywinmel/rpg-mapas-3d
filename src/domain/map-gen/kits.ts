@@ -221,7 +221,7 @@ const MEDIEVAL: StyleKit = {
 };
 
 const MODERN: StyleKit = {
-  interiors: ['classroom', 'ward'],
+  interiors: ['classroom', 'ward', 'police', 'post', 'market'],
   tiles: {
     ground: 'grama',
     road: 'mod-asfalto',

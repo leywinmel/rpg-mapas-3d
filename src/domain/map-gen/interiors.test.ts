@@ -3,6 +3,7 @@ import { rotatedFootprint } from '../map-v2';
 import {
   arrangeInterior,
   INTERIOR_PIECES,
+  type Interior,
   type InteriorPiece,
   type InteriorRoom,
 } from './interiors';
@@ -28,7 +29,9 @@ function cellsOf(piece: InteriorPiece): string[] {
   return cells;
 }
 
-describe.each(['classroom', 'ward'] as const)('arrangeInterior (%s)', (interior) => {
+const INTERIORS = ['classroom', 'ward', 'police', 'post', 'market'] as const;
+
+describe.each(INTERIORS)('arrangeInterior (%s)', (interior) => {
   const pieces = arrangeInterior(interior, ROOM);
   const cells = pieces.flatMap(cellsOf);
 
@@ -65,7 +68,7 @@ describe.each(['classroom', 'ward'] as const)('arrangeInterior (%s)', (interior)
 });
 
 describe('arrangeInterior: o que cada cômodo tem', () => {
-  const keys = (interior: 'classroom' | 'ward', story = 0) =>
+  const keys = (interior: Interior, story = 0) =>
     arrangeInterior(interior, { ...ROOM, story }).map((piece) => piece.key);
 
   it('shouldGiveTheClassroomABoardATeacherDeskAndRowsOfDesks', () => {
@@ -82,5 +85,36 @@ describe('arrangeInterior: o que cada cômodo tem', () => {
     expect(keys('ward', 1).filter((key) => key === INTERIOR_PIECES.bed).length).toBeGreaterThan(
       keys('ward').filter((key) => key === INTERIOR_PIECES.bed).length,
     );
+  });
+
+  it('shouldGiveThePoliceStationACounterDesksWithChairsAndFiles', () => {
+    const police = keys('police');
+    expect(police).toContain(INTERIOR_PIECES.counter);
+    expect(police).toContain(INTERIOR_PIECES.bookcase);
+    const desks = police.filter((key) => key === INTERIOR_PIECES.officeDesk).length;
+    expect(desks).toBeGreaterThan(2);
+    expect(police.filter((key) => key === INTERIOR_PIECES.chair).length).toBe(desks);
+  });
+
+  it('shouldGiveThePostOfficeACounterShelvesAndParcels', () => {
+    const post = keys('post');
+    expect(post).toContain(INTERIOR_PIECES.counter);
+    expect(post).toContain(INTERIOR_PIECES.bookcase);
+    expect(post).toContain(INTERIOR_PIECES.parcel);
+    expect(keys('post', 1)).not.toContain(INTERIOR_PIECES.counter);
+  });
+
+  it('shouldGiveTheMarketCheckoutsAislesOfShelvesAndFridges', () => {
+    const market = keys('market');
+    expect(market).toContain(INTERIOR_PIECES.counter);
+    expect(market.filter((key) => key === INTERIOR_PIECES.shelf).length).toBeGreaterThan(6);
+    expect(market).toContain(INTERIOR_PIECES.fridge);
+  });
+
+  it('shouldLeaveAPassageThroughTheServiceCounter', () => {
+    const counterCells = arrangeInterior('police', ROOM)
+      .filter((piece) => piece.key === INTERIOR_PIECES.counter)
+      .flatMap(cellsOf);
+    expect(counterCells.length).toBe(ROOM.width - 1);
   });
 });

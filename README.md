@@ -160,8 +160,10 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
 - **Casas prontas:** a aba "Casas" (atalho `H`) traz casas inteiras de cada estilo, com móveis e
   telhado. Um clique põe a casa no cursor, `R` gira, e `Ctrl+Z` desfaz a casa toda de uma vez.
   O estilo moderno traz também a escola, o posto de saúde e o hospital, já com as salas de aula e
-  as enfermarias montadas; as cidades modernas geradas ganham, de vez em quando, uma escola ou um
-  hospital no lugar de um prédio comum.
+  as enfermarias montadas, e os prédios públicos: a delegacia (balcão do plantão, mesas dos
+  investigadores e arquivos), os correios (balcão, triagem e pacotes), o mercado (caixas,
+  corredores de prateleiras e geladeiras) e a lojinha. As cidades modernas geradas ganham, de vez
+  em quando, um desses prédios no lugar de um prédio comum.
 - **Pintar e acabamentos:** a ferramenta Pintar (atalho `T`) tinge paredes e objetos com uma
   paleta de cores ou troca o acabamento das paredes (tijolo, madeira, reboco, pedra), mantendo
   portas e janelas no lugar. Um clique numa parede pinta a casa inteira (as paredes ligadas a ela,

@@ -73,10 +73,14 @@ export const PREFABS: readonly PrefabDefinition[] = [
     ['casa-amarela', 'Casa amarela', 6, 8, 1, 'house', 2, 27],
     ['sobrado-azul', 'Sobrado azul', 8, 8, 2, 'house', 3, 28],
     ['chale-verde', 'Chalé verde', 4, 6, 1, 'house', 4, 29],
+    ['lojinha', 'Lojinha', 6, 6, 1, 'shop', 1, 216],
   ]).concat(
     institution(['escola', 'Escola', 12, 8, 2, 'house', 1, 210], 'classroom'),
     institution(['posto-saude', 'Posto de saúde', 10, 8, 1, 'house', 0, 211], 'ward'),
     institution(['hospital', 'Hospital', 12, 12, 4, 'tower', 0, 212], 'ward'),
+    institution(['delegacia', 'Delegacia', 12, 8, 1, 'house', 0, 213], 'police'),
+    institution(['correios', 'Correios', 10, 8, 1, 'house', 1, 214], 'post'),
+    institution(['mercado', 'Mercado', 12, 10, 1, 'shop', 0, 215], 'market'),
   ),
   ...rows('futurist', [
     ['modulo', 'Módulo habitacional', 6, 6, 1, 'house', 0, 31],
