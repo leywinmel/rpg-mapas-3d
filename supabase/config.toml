@@ -436,6 +436,11 @@ project_id = "nxlnjnmryexavvsadbkz"
 site_url = "https://rpgmaps-sepia.vercel.app"
 additional_redirect_urls = ["https://rpgmaps-sepia.vercel.app/**"]
 
+# O Google está LIGADO na nuvem desde 20/11, pelo painel (Authentication → Providers → Google), com
+# o segredo guardado só lá. Não há sobrescrita aqui porque ela levaria o ID e o segredo das variáveis
+# locais: um `config push` sem elas apagaria a chave da nuvem. Antes de cada push, confira no
+# `config diff` que a seção do Google não muda; se mudar, desfaça no painel.
+
 # Valores que a nuvem já traz certos para o plano Free: ficam iguais ao painel, não ao local.
 [remotes.production.auth.email]
 max_frequency = "1m0s"
