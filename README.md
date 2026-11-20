@@ -133,6 +133,16 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   alto, o salão principal, o pagode e o bambuzal. As peças japonesas (paredes de madeira e reboco,
   telhados de beiral curvo, torii, lanterna de pedra, cerejeira, bambu, pagode, campanário,
   incensário e boneco de treino) também ficam na biblioteca do editor.
+  A "Escola do Bairro Alto" (100 × 100) é uma escola inteira cercada, de frente para a avenida:
+  pavilhões de dois andares com as salas de aula montadas (lousa, mesa do professor, fileiras de
+  carteiras e armários), refeitório, campo de futebol com pista, quadra de basquete, enfermaria,
+  secretaria na praça do mastro e estacionamento, com o ônibus escolar na porta. O "Hospital
+  Central" (200 × 200) é um complexo hospitalar: alas de internação de cinco andares com
+  enfermarias (leitos encostados nas paredes, soro, monitor e armário de remédios), torre principal
+  com recepção, pronto-socorro com a baía das ambulâncias, heliponto, parque com lago e
+  estacionamentos lotados. As peças de escola e hospital (carteira, lousa, armário de aço, tabela
+  de basquete, trave, bebedouro, mastro, leito, soro, monitor, biombo, cadeira de rodas, maca,
+  balcão de recepção e heliponto) também ficam na biblioteca do editor.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
@@ -149,6 +159,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   degrau abaixo do chão: o cais e a margem sobem sobre o mar, e a poça da caverna e o oásis afundam.
 - **Casas prontas:** a aba "Casas" (atalho `H`) traz casas inteiras de cada estilo, com móveis e
   telhado. Um clique põe a casa no cursor, `R` gira, e `Ctrl+Z` desfaz a casa toda de uma vez.
+  O estilo moderno traz também a escola, o posto de saúde e o hospital, já com as salas de aula e
+  as enfermarias montadas; as cidades modernas geradas ganham, de vez em quando, uma escola ou um
+  hospital no lugar de um prédio comum.
 - **Mover carros e objetos durante o jogo:** com a ferramenta de seleção (`V`), o mestre arrasta um
   veículo ou objeto solto (barril, caixa, mesa, baú, modelo `.glb` próprio) para outra casa; `R` gira
   a peça escolhida e as setas a empurram uma casa. Paredes, chão, telhados e casas ficam no lugar. A

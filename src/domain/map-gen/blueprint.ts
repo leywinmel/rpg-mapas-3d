@@ -8,6 +8,7 @@
  */
 import type { Cell, GridEdge } from '../grid';
 import { QUARTER_TURNS, rotatedFootprint, STORY_HEIGHT_STEPS, type Footprint } from '../map-v2';
+import { arrangeInterior, type Interior } from './interiors';
 import { createRandom } from './random';
 import {
   gableRoofsFor,
@@ -62,6 +63,8 @@ export type BuildingSpec = {
   readonly roof: RoofKind;
   /** Semente da mobília: a mesma planta sai sempre igual. */
   readonly seed: number;
+  /** Sala de aula ou enfermaria (RPG-65): arrumação própria no lugar da mobília sorteada. */
+  readonly interior?: Interior;
 };
 
 /** Escada de um andar: 1×3 casas. Prédio mais estreito que isto não tem andar de cima. */
@@ -253,6 +256,17 @@ function spotCells(spot: FloorSpot): string[] {
 /** Mobília do andar (a de loja no térreo da loja), longe da porta e da escada, sem sobrepor. */
 function furnish(context: StoryContext, story: number): BlueprintPiece[] {
   const { spec, kit, random } = context;
+  if (spec.interior) {
+    const room = {
+      width: spec.width,
+      depth: spec.depth,
+      door: doorColumn(spec.width),
+      stairs: context.stairs,
+      story,
+    };
+    const level = story * STORY_HEIGHT_STEPS;
+    return arrangeInterior(spec.interior, room).map((piece) => ({ ...piece, level, scale: 1 }));
+  }
   const taken = new Set(context.stairs.map((cell) => `${cell.x},${cell.z}`));
   const door = doorColumn(spec.width);
   // A casa da porta e a da frente dela ficam livres: o boneco entra sem tropeçar.

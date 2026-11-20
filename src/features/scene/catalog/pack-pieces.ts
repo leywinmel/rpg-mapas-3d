@@ -7,6 +7,7 @@
 import { STORY_HEIGHT_STEPS, HEIGHT_STEP } from '@/domain/map-v2';
 import type { CatalogEntry } from './catalog-types';
 import { GENERIC_PIECES } from './generic-pieces';
+import { INSTITUTION_PIECES } from './institution-pieces';
 import { JAPANESE_PIECES } from './japanese-pieces';
 
 /** Parede de pacote cobre um andar inteiro (porta e janela não se repetem empilhadas). */
@@ -2195,4 +2196,5 @@ export const PACK_PIECES: readonly CatalogEntry[] = [
   },
   ...GENERIC_PIECES,
   ...JAPANESE_PIECES,
+  ...INSTITUTION_PIECES,
 ];

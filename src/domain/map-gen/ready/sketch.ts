@@ -7,6 +7,7 @@ import type { Cell, GridSize } from '../../grid';
 import type { CellRect, Footprint, MapHeader, MapWall } from '../../map-v2';
 import { createAssembler, createTileKeys, type AssembledMap } from '../assemble';
 import { buildBlueprint, rotateBlueprint, type Blueprint, type BuildingUse } from '../blueprint';
+import type { Interior } from '../interiors';
 import { propFootprint, roofFor, STYLE_KITS, type SettlementStyle, type WallSet } from '../kits';
 
 export type SketchPiece = {
@@ -123,6 +124,8 @@ export type SketchBuilding = {
    * piso do medieval com a madeira e o telhado de beiral curvo dele.
    */
   readonly walls?: WallSet;
+  /** Sala de aula ou enfermaria (RPG-65) no lugar da mobília sorteada. */
+  readonly interior?: Interior;
 };
 
 function buildingBlueprint(building: SketchBuilding): Blueprint {
@@ -139,6 +142,7 @@ function buildingBlueprint(building: SketchBuilding): Blueprint {
     // Mesma regra do gerador: telhado de duas águas só onde o kit tem e as medidas são pares.
     roof: roofFor(kit, walls, building),
     seed: building.variant + 1,
+    ...(building.interior ? { interior: building.interior } : {}),
   };
   return rotateBlueprint(buildBlueprint(spec, kit), building.rotation);
 }

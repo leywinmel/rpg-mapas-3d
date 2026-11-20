@@ -4,6 +4,7 @@
  * pronta sair sempre igual.
  */
 import { buildBlueprint, type Blueprint, type BuildingUse } from './blueprint';
+import type { Interior } from './interiors';
 import { roofFor, STYLE_KITS, type SettlementStyle } from './kits';
 
 export type PrefabDefinition = {
@@ -19,6 +20,8 @@ export type PrefabDefinition = {
   /** Qual piso interno do kit (índice). */
   readonly floor: number;
   readonly seed: number;
+  /** Sala de aula ou enfermaria (RPG-65) no lugar da mobília de casa. */
+  readonly interior?: Interior;
 };
 
 type Row = readonly [
@@ -46,6 +49,11 @@ const rows = (style: SettlementStyle, list: readonly Row[]): PrefabDefinition[] 
     seed,
   }));
 
+/** Casa pronta do moderno com cômodo de uso próprio: escola, posto de saúde, hospital. */
+function institution(row: Row, interior: Interior): PrefabDefinition {
+  return { ...rows('modern', [row])[0]!, interior };
+}
+
 export const PREFABS: readonly PrefabDefinition[] = [
   ...rows('medieval', [
     ['cabana', 'Cabana', 4, 4, 1, 'house', 0, 11],
@@ -65,7 +73,11 @@ export const PREFABS: readonly PrefabDefinition[] = [
     ['casa-amarela', 'Casa amarela', 6, 8, 1, 'house', 2, 27],
     ['sobrado-azul', 'Sobrado azul', 8, 8, 2, 'house', 3, 28],
     ['chale-verde', 'Chalé verde', 4, 6, 1, 'house', 4, 29],
-  ]),
+  ]).concat(
+    institution(['escola', 'Escola', 12, 8, 2, 'house', 1, 210], 'classroom'),
+    institution(['posto-saude', 'Posto de saúde', 10, 8, 1, 'house', 0, 211], 'ward'),
+    institution(['hospital', 'Hospital', 12, 12, 4, 'tower', 0, 212], 'ward'),
+  ),
   ...rows('futurist', [
     ['modulo', 'Módulo habitacional', 6, 6, 1, 'house', 0, 31],
     ['habitacao', 'Bloco habitacional', 8, 8, 3, 'house', 1, 32],
@@ -105,6 +117,7 @@ export function prefabBlueprint(prefab: PrefabDefinition): Blueprint {
       floor: kit.tiles.indoor[prefab.floor % kit.tiles.indoor.length]!,
       roof: roofFor(kit, walls, prefab),
       seed: prefab.seed,
+      ...(prefab.interior ? { interior: prefab.interior } : {}),
     },
     kit,
   );

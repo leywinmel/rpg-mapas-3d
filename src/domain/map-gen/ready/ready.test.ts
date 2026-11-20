@@ -13,11 +13,13 @@ import { chromeDocksFloors } from './chrome-docks';
 import { cityCenterFloors } from './city-center';
 import { colonyFloors } from './colony';
 import { desertFloors } from './desert';
+import { hospitalFloors } from './hospital';
 import { islandFloors } from './island';
 import { medievalTownFloors } from './medieval-town';
 import { modernTownFloors } from './modern-town';
 import { neonDistrictFloors } from './neon-district';
 import { portFloors } from './port';
+import { schoolFloors } from './school';
 import { buildShipMap, SHIP_SIZE } from './ship';
 import { stationFloors } from './station';
 import { templeSchoolFloors } from './temple-school';
@@ -308,5 +310,56 @@ describe('academia do monte kasumi', () => {
     expect(path).toEqual([1, 2, 4, 5, 6, 8, 9, 10, 12, 13]);
     expect(floors.get('29,51')).toEqual({ tile: 'grama', height: 1 });
     expect(floors.get('10,45')?.tile).toBe('terra');
+  });
+});
+
+describe('escola do bairro alto', () => {
+  it('shouldReachEveryCellOneStepAtATime', () => {
+    expect(unreachableDryCells(schoolFloors(), '0,0')).toEqual([]);
+  });
+
+  it('shouldRaiseThePatioAndTheEntranceOneStepAboveTheCampus', () => {
+    const floors = schoolFloors();
+    expect(floors.get('55,46')).toEqual({ tile: 'piso-pedra', height: 2 });
+    expect(floors.get('20,50')).toEqual({ tile: 'grama', height: 1 });
+    expect(floors.get('12,50')).toEqual({ tile: 'terra', height: 1 });
+    expect(floors.get('50,93')).toEqual({ tile: 'mod-asfalto', height: 1 });
+  });
+
+  it('shouldFurnishTheClassroomsWithDesksAndBoards', () => {
+    const { model } = readyMap('escola-bairro-alto')!.build();
+    const keys = allPieces(model).map((piece) =>
+      piece.asset.source === 'catalog' ? piece.asset.key : '',
+    );
+    expect(keys.filter((key) => key === 'esc-lousa').length).toBe(18);
+    expect(keys.filter((key) => key === 'esc-carteira').length).toBeGreaterThan(200);
+    expect(keys).toContain('hos-leito');
+  });
+});
+
+describe('hospital central', () => {
+  it('shouldReachEveryDryCellOneStepAtATime', () => {
+    expect(unreachableDryCells(hospitalFloors(), '0,0')).toEqual([]);
+  });
+
+  it('shouldSinkTheLakeAndRaiseThePlazaAndTheHelipad', () => {
+    const floors = hospitalFloors();
+    expect(waterHeights(floors)).toEqual([0]);
+    expect(floors.get('55,28')).toEqual({ tile: 'agua', height: 0 });
+    expect(floors.get('40,18')).toEqual({ tile: 'grama', height: 1 });
+    expect(floors.get('100,140')).toEqual({ tile: 'piso-pedra', height: 2 });
+    expect(floors.get('176,18')).toEqual({ tile: 'piso-pedra', height: 2 });
+  });
+
+  it('shouldFurnishTheWardsWithBedsDripsAndMonitors', () => {
+    const { model } = readyMap('hospital-central')!.build();
+    const keys = allPieces(model).map((piece) =>
+      piece.asset.source === 'catalog' ? piece.asset.key : '',
+    );
+    expect(keys.filter((key) => key === 'hos-leito').length).toBeGreaterThan(300);
+    expect(keys).toContain('hos-soro');
+    expect(keys).toContain('hos-monitor');
+    expect(keys).toContain('hos-balcao');
+    expect(keys).toContain('hos-heliponto');
   });
 });

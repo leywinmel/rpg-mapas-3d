@@ -63,6 +63,7 @@ function blueprintCache(kit: StyleKit) {
       spec.walls.plain,
       spec.floor,
       spec.seed,
+      spec.interior,
       rotation,
     ].join('|');
     const found = cache.get(key);

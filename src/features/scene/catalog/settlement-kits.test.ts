@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  INTERIOR_PIECES,
   kitKeys,
   prefabBlueprint,
   PREFABS,
+  propFootprint,
   READY_MAPS,
   SETTLEMENT_STYLES,
   STYLE_KITS,
@@ -29,6 +31,16 @@ describe.each(SETTLEMENT_STYLES)('kit de peças do gerador (%s)', (style) => {
       const entry = pieceCatalog.get(key);
       expect(entry?.kind, key).toBe('prop');
       expect(entry?.footprint ?? SINGLE, key).toEqual(footprint);
+    }
+  });
+});
+
+describe('salas de aula e enfermarias', () => {
+  it('shouldUseCatalogPropsWithTheFootprintTheArrangementExpects', () => {
+    for (const key of Object.values(INTERIOR_PIECES)) {
+      const entry = pieceCatalog.get(key);
+      expect(entry?.kind, key).toBe('prop');
+      expect(entry?.footprint ?? SINGLE, key).toEqual(propFootprint(key));
     }
   });
 });
