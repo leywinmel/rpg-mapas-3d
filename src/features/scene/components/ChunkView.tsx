@@ -106,6 +106,7 @@ function NearView({ chunk, cutaway, modelUrls, showGrid }: NearViewProps) {
           asset={group.asset}
           transforms={group.transforms}
           tint={group.tint}
+          states={group.states}
           modelUrls={modelUrls}
         />
       ))}

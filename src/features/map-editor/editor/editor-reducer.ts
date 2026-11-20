@@ -43,6 +43,7 @@ import {
   eraseTargetAt,
   movePieceTo,
   normalizeQuarterTurns,
+  interactAt,
   paintAt,
   placePieceAt,
   placeWallAt,
@@ -58,7 +59,16 @@ import { cellsOnLine } from './stroke-line';
 export type { PaintBrush, PointerHit } from './model-ops';
 
 export type Tool =
-  'select' | 'floor' | 'wall' | 'prop' | 'prefab' | 'paint' | 'erase' | 'raise' | 'lower';
+  | 'select'
+  | 'floor'
+  | 'wall'
+  | 'prop'
+  | 'prefab'
+  | 'paint'
+  | 'interact'
+  | 'erase'
+  | 'raise'
+  | 'lower';
 
 /** `prefab` é o id da casa pronta escolhida (ver `PREFABS`); `paint`, a tinta ou o acabamento. */
 export type Brush = {
@@ -172,9 +182,18 @@ export function createEditorState(model: MapModel): EditorState {
   };
 }
 
-/** Ferramentas que pintam arrastando (o objeto, a casa pronta e a tinta são um por clique). */
+/**
+ * Ferramentas que pintam arrastando. O objeto, a casa pronta e a tinta são um por clique; o
+ * acionar também, senão o arraste abriria e fecharia a porta a cada casa.
+ */
 export function isPaintingTool(tool: Tool): boolean {
-  return tool !== 'select' && tool !== 'prop' && tool !== 'prefab' && tool !== 'paint';
+  return (
+    tool !== 'select' &&
+    tool !== 'prop' &&
+    tool !== 'prefab' &&
+    tool !== 'paint' &&
+    tool !== 'interact'
+  );
 }
 
 /**
@@ -242,6 +261,8 @@ function applyTool(
       return newPropId ? placeChosenPrefab(state, hit, newPropId) : unchanged;
     case 'paint':
       return paintAt(model, { hit, paint: state.brush.paint, wholeHouse: state.paintWholeHouse });
+    case 'interact':
+      return interactAt(model, hit.cell);
     case 'erase': {
       const target = eraseTargetAt(model, hit);
       return target ? eraseTarget(model, target) : unchanged;

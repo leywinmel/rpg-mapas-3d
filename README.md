@@ -169,6 +169,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   portas e janelas no lugar. Um clique numa parede pinta a casa inteira (as paredes ligadas a ela,
   em todos os andares); o botão da casa na barra troca para pintar só uma parede. A tinta aparece
   de perto, de longe e no .glb exportado.
+- **Acionar peças:** a ferramenta Acionar (atalho `A`) abre e fecha as portas de trás da
+  ambulância e da van e levanta ou baixa a pá do trator. Só o mestre aciona; a mesa vê a peça
+  mudar quando o mapa é salvo, e o mapa guarda a peça aberta.
 - **Mover carros e objetos durante o jogo:** com a ferramenta de seleção (`V`), o mestre arrasta um
   veículo ou objeto solto (barril, caixa, mesa, baú, modelo `.glb` próprio) para outra casa; `R` gira
   a peça escolhida e as setas a empurram uma casa. Paredes, chão, telhados e casas ficam no lugar. A

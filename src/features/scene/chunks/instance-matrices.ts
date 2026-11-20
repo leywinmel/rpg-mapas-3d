@@ -17,17 +17,21 @@ const scratch = {
   color: new Color(),
 };
 
+/** A matriz de posição, giro e escala de uma cópia, escrita em `target`. */
+export function transformMatrix(transform: InstanceTransform, target: Matrix4): Matrix4 {
+  scratch.position.set(transform.x, transform.y, transform.z);
+  scratch.euler.set(0, transform.rotationY * DEGREES_TO_RADIANS, 0);
+  scratch.rotation.setFromEuler(scratch.euler);
+  scratch.scale.set(transform.scale, transform.scaleY ?? transform.scale, transform.scale);
+  return target.compose(scratch.position, scratch.rotation, scratch.scale);
+}
+
 export function writeTransforms(
   mesh: InstancedMesh,
   transforms: readonly InstanceTransform[],
 ): void {
   transforms.forEach((transform, index) => {
-    scratch.position.set(transform.x, transform.y, transform.z);
-    scratch.euler.set(0, transform.rotationY * DEGREES_TO_RADIANS, 0);
-    scratch.rotation.setFromEuler(scratch.euler);
-    scratch.scale.set(transform.scale, transform.scaleY ?? transform.scale, transform.scale);
-    scratch.matrix.compose(scratch.position, scratch.rotation, scratch.scale);
-    mesh.setMatrixAt(index, scratch.matrix);
+    mesh.setMatrixAt(index, transformMatrix(transform, scratch.matrix));
   });
   mesh.instanceMatrix.needsUpdate = true;
 }

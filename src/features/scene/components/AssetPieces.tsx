@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { pieceCatalog } from '../catalog/catalog';
+import { INTERACTIVE_MODELS } from '../catalog/interactive-models';
 import { getPieceLayers } from '../catalog/piece-geometry';
+import type { PieceState } from '../chunks/chunk-instances';
 import { regroupWallSegments, type InstanceTransform, type PropAsset } from '../layout';
 import { ModelPieces } from './ModelPieces';
 import { PieceInstances } from './PieceInstances';
@@ -16,11 +18,24 @@ type CatalogPiecesProps = {
   transforms: readonly InstanceTransform[];
   tint?: string;
   ghost?: boolean;
+  /** Aberta ou fechada, por cópia: só nas peças com interação (RPG-44). */
+  states?: readonly PieceState[];
 };
 
 /** Peça do catálogo, procedural ou .glb de pacote: o chamador não precisa saber qual. */
-export function CatalogPieces({ pieceKey, transforms, tint, ghost = false }: CatalogPiecesProps) {
+export function CatalogPieces({
+  pieceKey,
+  transforms,
+  tint,
+  ghost = false,
+  states,
+}: CatalogPiecesProps) {
   const entry = pieceCatalog.get(pieceKey);
+  const model = INTERACTIVE_MODELS[pieceKey];
+  const interaction = useMemo(
+    () => (model && states ? { model, states } : undefined),
+    [model, states],
+  );
   const span = entry?.wallSpan;
   const placed = useMemo(
     () => (span ? regroupWallSegments(transforms, span) : transforms),
@@ -35,6 +50,7 @@ export function CatalogPieces({ pieceKey, transforms, tint, ghost = false }: Cat
         fitToCell={false}
         tint={tint}
         ghost={ghost}
+        interaction={interaction}
       />
     );
   }
@@ -54,6 +70,7 @@ type AssetPiecesProps = {
   modelUrls?: ModelUrls;
   tint?: string;
   ghost?: boolean;
+  states?: readonly PieceState[];
 };
 
 export function AssetPieces({
@@ -62,9 +79,18 @@ export function AssetPieces({
   modelUrls,
   tint,
   ghost = false,
+  states,
 }: AssetPiecesProps) {
   if (asset.source === 'catalog') {
-    return <CatalogPieces pieceKey={asset.key} transforms={transforms} tint={tint} ghost={ghost} />;
+    return (
+      <CatalogPieces
+        pieceKey={asset.key}
+        transforms={transforms}
+        tint={tint}
+        ghost={ghost}
+        states={states}
+      />
+    );
   }
   const url = modelUrls ? modelUrls[asset.assetId] : null;
   if (url === undefined) return null;

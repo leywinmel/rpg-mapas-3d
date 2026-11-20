@@ -429,3 +429,32 @@ describe('pintar no editor (RPG-33)', () => {
     expect(isPaintingTool('paint')).toBe(false);
   });
 });
+
+describe('acionar peças (RPG-44)', () => {
+  const placeVan = [
+    { type: 'choose-prop', asset: { source: 'catalog', key: 'mod-van' } },
+    { type: 'stroke-start', hit: hitAt(3, 3), newPropId: 'van-1' },
+    { type: 'stroke-end' },
+    { type: 'set-tool', tool: 'interact' },
+  ] satisfies EditorAction[];
+  const click = (x: number, z: number): EditorAction[] => [
+    { type: 'stroke-start', hit: hitAt(x, z), newPropId: 'x' },
+    { type: 'stroke-end' },
+  ];
+
+  it('shouldOpenWithOneClickCloseWithAnotherAndUndo', () => {
+    const opened = run([...placeVan, ...click(3, 3)]);
+    expect(pieces(opened)[0]?.open).toBe(true);
+    expect(pieces(run([...placeVan, ...click(3, 3), ...click(3, 3)]))[0]?.open).toBeUndefined();
+    expect(pieces(editorReducer(opened, { type: 'undo' }))[0]?.open).toBeUndefined();
+  });
+
+  it('shouldWarnWhenThereIsNothingToOperate', () => {
+    const state = run([...placeVan, ...click(30, 30)]);
+    expect(state.notice?.message).toMatch(/não tem o que acionar/);
+  });
+
+  it('shouldOperateByClickNotByDrag', () => {
+    expect(isPaintingTool('interact')).toBe(false);
+  });
+});

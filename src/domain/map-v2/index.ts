@@ -13,6 +13,7 @@ export * from './height';
 export * from './model';
 export * from './operations';
 export * from './paint';
+export * from './interactions';
 export * from './piece-move';
 export * from './rect';
 export * from './resize';
