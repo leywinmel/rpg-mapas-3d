@@ -346,7 +346,11 @@ O login com Google vem desligado no ambiente local. Para ligar:
 4. Reinicie: `scripts\dev.bat restart` (ou `./scripts/dev.sh restart`).
 
 Na nuvem, o Google se liga no painel do Supabase (Authentication → Providers → Google), com o
-endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback`.
+endereço de retorno `https://<seu-projeto>.supabase.co/auth/v1/callback` cadastrado na credencial
+OAuth e a tela de consentimento publicada ("Público-alvo" → "Publicar app"); sem publicar, só os
+usuários de teste entram. O site no ar já tem o Google ligado. O ID e o segredo ficam só no painel:
+nunca no Git. Antes de um `npx supabase config push`, confira no `config diff` que a seção do
+Google não muda.
 
 ### Comandos úteis
 
