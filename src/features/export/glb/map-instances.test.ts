@@ -36,7 +36,7 @@ describe('collectMapInstances', () => {
     const pieceKey = makePiece({ id: 'x', x: 0, z: 0 }).asset;
     expect(pieceKey.source).toBe('catalog');
     if (pieceKey.source !== 'catalog') return;
-    expect(instances.catalog.get(pieceKey.key)).toHaveLength(2);
+    expect(instances.catalog.get(pieceKey.key)?.transforms).toHaveLength(2);
     expect(instances.uploads.size).toBe(0);
   });
 });

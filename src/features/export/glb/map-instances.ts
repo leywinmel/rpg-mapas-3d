@@ -4,7 +4,7 @@
  * suas malhas (para redesenhar só o que muda); no arquivo, uma malha por tipo deixa o .glb
  * menor e abre mais leve no Blender.
  */
-import { NO_FLOOR_INDEX, type Cutaway, type MapChunk } from '@/domain/map-v2';
+import { NO_FLOOR_INDEX, tintKey, type Cutaway, type MapChunk } from '@/domain/map-v2';
 import { pieceCatalog, regroupWallSegments, type InstanceTransform } from '@/features/scene';
 import {
   pieceGroups,
@@ -14,19 +14,32 @@ import {
 } from '@/features/scene/chunks/chunk-instances';
 import { GLB_BASE_BYTES, GLB_BYTES_PER_FLOOR_CELL, GLB_BYTES_PER_OBJECT } from '../constants';
 
+/** Cópias de uma peça (ou modelo enviado) com a mesma tinta: uma malha no arquivo. */
+export type TintedInstances = {
+  /** Chave da peça do catálogo ou id do modelo enviado. */
+  readonly key: string;
+  readonly tint?: string;
+  readonly transforms: InstanceTransform[];
+};
+
 export type MapInstances = {
   /** Colunas sob as casas com chão: uma camada lisa, colorida pela lateral do piso. */
   readonly columns: ColoredInstances;
-  /** Peças do catálogo (tampas de chão, paredes e objetos), pela chave da peça. */
-  readonly catalog: ReadonlyMap<string, InstanceTransform[]>;
-  /** Modelos enviados pelo mestre, pelo id do arquivo. */
-  readonly uploads: ReadonlyMap<string, InstanceTransform[]>;
+  /** Peças do catálogo (tampas de chão, paredes e objetos), pela chave da peça e a tinta. */
+  readonly catalog: ReadonlyMap<string, TintedInstances>;
+  /** Modelos enviados pelo mestre, pelo id do arquivo e a tinta. */
+  readonly uploads: ReadonlyMap<string, TintedInstances>;
 };
 
-function append(groups: Map<string, InstanceTransform[]>, key: string, items: InstanceTransform[]) {
-  const group = groups.get(key);
-  if (group) group.push(...items);
-  else groups.set(key, [...items]);
+function append(
+  groups: Map<string, TintedInstances>,
+  { key, tint }: { key: string; tint?: string | undefined },
+  items: InstanceTransform[],
+) {
+  const groupKey = tintKey(key, tint);
+  const group = groups.get(groupKey);
+  if (group) group.transforms.push(...items);
+  else groups.set(groupKey, { key, ...(tint ? { tint } : {}), transforms: [...items] });
 }
 
 /** As paredes de modelo do pacote vêm em trechos de várias casas: junta como o CatalogPieces. */
@@ -38,20 +51,24 @@ function placedCatalog(key: string, transforms: InstanceTransform[]): InstanceTr
 
 export function collectMapInstances(chunks: readonly MapChunk[], cutaway: Cutaway): MapInstances {
   const columns: ColoredInstances = { transforms: [], colors: [] };
-  const catalog = new Map<string, InstanceTransform[]>();
-  const uploads = new Map<string, InstanceTransform[]>();
+  const catalog = new Map<string, TintedInstances>();
+  const uploads = new Map<string, TintedInstances>();
   for (const chunk of chunks) {
     const terrain = terrainInstances(chunk);
     columns.transforms.push(...terrain.columns.transforms);
     columns.colors.push(...terrain.columns.colors);
-    for (const cap of terrain.caps) append(catalog, cap.tile, cap.transforms);
+    for (const cap of terrain.caps) append(catalog, { key: cap.tile }, cap.transforms);
     for (const wall of wallGroups(chunk, cutaway)) {
-      append(catalog, wall.style, placedCatalog(wall.style, wall.transforms));
+      append(
+        catalog,
+        { key: wall.style, tint: wall.tint },
+        placedCatalog(wall.style, wall.transforms),
+      );
     }
     for (const group of pieceGroups(chunk, cutaway)) {
-      const { asset } = group;
-      if (asset.source === 'catalog') append(catalog, asset.key, group.transforms);
-      else append(uploads, asset.assetId, group.transforms);
+      const { asset, tint } = group;
+      if (asset.source === 'catalog') append(catalog, { key: asset.key, tint }, group.transforms);
+      else append(uploads, { key: asset.assetId, tint }, group.transforms);
     }
   }
   return { columns, catalog, uploads };

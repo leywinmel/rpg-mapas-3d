@@ -93,13 +93,19 @@ function NearView({ chunk, cutaway, modelUrls, showGrid }: NearViewProps) {
     <>
       <Terrain terrain={terrain} />
       {walls.map((group) => (
-        <CatalogPieces key={group.style} pieceKey={group.style} transforms={group.transforms} />
+        <CatalogPieces
+          key={group.key}
+          pieceKey={group.style}
+          transforms={group.transforms}
+          tint={group.tint}
+        />
       ))}
       {pieces.map((group) => (
         <AssetPieces
           key={group.key}
           asset={group.asset}
           transforms={group.transforms}
+          tint={group.tint}
           modelUrls={modelUrls}
         />
       ))}

@@ -323,3 +323,109 @@ describe('casas prontas no editor', () => {
     expect(isPaintingTool('prefab')).toBe(false);
   });
 });
+
+describe('pintar no editor (RPG-33)', () => {
+  const RED = '#d9937a';
+  /** Casa 2×2 de pedra com uma porta de reboco no canto (1, 1), mais uma parede solta longe. */
+  const house = [
+    { type: 'choose-wall', key: 'med-parede-rustica' },
+    ...[
+      { x: 1.5, z: 1.05 },
+      { x: 2.5, z: 1.05 },
+      { x: 1.05, z: 1.5 },
+      { x: 1.05, z: 2.5 },
+      { x: 2.95, z: 1.5 },
+      { x: 2.95, z: 2.5 },
+      { x: 1.5, z: 2.95 },
+    ].flatMap((point): EditorAction[] => [
+      {
+        type: 'stroke-start',
+        hit: { cell: { x: Math.floor(point.x), z: Math.floor(point.z) }, point },
+        newPropId: 'x',
+      },
+      { type: 'stroke-end' },
+    ]),
+    { type: 'choose-wall', key: 'med-rustica-porta' },
+    {
+      type: 'stroke-start',
+      hit: { cell: { x: 2, z: 2 }, point: { x: 2.5, z: 2.95 } },
+      newPropId: 'x',
+    },
+    { type: 'stroke-end' },
+    { type: 'choose-wall', key: 'parede-pedra' },
+    {
+      type: 'stroke-start',
+      hit: { cell: { x: 4, z: 4 }, point: { x: 4.5, z: 4.05 } },
+      newPropId: 'x',
+    },
+    { type: 'stroke-end' },
+  ] satisfies EditorAction[];
+  const clickWall: EditorAction[] = [
+    {
+      type: 'stroke-start',
+      hit: { cell: { x: 1, z: 1 }, point: { x: 1.5, z: 1.05 } },
+      newPropId: 'x',
+    },
+    { type: 'stroke-end' },
+  ];
+
+  it('shouldPaintTheWholeHouseWithOneClickAndUndoItInOneStep', () => {
+    const state = run([
+      ...house,
+      { type: 'choose-paint', paint: { kind: 'tint', tint: RED } },
+      ...clickWall,
+    ]);
+    expect(state.tool).toBe('paint');
+    const painted = walls(state).filter((wall) => wall.tint === RED);
+    expect(painted).toHaveLength(8);
+    expect(walls(state).find((wall) => wall.style === 'parede-pedra')?.tint).toBeUndefined();
+    const undone = editorReducer(state, { type: 'undo' });
+    expect(walls(undone).some((wall) => wall.tint)).toBe(false);
+  });
+
+  it('shouldPaintOnlyTheClickedWallWhenTheWholeHouseIsOff', () => {
+    const state = run([
+      ...house,
+      { type: 'choose-paint', paint: { kind: 'tint', tint: RED } },
+      { type: 'set-paint-whole-house', whole: false },
+      ...clickWall,
+    ]);
+    expect(walls(state).filter((wall) => wall.tint === RED)).toHaveLength(1);
+  });
+
+  it('shouldSwapTheFinishKeepingTheDoor', () => {
+    const state = run([
+      ...house,
+      { type: 'choose-paint', paint: { kind: 'finish', finish: 'tijolo' } },
+      ...clickWall,
+    ]);
+    const styles = walls(state).map((wall) => wall.style);
+    expect(styles.filter((style) => style === 'mod-parede-tijolo')).toHaveLength(7);
+    expect(styles).toContain('mod-porta-madeira');
+    expect(styles).toContain('parede-pedra');
+  });
+
+  it('shouldTintAnObjectAndWarnWhenAFinishIsUsedOnIt', () => {
+    const placed = run([
+      { type: 'choose-prop', asset: { source: 'catalog', key: 'barril' } },
+      { type: 'stroke-start', hit: hitAt(3, 3), newPropId: 'barril-1' },
+      { type: 'stroke-end' },
+    ]);
+    const tinted = [
+      { type: 'choose-paint', paint: { kind: 'tint', tint: RED } },
+      { type: 'stroke-start', hit: hitAt(3, 3), newPropId: 'x' },
+      { type: 'stroke-end' },
+    ] satisfies EditorAction[];
+    const painted = tinted.reduce(editorReducer, placed);
+    expect(pieces(painted)[0]?.tint).toBe(RED);
+    const refused = editorReducer(
+      editorReducer(painted, { type: 'choose-paint', paint: { kind: 'finish', finish: 'pedra' } }),
+      { type: 'stroke-start', hit: hitAt(3, 3), newPropId: 'x' },
+    );
+    expect(refused.notice?.message).toMatch(/só para paredes/);
+  });
+
+  it('shouldPaintByClickNotByDrag', () => {
+    expect(isPaintingTool('paint')).toBe(false);
+  });
+});

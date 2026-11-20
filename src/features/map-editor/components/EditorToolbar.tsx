@@ -10,20 +10,25 @@ import {
   Minus,
   MousePointer2,
   PaintBucket,
+  Palette,
+  PanelTop,
   Paintbrush,
   Plus,
   Redo2,
   RotateCw,
+  Ban,
   SquareDashed,
   Undo2,
 } from 'lucide-react';
-import { IconButton, Toolbar, ToolbarSeparator } from '@/components';
+import { Button, IconButton, Toolbar, ToolbarSeparator } from '@/components';
+import { FINISHES } from '@/domain/map-gen';
 import {
   MAX_FOOTPRINT,
   MAX_LEVEL,
   MAX_WALL_HEIGHT_STEPS,
   MIN_WALL_HEIGHT_STEPS,
   stepsToWorld,
+  TINT_PALETTE,
 } from '@/domain/map-v2';
 import {
   supportsRectShape,
@@ -44,6 +49,7 @@ const TOOL_ICONS: Readonly<Record<Tool, ReactNode>> = {
   wall: <BrickWall size={ICON_SIZE} />,
   prop: <Box size={ICON_SIZE} />,
   prefab: <House size={ICON_SIZE} />,
+  paint: <Palette size={ICON_SIZE} />,
   erase: <Eraser size={ICON_SIZE} />,
   raise: <ArrowUpFromLine size={ICON_SIZE} />,
   lower: <ArrowDownToLine size={ICON_SIZE} />,
@@ -139,6 +145,64 @@ function BrushShapeChoice({ state, dispatch }: Props) {
         icon={<SquareDashed size={ICON_SIZE} />}
         active={state.shape === 'rect'}
         onClick={() => dispatch({ type: 'set-shape', shape: 'rect' })}
+      />
+    </>
+  );
+}
+
+/**
+ * Tinta e acabamento da ferramenta Pintar (RPG-33). A amostra é a própria cor da paleta, que é
+ * dado do mapa e não cor da interface; por isso vem no estilo da bolinha.
+ */
+function PaintOptions({ state, dispatch }: Props) {
+  const { paint } = state.brush;
+  const tintActive = (tint: string | null) => paint.kind === 'tint' && paint.tint === tint;
+  return (
+    <>
+      {TINT_PALETTE.map((swatch) => (
+        <IconButton
+          key={swatch.color}
+          label={`Tinta ${swatch.name}`}
+          icon={<span className={styles.swatch} style={{ background: swatch.color }} />}
+          size="sm"
+          active={tintActive(swatch.color)}
+          onClick={() =>
+            dispatch({ type: 'choose-paint', paint: { kind: 'tint', tint: swatch.color } })
+          }
+        />
+      ))}
+      <IconButton
+        label="Tirar a tinta (volta à cor original)"
+        icon={<Ban size={STEPPER_ICON_SIZE} />}
+        size="sm"
+        active={tintActive(null)}
+        onClick={() => dispatch({ type: 'choose-paint', paint: { kind: 'tint', tint: null } })}
+      />
+      <ToolbarSeparator />
+      {FINISHES.map((finish) => (
+        <Button
+          key={finish.id}
+          size="sm"
+          variant={paint.kind === 'finish' && paint.finish === finish.id ? 'primary' : 'ghost'}
+          aria-pressed={paint.kind === 'finish' && paint.finish === finish.id}
+          title={`Trocar as paredes por ${finish.name.toLowerCase()}`}
+          onClick={() =>
+            dispatch({ type: 'choose-paint', paint: { kind: 'finish', finish: finish.id } })
+          }
+        >
+          {finish.name}
+        </Button>
+      ))}
+      <ToolbarSeparator />
+      <IconButton
+        label={
+          state.paintWholeHouse
+            ? 'Casa inteira: pinta as paredes ligadas (clique para pintar só uma)'
+            : 'Só esta parede (clique para pintar a casa inteira)'
+        }
+        icon={state.paintWholeHouse ? <House size={ICON_SIZE} /> : <PanelTop size={ICON_SIZE} />}
+        active={state.paintWholeHouse}
+        onClick={() => dispatch({ type: 'set-paint-whole-house', whole: !state.paintWholeHouse })}
       />
     </>
   );
@@ -273,6 +337,11 @@ export function EditorToolbar({ state, dispatch }: Props) {
       {state.tool === 'wall' && (
         <Toolbar label="Opções da parede">
           <WallHeight state={state} dispatch={dispatch} />
+        </Toolbar>
+      )}
+      {state.tool === 'paint' && (
+        <Toolbar label="Tinta e acabamento">
+          <PaintOptions state={state} dispatch={dispatch} />
         </Toolbar>
       )}
       {state.tool === 'prop' && (

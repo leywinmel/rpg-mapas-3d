@@ -3,6 +3,7 @@
  * mapa. Quem usa importa de '@/domain/map-gen'.
  */
 export * from './blueprint';
+export * from './finishes';
 export * from './generator';
 export * from './interiors';
 export * from './kits';

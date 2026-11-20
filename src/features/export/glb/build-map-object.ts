@@ -34,12 +34,28 @@ export type BuiltMap = {
   readonly dispose: () => void;
 };
 
-type LayerSource = { key: string; layers: PieceLayer[]; transforms: InstanceTransform[] };
+type LayerSource = {
+  key: string;
+  layers: PieceLayer[];
+  tint?: string;
+  transforms: InstanceTransform[];
+};
 
-function instancedLayer(name: string, layer: PieceLayer, transforms: InstanceTransform[]) {
+function instancedLayer(
+  name: string,
+  layer: PieceLayer,
+  transforms: InstanceTransform[],
+  tint?: string,
+) {
   const mesh = new InstancedMesh(layer.geometry, layer.material, transforms.length);
   mesh.name = name;
   writeTransforms(mesh, transforms);
+  // A tinta vai para o arquivo como cor por cópia, igual à da tela.
+  if (tint)
+    writeColors(
+      mesh,
+      transforms.map(() => tint),
+    );
   return mesh;
 }
 
@@ -84,18 +100,18 @@ export async function buildMapObject({
   };
 
   const sources: LayerSource[] = [];
-  for (const [key, transforms] of instances.catalog) {
+  for (const [name, { key, tint, transforms }] of instances.catalog) {
     const visual = pieceCatalog.get(key)?.visual;
     const layers =
       visual?.type === 'model'
         ? await withFallback(modelLayers(visual.url, false))
         : getPieceLayers(key);
-    sources.push({ key, layers, transforms });
+    sources.push({ key: name, layers, ...(tint ? { tint } : {}), transforms });
   }
-  for (const [assetId, transforms] of instances.uploads) {
+  for (const [name, { key: assetId, tint, transforms }] of instances.uploads) {
     const url = modelUrls?.[assetId];
     const layers = await withFallback(url ? modelLayers(url, true) : null);
-    sources.push({ key: assetId, layers, transforms });
+    sources.push({ key: name, layers, ...(tint ? { tint } : {}), transforms });
   }
 
   const map = new Group();
@@ -112,7 +128,7 @@ export async function buildMapObject({
   for (const source of sources) {
     if (source.transforms.length === 0) continue;
     source.layers.forEach((layer, index) => {
-      map.add(instancedLayer(`${source.key}-${index}`, layer, source.transforms));
+      map.add(instancedLayer(`${source.key}-${index}`, layer, source.transforms, source.tint));
     });
   }
 
