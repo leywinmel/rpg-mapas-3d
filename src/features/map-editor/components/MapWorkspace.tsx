@@ -17,7 +17,8 @@ import { uploadedAssetIds, useModelUrls } from '../hooks/useModelUrls';
 import { useRoomMaps } from '../hooks/useRoomMaps';
 import { EditorSidebar, HUD_CHROME_CLASS } from './EditorSidebar';
 import { MapEditor } from './MapEditor';
-import { MapListDialogs, MapListPanel, useMapDialogs } from './MapListPanel';
+import { useMapDialogs } from '../hooks/useMapDialogs';
+import { MapListDialogs, MapListPanel } from './MapListPanel';
 import { cx } from '@/lib/cx';
 import layout from './MapWorkspace.module.css';
 
