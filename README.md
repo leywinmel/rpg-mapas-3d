@@ -243,7 +243,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   de papel-cartão. Bonecos: os simples (aventureiro e criatura, com duas cores à escolha) e os
   prontos, animados, com as cores deles: cavaleiro, bárbaro, mago, ladino, ladino encapuzado,
   clérigo, monge, patrulheira, assassino encapuzado, guerreiro, arquimago, os esqueletos guerreiro,
-  mago, ladino e servo e os monstros morcego gigante e dragão filhote (KayKit e Quaternius, CC0;
+  mago, ladino e servo, os monstros morcego gigante e dragão filhote e, no grupo "Animais", gato,
+  cachorro, rato, galinha, porco, ovelha, raposa, lobo, cervo, vaca e cavalo, no tamanho de cada
+  bicho (KayKit e Quaternius, CC0;
   novos entram por
   `scripts/assets/convert-token.mjs` mais uma linha em `token_models` e em `TOKEN_MODELS`). O token nasce no ponto que a câmera olha, com nome,
   tamanho (1×1 a 4×4 casas), vida opcional e dono: só o mestre (NPC, monstro) ou um jogador. "Esconder
@@ -434,7 +436,8 @@ Os modelos 3D dos estilos são gratuitos. Quase todos são de domínio público 
 cortesia; o Cyber City é CC BY 4.0 e exige o crédito. Os créditos também aparecem no site, na página `/creditos` (link no rodapé da tela inicial).
 
 - **Quaternius** ([quaternius.com](https://quaternius.com)): Medieval Village MegaKit, Downtown
-  City MegaKit e Modular Sci-Fi MegaKit.
+  City MegaKit e Modular Sci-Fi MegaKit; os bonecos e animais de token (RPG Characters, Animated
+  Monster Pack e os animais animados).
 - **papptimus** ([papptimus.itch.io/cyber-city](https://papptimus.itch.io/cyber-city)): Cyber City,
   sob [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Os prédios foram empilhados e
   reduzidos para a escala do mapa.

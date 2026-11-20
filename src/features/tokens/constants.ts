@@ -27,6 +27,7 @@ export const TOKEN_MODEL_GROUPS = [
   { value: 'heroes', label: 'Heróis' },
   { value: 'undead', label: 'Mortos-vivos' },
   { value: 'monsters', label: 'Monstros' },
+  { value: 'animals', label: 'Animais' },
 ] as const;
 export type TokenModelGroup = (typeof TOKEN_MODEL_GROUPS)[number]['value'];
 
@@ -92,6 +93,19 @@ export const TOKEN_MODELS = [
   // Morcego e dragão pairam voando: a altura conta o voo, para não ficarem gigantes.
   { value: 'bat', label: 'Morcego gigante', group: 'monsters', file: 'bat', height: 4.1 },
   { value: 'dragon', label: 'Dragão filhote', group: 'monsters', file: 'dragon', height: 3.9 },
+  // Bichos no tamanho de verdade, um pouco exagerado para o pequeno não sumir: a "altura" é a do
+  // arquivo dividida pela fração da altura de gente (gato meio metro, cavalo da altura de gente).
+  { value: 'cat', label: 'Gato', group: 'animals', file: 'cat', height: 5.1 },
+  { value: 'dog', label: 'Cachorro', group: 'animals', file: 'dog', height: 3.8 },
+  { value: 'rat', label: 'Rato', group: 'animals', file: 'rat', height: 11.5 },
+  { value: 'chicken', label: 'Galinha', group: 'animals', file: 'chicken', height: 4.6 },
+  { value: 'pig', label: 'Porco', group: 'animals', file: 'pig', height: 4 },
+  { value: 'sheep', label: 'Ovelha', group: 'animals', file: 'sheep', height: 8.2 },
+  { value: 'fox', label: 'Raposa', group: 'animals', file: 'fox', height: 5.75 },
+  { value: 'wolf', label: 'Lobo', group: 'animals', file: 'wolf', height: 4 },
+  { value: 'deer', label: 'Cervo', group: 'animals', file: 'deer', height: 4.9 },
+  { value: 'cow', label: 'Vaca', group: 'animals', file: 'cow', height: 5.8 },
+  { value: 'horse', label: 'Cavalo', group: 'animals', file: 'horse', height: 4.85 },
 ] as const;
 export type TokenModelKey = (typeof TOKEN_MODELS)[number]['value'];
 export type TokenModelEntry = (typeof TOKEN_MODELS)[number];
