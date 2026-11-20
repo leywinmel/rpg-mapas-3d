@@ -5,6 +5,7 @@
  */
 import type { Backdrop } from '../map-document';
 import { createDefaultHeader, type Footprint, type MapHeader } from '../map-v2';
+import type { Interior } from './interiors';
 
 export type SettlementStyle = 'medieval' | 'modern' | 'futurist' | 'cyberpunk';
 
@@ -44,6 +45,8 @@ export type SizedPiece = { readonly key: string; readonly footprint: Footprint }
 export type RoofKind = 'gable' | 'flat';
 
 export type StyleKit = {
+  /** Cômodos de uso próprio que a cidade do estilo ganha de vez em quando (escola, hospital). */
+  readonly interiors: readonly Interior[];
   readonly tiles: {
     /** Chão de fora das ruas (grama, placas). */
     readonly ground: string;
@@ -157,6 +160,13 @@ export const PROP_FOOTPRINTS: Readonly<Record<string, Footprint>> = {
   'jap-torii': { width: 3, depth: 1 },
   'jap-pagode': { width: 3, depth: 3 },
   'jap-campanario': { width: 2, depth: 2 },
+  'esc-mesa-professor': { width: 2, depth: 1 },
+  'esc-lousa': { width: 2, depth: 1 },
+  'esc-trave': { width: 3, depth: 1 },
+  'hos-leito': { width: 1, depth: 2 },
+  'hos-maca': { width: 1, depth: 2 },
+  'hos-balcao': { width: 2, depth: 1 },
+  'hos-heliponto': { width: 4, depth: 4 },
 };
 
 /** Footprint de uma peça solta (sem giro): o da tabela ou uma casa. */
@@ -165,6 +175,7 @@ export function propFootprint(key: string): Footprint {
 }
 
 const MEDIEVAL: StyleKit = {
+  interiors: [],
   tiles: {
     ground: 'grama',
     road: 'med-calcamento',
@@ -210,6 +221,7 @@ const MEDIEVAL: StyleKit = {
 };
 
 const MODERN: StyleKit = {
+  interiors: ['classroom', 'ward'],
   tiles: {
     ground: 'grama',
     road: 'mod-asfalto',
@@ -313,6 +325,7 @@ const MODERN: StyleKit = {
 };
 
 const FUTURIST: StyleKit = {
+  interiors: [],
   tiles: {
     ground: 'fut-placas-escuras',
     road: 'fut-piso-metal',
@@ -364,6 +377,7 @@ const neonWalls = (neon: 'rosa' | 'ciano'): WallSet => ({
 
 /** Cidade cyberpunk (RPG-42): asfalto molhado, neon, letreiros, hologramas e máquinas de venda. */
 const CYBERPUNK: StyleKit = {
+  interiors: [],
   tiles: {
     ground: 'cyb-asfalto',
     road: 'cyb-asfalto',

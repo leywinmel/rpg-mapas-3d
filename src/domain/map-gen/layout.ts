@@ -9,6 +9,7 @@
 import type { GridSize } from '../grid';
 import { QUARTER_TURNS, type CellRect, type Footprint } from '../map-v2';
 import { doorColumn, type BuildingSpec, type BuildingUse } from './blueprint';
+import { MIN_INTERIOR_SIDE, type Interior } from './interiors';
 import {
   propFootprint,
   roofFor,
@@ -92,6 +93,8 @@ const TREE_SCALE = { min: 0.8, spread: 0.6 } as const;
 /** Andar mínimo para o prédio virar "torre" (janelas em toda a fachada). */
 const TOWER_STORIES = 3;
 const SHOP_CHANCE = 0.25;
+/** Um prédio grande em tantos vira escola ou hospital (RPG-65), no estilo que tem as peças. */
+const INSTITUTION_CHANCE = 0.08;
 /** Vaga entre veículos estacionados, em casas. */
 const PARKING_GAP = { min: 1, max: 5 } as const;
 const BIG_VEHICLE_CHANCE = 0.15;
@@ -282,6 +285,14 @@ function buildingUse(planner: Planner, stories: number): BuildingUse {
   return planner.random.chance(SHOP_CHANCE) ? 'shop' : 'house';
 }
 
+/** Sala de aula ou enfermaria, de vez em quando, no prédio que tem lado para elas. */
+function interiorFor(planner: Planner, rect: CellRect): Interior | null {
+  const { kit, random } = planner;
+  if (kit.interiors.length === 0) return null;
+  if (Math.min(rect.width, rect.depth) < MIN_INTERIOR_SIDE) return null;
+  return random.chance(INSTITUTION_CHANCE) ? random.pick(kit.interiors) : null;
+}
+
 /** Lado do prédio: o telhado de duas águas só fecha em lados pares. */
 function side(planner: Planner, max: number): number {
   const { profile, kit, random } = planner;
@@ -313,6 +324,7 @@ function addBuilding(planner: Planner, lot: CellRect, front: Frontage): void {
   const walls = random.pick(kit.walls[use]);
   const rect = lotFor(planner, lot, walls, front);
   const rotation = front === 'north' ? 0 : 2;
+  const interior = interiorFor(planner, rect);
   const spec: BuildingSpec = {
     width: rect.width,
     depth: rect.depth,
@@ -322,6 +334,7 @@ function addBuilding(planner: Planner, lot: CellRect, front: Frontage): void {
     floor: random.pick(kit.tiles.indoor),
     roof: roofFor(kit, walls, rect),
     seed: deriveSeed(planner.seed, random.between(0, INTERIOR_VARIANTS - 1)),
+    ...(interior ? { interior } : {}),
   };
   fillClass(planner, rect, TERRAIN_CLASS.building);
   block(planner, rect);

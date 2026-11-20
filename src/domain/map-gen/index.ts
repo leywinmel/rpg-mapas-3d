@@ -4,6 +4,7 @@
  */
 export * from './blueprint';
 export * from './generator';
+export * from './interiors';
 export * from './kits';
 export * from './layout';
 export * from './place-prefab';

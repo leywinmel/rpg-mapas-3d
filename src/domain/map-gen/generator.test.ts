@@ -11,6 +11,7 @@ import {
   type MapPiece,
 } from '../map-v2';
 import { generateSettlement } from './generator';
+import { INTERIOR_PIECES } from './interiors';
 import { GARDEN_BED, STYLE_KITS, SETTLEMENT_STYLES } from './kits';
 import { planSettlement, TERRAIN_CLASS } from './layout';
 import { EXAMPLE_MAPS, sizePreset, SIZE_PRESETS } from './presets';
@@ -119,6 +120,17 @@ describe('settlement generator', () => {
     for (const set of kit.walls.house.filter((house) => house.roofs && styles.has(house.plain))) {
       expect(styles.has(set.window), set.plain).toBe(true);
     }
+  });
+
+  it('shouldGiveTheModernTownSchoolsOrHospitalsAndTheMedievalOneNone', () => {
+    const institutional = (style: 'modern' | 'medieval') => {
+      const keys = new Set(
+        allPieces(generateSettlement({ style, size: side(TOWN), seed: 3 }).model).map(keyOf),
+      );
+      return Object.values(INTERIOR_PIECES).filter((key) => keys.has(key));
+    };
+    expect(institutional('modern').length).toBeGreaterThan(0);
+    expect(institutional('medieval')).toEqual([]);
   });
 
   it('shouldParkVehiclesInsideTheRoadAndKeepDoorsClear', () => {

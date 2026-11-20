@@ -8,6 +8,7 @@ import { buildCaveMap, CAVE_SIZE } from './cave';
 import { buildChromeDocksMap, CHROME_DOCKS_SIZE } from './chrome-docks';
 import { buildCryptMap, CRYPT_SIZE } from './crypt';
 import { buildDesertMap, DESERT_SIZE } from './desert';
+import { buildHospitalMap, HOSPITAL_SIZE } from './hospital';
 import { buildIslandMap, ISLAND_SIZE } from './island';
 import { buildMedievalTownMap, MEDIEVAL_TOWN_SIZE } from './medieval-town';
 import { buildCityCenterMap, CITY_CENTER_SIZE } from './city-center';
@@ -15,6 +16,7 @@ import { buildColonyMap, COLONY_SIZE } from './colony';
 import { buildModernTownMap, MODERN_TOWN_SIZE } from './modern-town';
 import { buildNeonDistrictMap, NEON_DISTRICT_SIZE } from './neon-district';
 import { buildPortMap, PORT_SIZE } from './port';
+import { buildSchoolMap, SCHOOL_SIZE } from './school';
 import { buildShipMap, SHIP_SIZE } from './ship';
 import { buildStationMap, STATION_SIZE } from './station';
 import { buildTempleSchoolMap, TEMPLE_SCHOOL_SIZE } from './temple-school';
@@ -149,6 +151,22 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Escola-templo japonesa na encosta: torii e lago no pé do monte, campo de treino e salas de aula, pátio do incensário entre os dormitórios e, no alto, o salão principal, o pagode e o bambuzal.',
     size: TEMPLE_SCHOOL_SIZE,
     build: buildTempleSchoolMap,
+  },
+  {
+    id: 'escola-bairro-alto',
+    name: 'Escola do Bairro Alto',
+    description:
+      'Escola inteira cercada, de frente para a avenida: pavilhões de dois andares com as salas de aula montadas, refeitório, campo de futebol com pista, quadra de basquete, enfermaria, secretaria na praça do mastro e estacionamento.',
+    size: SCHOOL_SIZE,
+    build: buildSchoolMap,
+  },
+  {
+    id: 'hospital-central',
+    name: 'Hospital Central',
+    description:
+      'Complexo hospitalar gigante: alas de internação de cinco andares com as enfermarias montadas, torre principal com recepção, pronto-socorro com a baía das ambulâncias, heliponto, parque com lago e estacionamentos lotados.',
+    size: HOSPITAL_SIZE,
+    build: buildHospitalMap,
   },
 ];
 

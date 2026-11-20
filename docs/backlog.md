@@ -110,7 +110,7 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 
 **Fase G: lugares grandes prontos (pedido do usuário em 10/11)**
 
-- [ ] **RPG-45** Lugares prontos de verdade, mobiliados e com adereços: escola (100×100), posto de gasolina (50×50), hospital (200×200), delegacia, prédios inteiros; entram como "casa pronta" de um clique e como mapa pronto. O usuário vai mandar a lista de mapas que quer para uma sessão.
+- [ ] **RPG-45** (escola 100×100 e hospital 200×200 feitos no RPG-65; faltam posto de gasolina, delegacia e prédios) Lugares prontos de verdade, mobiliados e com adereços: escola (100×100), posto de gasolina (50×50), hospital (200×200), delegacia, prédios inteiros; entram como "casa pronta" de um clique e como mapa pronto. O usuário vai mandar a lista de mapas que quer para uma sessão.
 - [x] **RPG-46** Barcos e navios (pequeno, pesqueiro, navio grande) e um gerador de porto/cais com água.
 - [x] **RPG-47** Muito mais adereços em cada lugar (dentro e fora): o gerador e as casas prontas enchem os cômodos, as calçadas e os pátios, em vez de deixar cenário vazio.
 
@@ -143,6 +143,6 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
     Base feita com o RPG-62: a aba "Mapas prontos" em "Novo mapa" (o gerador virou "Gerar mapa") e o esboço que monta chão, paredes e peças casa por casa (`src/domain/map-gen/ready/`).
 - [x] **RPG-64** Escola de feiticeiros grande, inspirada no estilo de Jujutsu Kaisen: campus de templos japoneses na montanha, com pátio, dormitórios, salas e campo de treino. Só a inspiração: nada de nome, personagem ou arte da obra.
       Feito: "Academia do Monte Kasumi" (64 × 64) na aba de mapas prontos, em quatro patamares de um andar cada ligados pela escadaria de pedra (torii e lago no pé; campo de treino e salas de aula; pátio do incensário e do campanário entre os dormitórios de dois andares; salão principal, pagode e bambuzal no alto). Peças novas na biblioteca: paredes japonesas (lisa, shoji e porta de correr), telhados de beiral curvo 2×2, 2×4 e 4×4, torii, lanterna de pedra, cerejeira, bambuzal, pagode, campanário, incensário e boneco de treino.
-- [ ] **RPG-65** Escolas e hospitais (continuação do RPG-45): o mapa grande de cada um e versões menores que entram nas cidades geradas.
+- [x] **RPG-65** Escolas e hospitais (continuação do RPG-45): o mapa grande de cada um e versões menores que entram nas cidades geradas.
 - [x] **RPG-66** Móveis na escala do personagem: cama, sofá e TV estão pequenos perto do boneco. Pensar o tamanho de cada um (ex: cama 1×2, sofá 2×1, TV larga) e refazer os que ficam em 1×1. Bancos de praça passam a 2×1. Estantes lado a lado se juntam numa estante só, sem a lateral dupla no meio.
       Feito: sofá de três lugares 2×1, cama de solteiro 1×2 (1,8 de comprimento), rack 2×1 com TV de 1,2 e os dois bancos de praça 2×1; a estante vai de borda a borda da casa. O gerador encosta o móvel comprido na parede sem sair do prédio nem sobrepor outro. Mapas salvos antes guardam o móvel como 1×1: o modelo novo aparece maior, por cima da casa vizinha.
