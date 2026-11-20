@@ -91,6 +91,14 @@ export const MODEL_CREDITS: readonly Credit[] = [
     ...CC0,
   },
   {
+    work: 'Ultimate Monsters, Zombie Apocalypse e personagens animados',
+    author: 'Quaternius',
+    url: 'https://poly.pizza/u/Quaternius',
+    usage:
+      'Bonecos de token: goblin, orc, yeti, gosma, aranha, rei cogumelo, diabrete, zumbi, fantasma, tentáculo, criatura cósmica, agente tático, mercenária, traje de proteção, drone, fazendeiro, rei e bruxa.',
+    ...CC0,
+  },
+  {
     work: 'Ultimate Animated Animals, Cute Animals e Rat',
     author: 'Quaternius',
     url: 'https://poly.pizza/u/Quaternius',

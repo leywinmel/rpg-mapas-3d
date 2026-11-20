@@ -27,6 +27,9 @@ export const TOKEN_MODEL_GROUPS = [
   { value: 'heroes', label: 'Heróis' },
   { value: 'undead', label: 'Mortos-vivos' },
   { value: 'monsters', label: 'Monstros' },
+  { value: 'horror', label: 'Horror' },
+  { value: 'modern', label: 'Moderno e cyberpunk' },
+  { value: 'townsfolk', label: 'Gente' },
   { value: 'animals', label: 'Animais' },
 ] as const;
 export type TokenModelGroup = (typeof TOKEN_MODEL_GROUPS)[number]['value'];
@@ -90,9 +93,36 @@ export const TOKEN_MODELS = [
     file: 'skeleton-minion',
     height: 2.4,
   },
+  { value: 'zombie', label: 'Zumbi', group: 'undead', file: 'zombie', height: 2.75 },
+  // O fantasma paira: a altura conta o voo.
+  { value: 'ghost', label: 'Fantasma', group: 'undead', file: 'ghost', height: 2.9 },
   // Morcego e dragão pairam voando: a altura conta o voo, para não ficarem gigantes.
   { value: 'bat', label: 'Morcego gigante', group: 'monsters', file: 'bat', height: 4.1 },
   { value: 'dragon', label: 'Dragão filhote', group: 'monsters', file: 'dragon', height: 3.9 },
+  { value: 'goblin', label: 'Goblin', group: 'monsters', file: 'goblin', height: 3.7 },
+  { value: 'orc', label: 'Orc', group: 'monsters', file: 'orc', height: 2.7 },
+  { value: 'yeti', label: 'Yeti', group: 'monsters', file: 'yeti', height: 2 },
+  { value: 'slime', label: 'Gosma', group: 'monsters', file: 'slime', height: 3.7 },
+  // As pernas abertas da aranha passam da base: mais baixa para não cobrir as casas vizinhas.
+  { value: 'spider', label: 'Aranha gigante', group: 'monsters', file: 'spider', height: 4.2 },
+  {
+    value: 'mushroom-king',
+    label: 'Rei cogumelo',
+    group: 'monsters',
+    file: 'mushroom-king',
+    height: 3.45,
+  },
+  { value: 'demon', label: 'Diabrete', group: 'monsters', file: 'demon', height: 2.8 },
+  { value: 'tentacle', label: 'Tentáculo', group: 'horror', file: 'tentacle', height: 13 },
+  { value: 'alien', label: 'Criatura cósmica', group: 'horror', file: 'alien', height: 3.75 },
+  { value: 'swat', label: 'Agente tático', group: 'modern', file: 'swat', height: 1.81 },
+  { value: 'soldier', label: 'Mercenária', group: 'modern', file: 'soldier', height: 1.79 },
+  { value: 'hazmat', label: 'Traje de proteção', group: 'modern', file: 'hazmat', height: 2.02 },
+  // O drone paira na altura do peito: menor que gente.
+  { value: 'robot', label: 'Drone de combate', group: 'modern', file: 'robot', height: 1.2 },
+  { value: 'farmer', label: 'Fazendeiro', group: 'townsfolk', file: 'farmer', height: 1.82 },
+  { value: 'king', label: 'Rei', group: 'townsfolk', file: 'king', height: 1.87 },
+  { value: 'witch', label: 'Bruxa', group: 'townsfolk', file: 'witch', height: 2.01 },
   // Bichos no tamanho de verdade, um pouco exagerado para o pequeno não sumir: a "altura" é a do
   // arquivo dividida pela fração da altura de gente (gato meio metro, cavalo da altura de gente).
   { value: 'cat', label: 'Gato', group: 'animals', file: 'cat', height: 5.1 },

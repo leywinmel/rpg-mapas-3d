@@ -12,8 +12,8 @@ import { dedup, prune, quantize, reorder, resample } from '@gltf-transform/funct
 import { MeshoptEncoder } from 'meshoptimizer';
 
 const [SOURCE, KEY, OUT] = process.argv.slice(2);
-// O nome pode vir com o caminho da armadura ("AnimalArmature|Idle").
-const IDLE = /(^|[_|])idle$/i;
+// O nome pode vir com o caminho da armadura antes e depois ("AnimalArmature|Idle", "…|Tentacle_Idle|…").
+const IDLE = /(^|[_|])idle(\||$)/i;
 /** Morcego e dragão não têm animação parada: pairar voando faz o papel dela. */
 const HOVER = /(^|_)flying$/i;
 const TEXTURE_SIZE = 512;
