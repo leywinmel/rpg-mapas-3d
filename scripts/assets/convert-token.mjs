@@ -12,13 +12,16 @@ import { dedup, prune, quantize, reorder, resample } from '@gltf-transform/funct
 import { MeshoptEncoder } from 'meshoptimizer';
 
 const [SOURCE, KEY, OUT] = process.argv.slice(2);
-const IDLE = /(^|_)idle$/i;
+// O nome pode vir com o caminho da armadura ("AnimalArmature|Idle").
+const IDLE = /(^|[_|])idle$/i;
 /** Morcego e dragão não têm animação parada: pairar voando faz o papel dela. */
 const HOVER = /(^|_)flying$/i;
 const TEXTURE_SIZE = 512;
 
 await MeshoptEncoder.ready;
-const io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({ 'meshopt.encoder': MeshoptEncoder });
+const io = new NodeIO()
+  .registerExtensions(ALL_EXTENSIONS)
+  .registerDependencies({ 'meshopt.encoder': MeshoptEncoder });
 const doc = await io.readBinary(readFileSync(SOURCE));
 const root = doc.getRoot();
 
@@ -26,7 +29,10 @@ const animations = root.listAnimations();
 const idle =
   animations.find((animation) => IDLE.test(animation.getName())) ??
   animations.find((animation) => HOVER.test(animation.getName()));
-if (!idle) throw new Error(`${SOURCE}: sem animação Idle (${animations.map((a) => a.getName()).join(', ')})`);
+if (!idle)
+  throw new Error(
+    `${SOURCE}: sem animação Idle (${animations.map((a) => a.getName()).join(', ')})`,
+  );
 // Canais e amostradores também: só descartar a animação deixaria os acessores órfãos no arquivo.
 for (const animation of animations) {
   if (animation === idle) continue;
@@ -44,7 +50,9 @@ root.listTextures().forEach((texture, index) => {
   const input = join(scratch, `${index}.png`);
   const output = join(scratch, `${index}.webp`);
   writeFileSync(input, texture.getImage());
-  execFileSync(process.execPath, [webpScript, input, output, String(TEXTURE_SIZE)], { stdio: 'inherit' });
+  execFileSync(process.execPath, [webpScript, input, output, String(TEXTURE_SIZE)], {
+    stdio: 'inherit',
+  });
   texture.setImage(readFileSync(output)).setMimeType('image/webp');
 });
 rmSync(scratch, { recursive: true, force: true });
@@ -54,10 +62,18 @@ await doc.transform(
   dedup(),
   resample(),
   // Os pesos e índices do esqueleto ficam como estão: quantizar WEIGHTS muda a pose.
-  quantize({ pattern: /^(POSITION|NORMAL|TEXCOORD_0)$/, quantizePosition: 14, quantizeNormal: 8, quantizeTexcoord: 12 }),
+  quantize({
+    pattern: /^(POSITION|NORMAL|TEXCOORD_0)$/,
+    quantizePosition: 14,
+    quantizeNormal: 8,
+    quantizeTexcoord: 12,
+  }),
   reorder({ encoder: MeshoptEncoder }),
 );
-doc.createExtension(EXTMeshoptCompression).setRequired(true).setEncoderOptions({ method: EXTMeshoptCompression.EncoderMethod.FILTER });
+doc
+  .createExtension(EXTMeshoptCompression)
+  .setRequired(true)
+  .setEncoderOptions({ method: EXTMeshoptCompression.EncoderMethod.FILTER });
 root.listBuffers().forEach((buffer) => buffer.setURI(`${KEY}.bin`));
 root.listTextures().forEach((texture, index) => texture.setURI(`${KEY}-${index}.webp`));
 

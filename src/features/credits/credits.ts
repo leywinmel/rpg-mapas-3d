@@ -90,6 +90,14 @@ export const MODEL_CREDITS: readonly Credit[] = [
     usage: 'Bonecos de token: morcego gigante e dragão filhote.',
     ...CC0,
   },
+  {
+    work: 'Ultimate Animated Animals, Cute Animals e Rat',
+    author: 'Quaternius',
+    url: 'https://poly.pizza/u/Quaternius',
+    usage:
+      'Animais de token: gato, cachorro, rato, galinha, porco, ovelha, raposa, lobo, cervo, vaca e cavalo.',
+    ...CC0,
+  },
 ];
 
 export const FONT_CREDITS: readonly Credit[] = [
