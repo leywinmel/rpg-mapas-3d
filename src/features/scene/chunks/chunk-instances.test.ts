@@ -267,6 +267,17 @@ describe('wall segments with the cutaway', () => {
     expect(wallGroups(chunk, 2)).toEqual([]);
     expect(wallGroups(chunk, null)[0]?.transforms).toHaveLength(4);
   });
+
+  it('shouldSplitWallsOfTheSameStyleByTint', () => {
+    const red = { ...wall, x: 5, tint: '#d9937a' };
+    const chunk = withContent(firstChunk(), { walls: [wall, red, { ...red, x: 6 }] });
+    const groups = wallGroups(chunk, null);
+    expect(groups.map((group) => [group.style, group.tint, group.transforms.length])).toEqual([
+      [wall.style, undefined, 4],
+      [wall.style, '#d9937a', 8],
+    ]);
+    expect(new Set(groups.map((group) => group.key)).size).toBe(2);
+  });
 });
 
 describe('the chunk seen from afar', () => {
@@ -298,6 +309,13 @@ describe('the chunk seen from afar', () => {
     });
     expect(farInstances(chunk, 5).walls.transforms[0]?.scaleY).toBe(1.5);
     expect(farInstances(chunk, 2).walls.transforms).toEqual([]);
+  });
+
+  it('shouldTintAWallSeenFromAfarLikeTheNearOne', () => {
+    const chunk = withContent(firstChunk(), { walls: [{ ...wall, tint: '#ffffff' }] });
+    expect(farInstances(chunk, null).walls.colors).toEqual([SCENE_PALETTE.wallWood]);
+    const red = withContent(firstChunk(), { walls: [{ ...wall, tint: '#ff0000' }] });
+    expect(farInstances(red, null).walls.colors[0]).toMatch(/^#[0-9a-f]{2}0000$/);
   });
 });
 

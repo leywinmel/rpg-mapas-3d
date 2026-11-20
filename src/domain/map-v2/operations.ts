@@ -176,7 +176,7 @@ function overlapsOnEdge(a: MapWall, b: MapWall): boolean {
 }
 
 function sameWall(a: MapWall, b: MapWall): boolean {
-  return sameWallKey(a, b) && a.style === b.style && a.height === b.height;
+  return sameWallKey(a, b) && a.style === b.style && a.height === b.height && a.tint === b.tint;
 }
 
 /**

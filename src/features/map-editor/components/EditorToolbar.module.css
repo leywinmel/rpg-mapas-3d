@@ -67,3 +67,12 @@
   font-family: var(--font-mono);
   font-size: var(--text-xs);
 }
+
+/* A cor da amostra vem da paleta de tintas do mapa (dado), no estilo da própria bolinha. */
+.swatch {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 50%;
+}

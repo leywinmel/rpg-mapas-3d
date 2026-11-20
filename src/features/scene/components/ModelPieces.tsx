@@ -47,15 +47,16 @@ type LoadedProps = {
   url: string;
   fitToCell: boolean;
   transforms: readonly InstanceTransform[];
+  tint?: string;
   ghost: boolean;
 };
 
-function LoadedModelPieces({ url, fitToCell, transforms, ghost }: LoadedProps) {
+function LoadedModelPieces({ url, fitToCell, transforms, tint, ghost }: LoadedProps) {
   // Draco desligado (baixaria o decodificador de outro site). O meshopt das peças dos pacotes
   // vem embutido no three-stdlib, sem download nem dependência nova.
   const gltf = useGLTF(url, false, true);
   const layers = useMemo(() => bakeModel(gltf.scene, { fitToCell }), [gltf, fitToCell]);
-  return <PieceInstances layers={layers} transforms={transforms} ghost={ghost} />;
+  return <PieceInstances layers={layers} transforms={transforms} tint={tint} ghost={ghost} />;
 }
 
 export type ModelPiecesProps = {
@@ -63,6 +64,7 @@ export type ModelPiecesProps = {
   url: string | null;
   transforms: readonly InstanceTransform[];
   fitToCell?: boolean;
+  tint?: string;
   ghost?: boolean;
   onError?: (error: unknown) => void;
 };
@@ -72,11 +74,17 @@ export function ModelPieces({
   url,
   transforms,
   fitToCell = true,
+  tint,
   ghost = false,
   onError,
 }: ModelPiecesProps) {
   const fallback = (
-    <PieceInstances layers={getFallbackLayers()} transforms={transforms} ghost={ghost} />
+    <PieceInstances
+      layers={getFallbackLayers()}
+      transforms={transforms}
+      tint={tint}
+      ghost={ghost}
+    />
   );
   if (!url) return fallback;
   return (
@@ -86,7 +94,13 @@ export function ModelPieces({
       onError={(error) => (onError ? onError(error) : reportModelFailure(url, error))}
     >
       <Suspense fallback={null}>
-        <LoadedModelPieces url={url} fitToCell={fitToCell} transforms={transforms} ghost={ghost} />
+        <LoadedModelPieces
+          url={url}
+          fitToCell={fitToCell}
+          transforms={transforms}
+          tint={tint}
+          ghost={ghost}
+        />
       </Suspense>
     </ModelBoundary>
   );

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  FINISHES,
   INTERIOR_PIECES,
   kitKeys,
   prefabBlueprint,
@@ -41,6 +42,17 @@ describe('salas de aula e enfermarias', () => {
       const entry = pieceCatalog.get(key);
       expect(entry?.kind, key).toBe('prop');
       expect(entry?.footprint ?? SINGLE, key).toEqual(propFootprint(key));
+    }
+  });
+});
+
+describe('acabamentos de parede', () => {
+  it('shouldUseWallsThatExistInTheCatalog', () => {
+    for (const finish of FINISHES) {
+      const { plain, door, window } = finish.walls;
+      for (const key of [plain, door, window]) {
+        expect(pieceCatalog.get(key)?.kind, key).toBe('wall');
+      }
     }
   });
 });

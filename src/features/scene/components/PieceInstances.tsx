@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useMemo, useRef } from 'react';
 import type { BufferGeometry, InstancedMesh, Material } from 'three';
 import { getGhostMaterial, type PieceLayer } from '../catalog/piece-geometry';
 import { writeColors, writeTransforms } from '../chunks/instance-matrices';
@@ -51,11 +51,17 @@ export function InstancedLayer({
 export type PieceInstancesProps = {
   layers: readonly PieceLayer[];
   transforms: readonly InstanceTransform[];
+  /** Tinta (RPG-33) de todas as cópias; o fantasma do pincel fica sem. */
+  tint?: string;
   ghost?: boolean;
 };
 
 /** Todas as camadas de uma peça (ex: tocha = madeira + chama) com as mesmas posições. */
-export function PieceInstances({ layers, transforms, ghost = false }: PieceInstancesProps) {
+export function PieceInstances({ layers, transforms, tint, ghost = false }: PieceInstancesProps) {
+  const colors = useMemo(
+    () => (tint && !ghost ? transforms.map(() => tint) : undefined),
+    [tint, ghost, transforms],
+  );
   if (transforms.length === 0) return null;
   return (
     <>
@@ -65,6 +71,7 @@ export function PieceInstances({ layers, transforms, ghost = false }: PieceInsta
           geometry={layer.geometry}
           material={ghost ? getGhostMaterial(layer.material) : layer.material}
           transforms={transforms}
+          colors={colors}
           // Vidro é translúcido: com sombra cheia, a janela escurecia o chão como uma parede.
           shadows={!ghost && !layer.material.transparent}
         />

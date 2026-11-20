@@ -14,11 +14,12 @@ export type ModelUrls = Readonly<Record<string, string | null>>;
 type CatalogPiecesProps = {
   pieceKey: string;
   transforms: readonly InstanceTransform[];
+  tint?: string;
   ghost?: boolean;
 };
 
 /** Peça do catálogo, procedural ou .glb de pacote: o chamador não precisa saber qual. */
-export function CatalogPieces({ pieceKey, transforms, ghost = false }: CatalogPiecesProps) {
+export function CatalogPieces({ pieceKey, transforms, tint, ghost = false }: CatalogPiecesProps) {
   const entry = pieceCatalog.get(pieceKey);
   const span = entry?.wallSpan;
   const placed = useMemo(
@@ -28,24 +29,44 @@ export function CatalogPieces({ pieceKey, transforms, ghost = false }: CatalogPi
   if (entry?.visual.type === 'model') {
     // O modelo do pacote já vem normalizado (origem e escala em casas): nada de encaixar.
     return (
-      <ModelPieces url={entry.visual.url} transforms={placed} fitToCell={false} ghost={ghost} />
+      <ModelPieces
+        url={entry.visual.url}
+        transforms={placed}
+        fitToCell={false}
+        tint={tint}
+        ghost={ghost}
+      />
     );
   }
-  return <PieceInstances layers={getPieceLayers(pieceKey)} transforms={transforms} ghost={ghost} />;
+  return (
+    <PieceInstances
+      layers={getPieceLayers(pieceKey)}
+      transforms={transforms}
+      tint={tint}
+      ghost={ghost}
+    />
+  );
 }
 
 type AssetPiecesProps = {
   asset: PropAsset;
   transforms: readonly InstanceTransform[];
   modelUrls?: ModelUrls;
+  tint?: string;
   ghost?: boolean;
 };
 
-export function AssetPieces({ asset, transforms, modelUrls, ghost = false }: AssetPiecesProps) {
+export function AssetPieces({
+  asset,
+  transforms,
+  modelUrls,
+  tint,
+  ghost = false,
+}: AssetPiecesProps) {
   if (asset.source === 'catalog') {
-    return <CatalogPieces pieceKey={asset.key} transforms={transforms} ghost={ghost} />;
+    return <CatalogPieces pieceKey={asset.key} transforms={transforms} tint={tint} ghost={ghost} />;
   }
   const url = modelUrls ? modelUrls[asset.assetId] : null;
   if (url === undefined) return null;
-  return <ModelPieces url={url} transforms={transforms} ghost={ghost} />;
+  return <ModelPieces url={url} transforms={transforms} tint={tint} ghost={ghost} />;
 }

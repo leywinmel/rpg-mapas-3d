@@ -5,9 +5,11 @@
  */
 import {
   isPieceVisible,
+  multiplyTint,
   NO_FLOOR_INDEX,
   pieceRect,
   stepsToWorld,
+  tintKey,
   visibleWallHeight,
   type Cutaway,
   type MapChunk,
@@ -90,14 +92,25 @@ export function wallTransforms(wall: MapWall, cutaway: Cutaway): InstanceTransfo
   return stackedWallSegments(wall, stepsToWorld(wall.level), stepsToWorld(steps));
 }
 
-export type WallGroup = { readonly style: string; readonly transforms: InstanceTransform[] };
+export type WallGroup = {
+  /** Estilo e tinta juntos: a chave da malha. */
+  readonly key: string;
+  readonly style: string;
+  readonly tint?: string;
+  readonly transforms: InstanceTransform[];
+};
 
-/** Paredes do pedaço por estilo; o estilo que o corte esconde inteiro não vira malha vazia. */
+/**
+ * Paredes do pedaço por estilo e tinta; o estilo que o corte esconde inteiro não vira malha
+ * vazia. A tinta vai para a malha toda, então paredes de tintas diferentes ficam separadas.
+ */
 export function wallGroups(chunk: MapChunk, cutaway: Cutaway): WallGroup[] {
   const groups: WallGroup[] = [];
-  for (const [style, walls] of groupBy(chunk.walls, (wall) => wall.style)) {
+  for (const [key, walls] of groupBy(chunk.walls, (wall) => tintKey(wall.style, wall.tint))) {
     const transforms = walls.flatMap((wall) => wallTransforms(wall, cutaway));
-    if (transforms.length > 0) groups.push({ style, transforms });
+    if (transforms.length === 0) continue;
+    const { style, tint } = walls[0]!;
+    groups.push({ key, style, ...(tint ? { tint } : {}), transforms });
   }
   return groups;
 }
@@ -121,17 +134,23 @@ export function pieceTransform(piece: MapPiece): InstanceTransform {
 export type PieceGroup = {
   readonly key: string;
   readonly asset: PieceAsset;
+  readonly tint?: string;
   readonly transforms: InstanceTransform[];
 };
 
 /** Peças do pedaço que o corte deixa ver, agrupadas por modelo (um InstancedMesh por grupo). */
 export function pieceGroups(chunk: MapChunk, cutaway: Cutaway): PieceGroup[] {
   const visible = chunk.pieces.filter((piece) => isPieceVisible(piece, cutaway));
-  return [...groupBy(visible, (piece) => assetGroupKey(piece.asset))].map(([key, pieces]) => ({
-    key,
-    asset: pieces[0]!.asset,
-    transforms: pieces.map(pieceTransform),
-  }));
+  const key = (piece: MapPiece) => tintKey(assetGroupKey(piece.asset), piece.tint);
+  return [...groupBy(visible, key)].map(([groupKey, pieces]) => {
+    const { asset, tint } = pieces[0]!;
+    return {
+      key: groupKey,
+      asset,
+      ...(tint ? { tint } : {}),
+      transforms: pieces.map(pieceTransform),
+    };
+  });
 }
 
 /** Luz que uma peça acende (tocha), já na posição do mundo. */
@@ -199,7 +218,7 @@ export function farInstances(chunk: MapChunk, cutaway: Cutaway): FarInstances {
       scale: 1,
       scaleY: stepsToWorld(steps),
     });
-    walls.colors.push(farColorOf(wall.style, SCENE_PALETTE.wallStone));
+    walls.colors.push(multiplyTint(farColorOf(wall.style, SCENE_PALETTE.wallStone), wall.tint));
   }
   return { terrain, walls };
 }

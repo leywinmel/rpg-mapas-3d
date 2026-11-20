@@ -162,6 +162,11 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   O estilo moderno traz também a escola, o posto de saúde e o hospital, já com as salas de aula e
   as enfermarias montadas; as cidades modernas geradas ganham, de vez em quando, uma escola ou um
   hospital no lugar de um prédio comum.
+- **Pintar e acabamentos:** a ferramenta Pintar (atalho `T`) tinge paredes e objetos com uma
+  paleta de cores ou troca o acabamento das paredes (tijolo, madeira, reboco, pedra), mantendo
+  portas e janelas no lugar. Um clique numa parede pinta a casa inteira (as paredes ligadas a ela,
+  em todos os andares); o botão da casa na barra troca para pintar só uma parede. A tinta aparece
+  de perto, de longe e no .glb exportado.
 - **Mover carros e objetos durante o jogo:** com a ferramenta de seleção (`V`), o mestre arrasta um
   veículo ou objeto solto (barril, caixa, mesa, baú, modelo `.glb` próprio) para outra casa; `R` gira
   a peça escolhida e as setas a empurram uma casa. Paredes, chão, telhados e casas ficam no lugar. A

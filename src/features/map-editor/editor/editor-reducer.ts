@@ -8,6 +8,7 @@
  */
 import type { Ambience, Cell, GridSize, MapResult } from '@/domain';
 import { findPrefab, placePrefab, PREFABS, prefabBlueprint } from '@/domain/map-gen';
+import { TINT_PALETTE } from '@/domain/map-v2';
 import {
   MAX_FOOTPRINT,
   MAX_WALL_HEIGHT_STEPS,
@@ -42,22 +43,31 @@ import {
   eraseTargetAt,
   movePieceTo,
   normalizeQuarterTurns,
+  paintAt,
   placePieceAt,
   placeWallAt,
   rotatePiece,
   shiftPieceLevel,
   setAmbience,
   topPieceAt,
+  type PaintBrush,
   type PointerHit,
 } from './model-ops';
 import { cellsOnLine } from './stroke-line';
 
-export type { PointerHit } from './model-ops';
+export type { PaintBrush, PointerHit } from './model-ops';
 
-export type Tool = 'select' | 'floor' | 'wall' | 'prop' | 'prefab' | 'erase' | 'raise' | 'lower';
+export type Tool =
+  'select' | 'floor' | 'wall' | 'prop' | 'prefab' | 'paint' | 'erase' | 'raise' | 'lower';
 
-/** `prefab` é o id da casa pronta escolhida (ver `PREFABS`). */
-export type Brush = { floor: string; wall: string; prop: PropAsset; prefab: string };
+/** `prefab` é o id da casa pronta escolhida (ver `PREFABS`); `paint`, a tinta ou o acabamento. */
+export type Brush = {
+  floor: string;
+  wall: string;
+  prop: PropAsset;
+  prefab: string;
+  paint: PaintBrush;
+};
 
 /**
  * Forma do pincel de chão e de altura: "free" pinta as casas por onde o cursor passa;
@@ -96,6 +106,8 @@ export type EditorState = {
   footprint: Footprint;
   /** Altura da próxima parede, em degraus. */
   wallHeight: number;
+  /** Pintar leva a casa inteira (as paredes ligadas) ou só a parede clicada. */
+  paintWholeHouse: boolean;
   selectedPiece: PieceRef | null;
   stroke: Stroke | null;
   /** Ajustes contínuos (ex: arrastar o controle de luz) viram um passo só no histórico. */
@@ -109,6 +121,8 @@ export type EditorAction =
   | { type: 'choose-wall'; key: string }
   | { type: 'choose-prop'; asset: PropAsset }
   | { type: 'choose-prefab'; id: string }
+  | { type: 'choose-paint'; paint: PaintBrush }
+  | { type: 'set-paint-whole-house'; whole: boolean }
   | { type: 'rotate' }
   | { type: 'set-wall-height'; height: number }
   | { type: 'set-shape'; shape: BrushShape }
@@ -134,6 +148,7 @@ export const DEFAULT_BRUSH: Brush = {
   wall: DEFAULT_WALL_STYLE,
   prop: { source: 'catalog', key: DEFAULT_PROP_KEY },
   prefab: PREFABS[0]!.id,
+  paint: { kind: 'tint', tint: TINT_PALETTE[0]!.color },
 };
 /** Uma parede nova tem um andar de altura: a mesma parede de 2 unidades do v1. */
 export const DEFAULT_WALL_HEIGHT = STORY_HEIGHT_STEPS;
@@ -149,6 +164,7 @@ export function createEditorState(model: MapModel): EditorState {
     rotation: 0,
     footprint: SINGLE_CELL,
     wallHeight: DEFAULT_WALL_HEIGHT,
+    paintWholeHouse: true,
     selectedPiece: null,
     stroke: null,
     coalesceKey: null,
@@ -156,9 +172,9 @@ export function createEditorState(model: MapModel): EditorState {
   };
 }
 
-/** Ferramentas que pintam arrastando (o objeto e a casa pronta são um por clique). */
+/** Ferramentas que pintam arrastando (o objeto, a casa pronta e a tinta são um por clique). */
 export function isPaintingTool(tool: Tool): boolean {
-  return tool !== 'select' && tool !== 'prop' && tool !== 'prefab';
+  return tool !== 'select' && tool !== 'prop' && tool !== 'prefab' && tool !== 'paint';
 }
 
 /**
@@ -224,6 +240,8 @@ function applyTool(
       });
     case 'prefab':
       return newPropId ? placeChosenPrefab(state, hit, newPropId) : unchanged;
+    case 'paint':
+      return paintAt(model, { hit, paint: state.brush.paint, wholeHouse: state.paintWholeHouse });
     case 'erase': {
       const target = eraseTargetAt(model, hit);
       return target ? eraseTarget(model, target) : unchanged;
@@ -344,6 +362,10 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return { ...state, brush: { ...state.brush, prop: action.asset }, tool: 'prop' };
     case 'choose-prefab':
       return { ...state, brush: { ...state.brush, prefab: action.id }, tool: 'prefab' };
+    case 'choose-paint':
+      return { ...state, brush: { ...state.brush, paint: action.paint }, tool: 'paint' };
+    case 'set-paint-whole-house':
+      return { ...state, paintWholeHouse: action.whole };
     case 'rotate':
       return rotate(state);
     case 'set-wall-height':

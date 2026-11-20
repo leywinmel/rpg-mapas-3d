@@ -4,7 +4,9 @@
  * aresta" para a operação certa, com a peça ou parede já apoiada no chão.
  */
 import { isInside, type Ambience, type Cell, type GridEdge, type MapResult } from '@/domain';
+import { findFinish, finishStyle } from '@/domain/map-gen';
 import {
+  connectedWalls,
   findPiece,
   getChunk,
   movePiece,
@@ -19,7 +21,10 @@ import {
   removeWall,
   stackedPieceLevel,
   terrainAt,
+  updatePiece,
+  updateWalls,
   wallOwnerChunk,
+  withTint,
   wallRestingLevel,
   type Footprint,
   type MapModel,
@@ -193,6 +198,45 @@ export function eraseTarget(model: MapModel, target: EraseTarget): MapResult<Map
     case 'floor':
       return paintTerrainCell(model, { cell: target.cell, tile: null });
   }
+}
+
+/**
+ * O que a ferramenta Pintar põe (RPG-33): uma tinta da paleta (nula = tirar a tinta) ou um
+ * acabamento de parede, pelo id.
+ */
+export type PaintBrush =
+  | { readonly kind: 'tint'; readonly tint: string | null }
+  | { readonly kind: 'finish'; readonly finish: string };
+
+export type PaintDraft = { hit: PointerHit; paint: PaintBrush; wholeHouse: boolean };
+
+const FINISH_ON_PIECE_MESSAGE = 'O acabamento vale só para paredes: clique perto de uma parede.';
+
+function repaintWall(wall: MapWall, paint: PaintBrush): MapWall {
+  if (paint.kind === 'tint') return withTint(wall, paint.tint);
+  const finish = findFinish(paint.finish);
+  return finish ? { ...wall, style: finishStyle(wall.style, finish) } : wall;
+}
+
+/**
+ * Perto de uma aresta com parede, pinta a parede (e, com a casa inteira, as ligadas a ela);
+ * longe, pinta a peça mais alta da casa. Acabamento numa peça vira aviso.
+ */
+export function paintAt(
+  model: MapModel,
+  { hit, paint, wholeHouse }: PaintDraft,
+): MapResult<MapModel> {
+  if (distanceToNearestEdge(hit.cell, hit.point) <= WALL_ERASE_RANGE) {
+    const wall = wallsOnEdge(model, nearestEdge(hit.cell, hit.point)).at(-1);
+    if (wall) {
+      const walls = wholeHouse ? connectedWalls(model, wall) : [wall];
+      return updateWalls(model, walls, (each) => repaintWall(each, paint));
+    }
+  }
+  const piece = topPieceAt(model, hit.cell);
+  if (!piece) return { ok: true, value: model };
+  if (paint.kind !== 'tint') return { ok: false, errors: [FINISH_ON_PIECE_MESSAGE] };
+  return updatePiece(model, piece, (current) => withTint(current, paint.tint));
 }
 
 /** Troca o clima; o MESMO modelo quando nada muda, para o histórico não ganhar passo vazio. */

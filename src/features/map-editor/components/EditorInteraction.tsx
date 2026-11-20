@@ -230,6 +230,8 @@ function Ghost({ hit, view, model, heights, modelUrls }: GhostProps) {
       return <PrefabGhost hit={hit} view={view} model={model} />;
     case 'erase':
       return eraseTargetAt(model, hit) ? <CellMarker hit={hit} heights={heights} danger /> : null;
+    case 'paint':
+      return <CellMarker hit={hit} heights={heights} />;
     case 'raise':
     case 'lower':
       return terrainAt(model, cell)?.tile ? <CellMarker hit={hit} heights={heights} /> : null;

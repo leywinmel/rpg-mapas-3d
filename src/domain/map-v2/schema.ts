@@ -42,6 +42,14 @@ const levelSchema = boundedInt('O degrau da base', 0, MAX_LEVEL);
 const edgeCoordinate = (what: string) => boundedInt(what, 0, MAX_MAP_SIZE_V2);
 const cellCoordinate = (what: string) => boundedInt(what, 0, MAX_MAP_SIZE_V2 - 1);
 const footprintSide = (what: string) => boundedInt(what, 1, MAX_FOOTPRINT);
+/**
+ * Tinta (RPG-33): a cor multiplica a do modelo, então branco deixa como está. Sem o campo, a
+ * parede ou a peça fica com a cor original; mapas antigos continuam valendo.
+ */
+const tintSchema = z
+  .string({ error: 'A tinta precisa ser um texto.' })
+  .regex(/^#[0-9a-f]{6}$/, 'A tinta precisa ser uma cor como #a1b2c3.')
+  .optional();
 
 export const mapHeaderSchema = z.object({
   version: z.literal(MAP_V2_VERSION),
@@ -70,6 +78,7 @@ export const wallSchema = z.object({
   height: boundedInt('A altura da parede', MIN_WALL_HEIGHT_STEPS, MAX_WALL_HEIGHT_STEPS),
   /** Degrau absoluto da base: 0 no térreo, mais para as paredes dos andares de cima. */
   level: levelSchema,
+  tint: tintSchema,
 });
 
 export const pieceSchema = z.object({
@@ -100,6 +109,7 @@ export const pieceSchema = z.object({
       MAX_PIECE_SCALE,
       `A escala da peça precisa ficar entre ${MIN_PIECE_SCALE} e ${MAX_PIECE_SCALE}.`,
     ),
+  tint: tintSchema,
 });
 
 export const chunkDocumentSchema = z.object({

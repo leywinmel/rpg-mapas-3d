@@ -86,7 +86,7 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 
 **Fase C: paredes**
 
-- [ ] **RPG-33** Acabamentos (tijolo, madeira, reboco, pedra) e paleta para tingir; a casa inteira fica com a mesma cor.
+- [x] **RPG-33** Acabamentos (tijolo, madeira, reboco, pedra) e paleta para tingir; a casa inteira fica com a mesma cor.
 
 **Fase D: cidade viva**
 
