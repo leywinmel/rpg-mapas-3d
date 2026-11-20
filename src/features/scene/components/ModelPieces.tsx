@@ -2,9 +2,18 @@ import { Component, Suspense, useMemo, type ReactNode } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { reportError } from '@/lib/report-error';
 import { bakeModel } from '../catalog/model-layers';
+import type { InteractiveModel } from '../catalog/interactive-models';
 import { getFallbackLayers } from '../catalog/piece-geometry';
+import type { PieceState } from '../chunks/chunk-instances';
 import type { InstanceTransform } from '../layout';
+import { InteractiveInstances } from './InteractiveInstances';
 import { PieceInstances } from './PieceInstances';
+
+/** Peça com interação (RPG-44): onde fica a parte que mexe e se cada cópia está aberta. */
+export type PieceInteraction = {
+  model: InteractiveModel;
+  states: readonly PieceState[];
+};
 
 type BoundaryProps = {
   fallback: ReactNode;
@@ -49,13 +58,25 @@ type LoadedProps = {
   transforms: readonly InstanceTransform[];
   tint?: string;
   ghost: boolean;
+  interaction?: PieceInteraction;
 };
 
-function LoadedModelPieces({ url, fitToCell, transforms, tint, ghost }: LoadedProps) {
+function LoadedModelPieces({ url, fitToCell, transforms, tint, ghost, interaction }: LoadedProps) {
   // Draco desligado (baixaria o decodificador de outro site). O meshopt das peças dos pacotes
   // vem embutido no three-stdlib, sem download nem dependência nova.
   const gltf = useGLTF(url, false, true);
   const layers = useMemo(() => bakeModel(gltf.scene, { fitToCell }), [gltf, fitToCell]);
+  if (interaction && !ghost) {
+    return (
+      <InteractiveInstances
+        layers={layers}
+        model={interaction.model}
+        transforms={transforms}
+        states={interaction.states}
+        tint={tint}
+      />
+    );
+  }
   return <PieceInstances layers={layers} transforms={transforms} tint={tint} ghost={ghost} />;
 }
 
@@ -66,6 +87,7 @@ export type ModelPiecesProps = {
   fitToCell?: boolean;
   tint?: string;
   ghost?: boolean;
+  interaction?: PieceInteraction;
   onError?: (error: unknown) => void;
 };
 
@@ -76,6 +98,7 @@ export function ModelPieces({
   fitToCell = true,
   tint,
   ghost = false,
+  interaction,
   onError,
 }: ModelPiecesProps) {
   const fallback = (
@@ -100,6 +123,7 @@ export function ModelPieces({
           transforms={transforms}
           tint={tint}
           ghost={ghost}
+          interaction={interaction}
         />
       </Suspense>
     </ModelBoundary>

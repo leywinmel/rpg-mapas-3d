@@ -4,6 +4,7 @@
  * aresta que ele guarda, peças ancoradas nele); por isso mudar um pedaço redesenha só ele.
  */
 import {
+  isInteractive,
   isPieceVisible,
   multiplyTint,
   NO_FLOOR_INDEX,
@@ -131,11 +132,16 @@ export function pieceTransform(piece: MapPiece): InstanceTransform {
   };
 }
 
+/** Peça com interação (RPG-44): qual é e se está aberta, na ordem das posições do grupo. */
+export type PieceState = { readonly id: string; readonly open: boolean };
+
 export type PieceGroup = {
   readonly key: string;
   readonly asset: PieceAsset;
   readonly tint?: string;
   readonly transforms: InstanceTransform[];
+  /** Só nas peças com interação: aberta ou fechada, cada uma com a sua animação. */
+  readonly states?: PieceState[];
 };
 
 /** Peças do pedaço que o corte deixa ver, agrupadas por modelo (um InstancedMesh por grupo). */
@@ -149,6 +155,9 @@ export function pieceGroups(chunk: MapChunk, cutaway: Cutaway): PieceGroup[] {
       asset,
       ...(tint ? { tint } : {}),
       transforms: pieces.map(pieceTransform),
+      ...(isInteractive(pieces[0]!)
+        ? { states: pieces.map((piece) => ({ id: piece.id, open: piece.open === true })) }
+        : {}),
     };
   });
 }

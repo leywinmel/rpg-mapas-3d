@@ -7,6 +7,8 @@ import { isInside, type Ambience, type Cell, type GridEdge, type MapResult } fro
 import { findFinish, finishStyle } from '@/domain/map-gen';
 import {
   connectedWalls,
+  isInteractive,
+  toggleOpen,
   findPiece,
   getChunk,
   movePiece,
@@ -237,6 +239,21 @@ export function paintAt(
   if (!piece) return { ok: true, value: model };
   if (paint.kind !== 'tint') return { ok: false, errors: [FINISH_ON_PIECE_MESSAGE] };
   return updatePiece(model, piece, (current) => withTint(current, paint.tint));
+}
+
+export const NOTHING_TO_INTERACT_MESSAGE =
+  'Aqui não tem o que acionar: clique numa ambulância, numa van ou num trator com pá.';
+
+/** A peça com interação mais alta da casa (o carro, não a caixa em cima dele). */
+export function interactiveAt(model: MapModel, cell: Cell): MapPiece | undefined {
+  return piecesOccupyingCell(model, cell).filter(isInteractive).at(-1);
+}
+
+/** Abre ou fecha a peça com interação da casa (RPG-44). */
+export function interactAt(model: MapModel, cell: Cell): MapResult<MapModel> {
+  const piece = interactiveAt(model, cell);
+  if (!piece) return { ok: false, errors: [NOTHING_TO_INTERACT_MESSAGE] };
+  return toggleOpen(model, piece);
 }
 
 /** Troca o clima; o MESMO modelo quando nada muda, para o histórico não ganhar passo vazio. */

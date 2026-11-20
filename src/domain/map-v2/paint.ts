@@ -120,8 +120,8 @@ export function updatePiece(
   const current = owner.pieces[index]!;
   const parsed = parseWithSchema(pieceSchema, update(current));
   if (!parsed.ok) return parsed;
-  // Só a tinta muda numa peça: o resto que volta do zod é cópia igual.
-  if (parsed.value.tint === current.tint) return ok(model);
+  // Só a tinta e o aberto mudam numa peça: o resto que volta do zod é cópia igual.
+  if (parsed.value.tint === current.tint && parsed.value.open === current.open) return ok(model);
   const pieces = owner.pieces.slice();
   pieces[index] = parsed.value;
   return ok(replaceChunk(model, { ...owner, pieces }));

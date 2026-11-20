@@ -42,6 +42,7 @@ import type { Brush, PointerHit, Tool } from '../editor/editor-reducer';
 import {
   eraseTargetAt,
   findPiece,
+  interactiveAt,
   movePieceTo,
   pieceFor,
   topPieceAt,
@@ -232,6 +233,8 @@ function Ghost({ hit, view, model, heights, modelUrls }: GhostProps) {
       return eraseTargetAt(model, hit) ? <CellMarker hit={hit} heights={heights} danger /> : null;
     case 'paint':
       return <CellMarker hit={hit} heights={heights} />;
+    case 'interact':
+      return interactiveAt(model, cell) ? <CellMarker hit={hit} heights={heights} /> : null;
     case 'raise':
     case 'lower':
       return terrainAt(model, cell)?.tile ? <CellMarker hit={hit} heights={heights} /> : null;

@@ -110,6 +110,8 @@ export const pieceSchema = z.object({
       `A escala da peça precisa ficar entre ${MIN_PIECE_SCALE} e ${MAX_PIECE_SCALE}.`,
     ),
   tint: tintSchema,
+  /** Peça com interação aberta (RPG-44): portas de trás abertas, pá levantada. */
+  open: z.literal(true, { error: 'A peça aberta é marcada só com true.' }).optional(),
 });
 
 export const chunkDocumentSchema = z.object({
