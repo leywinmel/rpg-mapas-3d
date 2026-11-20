@@ -13,6 +13,7 @@ import { chromeDocksFloors } from './chrome-docks';
 import { cityCenterFloors } from './city-center';
 import { colonyFloors } from './colony';
 import { desertFloors } from './desert';
+import { gasStationFloors } from './gas-station';
 import { hospitalFloors } from './hospital';
 import { islandFloors } from './island';
 import { medievalTownFloors } from './medieval-town';
@@ -361,5 +362,32 @@ describe('hospital central', () => {
     expect(keys).toContain('hos-monitor');
     expect(keys).toContain('hos-balcao');
     expect(keys).toContain('hos-heliponto');
+  });
+});
+
+describe('posto da rodovia', () => {
+  it('shouldReachEveryCellOneStepAtATime', () => {
+    expect(unreachableDryCells(gasStationFloors(), '0,0')).toEqual([]);
+  });
+
+  it('shouldOpenTheDrivewaysToTheHighway', () => {
+    const floors = gasStationFloors();
+    expect(floors.get('8,40')).toEqual({ tile: 'mod-asfalto', height: 1 });
+    expect(floors.get('24,40')).toEqual({ tile: 'grama', height: 1 });
+    expect(floors.get('20,30')).toEqual({ tile: 'mod-calcada', height: 1 });
+  });
+
+  it('shouldCoverEightPumpsAndFurnishTheShop', () => {
+    const pieces = allPieces(readyMap('posto-rodovia')!.build().model);
+    const keys = pieces.map((piece) => (piece.asset.source === 'catalog' ? piece.asset.key : ''));
+    expect(keys.filter((key) => key === 'pos-bomba').length).toBe(8);
+    expect(keys.filter((key) => key === 'pos-pilar').length).toBe(4);
+    const canopies = pieces.filter(
+      (piece) => piece.asset.source === 'catalog' && piece.asset.key === 'pos-cobertura',
+    );
+    // A cobertura fica em cima dos pilares de 3 (seis degraus) acima do pátio.
+    expect(canopies.map((piece) => piece.level)).toEqual([7, 7]);
+    expect(keys).toContain('pos-placa-precos');
+    expect(keys).toContain('mod-prateleira');
   });
 });

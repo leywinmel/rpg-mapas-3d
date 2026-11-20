@@ -1,7 +1,8 @@
 // Gera os móveis e adereços de escola e hospital (RPG-65): na escola, carteira com cadeira,
 // mesa do professor, lousa, armário de aço, tabela de basquete, trave de futebol, bebedouro e
 // mastro de bandeira; no hospital, leito com grades, suporte de soro, monitor no carrinho,
-// biombo, cadeira de rodas, maca, armário de remédios, balcão da recepção e o heliponto.
+// biombo, cadeira de rodas, maca, armário de remédios, balcão da recepção e o heliponto; no
+// posto de gasolina (RPG-45), bomba, pilar e cobertura, calibrador, totem de preços e freezer de gelo.
 // Cada peça olha para +z (a frente do móvel); o gerador encosta na parede e vira a frente para
 // dentro do cômodo. Escala do boneco de 1,5 de altura; a origem fica no centro do footprint.
 // uso: node scripts/assets/institution-pieces.mjs <public/assets/institution>
@@ -35,6 +36,10 @@ const BAG = [196, 220, 236];
 const SCREEN = [80, 230, 150];
 const PAD = [64, 68, 72];
 const PAD_LINE = [236, 236, 228];
+const FUEL_RED = [196, 40, 36];
+const CONCRETE = [150, 150, 146];
+const SAFETY_YELLOW = [236, 192, 40];
+const AIR_BLUE = [48, 96, 170];
 
 /** Caixa centrada em x e z, apoiada em y0. */
 const block = (w, d, y0, y1, cx = 0, cz = 0) => ({
@@ -369,6 +374,103 @@ async function helipad() {
   await writePiece(OUT, 'hos-heliponto', p);
 }
 
+// ---------------------------------------------------------------------------
+// Posto de gasolina
+// ---------------------------------------------------------------------------
+
+/** Bomba de combustível na ilha de concreto: visor aceso dos dois lados e um bico em cada lateral. */
+async function fuelPump() {
+  const p = layers({
+    island: CONCRETE,
+    body: WHITE,
+    band: FUEL_RED,
+    dark: BLACK,
+    screen: glow([120, 230, 170]),
+  });
+  p.island.mesh.box(block(0.92, 0.92, 0, 0.12), ['ny']);
+  p.body.mesh.box(block(0.5, 0.36, 0.12, 1.3), ['ny']);
+  p.band.mesh.box(block(0.54, 0.4, 1.3, 1.5));
+  for (const side of [-1, 1]) {
+    const z = side * 0.181;
+    p.screen.mesh.box(block(0.3, 0.01, 0.98, 1.18, 0, z), [side > 0 ? 'nz' : 'pz']);
+    p.dark.mesh.box(block(0.07, 0.12, 0.66, 0.92, side * 0.285, 0), ['ny']);
+    p.dark.mesh.box(block(0.03, 0.03, 0.3, 0.66, side * 0.31, 0.04), ['ny']);
+  }
+  await writePiece(OUT, 'pos-bomba', p);
+}
+
+/** Pilar da cobertura: 3 de altura (seis degraus), listrado de vermelho, com a sapata amarela. */
+async function canopyPillar() {
+  const p = layers({ base: SAFETY_YELLOW, pillar: WHITE, band: FUEL_RED });
+  p.base.mesh.box(block(0.5, 0.5, 0, 0.2), ['ny']);
+  p.pillar.mesh.box(block(0.3, 0.3, 0.2, 3), ['ny']);
+  for (const y of [0.6, 1.6]) p.band.mesh.box(block(0.32, 0.32, y, y + 0.24), ['ny']);
+  await writePiece(OUT, 'pos-pilar', p);
+}
+
+/**
+ * Cobertura das bombas, 12×8: a laje com a faixa vermelha em volta e as luminárias por baixo.
+ * Fica seis degraus acima do pátio, apoiada nos pilares; o corte de andar a esconde.
+ */
+async function canopy() {
+  const p = layers({
+    slab: [196, 198, 200],
+    fascia: FUEL_RED,
+    stripe: WHITE,
+    light: glow([255, 250, 230]),
+  });
+  p.slab.mesh.box(block(11.9, 7.9, 0.05, 0.4));
+  p.fascia.mesh.box(block(12, 0.06, 0, 0.5, 0, 3.97), ['nz']);
+  p.fascia.mesh.box(block(12, 0.06, 0, 0.5, 0, -3.97), ['pz']);
+  p.fascia.mesh.box(block(0.06, 7.88, 0, 0.5, 5.97, 0), ['nx']);
+  p.fascia.mesh.box(block(0.06, 7.88, 0, 0.5, -5.97, 0), ['px']);
+  p.stripe.mesh.box(block(12.02, 7.98, 0.3, 0.36), ['py', 'ny']);
+  for (const x of [-4.5, -1.5, 1.5, 4.5]) {
+    for (const z of [-2.5, 0, 2.5]) p.light.mesh.box(block(1.2, 0.3, 0.02, 0.05, x, z), ['py']);
+  }
+  await writePiece(OUT, 'pos-cobertura', p);
+}
+
+/** Calibrador de pneus: o poste azul, o visor e a mangueira enrolada. */
+async function airTower() {
+  const p = layers({ post: AIR_BLUE, base: CONCRETE, dark: BLACK, screen: glow([255, 200, 80]) });
+  p.base.mesh.box(block(0.5, 0.5, 0, 0.08), ['ny']);
+  p.post.mesh.box(block(0.26, 0.22, 0.08, 1.2), ['ny']);
+  p.post.mesh.box(block(0.36, 0.3, 1.2, 1.36));
+  p.screen.mesh.box(block(0.18, 0.01, 1.0, 1.12, 0, 0.115), ['nz']);
+  p.dark.mesh.box(block(0.2, 0.08, 0.5, 0.78, 0, 0.15), ['ny']);
+  await writePiece(OUT, 'pos-calibrador', p);
+}
+
+/** Totem de preços na beira da estrada: o letreiro aceso no alto e três linhas de preço. */
+async function priceSign() {
+  const p = layers({
+    pole: STEEL_DARK,
+    panel: FUEL_RED,
+    logo: glow(WHITE),
+    price: glow([255, 214, 80]),
+  });
+  p.pole.mesh.box(block(0.22, 0.22, 0, 1.6), ['ny']);
+  p.panel.mesh.box(block(0.92, 0.2, 1.6, 3.8));
+  for (const side of [-1, 1]) {
+    const z = side * 0.105;
+    const face = side > 0 ? 'nz' : 'pz';
+    p.logo.mesh.box(block(0.7, 0.01, 3.3, 3.62, 0, z), [face]);
+    for (const y of [1.8, 2.24, 2.68])
+      p.price.mesh.box(block(0.6, 0.01, y, y + 0.28, 0, z), [face]);
+  }
+  await writePiece(OUT, 'pos-placa-precos', p);
+}
+
+/** Freezer de gelo da loja de conveniência: a caixa branca com o letreiro azul aceso na frente. */
+async function iceFreezer() {
+  const p = layers({ box: WHITE, lid: STEEL, label: glow([110, 180, 250]) });
+  p.box.mesh.box(block(0.84, 0.54, 0, 1.0), ['ny']);
+  p.lid.mesh.box(block(0.88, 0.58, 1.0, 1.06));
+  p.label.mesh.box(block(0.6, 0.01, 0.6, 0.88, 0, 0.275), ['nz']);
+  await writePiece(OUT, 'pos-freezer-gelo', p);
+}
+
 for (const make of [
   studentDesk,
   teacherDesk,
@@ -387,6 +489,12 @@ for (const make of [
   medicineCabinet,
   receptionDesk,
   helipad,
+  fuelPump,
+  canopyPillar,
+  canopy,
+  airTower,
+  priceSign,
+  iceFreezer,
 ]) {
   await make();
 }

@@ -25,6 +25,7 @@ const READY_MAP_IMAGES: Readonly<Record<string, string>> = {
   'academia-kasumi': '/assets/ready/academia-kasumi.webp',
   'escola-bairro-alto': '/assets/ready/escola-bairro-alto.webp',
   'hospital-central': '/assets/ready/hospital-central.webp',
+  'posto-rodovia': '/assets/ready/posto-rodovia.webp',
 };
 
 type FieldsProps = {

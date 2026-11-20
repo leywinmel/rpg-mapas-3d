@@ -1,7 +1,7 @@
 /**
- * Móveis e adereços de escola e hospital (RPG-65), gerados por
+ * Móveis e adereços de escola e hospital (RPG-65) e do posto de gasolina (RPG-45), gerados por
  * scripts/assets/institution-pieces.mjs em public/assets/institution/. Servem às salas de aula
- * e enfermarias do gerador, às casas prontas e aos mapas prontos de escola e hospital. As
+ * e enfermarias do gerador, às casas prontas e aos mapas prontos de escola, hospital e posto. As
  * alturas saem do próprio modelo.
  */
 
@@ -22,6 +22,7 @@ type InstitutionSpec = {
 
 const SCHOOL = ['escola', 'aula', 'colégio'] as const;
 const HOSPITAL = ['hospital', 'saúde', 'médico', 'enfermaria'] as const;
+const GAS = ['posto', 'gasolina', 'combustível'] as const;
 
 const SPECS: readonly InstitutionSpec[] = [
   {
@@ -166,6 +167,55 @@ const SPECS: readonly InstitutionSpec[] = [
     height: 0.1,
     category: 'structure',
     footprint: { width: 4, depth: 4 },
+  },
+  {
+    key: 'pos-bomba',
+    label: 'Bomba de combustível',
+    keywords: [...GAS, 'bomba', 'abastecer', 'álcool', 'diesel'],
+    icon: 'box',
+    height: 1.5,
+    category: 'structure',
+  },
+  {
+    key: 'pos-pilar',
+    label: 'Pilar da cobertura',
+    keywords: [...GAS, 'pilar', 'coluna'],
+    icon: 'pillar',
+    height: 3,
+    category: 'structure',
+  },
+  {
+    key: 'pos-cobertura',
+    label: 'Cobertura das bombas',
+    keywords: [...GAS, 'cobertura', 'teto', 'marquise'],
+    icon: 'roof',
+    height: 0.5,
+    category: 'structure',
+    footprint: { width: 12, depth: 8 },
+  },
+  {
+    key: 'pos-calibrador',
+    label: 'Calibrador de pneus',
+    keywords: [...GAS, 'calibrador', 'pneu', 'ar'],
+    icon: 'pillar',
+    height: 1.36,
+    category: 'structure',
+  },
+  {
+    key: 'pos-placa-precos',
+    label: 'Totem de preços',
+    keywords: [...GAS, 'placa', 'preço', 'letreiro', 'totem'],
+    icon: 'monitor',
+    height: 3.8,
+    category: 'structure',
+  },
+  {
+    key: 'pos-freezer-gelo',
+    label: 'Freezer de gelo',
+    keywords: [...GAS, 'gelo', 'freezer', 'conveniência'],
+    icon: 'box',
+    height: 1.06,
+    category: 'furniture',
   },
 ];
 
