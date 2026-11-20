@@ -243,7 +243,10 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   de papel-cartão. Bonecos: os simples (aventureiro e criatura, com duas cores à escolha) e os
   prontos, animados, com as cores deles: cavaleiro, bárbaro, mago, ladino, ladino encapuzado,
   clérigo, monge, patrulheira, assassino encapuzado, guerreiro, arquimago, os esqueletos guerreiro,
-  mago, ladino e servo, os monstros morcego gigante e dragão filhote e, no grupo "Animais", gato,
+  mago, ladino e servo, o zumbi e o fantasma, os monstros (morcego gigante, dragão filhote, goblin,
+  orc, yeti, gosma, aranha gigante, rei cogumelo e diabrete), o horror (tentáculo e criatura
+  cósmica), o moderno e cyberpunk (agente tático, mercenária, traje de proteção e drone de
+  combate), a gente da cidade (fazendeiro, rei e bruxa) e, no grupo "Animais", gato,
   cachorro, rato, galinha, porco, ovelha, raposa, lobo, cervo, vaca e cavalo, no tamanho de cada
   bicho (KayKit e Quaternius, CC0;
   novos entram por

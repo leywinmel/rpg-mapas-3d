@@ -22,7 +22,7 @@ describe('CreditsPage', () => {
         credit.url,
       );
     }
-    expect(screen.getAllByText(/por Quaternius/)).toHaveLength(6);
+    expect(screen.getAllByText(/por Quaternius/)).toHaveLength(7);
     expect(screen.getByText(/por Kenney/)).toBeInTheDocument();
     expect(screen.getByText(/por papptimus/)).toBeInTheDocument();
     expect(screen.getByText(/CC BY 4.0/)).toBeInTheDocument();
