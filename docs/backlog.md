@@ -105,6 +105,8 @@ tokens (B), clima e pisos (E: chuva, dia e noite, areia), e só então os lugare
 - [x] **RPG-40** Fundos temáticos no lugar da cor única: floresta com folhas, deserto, cidade, masmorra, mar. Campo "Fundo" na aba Ambiente; paisagem espalhada com semente em volta do mapa, mar com ondas, folhas caindo; o gerador escolhe pelo estilo.
       Ajuste de 20/11 (pedido do usuário): o chão em volta pega a cor do piso que mais aparece na borda do mapa
       (areia, terra da caverna, pedra da masmorra) e o mar a cor do ladrilho de água, sem emenda na beira.
+      Ajuste de 22/11 (pedido do usuário): o fundo "Cidade moderna" virou uma cidade pequena, sem prédios:
+      ruas de asfalto, quadras com calçada e gramado e casas térreas e sobrados de frente para a rua até o horizonte.
 - [x] **RPG-41** Pisos novos: areia, deserto, poça e lama.
 
 **Fase F: estilos, mapas e interação**

@@ -33,6 +33,14 @@ const COLORS = {
   windowWarm: '#ffcf7a',
   windowCool: '#a8d4ff',
   cottageWall: '#8a7458',
+  houseWall: '#a08a6c',
+  houseRoof: '#7a3a2a',
+  houseLightWall: '#b9b4a8',
+  houseLightRoof: '#3e434c',
+  townhouseWall: '#a89a6a',
+  townhouseRoof: '#5a3b2a',
+  windowDark: '#2c3038',
+  trim: '#d8d2c4',
   cottageRoof: '#4a3024',
   stone: '#6b6660',
   stoneRoof: '#3b2a22',
@@ -168,22 +176,72 @@ function litWindows(height: number, seed: string): Part[] {
   return windows;
 }
 
-function building(height: number, seed: string): () => ProceduralLayer[] {
-  return () => [
-    matte(
-      [
-        box([1, height, 1], COLORS.building),
-        box([0.86, 0.12, 0.86], COLORS.roof, { y: height }),
-        box([0.3, 0.3, 0.3], COLORS.buildingDark, { x: 0.2, y: height + 0.12, z: -0.18 }),
-      ],
-      seed,
-    ),
-    // Janela acesa brilha no escuro, sem depender da luz da cena.
-    { geometry: mergeParts(litWindows(height, seed), `${seed}-janelas`), material: 'glow' },
-  ];
+type HouseLook = { wall: string; roof: string; floors: 1 | 2; seed: string };
+
+const HOUSE = {
+  width: 1,
+  depth: 0.85,
+  /** Altura de um andar da casa, na mesma medida do lote. */
+  story: 0.62,
+  /** Telhado de duas águas: prisma de três lados com a cumeeira de frente para a rua. */
+  roofRadius: 0.64,
+  roofLength: 0.97,
+} as const;
+/** Prisma deitado com a ponta para cima: o eixo vai de frente para os fundos (z). */
+const ROOF_TILT = -Math.PI / 2;
+const TRIANGLE_SIDES = 3;
+
+/** Janelas da frente de um andar: a da direita acesa, a da esquerda apagada. */
+function frontWindows(y: number, front: number): { lit: Part; dark: Part } {
+  const pane = () => new PlaneGeometry(0.18, 0.18);
+  return {
+    lit: place(pane(), COLORS.windowWarm, { x: 0.27, y, z: front }),
+    dark: place(pane(), COLORS.windowDark, { x: -0.27, y, z: front }),
+  };
 }
 
-const BUILDING_HEIGHTS = { low: 2.5, medium: 4.5, tall: 8 } as const;
+/** Casa de bairro: térrea ou sobrado, telhado de duas águas, porta e janelas na frente. */
+function house({ wall, roof, floors, seed }: HouseLook): () => ProceduralLayer[] {
+  return () => {
+    const height = HOUSE.story * floors;
+    const front = HOUSE.depth / 2 + FACE_GAP;
+    const rows = Array.from({ length: floors }, (_, floor) =>
+      frontWindows(HOUSE.story * (floor + 0.55), front),
+    );
+    const doorHeight = 0.34;
+    return [
+      matte(
+        [
+          box([HOUSE.width, height, HOUSE.depth], wall),
+          // O centro do prisma fica meio raio acima do topo da parede: a base dele encosta nela.
+          cylinder(
+            {
+              top: HOUSE.roofRadius,
+              bottom: HOUSE.roofRadius,
+              height: HOUSE.roofLength,
+              segments: TRIANGLE_SIDES,
+            },
+            roof,
+            { y: height + HOUSE.roofRadius / 2 - HOUSE.roofLength / 2, rx: ROOF_TILT },
+          ),
+          box([1.04, 0.05, HOUSE.depth + 0.04], COLORS.trim, { y: height - 0.05 }),
+          place(new PlaneGeometry(0.2, doorHeight), COLORS.doorDark, {
+            y: doorHeight / 2,
+            z: front,
+          }),
+          ...rows.slice(1).map((row) => row.dark),
+          rows[0]!.dark,
+        ],
+        seed,
+      ),
+      // Só uma janela por andar acende: de noite o bairro parece morado, sem virar letreiro.
+      glow(
+        rows.map((row) => row.lit),
+        seed,
+      ),
+    ];
+  };
+}
 
 const PYRAMID_SIDES = 4;
 const ROUND_SIDES = 8;
@@ -362,12 +420,31 @@ const BUILDERS: Readonly<Record<BackdropPiece, () => PieceLayer[]>> = {
   cacto: () => getBuiltLayers('fundo-cacto', cactus),
   duna: () => getBuiltLayers('fundo-duna', dune),
   estalagmite: () => getBuiltLayers('fundo-estalagmite', stalagmite),
-  'predio-baixo': () =>
-    getBuiltLayers('fundo-predio-baixo', building(BUILDING_HEIGHTS.low, 'fundo-predio-baixo')),
-  'predio-medio': () =>
-    getBuiltLayers('fundo-predio-medio', building(BUILDING_HEIGHTS.medium, 'fundo-predio-medio')),
-  'predio-alto': () =>
-    getBuiltLayers('fundo-predio-alto', building(BUILDING_HEIGHTS.tall, 'fundo-predio-alto')),
+  casa: () =>
+    getBuiltLayers(
+      'fundo-casa',
+      house({ wall: COLORS.houseWall, roof: COLORS.houseRoof, floors: 1, seed: 'fundo-casa' }),
+    ),
+  'casa-clara': () =>
+    getBuiltLayers(
+      'fundo-casa-clara',
+      house({
+        wall: COLORS.houseLightWall,
+        roof: COLORS.houseLightRoof,
+        floors: 1,
+        seed: 'fundo-casa-clara',
+      }),
+    ),
+  sobrado: () =>
+    getBuiltLayers(
+      'fundo-sobrado',
+      house({
+        wall: COLORS.townhouseWall,
+        roof: COLORS.townhouseRoof,
+        floors: 2,
+        seed: 'fundo-sobrado',
+      }),
+    ),
   casebre: () => getBuiltLayers('fundo-casebre', cottage),
   'torre-pedra': () => getBuiltLayers('fundo-torre-pedra', stoneTower),
   'torre-futurista': () => getBuiltLayers('fundo-torre-futurista', futureTower),

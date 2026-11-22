@@ -6,6 +6,7 @@
 import type { Backdrop, GridSize } from '@/domain';
 import type { InstanceTransform } from '../layout';
 import type { QualityLevel } from '../quality/quality';
+import { layTown, type TownLayout } from './town';
 
 /** Peças da paisagem. As do catálogo do mapa (árvore, rocha, pilar) são reaproveitadas. */
 export type BackdropPiece =
@@ -15,9 +16,9 @@ export type BackdropPiece =
   | 'cacto'
   | 'duna'
   | 'estalagmite'
-  | 'predio-baixo'
-  | 'predio-medio'
-  | 'predio-alto'
+  | 'casa'
+  | 'casa-clara'
+  | 'sobrado'
   | 'casebre'
   | 'torre-pedra'
   | 'torre-futurista'
@@ -42,6 +43,8 @@ export type BackdropSpec = {
   water: boolean;
   /** Floresta: folhas caindo na beira do mapa. */
   leaves: boolean;
+  /** Cidade: bairro em grade (ruas, quadras e casas, em town.ts) no lugar das peças soltas. */
+  town?: boolean;
   groups: readonly ScatterGroup[];
 };
 
@@ -79,15 +82,13 @@ export const BACKDROP_SPECS: Readonly<Record<SceneBackdrop, BackdropSpec>> = {
       { piece: 'rocha', perArea: 0.004, max: 140, scale: [1, 2.6] },
     ],
   },
+  // Cidade pequena, não metrópole: casas e sobrados em quadras, com ruas até o horizonte.
   city: {
-    groundColor: '#26262c',
+    groundColor: '#2e3c29',
     water: false,
     leaves: false,
-    groups: [
-      { piece: 'predio-baixo', perArea: 0.006, max: 220, scale: [2, 3] },
-      { piece: 'predio-medio', perArea: 0.005, max: 180, scale: [2, 3] },
-      { piece: 'predio-alto', perArea: 0.003, max: 120, scale: [2, 3.2] },
-    ],
+    town: true,
+    groups: [],
   },
   dungeon: {
     groundColor: '#1d1a1f',
@@ -240,16 +241,39 @@ export type ScatteredGroup = { piece: BackdropPiece; transforms: InstanceTransfo
 
 export type ScatterOptions = { level?: QualityLevel };
 
+function spanScaleOf(size: GridSize): number {
+  const span = Math.max(size.width, size.depth);
+  return Math.min(Math.max(span / SCALE_SPAN_REFERENCE, 1), MAX_SPAN_SCALE);
+}
+
+/** Bairro do fundo de cidade para este mapa; null nos fundos sem bairro. */
+export function townLayout(
+  backdrop: SceneBackdrop,
+  size: GridSize,
+  { level = 'high' }: ScatterOptions = {},
+): TownLayout | null {
+  const spec = BACKDROP_SPECS[backdrop];
+  if (!spec.town) return null;
+  return layTown({
+    ring: backdropRing(size),
+    scale: spanScaleOf(size),
+    groundY: backdropGroundY(spec),
+    density: BACKDROP_DENSITY[level],
+    random: seededRandom(`${backdrop}:bairro:${size.width}x${size.depth}`),
+  });
+}
+
 /** Onde cai cada peça da paisagem, agrupada por peça (um InstancedMesh por grupo). */
 export function scatterBackdrop(
   backdrop: SceneBackdrop,
   size: GridSize,
   { level = 'high' }: ScatterOptions = {},
 ): ScatteredGroup[] {
+  const town = townLayout(backdrop, size, { level });
+  if (town) return [...town.houses];
   const ring = backdropRing(size);
   const area = ringArea(ring);
-  const span = Math.max(size.width, size.depth);
-  const spanScale = Math.min(Math.max(span / SCALE_SPAN_REFERENCE, 1), MAX_SPAN_SCALE);
+  const spanScale = spanScaleOf(size);
   const spec = BACKDROP_SPECS[backdrop];
   const groundY = backdropGroundY(spec);
   return spec.groups.map((group) => {

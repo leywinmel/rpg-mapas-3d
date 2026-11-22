@@ -25,8 +25,12 @@ import {
   groundRadius,
   ringPoint,
   scatterBackdrop,
+  townLayout,
   type BackdropSpec,
+  type SceneBackdrop,
 } from '../backdrop/backdrop';
+import type { TownRect } from '../backdrop/town';
+import { box, mergeParts, type Part } from '../catalog/piece-geometry';
 import { getBackdropLayers } from '../backdrop/backdrop-geometry';
 import { pieceCatalog } from '../catalog/catalog';
 import { SCENE_PALETTE } from '../catalog/palette';
@@ -296,6 +300,66 @@ function landColor(spec: BackdropSpec, edgeTile: string | null | undefined): str
   return edge ?? spec.groundColor;
 }
 
+const TOWN_GROUND = {
+  asphalt: '#2f3036',
+  sidewalk: '#6e6c66',
+  lawn: '#3a4a2f',
+  /** Espessura de cada camada: asfalto embaixo, calçada e gramado um degrau acima. */
+  asphaltHeight: 0.02,
+  sidewalkHeight: 0.05,
+  lawnHeight: 0.06,
+} as const;
+
+function slab(rect: TownRect, height: number, color: string, y: number): Part {
+  return box([rect.width, height, rect.depth], color, {
+    x: rect.x + rect.width / 2,
+    y,
+    z: rect.z + rect.depth / 2,
+  });
+}
+
+/** Chão do bairro: asfalto das ruas, calçada de cada quadra e o gramado dentro dela. */
+function TownGround({ backdrop, size }: { backdrop: SceneBackdrop; size: GridSize }) {
+  const level = useQualityLevel();
+  const geometry = useMemo(() => {
+    const town = townLayout(backdrop, size, { level });
+    if (!town || town.blocks.length === 0) return null;
+    const y = backdropGroundY(BACKDROP_SPECS[backdrop]);
+    const inset = town.sidewalk;
+    const parts: Part[] = [
+      ...town.roads.map((road) => slab(road, TOWN_GROUND.asphaltHeight, TOWN_GROUND.asphalt, y)),
+      ...town.blocks.flatMap((block) => [
+        slab(block, TOWN_GROUND.sidewalkHeight, TOWN_GROUND.sidewalk, y),
+        slab(
+          {
+            x: block.x + inset,
+            z: block.z + inset,
+            width: block.width - 2 * inset,
+            depth: block.depth - 2 * inset,
+          },
+          TOWN_GROUND.lawnHeight,
+          TOWN_GROUND.lawn,
+          y,
+        ),
+      ]),
+    ];
+    return mergeParts(parts, `bairro-${size.width}x${size.depth}`);
+  }, [backdrop, size, level]);
+  const material = useMemo(
+    () => new MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: true }),
+    [],
+  );
+  useEffect(
+    () => () => {
+      geometry?.dispose();
+    },
+    [geometry],
+  );
+  useEffect(() => () => material.dispose(), [material]);
+  if (!geometry) return null;
+  return <mesh geometry={geometry} material={material} receiveShadow />;
+}
+
 /** Paisagem em volta do mapa (RPG-40): chão, peças espalhadas, água ou folhas, conforme o fundo. */
 export function BackdropLayer({ backdrop, size, edgeTile }: BackdropLayerProps) {
   const stableSize = useMemo(
@@ -316,6 +380,7 @@ export function BackdropLayer({ backdrop, size, edgeTile }: BackdropLayerProps) 
       />
       {spec.water && <Water radius={radius} center={ring.center} />}
       {spec.leaves && !prefersReducedMotion() && <FallingLeaves size={stableSize} />}
+      {spec.town && <TownGround backdrop={backdrop} size={stableSize} />}
       <Scatter backdrop={backdrop} size={stableSize} />
     </group>
   );
