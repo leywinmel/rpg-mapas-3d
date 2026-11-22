@@ -150,6 +150,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   pátio, apoiada nos pilares; o corte de andar a esconde para ver as bombas. As peças do posto
   (bomba, pilar, cobertura, calibrador, totem de preços e freezer de gelo) também ficam na
   biblioteca do editor.
+  O "Bosque das Sombras" (48 × 48) é floresta fechada para emboscadas e viagens: uma trilha de terra
+  cruza o mapa e passa o riacho numa ponte de tábuas; em volta, o círculo de pedras com o altar,
+  o acampamento dos salteadores, a cabana da bruxa num morrote de lama e o anel de cogumelos.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
