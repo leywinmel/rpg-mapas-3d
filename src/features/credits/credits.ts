@@ -77,6 +77,14 @@ export const MODEL_CREDITS: readonly Credit[] = [
     ...CC0,
   },
   {
+    work: 'KayKit Dungeon Remastered',
+    author: 'Kay Lousberg',
+    url: 'https://kaylousberg.itch.io/kaykit-dungeon-remastered',
+    usage:
+      'Móveis de taverna e de masmorra: camas, barris de chope, mesas, banquinhos, estantes, velas, estandartes, baús e tochas de parede.',
+    ...CC0,
+  },
+  {
     work: 'RPG Characters',
     author: 'Quaternius',
     url: 'https://opengameart.org/content/lowpoly-rpg-characters',

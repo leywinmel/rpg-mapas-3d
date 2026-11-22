@@ -6,7 +6,7 @@
  */
 
 import type { Footprint } from '@/domain/map-v2';
-import type { CatalogEntry, PieceCategory, PieceIcon } from './catalog-types';
+import type { CatalogEntry, PieceCategory, PieceIcon, PieceLight } from './catalog-types';
 
 type GenericSpec = {
   key: string;
@@ -15,6 +15,7 @@ type GenericSpec = {
   icon: PieceIcon;
   height: number;
   footprint?: Footprint;
+  light?: PieceLight;
 };
 
 /** Monta as entradas de uma pasta de public/assets, todas da mesma categoria. */
@@ -269,6 +270,158 @@ const DUNGEON: readonly GenericSpec[] = [
   },
 ];
 
+/** Luz de vela: amarela, fraca e curta, só a mesa ou a parede em volta. */
+const CANDLE_LIGHT = { color: '#ffc070', intensity: 2.5, distance: 3, offsetY: 0.6 } as const;
+
+/**
+ * Móveis de taverna e de masmorra do KayKit Dungeon Remastered (Kay Lousberg, CC0), convertidos
+ * por scripts/assets/kaykit-props.mjs. Medidas (altura e casas) saem do próprio modelo.
+ */
+const TAVERN: readonly GenericSpec[] = [
+  {
+    key: 'kay-cama',
+    label: 'Cama de casal',
+    keywords: ['quarto', 'estalagem', 'dormir', 'taverna'],
+    icon: 'armchair',
+    height: 1.11,
+    footprint: { width: 2, depth: 2 },
+  },
+  {
+    key: 'kay-cama-palha',
+    label: 'Cama de palha',
+    keywords: ['colchão', 'dormir', 'cela', 'estalagem'],
+    icon: 'armchair',
+    height: 0.37,
+    footprint: { width: 1, depth: 2 },
+  },
+  {
+    key: 'kay-barril-chope',
+    label: 'Barril de chope',
+    keywords: ['taverna', 'cerveja', 'torneira', 'bar', 'hidromel'],
+    icon: 'cylinder',
+    height: 1.33,
+    footprint: { width: 2, depth: 1 },
+  },
+  {
+    key: 'kay-barris',
+    label: 'Barris empilhados',
+    keywords: ['taverna', 'depósito', 'adega', 'vinho'],
+    icon: 'cylinder',
+    height: 1.15,
+  },
+  {
+    key: 'kay-mesa-banquete',
+    label: 'Mesa de banquete',
+    keywords: ['taverna', 'jantar', 'comida', 'salão', 'festa'],
+    icon: 'table',
+    height: 1.23,
+    footprint: { width: 2, depth: 3 },
+  },
+  {
+    key: 'kay-mesa-toalha',
+    label: 'Mesa com toalha',
+    keywords: ['taverna', 'estalagem', 'refeição'],
+    icon: 'table',
+    height: 0.65,
+  },
+  {
+    key: 'kay-mesinha',
+    label: 'Mesinha com garrafa',
+    keywords: ['taverna', 'bebida', 'vela'],
+    icon: 'table',
+    height: 1.05,
+  },
+  {
+    key: 'kay-banquinho',
+    label: 'Banquinho',
+    keywords: ['taverna', 'assento', 'banco', 'bar'],
+    icon: 'armchair',
+    height: 0.33,
+  },
+  {
+    key: 'kay-estante',
+    label: 'Estante de madeira',
+    keywords: ['prateleira', 'livros', 'depósito', 'taverna'],
+    icon: 'box',
+    height: 1.27,
+  },
+  {
+    key: 'kay-prateleira-velas',
+    label: 'Prateleira com velas',
+    keywords: ['vela', 'parede', 'capela', 'luz'],
+    icon: 'flame',
+    height: 0.65,
+    light: CANDLE_LIGHT,
+  },
+  {
+    key: 'kay-candelabro',
+    label: 'Candelabro',
+    keywords: ['vela', 'luz', 'castiçal', 'altar'],
+    icon: 'flame',
+    height: 0.57,
+    light: CANDLE_LIGHT,
+  },
+  {
+    key: 'kay-estandarte-vermelho',
+    label: 'Estandarte vermelho',
+    keywords: ['bandeira', 'brasão', 'castelo', 'salão'],
+    icon: 'pillar',
+    height: 2.08,
+  },
+  {
+    key: 'kay-estandarte-azul',
+    label: 'Estandarte com escudo',
+    keywords: ['bandeira', 'brasão', 'castelo', 'guarda'],
+    icon: 'pillar',
+    height: 2.08,
+    footprint: { width: 2, depth: 1 },
+  },
+  {
+    key: 'kay-caixas',
+    label: 'Caixotes empilhados',
+    keywords: ['carga', 'depósito', 'armazém', 'porão'],
+    icon: 'box',
+    height: 1.39,
+  },
+  {
+    key: 'kay-moedas',
+    label: 'Pilha de moedas',
+    keywords: ['tesouro', 'ouro', 'dragão', 'recompensa'],
+    icon: 'chest',
+    height: 0.75,
+  },
+  {
+    key: 'kay-bau-ouro',
+    label: 'Baú de ouro',
+    keywords: ['tesouro', 'recompensa', 'masmorra'],
+    icon: 'chest',
+    height: 0.85,
+  },
+  {
+    key: 'kay-espada-escudo',
+    label: 'Espada e escudo na parede',
+    keywords: ['armas', 'troféu', 'arsenal', 'guarda'],
+    icon: 'statue',
+    height: 1.08,
+    footprint: { width: 2, depth: 1 },
+  },
+  {
+    key: 'kay-arca',
+    label: 'Arca de viagem',
+    keywords: ['baú', 'bagagem', 'quarto', 'estalagem'],
+    icon: 'chest',
+    height: 0.65,
+  },
+  {
+    key: 'kay-tocha-parede',
+    label: 'Tocha de parede',
+    keywords: ['fogo', 'luz', 'suporte', 'masmorra'],
+    icon: 'flame',
+    height: 0.69,
+    light: CANDLE_LIGHT,
+  },
+];
+
 /** Peças da caverna (RPG-63): moram junto das da masmorra, mas entram como natureza. */
 const CAVE: readonly GenericSpec[] = [
   {
@@ -300,4 +453,5 @@ export const GENERIC_PIECES: readonly CatalogEntry[] = [
   ...genericPieces('/assets/ship', 'structure', SHIP),
   ...genericPieces('/assets/dungeon', 'furniture', DUNGEON),
   ...genericPieces('/assets/dungeon', 'nature', CAVE),
+  ...genericPieces('/assets/tavern', 'furniture', TAVERN),
 ];

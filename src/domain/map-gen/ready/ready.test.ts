@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { Cell } from '../../grid';
 import {
   parseChunk,
   rotatedFootprint,
@@ -416,5 +417,55 @@ describe('posto da rodovia', () => {
     expect(canopies.map((piece) => piece.level)).toEqual([7, 7]);
     expect(keys).toContain('pos-placa-precos');
     expect(keys).toContain('mod-prateleira');
+  });
+});
+
+describe('taverna do javali', () => {
+  /** Anda de casa em casa sem atravessar parede: passa pela parede com porta e pelos vãos. */
+  function walkFrom(model: MapModel, start: Cell): Set<string> {
+    const walls = new Set(
+      [...model.chunks.values()].flatMap((chunk) =>
+        chunk.walls
+          .filter((wall) => !wall.style.includes('porta'))
+          .map((wall) => `${wall.x},${wall.z},${wall.side}`),
+      ),
+    );
+    const blocked = (from: Cell, to: Cell) => {
+      if (to.x !== from.x) return walls.has(`${Math.max(from.x, to.x)},${from.z},west`);
+      return walls.has(`${from.x},${Math.max(from.z, to.z)},north`);
+    };
+    const seen = new Set([`${start.x},${start.z}`]);
+    const queue = [start];
+    for (let cell = queue.shift(); cell; cell = queue.shift()) {
+      for (const [dx, dz] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ] as const) {
+        const next = { x: cell.x + dx, z: cell.z + dz };
+        const id = `${next.x},${next.z}`;
+        const outside =
+          next.x < 0 || next.z < 0 || next.x >= model.size.width || next.z >= model.size.depth;
+        if (outside || seen.has(id) || blocked(cell, next)) continue;
+        seen.add(id);
+        queue.push(next);
+      }
+    }
+    return seen;
+  }
+
+  it('shouldReachEveryRoomFromTheStreetThroughTheDoors', () => {
+    const { model } = readyMap('taverna-javali')!.build();
+    const reached = walkFrom(model, { x: 10, z: 21 });
+    expect(reached.size).toBe(model.size.width * model.size.depth);
+  });
+
+  it('shouldFurnishTheTavernWithTheKayKitPieces', () => {
+    const { model } = readyMap('taverna-javali')!.build();
+    const kaykit = allPieces(model).filter(
+      (piece) => piece.asset.source === 'catalog' && piece.asset.key.startsWith('kay-'),
+    );
+    expect(kaykit.length).toBeGreaterThan(60);
   });
 });

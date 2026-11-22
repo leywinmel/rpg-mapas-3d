@@ -153,6 +153,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   O "Bosque das Sombras" (48 × 48) é floresta fechada para emboscadas e viagens: uma trilha de terra
   cruza o mapa e passa o riacho numa ponte de tábuas; em volta, o círculo de pedras com o altar,
   o acampamento dos salteadores, a cabana da bruxa num morrote de lama e o anel de cogumelos.
+  A "Taverna do Javali" (32 × 26) é a estalagem de beira de estrada para o grupo se encontrar: o
+  salão com o balcão de chope, mesas com banquinhos e a mesa de banquete, a cozinha com a despensa,
+  dois quartos de hóspede (o do dono com o baú de ouro) e, lá fora, a rua de calçamento com o chafariz.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
@@ -397,6 +400,9 @@ Google não muda.
 - `scripts/assets/cyber-city.mjs <pasta dos .glb> public/assets/cyberpunk`: monta os prédios e os
   megaprédios do cyberpunk empilhando as seções do pacote Cyber City (papptimus, CC BY 4.0), que o
   Blender passa de FBX para `.glb` com o `fbx-to-glb.py`.
+- `scripts/assets/kaykit-props.mjs <pasta gltf do pacote> public/assets/tavern`: converte os móveis
+  do KayKit Dungeon Remastered (escala do boneco, malha em meshopt e a paleta do pacote numa WebP
+  só) e imprime altura, footprint e cor de longe de cada peça para o catálogo.
 - Veículos do moderno (pacote Rgsdev, CC0, em FBX): o Blender passa para `.glb` com
   `blender -b --factory-startup -P scripts/assets/fbx-to-glb.py -- <pasta do pacote> <saída>`, e
   `scripts/assets/convert-vehicle.mjs <entrada.glb> <saída.gltf> [comprimento máximo]` põe na
@@ -460,6 +466,8 @@ cortesia; o Cyber City é CC BY 4.0 e exige o crédito. Os créditos também apa
   sob [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Os prédios foram empilhados e
   reduzidos para a escala do mapa.
 - **Kenney** ([kenney.nl](https://kenney.nl/assets/car-kit)): Car Kit.
+- **Kay Lousberg** ([kaylousberg.itch.io](https://kaylousberg.itch.io)): KayKit Character Pack
+  (Adventurers e Skeletons), bonecos de token, e KayKit Dungeon Remastered, os móveis de taverna.
 - **Inter**, de Rasmus Andersson: fonte da interface (SIL Open Font License 1.1).
 
 As peças ficam otimizadas em `public/assets/<estilo>/`: um `.gltf` com `.bin` em meshopt, as texturas
