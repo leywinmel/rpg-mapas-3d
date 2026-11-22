@@ -88,9 +88,9 @@ describe('pieceCatalog', () => {
 describe('search', () => {
   it('shouldIgnoreAccentsAndCase', () => {
     expect(normalizeSearchText('  Baú ')).toBe('bau');
-    expect(pieceCatalog.search('BAÚ', { style: 'medieval' }).map((entry) => entry.key)).toEqual([
-      'bau',
-    ]);
+    const keys = pieceCatalog.search('BAÚ', { style: 'medieval' }).map((entry) => entry.key);
+    expect(keys[0]).toBe('bau');
+    expect(keys).toContain('kay-bau-ouro');
   });
 
   it('shouldMatchKeywordsAndFilterByKind', () => {

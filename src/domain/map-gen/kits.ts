@@ -168,6 +168,12 @@ export const PROP_FOOTPRINTS: Readonly<Record<string, Footprint>> = {
   'hos-balcao': { width: 2, depth: 1 },
   'hos-heliponto': { width: 4, depth: 4 },
   'pos-cobertura': { width: 12, depth: 8 },
+  'kay-cama': { width: 2, depth: 2 },
+  'kay-cama-palha': { width: 1, depth: 2 },
+  'kay-barril-chope': { width: 2, depth: 1 },
+  'kay-mesa-banquete': { width: 2, depth: 3 },
+  'kay-estandarte-azul': { width: 2, depth: 1 },
+  'kay-espada-escudo': { width: 2, depth: 1 },
 };
 
 /** Footprint de uma peça solta (sem giro): o da tabela ou uma casa. */

@@ -21,6 +21,7 @@ import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
 import { buildShipMap, SHIP_SIZE } from './ship';
 import { buildStationMap, STATION_SIZE } from './station';
+import { buildTavernMap, TAVERN_SIZE } from './tavern';
 import { buildTempleSchoolMap, TEMPLE_SCHOOL_SIZE } from './temple-school';
 import { buildWalledTownMap, WALLED_TOWN_SIZE } from './walled-town';
 
@@ -65,6 +66,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Floresta fechada cortada por uma trilha: a ponte sobre o riacho, o círculo de pedras com o altar, o acampamento dos salteadores, a cabana da bruxa no lamaçal e o anel de cogumelos.',
     size: FOREST_SIZE,
     build: buildForestMap,
+  },
+  {
+    id: 'taverna-javali',
+    name: 'Taverna do Javali',
+    description:
+      'Estalagem de beira de estrada: o salão com o balcão de chope, mesas e o banquete, a cozinha com a despensa, dois quartos de hóspede e a rua com o chafariz.',
+    size: TAVERN_SIZE,
+    build: buildTavernMap,
   },
   {
     id: 'deserto',
