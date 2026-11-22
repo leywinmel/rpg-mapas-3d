@@ -13,6 +13,7 @@ import { chromeDocksFloors } from './chrome-docks';
 import { cityCenterFloors } from './city-center';
 import { colonyFloors } from './colony';
 import { desertFloors } from './desert';
+import { forestFloors } from './forest';
 import { gasStationFloors } from './gas-station';
 import { hospitalFloors } from './hospital';
 import { islandFloors } from './island';
@@ -150,6 +151,32 @@ describe('caverna dos ecos', () => {
 
   it('shouldKeepTheLakeOneStepBelowItsShore', () => {
     expect(waterHeights(caveFloors())).toEqual([0]);
+  });
+});
+
+describe('bosque das sombras', () => {
+  it('shouldReachEveryDryCellFromTheTrailOneStepAtATime', () => {
+    const floors = forestFloors();
+    const start = [...floors].find(([, floor]) => floor.tile === 'terra')![0];
+    expect(unreachableDryCells(floors, start)).toEqual([]);
+  });
+
+  it('shouldKeepTheStreamOneStepBelowTheBridge', () => {
+    const floors = forestFloors();
+    expect(waterHeights(floors)).toEqual([0]);
+    const bridge = [...floors.values()].filter((floor) => floor.tile === 'piso-madeira');
+    expect(bridge.length).toBeGreaterThan(0);
+    expect(new Set(bridge.map((floor) => floor.height))).toEqual(new Set([1]));
+  });
+
+  it('shouldFillTheWoodsWithTrees', () => {
+    const { model } = readyMap('bosque-sombras')!.build();
+    const trees = allPieces(model).filter(
+      (piece) =>
+        piece.asset.source === 'catalog' &&
+        /carvalho|pinheiro|betula|^arvore$/.test(piece.asset.key),
+    );
+    expect(trees.length).toBeGreaterThan(300);
   });
 });
 

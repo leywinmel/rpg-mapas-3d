@@ -8,6 +8,7 @@ import { buildCaveMap, CAVE_SIZE } from './cave';
 import { buildChromeDocksMap, CHROME_DOCKS_SIZE } from './chrome-docks';
 import { buildCryptMap, CRYPT_SIZE } from './crypt';
 import { buildDesertMap, DESERT_SIZE } from './desert';
+import { buildForestMap, FOREST_SIZE } from './forest';
 import { buildGasStationMap, GAS_STATION_SIZE } from './gas-station';
 import { buildHospitalMap, HOSPITAL_SIZE } from './hospital';
 import { buildIslandMap, ISLAND_SIZE } from './island';
@@ -56,6 +57,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Gruta em degraus: salão de estalagmites, lago subterrâneo com bote, acampamento de saqueadores no patamar alto e a gruta dos cristais que brilham.',
     size: CAVE_SIZE,
     build: buildCaveMap,
+  },
+  {
+    id: 'bosque-sombras',
+    name: 'Bosque das Sombras',
+    description:
+      'Floresta fechada cortada por uma trilha: a ponte sobre o riacho, o círculo de pedras com o altar, o acampamento dos salteadores, a cabana da bruxa no lamaçal e o anel de cogumelos.',
+    size: FOREST_SIZE,
+    build: buildForestMap,
   },
   {
     id: 'deserto',
