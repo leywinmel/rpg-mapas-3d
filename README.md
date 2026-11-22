@@ -60,7 +60,8 @@ em tempo real, com dados 3D, névoa e anotações enviadas pelo mestre.
 ### Contas e mesas
 
 - **Mestre:** crie uma conta com e-mail e senha (ou Google) na tela inicial. No início aparecem
-  "Minhas mesas"; o botão de nova mesa cria a mesa e já abre a sala.
+  "Minhas mesas"; o botão de nova mesa cria a mesa e já abre a sala. A lixeira ao lado de uma mesa
+  que você criou apaga a mesa (pede confirmação; não dá para desfazer).
 - **Convite:** dentro da mesa, "Copiar link de convite" copia o endereço `/sala/<código>`. Quem abre
   o link vê o nome da mesa e entra com um apelido; a conta é opcional para o jogador.
 - **Na mesa:** a barra do topo mostra quem está online. O mestre renomeia ou apaga a mesa; o

@@ -31,6 +31,8 @@ export type RoomSummary = Membership & {
   lastActivityAt: string;
   /** Falso só para o admin, que vê todas as mesas antes de entrar nelas. */
   joined: boolean;
+  /** Quem criou a mesa: só essa pessoa pode apagá-la (regra "mesas: dono apaga" no banco). */
+  ownedByMe: boolean;
 };
 
 /** O pouco que dá para saber de uma mesa antes de entrar: o nome. */

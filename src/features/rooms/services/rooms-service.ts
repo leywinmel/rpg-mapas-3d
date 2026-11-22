@@ -69,7 +69,7 @@ export function createRoomsService(client: AppSupabaseClient) {
     async listMyRooms(userId: string): Promise<RoomSummary[]> {
       const { data, error } = await client
         .from('rooms')
-        .select('id, slug, name, updated_at, room_members(role, nickname, joined_at)')
+        .select('id, slug, name, owner_id, updated_at, room_members(role, nickname, joined_at)')
         .eq('room_members.user_id', userId);
       if (error) throw toRoomError(error);
       return data
@@ -83,6 +83,7 @@ export function createRoomsService(client: AppSupabaseClient) {
             nickname: member?.nickname ?? '',
             lastActivityAt: member ? latest(row.updated_at, member.joined_at) : row.updated_at,
             joined: member !== undefined,
+            ownedByMe: row.owner_id === userId,
           };
         })
         .sort((a, b) => Date.parse(b.lastActivityAt) - Date.parse(a.lastActivityAt));
