@@ -101,6 +101,7 @@ describe('createRoomsService', () => {
           id: 'old',
           slug: 'old',
           name: 'Antiga',
+          owner_id: 'someone-else',
           updated_at: '2026-10-01T09:00:00Z',
           room_members: [{ role: 'player', nickname: 'Ana', joined_at: '2026-10-01T10:00:00Z' }],
         },
@@ -108,6 +109,7 @@ describe('createRoomsService', () => {
           id: 'new',
           slug: 'new',
           name: 'Nova',
+          owner_id: 'u1',
           updated_at: '2026-10-05T10:00:00Z',
           room_members: [{ role: 'gm', nickname: 'Theo', joined_at: '2026-10-02T10:00:00Z' }],
         },
@@ -116,9 +118,9 @@ describe('createRoomsService', () => {
     });
     const rooms = await createRoomsService(client).listMyRooms('u1');
     expect(calls).toContainEqual({ method: 'eq', args: ['room_members.user_id', 'u1'] });
-    expect(rooms.map((room) => [room.id, room.role, room.lastActivityAt])).toEqual([
-      ['new', 'gm', '2026-10-05T10:00:00Z'],
-      ['old', 'player', '2026-10-01T10:00:00Z'],
+    expect(rooms.map((room) => [room.id, room.role, room.lastActivityAt, room.ownedByMe])).toEqual([
+      ['new', 'gm', '2026-10-05T10:00:00Z', true],
+      ['old', 'player', '2026-10-01T10:00:00Z', false],
     ]);
   });
 
@@ -129,6 +131,7 @@ describe('createRoomsService', () => {
           id: 'r1',
           slug: 'r1',
           name: 'Alheia',
+          owner_id: 'u9',
           updated_at: '2026-10-03T10:00:00Z',
           room_members: [],
         },
@@ -139,6 +142,7 @@ describe('createRoomsService', () => {
     expect(room).toMatchObject({
       role: 'gm',
       joined: false,
+      ownedByMe: false,
       lastActivityAt: '2026-10-03T10:00:00Z',
     });
   });

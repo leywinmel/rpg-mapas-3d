@@ -87,9 +87,32 @@ export function RenameRoomDialog({ open, onClose }: DialogProps) {
   );
 }
 
+/** Dentro da mesa: depois de apagar, volta para o lobby. */
 export function DeleteRoomDialog({ open, onClose }: DialogProps) {
   const { room } = useRoomSession();
   const navigate = useNavigate();
+  return (
+    <ConfirmDeleteRoomDialog
+      room={room}
+      open={open}
+      onClose={onClose}
+      onDeleted={() => navigate(LOBBY_PATH, { replace: true })}
+    />
+  );
+}
+
+type ConfirmDeleteRoomProps = DialogProps & {
+  room: { id: string; name: string };
+  onDeleted: () => void;
+};
+
+/** Confirmação de apagar uma mesa, usada dentro dela e na lista "Minhas mesas" do lobby. */
+export function ConfirmDeleteRoomDialog({
+  room,
+  open,
+  onClose,
+  onDeleted,
+}: ConfirmDeleteRoomProps) {
   const [failure, setFailure] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -108,8 +131,9 @@ export function DeleteRoomDialog({ open, onClose }: DialogProps) {
       setPending(false);
       return;
     }
+    setPending(false);
     notify.success('Mesa apagada.');
-    navigate(LOBBY_PATH, { replace: true });
+    onDeleted();
   }
 
   return (

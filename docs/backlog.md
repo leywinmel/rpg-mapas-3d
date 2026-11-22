@@ -15,6 +15,7 @@ Decisões de produto: [answers/2026_10_31 rpgmaps-requisitos 001.md](../answers/
 - [x] **RPG-1** Modelagem do banco: perfis, mesas, membros, mapas, tokens, anotações, névoa, rolagens, com RLS.
 - [x] **RPG-2** Contas: cadastro e login por e-mail e Google; perfil com nome e avatar.
 - [x] **RPG-3** Salas: mestre cria a mesa, gera o link; jogador entra com apelido (conta opcional); presença online; vários mapas por mesa com troca de cena.
+- [x] **RPG-67** (pedido do usuário em 22/11) Apagar mesa direto do lobby: em "Minhas mesas", quem criou a mesa tem uma lixeira ao lado dela, com a mesma confirmação do menu do mestre dentro da sala. Quem só joga na mesa não vê a lixeira; o banco também barra (só o dono apaga).
 
 ## Épico 2: Mapa 3D
 
