@@ -227,6 +227,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   O "Pântano de Lodoverde" (104 × 88) é o brejo da bruxa: dois canais em cruz com quatro pontes, os
   poços fundos, a cabana da bruxa com a fogueira, a aldeia dos pescadores, a ruína afundada no lodo
   com as covas, as árvores secas e os botes.
+  O "Oásis de Zahrim" (104 × 88) é uma parada de caravanas no deserto: o lago com o anel de
+  palmeiras, o caravançará murado com o poço e as tendas, o mercado de tendas, a estrada com as casas
+  de barro, as dunas e a ruína antiga com a estátua e os obeliscos.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

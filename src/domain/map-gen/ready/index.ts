@@ -39,6 +39,7 @@ import { buildGothicTownMap, GOTHIC_TOWN_SIZE } from './gothic-town';
 import { buildHarvestVillageMap, HARVEST_VILLAGE_SIZE } from './harvest-village';
 import { buildTournamentMap, TOURNAMENT_SIZE } from './tournament';
 import { buildWitchSwampMap, WITCH_SWAMP_SIZE } from './witch-swamp';
+import { buildDesertOasisMap, DESERT_OASIS_SIZE } from './desert-oasis';
 import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -299,6 +300,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Brejo da bruxa, 104×88: dois canais em cruz com quatro pontes de madeira, os poços fundos, a cabana da bruxa com a fogueira e os ossos, a aldeia dos pescadores, as casas da margem norte, a ruína afundada no lodo com as covas, as árvores secas, as pedras e os botes.',
     size: WITCH_SWAMP_SIZE,
     build: buildWitchSwampMap,
+  },
+  {
+    id: 'oasis-zahrim',
+    name: 'Oásis de Zahrim',
+    description:
+      'Parada de caravanas no deserto, 104×88: o lago do oásis com o anel de palmeiras, o caravançará murado com o poço e as tendas, o mercado de tendas, a estrada com as casas de barro do povoado, as dunas e a ruína antiga com a estátua e os obeliscos.',
+    size: DESERT_OASIS_SIZE,
+    build: buildDesertOasisMap,
   },
   {
     id: 'deserto',
