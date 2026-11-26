@@ -303,6 +303,18 @@ export const PROP_FOOTPRINTS: Readonly<Record<string, Footprint>> = {
   'kay-pinheiro-vila': { width: 4, depth: 4 },
   'kay-pedra-a': { width: 2, depth: 2 },
   'kay-pedra-c': { width: 2, depth: 2 },
+  // Masmorra (RPG-78): as peças maiores do KayKit Dungeon Remastered.
+  'kay-pilar-ornado': { width: 2, depth: 1 },
+  'kay-entulho': { width: 5, depth: 2 },
+  'kay-entulho-pequeno': { width: 3, depth: 2 },
+  'kay-armadilha-chao': { width: 3, depth: 3 },
+  'kay-grade-chao': { width: 3, depth: 3 },
+  'kay-mesa-quebrada': { width: 2, depth: 3 },
+  'kay-espada-escudo-ouro': { width: 2, depth: 1 },
+  'kay-estandarte-triplo': { width: 3, depth: 1 },
+  'kay-caixotes': { width: 2, depth: 3 },
+  'kay-escada-pedra': { width: 3, depth: 3 },
+  'kay-mesa-banquete-toalha': { width: 2, depth: 3 },
   // Medieval Hexagon (RPG-74): os reinos de telhado verde e amarelo.
   'kay-castelo-verde': { width: 10, depth: 11 },
   'kay-quartel-verde': { width: 7, depth: 8 },

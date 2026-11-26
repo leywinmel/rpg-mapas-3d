@@ -3,7 +3,8 @@
  * (lista em scripts/assets/kaykit-packs.mjs): móveis de casa (Furniture Bits), cemitério
  * (Halloween Bits), cozinha de restaurante (Restaurant Bits) e base em outro planeta (Space Base
  * Bits), cidade moderna (City Builder Bits) e vila medieval (Medieval Hexagon Pack: prédios,
- * muralhas, adereços, natureza e os reinos de telhado vermelho, verde e amarelo). Altura e casas saem do próprio modelo; as peças de mais de uma casa repetem a medida em
+ * muralhas, adereços, natureza e os reinos de telhado vermelho, verde e amarelo) e as peças maiores
+ * de masmorra (Dungeon Remastered). Altura e casas saem do próprio modelo; as peças de mais de uma casa repetem a medida em
  * PROP_FOOTPRINTS do domínio, para o gerador e os mapas prontos encaixarem igual à biblioteca.
  */
 import type { CatalogEntry, PieceCategory, PieceLight, PieceStyle } from './catalog-types';
@@ -1687,6 +1688,154 @@ const HEXAMARELO: readonly KaykitSpec[] = [
   },
 ];
 
+const MASMORRA: readonly KaykitSpec[] = [
+  {
+    key: 'kay-pilar-ornado',
+    label: 'Pilar de pedra ornado',
+    keywords: ['masmorra', 'salão', 'coluna', 'templo'],
+    icon: 'pillar',
+    category: 'structure',
+    height: 2.6,
+    footprint: { width: 2, depth: 1 },
+  },
+  {
+    key: 'kay-coluna-masmorra',
+    label: 'Coluna baixa de pedra',
+    keywords: ['masmorra', 'pedestal', 'ruína', 'base'],
+    icon: 'pillar',
+    category: 'structure',
+    height: 0.91,
+  },
+  {
+    key: 'kay-entulho',
+    label: 'Entulho de pedra grande',
+    keywords: ['masmorra', 'desabamento', 'ruína', 'pedras'],
+    icon: 'rock',
+    category: 'structure',
+    height: 2.273,
+    footprint: { width: 5, depth: 2 },
+  },
+  {
+    key: 'kay-entulho-pequeno',
+    label: 'Entulho de pedra',
+    keywords: ['masmorra', 'desabamento', 'ruína', 'pedras'],
+    icon: 'rock',
+    category: 'structure',
+    height: 2.275,
+    footprint: { width: 3, depth: 2 },
+  },
+  {
+    key: 'kay-armadilha-chao',
+    label: 'Armadilha de espetos',
+    keywords: ['masmorra', 'armadilha', 'perigo', 'espinhos'],
+    icon: 'grid',
+    category: 'structure',
+    height: 1.365,
+    footprint: { width: 3, depth: 3 },
+  },
+  {
+    key: 'kay-grade-chao',
+    label: 'Grade no chão',
+    keywords: ['masmorra', 'esgoto', 'alçapão', 'bueiro'],
+    icon: 'grid',
+    category: 'structure',
+    height: 0.682,
+    footprint: { width: 3, depth: 3 },
+  },
+  {
+    key: 'kay-chaveiro',
+    label: 'Molho de chaves pendurado',
+    keywords: ['masmorra', 'prisão', 'carcereiro', 'chave'],
+    icon: 'box',
+    height: 0.793,
+  },
+  {
+    key: 'kay-mesa-quebrada',
+    label: 'Mesa comprida quebrada',
+    keywords: ['masmorra', 'ruína', 'abandonado', 'saqueado'],
+    icon: 'table',
+    height: 0.823,
+    footprint: { width: 2, depth: 3 },
+  },
+  {
+    key: 'kay-espada-escudo-ouro',
+    label: 'Espada e escudo dourados',
+    keywords: ['tesouro', 'arsenal', 'troféu', 'arma'],
+    icon: 'statue',
+    height: 1.084,
+    footprint: { width: 2, depth: 1 },
+  },
+  {
+    key: 'kay-espada-escudo-quebrados',
+    label: 'Espada e escudo quebrados',
+    keywords: ['campo de batalha', 'arma', 'ruína'],
+    icon: 'statue',
+    height: 1.275,
+  },
+  {
+    key: 'kay-bau-madeira',
+    label: 'Baú de madeira',
+    keywords: ['tesouro', 'masmorra', 'saque', 'arca'],
+    icon: 'chest',
+    height: 0.845,
+  },
+  {
+    key: 'kay-pilha-moedas',
+    label: 'Pilha de moedas',
+    keywords: ['tesouro', 'ouro', 'dinheiro', 'saque'],
+    icon: 'cylinder',
+    height: 0.416,
+  },
+  {
+    key: 'kay-estandarte-triplo',
+    label: 'Estandarte triplo vermelho',
+    keywords: ['salão', 'castelo', 'bandeira', 'trono'],
+    icon: 'pillar',
+    height: 2.077,
+    footprint: { width: 3, depth: 1 },
+  },
+  {
+    key: 'kay-barril-grande',
+    label: 'Barril grande decorado',
+    keywords: ['adega', 'taverna', 'depósito', 'vinho'],
+    icon: 'cylinder',
+    height: 1.662,
+  },
+  {
+    key: 'kay-caixotes',
+    label: 'Caixotes empilhados',
+    keywords: ['depósito', 'carga', 'armazém', 'porão'],
+    icon: 'box',
+    height: 2.151,
+    footprint: { width: 2, depth: 3 },
+  },
+  {
+    key: 'kay-tocha-pe',
+    label: 'Tocha acesa no chão',
+    keywords: ['masmorra', 'luz', 'fogo', 'acampamento'],
+    icon: 'flame',
+    height: 0.732,
+    light: CANDLE_LOW,
+  },
+  {
+    key: 'kay-escada-pedra',
+    label: 'Escada de pedra com muretas',
+    keywords: ['masmorra', 'subir', 'descer', 'andar'],
+    icon: 'stairs',
+    category: 'structure',
+    height: 2.6,
+    footprint: { width: 3, depth: 3 },
+  },
+  {
+    key: 'kay-mesa-banquete-toalha',
+    label: 'Mesa de banquete com toalha',
+    keywords: ['salão', 'festa', 'castelo', 'refeição'],
+    icon: 'table',
+    height: 1.226,
+    footprint: { width: 2, depth: 3 },
+  },
+];
+
 /**
  * Monta a pasta com a categoria de cada peça (a da pasta, ou a própria quando ela diz). Pacote de
  * uma época só (a cidade, a vila, a base) leva o estilo dela, para o filtro do editor separar.
@@ -1714,4 +1863,5 @@ export const KAYKIT_PIECES: readonly CatalogEntry[] = [
   ...kaykitPieces('/assets/hexvila', 'nature', HEXNATURE),
   ...kaykitPieces('/assets/hexvila', 'structure', HEXVERDE, 'medieval'),
   ...kaykitPieces('/assets/hexvila', 'structure', HEXAMARELO, 'medieval'),
+  ...kaykitPieces('/assets/tavern', 'furniture', MASMORRA, 'medieval'),
 ];
