@@ -179,6 +179,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Vila Assombrada de Corvalha" (96 × 88) é uma aldeia abandonada: o cemitério murado com mausoléus e
   túmulos, a igreja e a torre, as casas em ruínas com o poço e a taverna, o pântano com a cabana da
   bruxa, o campo de abóboras e a mata morta.
+  A "Colônia Nova Esperança" (112 × 96) é uma colônia inteira em Marte: o núcleo com o comando, os
+  domos, o laboratório e o alojamento; o campo solar e as turbinas; o campo de pouso com naves e
+  hangar; as estufas, o depósito de carga e o garimpo com as perfuratrizes.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

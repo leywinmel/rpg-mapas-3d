@@ -24,6 +24,7 @@ import { buildColonyMap, COLONY_SIZE } from './colony';
 import { buildCornerBistroMap, CORNER_BISTRO_SIZE } from './corner-bistro';
 import { buildModernTownMap, MODERN_TOWN_SIZE } from './modern-town';
 import { buildNeonDistrictMap, NEON_DISTRICT_SIZE } from './neon-district';
+import { buildNewHopeMap, NEW_HOPE_SIZE } from './new-hope';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
 import { buildSiegeMap, SIEGE_SIZE } from './siege';
@@ -155,6 +156,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Aldeia abandonada inteira, 96×88: o cemitério murado com mausoléus e cinco fileiras de túmulos, a igreja e a torre, a vila de casas em ruínas com o poço e a taverna, o pântano com a cabana da bruxa, o campo de abóboras e a mata morta.',
     size: HAUNTED_VILLAGE_SIZE,
     build: buildHauntedVillageMap,
+  },
+  {
+    id: 'colonia-nova-esperanca',
+    name: 'Colônia Nova Esperança',
+    description:
+      'Colônia inteira em Marte, 112×96: o núcleo com o comando, os domos, o laboratório e o alojamento; o campo solar, as turbinas, o campo de pouso com naves e hangar; as estufas, o depósito de carga e o garimpo com as perfuratrizes.',
+    size: NEW_HOPE_SIZE,
+    build: buildNewHopeMap,
   },
   {
     id: 'deserto',
