@@ -28,6 +28,7 @@ import { buildIronDepthsMap, IRON_DEPTHS_SIZE } from './iron-depths';
 import { buildNewHopeMap, NEW_HOPE_SIZE } from './new-hope';
 import { buildSakuragawaMap, SAKURAGAWA_SIZE } from './sakuragawa';
 import { buildGoldenValeMap, GOLDEN_VALE_SIZE } from './golden-vale';
+import { buildCorsairCoveMap, CORSAIR_COVE_SIZE } from './corsair-cove';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
 import { buildSiegeMap, SIEGE_SIZE } from './siege';
@@ -191,6 +192,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Campo inteiro, 104×88: a sede, o celeiro e o terreiro com o poço; os trigais cercados e a horta de abóboras; o pasto, o pomar, o lago e o povoado com a ferraria; do outro lado do rio, o moinho de vento, a serraria, o moinho d’água e o bosque.',
     size: GOLDEN_VALE_SIZE,
     build: buildGoldenValeMap,
+  },
+  {
+    id: 'enseada-corsario',
+    name: 'Enseada do Corsário',
+    description:
+      'Refúgio pirata inteiro, 104×88: a doca com o navio atracado entre os píeres e mais dois ao largo, o cais, a vila com a taverna e o armazém, a ruína velha, o forte de pedra com a torre e os canhões, o acampamento na praia e o tesouro enterrado.',
+    size: CORSAIR_COVE_SIZE,
+    build: buildCorsairCoveMap,
   },
   {
     id: 'deserto',
