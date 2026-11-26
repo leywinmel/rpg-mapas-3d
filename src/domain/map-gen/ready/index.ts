@@ -42,6 +42,7 @@ import { buildWitchSwampMap, WITCH_SWAMP_SIZE } from './witch-swamp';
 import { buildDesertOasisMap, DESERT_OASIS_SIZE } from './desert-oasis';
 import { buildMiningTownMap, MINING_TOWN_SIZE } from './mining-town';
 import { buildTravelingFairMap, TRAVELING_FAIR_SIZE } from './traveling-fair';
+import { buildVineyardMap, VINEYARD_SIZE } from './vineyard';
 import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -326,6 +327,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'O circo e a feira no campo, 104×88: o picadeiro de areia cercado de barreiras com o estandarte e as bandeiras, o acampamento dos artistas com as tendas, as carroças e a fogueira, a avenida das barracas com os postes de lanterna, as mesas de comida, o lago com os botes, os trigais e os bosques.',
     size: TRAVELING_FAIR_SIZE,
     build: buildTravelingFairMap,
+  },
+  {
+    id: 'vinicola-monterrubro',
+    name: 'Vinícola de Monterrubro',
+    description:
+      'Quinta de vinho na encosta, 104×88: os morros do norte, as fileiras de vinhedos em dois andares com as cercas, o moinho de vento, o pátio de pedra do casarão com o poço, as carroças da colheita e os barris, a adega, as casas dos trabalhadores, o açude com o moinho-d’água e os botes, o pomar e os bosques.',
+    size: VINEYARD_SIZE,
+    build: buildVineyardMap,
   },
   {
     id: 'deserto',
