@@ -32,6 +32,7 @@ import { buildCorsairCoveMap, CORSAIR_COVE_SIZE } from './corsair-cove';
 import { buildGoldenSandsMap, GOLDEN_SANDS_SIZE } from './golden-sands';
 import { buildOssuaryMap, OSSUARY_SIZE } from './ossuary';
 import { buildLotharielMap, LOTHARIEL_SIZE } from './lothariel';
+import { buildSkullIslandMap, SKULL_ISLAND_SIZE } from './skull-island';
 import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -236,6 +237,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Cidade élfica na floresta, 104×88: o salão da rainha com o pátio, a fonte e as torres, a praça do conselho com o mercado, as casas dos elfos, o bairro dos guardiões com a torre de vigia, o lago da lua com a ilha da estátua e o moinho d’água, o bosque sagrado dos druidas e a mata fechada em volta.',
     size: LOTHARIEL_SIZE,
     build: buildLotharielMap,
+  },
+  {
+    id: 'ilha-caveira',
+    name: 'Ilha da Caveira',
+    description:
+      'Ilha pirata, 104×88, com o mar em volta: a enseada com o navio atracado no píer, a vila pirata com a taverna e a fogueira, o forte murado com as torres e os canhões, a selva fechada com a ruína da caveira e o tesouro, e o acampamento dos náufragos na praia leste.',
+    size: SKULL_ISLAND_SIZE,
+    build: buildSkullIslandMap,
   },
   {
     id: 'deserto',
