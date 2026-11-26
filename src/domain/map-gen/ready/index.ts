@@ -37,6 +37,7 @@ import { buildDwarfHoldMap, DWARF_HOLD_SIZE } from './dwarf-hold';
 import { buildOrcCampMap, ORC_CAMP_SIZE } from './orc-camp';
 import { buildGothicTownMap, GOTHIC_TOWN_SIZE } from './gothic-town';
 import { buildHarvestVillageMap, HARVEST_VILLAGE_SIZE } from './harvest-village';
+import { buildTournamentMap, TOURNAMENT_SIZE } from './tournament';
 import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -281,6 +282,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Aldeia de lavradores na colheita, 104×88: a ponte de pedra sobre o ribeirão, o moinho d’água, o pomar, os trigais com os moinhos de vento, a praça da feira com o poço, a capela, as hortas, a serraria, o pasto cercado e o celeiro grande com o terreiro.',
     size: HARVEST_VILLAGE_SIZE,
     build: buildHarvestVillageMap,
+  },
+  {
+    id: 'torneio-altamira',
+    name: 'Torneio de Altamira',
+    description:
+      'Campo de um torneio de cavaleiros, 104×88: a liça de areia com a barreira da justa, as arquibancadas, o pavilhão do rei com o banquete, o acampamento dos cavaleiros com as tendas e as bandeiras, o campo de arqueiros e os quartéis ao pé do castelo, a feira com as barracas e a taverna, e o povoado.',
+    size: TOURNAMENT_SIZE,
+    build: buildTournamentMap,
   },
   {
     id: 'deserto',
