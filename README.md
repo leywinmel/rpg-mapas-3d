@@ -185,6 +185,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   As "Profundezas de Ferro Negro" (80 × 72) são uma masmorra inteira: a escadaria da superfície, o
   depósito, o alojamento dos guardas, o grande salão de banquetes, a prisão de celas gradeadas, o
   arsenal com o tesouro, a galeria das armadilhas e o covil com o altar e os sarcófagos.
+  A "Vila de Sakuragawa" (96 × 80) é uma vila japonesa inteira: o rio com a ponte de pedra, as casas
+  de madeira das ruas de cima, o templo com o pagode, o campanário e o portal torii, o jardim do lago,
+  o bambuzal, a rua do mercado e o dojo com os bonecos de treino.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
