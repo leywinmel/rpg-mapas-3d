@@ -167,7 +167,10 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   andaimes; o rio com a ponte de pedra e o moinho d'água; os trigais, o moinho de vento, a serraria,
   a entrada da mina e o bosque. A "Avenida Aurora" (64 × 64) é o centro de uma cidade grande: duas
   avenidas com semáforos, quatro quarteirões de prédios de tijolo, becos com caçambas, a praça, o
-  estacionamento e uma perseguição policial no asfalto.
+  estacionamento e uma perseguição policial no asfalto. O "Cerco de Rubraforte" (96 × 80) é uma batalha
+  inteira: a fortaleza vermelha murada, com torres nos cantos, castelo, quartel e portão, e ao sul o
+  acampamento azul com tendas, paliçada, torres de catapulta e pedras caídas no campo; em volta,
+  montanhas, o lago, a aldeia queimada e os bosques.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
@@ -412,7 +415,7 @@ Google não muda.
 - `scripts/assets/cyber-city.mjs <pasta dos .glb> public/assets/cyberpunk`: monta os prédios e os
   megaprédios do cyberpunk empilhando as seções do pacote Cyber City (papptimus, CC BY 4.0), que o
   Blender passa de FBX para `.glb` com o `fbx-to-glb.py`.
-- `scripts/assets/kaykit-props.mjs <dungeon|furniture|halloween|restaurant|space|city|hexagon|hexagonNeutral> <pasta gltf do pacote> <saída>`:
+- `scripts/assets/kaykit-props.mjs <dungeon|furniture|halloween|restaurant|space|city|hexagon|hexagonNeutral|hexagonRed|hexagonProps|hexagonNature> <pasta gltf do pacote> <saída>`:
   converte as peças dos pacotes KayKit listados em `scripts/assets/kaykit-packs.mjs` (escala do pacote,
   malha em meshopt e a paleta do pacote numa WebP só) e imprime altura, footprint e cor de longe de cada peça para o catálogo.
 - Veículos do moderno (pacote Rgsdev, CC0, em FBX): o Blender passa para `.glb` com
@@ -481,7 +484,8 @@ cortesia; o Cyber City é CC BY 4.0 e exige o crédito. Os créditos também apa
 - **Kay Lousberg** ([kaylousberg.itch.io](https://kaylousberg.itch.io)): KayKit Character Pack
   (Adventurers e Skeletons), bonecos de token, KayKit Dungeon Remastered, os móveis de taverna, e
   KayKit Furniture, Halloween, Restaurant, Space Base e City Builder Bits (casa, cemitério, cozinha,
-  base espacial e cidade) e o KayKit Medieval Hexagon Pack (castelo, vila e moinhos).
+  base espacial e cidade) e o KayKit Medieval Hexagon Pack (castelo, vila, muralhas, acampamento,
+  montanhas e bosques).
 - **Inter**, de Rasmus Andersson: fonte da interface (SIL Open Font License 1.1).
 
 As peças ficam otimizadas em `public/assets/<estilo>/`: um `.gltf` com `.bin` em meshopt, as texturas

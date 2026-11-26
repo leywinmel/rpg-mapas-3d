@@ -129,7 +129,7 @@ export const MODEL_CREDITS: readonly Credit[] = [
     author: 'Kay Lousberg',
     url: 'https://kaylousberg.itch.io/kaykit-medieval-hexagon',
     usage:
-      'Vila medieval: castelo, igreja, taverna, moinhos, ferraria, mercado, quartel, campo de arqueiros, serraria, mina, torres, casas, ponte de pedra, ruína, andaime e trigal.',
+      'Vila medieval e reino rival: castelo, igreja, taverna, moinhos, ferraria, mercado, quartel, campo de arqueiros, serraria, mina, torres, casas, poço, pontes, ruína, andaime, trigal, muralhas, cercas, bandeiras, tendas, adereços de acampamento, montanhas, colinas, bosques e plantas de lago.',
     ...CC0,
   },
   {
