@@ -24,6 +24,7 @@ import { buildModernTownMap, MODERN_TOWN_SIZE } from './modern-town';
 import { buildNeonDistrictMap, NEON_DISTRICT_SIZE } from './neon-district';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
+import { buildSiegeMap, SIEGE_SIZE } from './siege';
 import { buildShipMap, SHIP_SIZE } from './ship';
 import { buildStationMap, STATION_SIZE } from './station';
 import { buildTavernMap, TAVERN_SIZE } from './tavern';
@@ -119,6 +120,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Centro de cidade grande, 64×64: duas avenidas com semáforos, quatro quarteirões de prédios, becos com caçambas, praça arborizada, estacionamento e uma perseguição policial no asfalto.',
     size: AURORA_AVENUE_SIZE,
     build: buildAuroraAvenueMap,
+  },
+  {
+    id: 'cerco-rubraforte',
+    name: 'Cerco de Rubraforte',
+    description:
+      'Batalha inteira, 96×80: a fortaleza vermelha murada com castelo, quartel e portão, e ao sul o acampamento azul com tendas, paliçada e torres de catapulta. Montanhas, lago, aldeia queimada e bosques em volta.',
+    size: SIEGE_SIZE,
+    build: buildSiegeMap,
   },
   {
     id: 'deserto',
