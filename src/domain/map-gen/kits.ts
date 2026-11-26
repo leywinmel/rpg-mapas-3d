@@ -328,6 +328,15 @@ export const PROP_FOOTPRINTS: Readonly<Record<string, Footprint>> = {
   'kay-tapete-listrado-2': { width: 2, depth: 1 },
   'kay-tapete-oval-2': { width: 2, depth: 1 },
   'kay-tapete': { width: 2, depth: 1 },
+  // Sobras da masmorra (RPG-88): as peças maiores do KayKit Dungeon Remastered.
+  'kay-cama-estrado': { width: 1, depth: 2 },
+  'kay-mesa-media-quebrada': { width: 2, depth: 2 },
+  'kay-mesa-longa-posta': { width: 1, depth: 3 },
+  'kay-barreira': { width: 3, depth: 1 },
+  'kay-coluna-barreira': { width: 3, depth: 1 },
+  'kay-escada-madeira': { width: 2, depth: 4 },
+  'kay-parede-estantes': { width: 3, depth: 1 },
+  'kay-grade-aberta': { width: 3, depth: 3 },
   // Vila e relevo (RPG-87): as peças maiores das sobras do KayKit Medieval Hexagon.
   'kay-campo-arqueiros-verde': { width: 9, depth: 8 },
   'kay-obra-alicerce': { width: 5, depth: 5 },
