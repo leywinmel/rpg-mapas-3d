@@ -221,6 +221,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Aldeia de Ribeira Clara" (104 × 88) é uma aldeia de lavradores na colheita: a ponte de pedra
   sobre o ribeirão, o moinho d'água, o pomar, os trigais com os moinhos de vento, a praça da feira
   com o poço, a capela, as hortas, a serraria, o pasto cercado e o celeiro grande com o terreiro.
+  O "Torneio de Altamira" (104 × 88) é o campo de um torneio de cavaleiros: a liça de areia com a
+  barreira da justa, as arquibancadas, o pavilhão do rei com o banquete, o acampamento das tendas,
+  o campo de arqueiros e os quartéis ao pé do castelo, a feira com a taverna e o povoado.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
