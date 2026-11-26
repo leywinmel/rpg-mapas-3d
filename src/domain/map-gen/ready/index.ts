@@ -10,11 +10,14 @@ import { buildCryptMap, CRYPT_SIZE } from './crypt';
 import { buildDesertMap, DESERT_SIZE } from './desert';
 import { buildForestMap, FOREST_SIZE } from './forest';
 import { buildGasStationMap, GAS_STATION_SIZE } from './gas-station';
+import { buildGraveyardMap, GRAVEYARD_SIZE } from './graveyard';
 import { buildHospitalMap, HOSPITAL_SIZE } from './hospital';
 import { buildIslandMap, ISLAND_SIZE } from './island';
+import { buildMarsBaseMap, MARS_BASE_SIZE } from './mars-base';
 import { buildMedievalTownMap, MEDIEVAL_TOWN_SIZE } from './medieval-town';
 import { buildCityCenterMap, CITY_CENTER_SIZE } from './city-center';
 import { buildColonyMap, COLONY_SIZE } from './colony';
+import { buildCornerBistroMap, CORNER_BISTRO_SIZE } from './corner-bistro';
 import { buildModernTownMap, MODERN_TOWN_SIZE } from './modern-town';
 import { buildNeonDistrictMap, NEON_DISTRICT_SIZE } from './neon-district';
 import { buildPortMap, PORT_SIZE } from './port';
@@ -74,6 +77,30 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Estalagem de beira de estrada: o salão com o balcão de chope, mesas e o banquete, a cozinha com a despensa, dois quartos de hóspede e a rua com o chafariz.',
     size: TAVERN_SIZE,
     build: buildTavernMap,
+  },
+  {
+    id: 'cemiterio-colina',
+    name: 'Cemitério da Colina',
+    description:
+      'Cemitério cercado de grade de ferro: a alameda de lanternas até o mausoléu, quatro quadras de túmulos, a cova violada, a cabana do coveiro com os caixões e a horta de abóboras.',
+    size: GRAVEYARD_SIZE,
+    build: buildGraveyardMap,
+  },
+  {
+    id: 'restaurante-esquina',
+    name: 'Restaurante da Esquina',
+    description:
+      'Quarteirão moderno: restaurante com salão, bar e cozinha completa, a casa do vizinho com sala, cozinha americana e dois quartos, e a rua com carros parados.',
+    size: CORNER_BISTRO_SIZE,
+    build: buildCornerBistroMap,
+  },
+  {
+    id: 'base-ares',
+    name: 'Base Ares (Marte)',
+    description:
+      'Colônia grande num planeta vermelho: módulos ligados por túneis, hangar, laboratório e alojamentos, mineração, painéis solares, turbinas, pátio de carga e duas plataformas de pouso.',
+    size: MARS_BASE_SIZE,
+    build: buildMarsBaseMap,
   },
   {
     id: 'deserto',

@@ -156,6 +156,12 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Taverna do Javali" (32 × 26) é a estalagem de beira de estrada para o grupo se encontrar: o
   salão com o balcão de chope, mesas com banquinhos e a mesa de banquete, a cozinha com a despensa,
   dois quartos de hóspede (o do dono com o baú de ouro) e, lá fora, a rua de calçamento com o chafariz.
+  O "Cemitério da Colina" (40 × 40) é cercado de grade de ferro: a alameda de lanternas sobe do
+  portão até o mausoléu, entre quatro quadras de túmulos, a cova violada com os ossos, a cabana do
+  coveiro com os caixões e a horta de abóboras. O "Restaurante da Esquina" (40 × 36) é um quarteirão
+  moderno: o restaurante com salão, bar e cozinha completa, a casa do vizinho com sala e dois quartos
+  e a rua com carros parados. A "Base Ares" (64 × 64) é uma colônia em Marte: módulos ligados por
+  túneis, hangar, mineração, painéis solares, turbinas, pátio de carga e duas plataformas de pouso.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
