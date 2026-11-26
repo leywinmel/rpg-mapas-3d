@@ -328,6 +328,12 @@ export const PROP_FOOTPRINTS: Readonly<Record<string, Footprint>> = {
   'kay-tapete-listrado-2': { width: 2, depth: 1 },
   'kay-tapete-oval-2': { width: 2, depth: 1 },
   'kay-tapete': { width: 2, depth: 1 },
+  // Cozinha e salão (RPG-85): as peças maiores das sobras do KayKit Restaurant Bits.
+  'kay-geladeira-b': { width: 1, depth: 2 },
+  'kay-mesa-pia': { width: 2, depth: 1 },
+  'kay-fogareiro': { width: 1, depth: 2 },
+  'kay-mesa-redonda-b': { width: 2, depth: 2 },
+  'kay-mesa-cozinha-b': { width: 2, depth: 1 },
   // Cidade e cemitério (RPG-83): as peças maiores do City Builder e do Halloween Bits.
   'kay-taxi': { width: 2, depth: 5 },
   'kay-semaforo-pedestre': { width: 4, depth: 2 },
