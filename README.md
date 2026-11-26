@@ -162,6 +162,12 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   moderno: o restaurante com salão, bar e cozinha completa, a casa do vizinho com sala e dois quartos
   e a rua com carros parados. A "Base Ares" (64 × 64) é uma colônia em Marte: módulos ligados por
   túneis, hangar, mineração, painéis solares, turbinas, pátio de carga e duas plataformas de pouso.
+  O "Reino de Valdouro" (80 × 80) é um reino inteiro: o castelo de torres azuis com quartel, campo
+  de arqueiros e quatro torres no pátio; a vila com mercado, igreja, taverna, ferraria e uma obra de
+  andaimes; o rio com a ponte de pedra e o moinho d'água; os trigais, o moinho de vento, a serraria,
+  a entrada da mina e o bosque. A "Avenida Aurora" (64 × 64) é o centro de uma cidade grande: duas
+  avenidas com semáforos, quatro quarteirões de prédios de tijolo, becos com caçambas, a praça, o
+  estacionamento e uma perseguição policial no asfalto.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
@@ -406,7 +412,7 @@ Google não muda.
 - `scripts/assets/cyber-city.mjs <pasta dos .glb> public/assets/cyberpunk`: monta os prédios e os
   megaprédios do cyberpunk empilhando as seções do pacote Cyber City (papptimus, CC BY 4.0), que o
   Blender passa de FBX para `.glb` com o `fbx-to-glb.py`.
-- `scripts/assets/kaykit-props.mjs <dungeon|furniture|halloween|restaurant|space> <pasta gltf do pacote> <saída>`:
+- `scripts/assets/kaykit-props.mjs <dungeon|furniture|halloween|restaurant|space|city|hexagon|hexagonNeutral> <pasta gltf do pacote> <saída>`:
   converte as peças dos pacotes KayKit listados em `scripts/assets/kaykit-packs.mjs` (escala do pacote,
   malha em meshopt e a paleta do pacote numa WebP só) e imprime altura, footprint e cor de longe de cada peça para o catálogo.
 - Veículos do moderno (pacote Rgsdev, CC0, em FBX): o Blender passa para `.glb` com
@@ -474,7 +480,8 @@ cortesia; o Cyber City é CC BY 4.0 e exige o crédito. Os créditos também apa
 - **Kenney** ([kenney.nl](https://kenney.nl/assets/car-kit)): Car Kit.
 - **Kay Lousberg** ([kaylousberg.itch.io](https://kaylousberg.itch.io)): KayKit Character Pack
   (Adventurers e Skeletons), bonecos de token, KayKit Dungeon Remastered, os móveis de taverna, e
-  KayKit Furniture, Halloween, Restaurant e Space Base Bits: casa, cemitério, cozinha e base espacial.
+  KayKit Furniture, Halloween, Restaurant, Space Base e City Builder Bits (casa, cemitério, cozinha,
+  base espacial e cidade) e o KayKit Medieval Hexagon Pack (castelo, vila e moinhos).
 - **Inter**, de Rasmus Andersson: fonte da interface (SIL Open Font License 1.1).
 
 As peças ficam otimizadas em `public/assets/<estilo>/`: um `.gltf` com `.bin` em meshopt, as texturas

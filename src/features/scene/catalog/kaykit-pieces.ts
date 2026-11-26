@@ -2,10 +2,10 @@
  * Peças dos pacotes KayKit "Bits" (Kay Lousberg, CC0), convertidas por scripts/assets/kaykit-props.mjs
  * (lista em scripts/assets/kaykit-packs.mjs): móveis de casa (Furniture Bits), cemitério
  * (Halloween Bits), cozinha de restaurante (Restaurant Bits) e base em outro planeta (Space Base
- * Bits). Altura e casas saem do próprio modelo; as peças de mais de uma casa repetem a medida em
+ * Bits), cidade moderna (City Builder Bits) e vila medieval (Medieval Hexagon Pack). Altura e casas saem do próprio modelo; as peças de mais de uma casa repetem a medida em
  * PROP_FOOTPRINTS do domínio, para o gerador e os mapas prontos encaixarem igual à biblioteca.
  */
-import type { CatalogEntry, PieceCategory, PieceLight } from './catalog-types';
+import type { CatalogEntry, PieceCategory, PieceLight, PieceStyle } from './catalog-types';
 import { genericPieces, type GenericSpec } from './generic-pieces';
 
 /** Peça de pacote que pode fugir da categoria da pasta (a árvore do cemitério é natureza). */
@@ -23,6 +23,8 @@ const LANTERN_POST: PieceLight = { color: '#ffb35c', intensity: 3, distance: 4, 
 const PUMPKIN: PieceLight = { color: '#ff8a3c', intensity: 2, distance: 3, offsetY: 0.35 };
 /** Holofote de base: branco frio e forte, ilumina o pátio. */
 const FLOODLIGHT: PieceLight = { color: '#e8f0ff', intensity: 5, distance: 8, offsetY: 2.4 };
+/** Poste de rua: luz amarelada de sódio, no alto, iluminando a calçada. */
+const STREET_LAMP: PieceLight = { color: '#ffcf8a', intensity: 4, distance: 6, offsetY: 4.4 };
 
 const HOME: readonly KaykitSpec[] = [
   {
@@ -720,14 +722,346 @@ const SPACEBASE: readonly KaykitSpec[] = [
   },
 ];
 
-/** Monta a pasta com a categoria de cada peça (a da pasta, ou a própria quando ela diz). */
+const CITY: readonly KaykitSpec[] = [
+  {
+    key: 'kay-predio-a',
+    label: 'Sobrado de tijolos',
+    keywords: ['cidade', 'prédio', 'loja', 'rua', 'moderno'],
+    icon: 'roof',
+    height: 7.75,
+    footprint: { width: 6, depth: 7 },
+  },
+  {
+    key: 'kay-predio-b',
+    label: 'Sobrado largo',
+    keywords: ['cidade', 'prédio', 'loja', 'rua', 'moderno'],
+    icon: 'roof',
+    height: 7.75,
+    footprint: { width: 8, depth: 7 },
+  },
+  {
+    key: 'kay-predio-c',
+    label: 'Prédio de três andares',
+    keywords: ['cidade', 'prédio', 'apartamento', 'rua'],
+    icon: 'roof',
+    height: 11.25,
+    footprint: { width: 6, depth: 7 },
+  },
+  {
+    key: 'kay-predio-d',
+    label: 'Prédio largo de três andares',
+    keywords: ['cidade', 'prédio', 'apartamento', 'rua'],
+    icon: 'roof',
+    height: 11.25,
+    footprint: { width: 8, depth: 7 },
+  },
+  {
+    key: 'kay-predio-e',
+    label: 'Edifício de esquina',
+    keywords: ['cidade', 'prédio', 'apartamento', 'quarteirão'],
+    icon: 'roof',
+    height: 11.25,
+    footprint: { width: 10, depth: 7 },
+  },
+  {
+    key: 'kay-predio-f',
+    label: 'Edifício comercial',
+    keywords: ['cidade', 'prédio', 'escritório', 'quarteirão'],
+    icon: 'roof',
+    height: 11.25,
+    footprint: { width: 10, depth: 7 },
+  },
+  {
+    key: 'kay-predio-g',
+    label: 'Edifício de apartamentos',
+    keywords: ['cidade', 'prédio', 'apartamento', 'quarteirão'],
+    icon: 'roof',
+    height: 11.25,
+    footprint: { width: 10, depth: 7 },
+  },
+  {
+    key: 'kay-predio-h',
+    label: 'Edifício alto',
+    keywords: ['cidade', 'prédio', 'torre', 'escritório', 'arranha-céu'],
+    icon: 'roof',
+    height: 14.75,
+    footprint: { width: 10, depth: 7 },
+  },
+  {
+    key: 'kay-viatura',
+    label: 'Viatura de polícia',
+    keywords: ['carro', 'polícia', 'cidade', 'perseguição'],
+    icon: 'car',
+    category: 'vehicle',
+    height: 2.063,
+    footprint: { width: 2, depth: 5 },
+  },
+  {
+    key: 'kay-sedan',
+    label: 'Sedã',
+    keywords: ['carro', 'cidade', 'rua', 'estacionamento'],
+    icon: 'car',
+    category: 'vehicle',
+    height: 1.844,
+    footprint: { width: 2, depth: 5 },
+  },
+  {
+    key: 'kay-hatch',
+    label: 'Carro compacto',
+    keywords: ['carro', 'cidade', 'rua', 'estacionamento'],
+    icon: 'car',
+    category: 'vehicle',
+    height: 1.844,
+    footprint: { width: 2, depth: 4 },
+  },
+  {
+    key: 'kay-perua',
+    label: 'Perua',
+    keywords: ['carro', 'cidade', 'família', 'estacionamento'],
+    icon: 'car',
+    category: 'vehicle',
+    height: 1.844,
+    footprint: { width: 2, depth: 5 },
+  },
+  {
+    key: 'kay-cacamba',
+    label: 'Caçamba de lixo',
+    keywords: ['lixo', 'beco', 'rua', 'cidade'],
+    icon: 'box',
+    category: 'furniture',
+    height: 1.586,
+    footprint: { width: 3, depth: 2 },
+  },
+  {
+    key: 'kay-hidrante',
+    label: 'Hidrante',
+    keywords: ['rua', 'calçada', 'cidade', 'bombeiro'],
+    icon: 'cylinder',
+    category: 'furniture',
+    height: 1.123,
+  },
+  {
+    key: 'kay-poste-rua',
+    label: 'Poste de rua',
+    keywords: ['luz', 'rua', 'calçada', 'iluminação'],
+    icon: 'flame',
+    category: 'furniture',
+    height: 4.8,
+    footprint: { width: 2, depth: 1 },
+    light: STREET_LAMP,
+  },
+  {
+    key: 'kay-semaforo',
+    label: 'Semáforo',
+    keywords: ['rua', 'cruzamento', 'trânsito', 'sinal'],
+    icon: 'pillar',
+    category: 'furniture',
+    height: 3.647,
+  },
+  {
+    key: 'kay-semaforo-duplo',
+    label: 'Semáforo de braço',
+    keywords: ['rua', 'cruzamento', 'trânsito', 'sinal'],
+    icon: 'pillar',
+    category: 'furniture',
+    height: 4.8,
+    footprint: { width: 2, depth: 1 },
+  },
+  {
+    key: 'kay-lixeira',
+    label: 'Bueiro',
+    keywords: ['rua', 'esgoto', 'tampa', 'calçada'],
+    icon: 'cylinder',
+    category: 'furniture',
+    height: 0.262,
+  },
+  {
+    key: 'kay-caixa-dagua',
+    label: 'Caixa-d’água',
+    keywords: ['telhado', 'cidade', 'água', 'prédio'],
+    icon: 'cylinder',
+    height: 3.35,
+    footprint: { width: 3, depth: 3 },
+  },
+  {
+    key: 'kay-banco-rua',
+    label: 'Banco de praça',
+    keywords: ['praça', 'parque', 'sentar', 'rua'],
+    icon: 'table',
+    category: 'furniture',
+    height: 0.5,
+    footprint: { width: 2, depth: 1 },
+  },
+];
+
+const HEXVILA: readonly KaykitSpec[] = [
+  {
+    key: 'kay-castelo',
+    label: 'Castelo de torres azuis',
+    keywords: ['castelo', 'fortaleza', 'rei', 'reino', 'muralha'],
+    icon: 'pillar',
+    height: 19.896,
+    footprint: { width: 10, depth: 11 },
+  },
+  {
+    key: 'kay-igreja',
+    label: 'Igreja da vila',
+    keywords: ['templo', 'capela', 'sino', 'vila', 'clérigo'],
+    icon: 'roof',
+    height: 8.225,
+    footprint: { width: 5, depth: 6 },
+  },
+  {
+    key: 'kay-taverna',
+    label: 'Taverna',
+    keywords: ['estalagem', 'bar', 'vila', 'pousada', 'hospedaria'],
+    icon: 'roof',
+    height: 6.983,
+    footprint: { width: 6, depth: 7 },
+  },
+  {
+    key: 'kay-moinho-vento',
+    label: 'Moinho de vento',
+    keywords: ['moinho', 'trigo', 'fazenda', 'vila'],
+    icon: 'fan',
+    height: 7.289,
+    footprint: { width: 6, depth: 4 },
+  },
+  {
+    key: 'kay-moinho-agua',
+    label: 'Moinho d’água',
+    keywords: ['moinho', 'rio', 'roda', 'vila'],
+    icon: 'roof',
+    height: 7.84,
+    footprint: { width: 5, depth: 6 },
+  },
+  {
+    key: 'kay-ferraria',
+    label: 'Ferraria',
+    keywords: ['ferreiro', 'forja', 'armas', 'vila'],
+    icon: 'roof',
+    height: 4.926,
+    footprint: { width: 7, depth: 6 },
+  },
+  {
+    key: 'kay-mercado',
+    label: 'Mercado com barracas',
+    keywords: ['feira', 'comércio', 'barraca', 'vila'],
+    icon: 'roof',
+    height: 4.909,
+    footprint: { width: 9, depth: 7 },
+  },
+  {
+    key: 'kay-quartel',
+    label: 'Quartel',
+    keywords: ['soldados', 'guarda', 'caserna', 'vila'],
+    icon: 'roof',
+    height: 8.2,
+    footprint: { width: 7, depth: 8 },
+  },
+  {
+    key: 'kay-campo-arqueiros',
+    label: 'Campo de arqueiros',
+    keywords: ['tiro', 'arco', 'treino', 'alvo', 'soldados'],
+    icon: 'roof',
+    height: 8.959,
+    footprint: { width: 9, depth: 8 },
+  },
+  {
+    key: 'kay-serraria',
+    label: 'Serraria',
+    keywords: ['madeira', 'lenhador', 'tora', 'vila'],
+    icon: 'roof',
+    height: 8.539,
+    footprint: { width: 7, depth: 6 },
+  },
+  {
+    key: 'kay-mina',
+    label: 'Entrada de mina',
+    keywords: ['mina', 'caverna', 'minério', 'anão'],
+    icon: 'mountain',
+    height: 5.683,
+    footprint: { width: 8, depth: 10 },
+  },
+  {
+    key: 'kay-torre-vigia',
+    label: 'Torre de vigia',
+    keywords: ['torre', 'sentinela', 'fronteira', 'guarda'],
+    icon: 'pillar',
+    height: 10.959,
+    footprint: { width: 5, depth: 6 },
+  },
+  {
+    key: 'kay-torre-catapulta',
+    label: 'Torre com catapulta',
+    keywords: ['torre', 'cerco', 'catapulta', 'defesa'],
+    icon: 'pillar',
+    height: 9.82,
+    footprint: { width: 5, depth: 7 },
+  },
+  {
+    key: 'kay-casa-a',
+    label: 'Casa da vila',
+    keywords: ['casa', 'aldeia', 'camponês', 'vila'],
+    icon: 'roof',
+    height: 4.65,
+    footprint: { width: 4, depth: 4 },
+  },
+  {
+    key: 'kay-casa-b',
+    label: 'Casa de dois andares',
+    keywords: ['casa', 'sobrado', 'aldeia', 'vila'],
+    icon: 'roof',
+    height: 6.4,
+    footprint: { width: 5, depth: 6 },
+  },
+  {
+    key: 'kay-ponte-pedra',
+    label: 'Ponte de pedra',
+    keywords: ['ponte', 'rio', 'travessia', 'arco'],
+    icon: 'road',
+    height: 6.25,
+    footprint: { width: 7, depth: 10 },
+  },
+  {
+    key: 'kay-ruina',
+    label: 'Casa em ruínas',
+    keywords: ['ruína', 'destruída', 'incêndio', 'abandonada'],
+    icon: 'brick',
+    height: 4.97,
+    footprint: { width: 8, depth: 7 },
+  },
+  {
+    key: 'kay-andaime',
+    label: 'Obra com andaime',
+    keywords: ['construção', 'andaime', 'obra', 'madeira'],
+    icon: 'grid',
+    height: 6.493,
+    footprint: { width: 10, depth: 11 },
+  },
+  {
+    key: 'kay-trigal',
+    label: 'Trigal',
+    keywords: ['trigo', 'plantação', 'fazenda', 'colheita', 'campo'],
+    icon: 'sprout',
+    category: 'nature',
+    height: 1.969,
+    footprint: { width: 10, depth: 11 },
+  },
+];
+
+/**
+ * Monta a pasta com a categoria de cada peça (a da pasta, ou a própria quando ela diz). Pacote de
+ * uma época só (a cidade, a vila, a base) leva o estilo dela, para o filtro do editor separar.
+ */
 function kaykitPieces(
   folder: string,
   category: PieceCategory,
   specs: readonly KaykitSpec[],
+  style: PieceStyle = 'generic',
 ): CatalogEntry[] {
   return specs.flatMap(({ category: own, ...spec }) =>
-    genericPieces(folder, own ?? category, [spec]),
+    genericPieces(folder, own ?? category, [spec]).map((entry) => ({ ...entry, style })),
   );
 }
 
@@ -735,5 +1069,7 @@ export const KAYKIT_PIECES: readonly CatalogEntry[] = [
   ...kaykitPieces('/assets/home', 'furniture', HOME),
   ...kaykitPieces('/assets/graveyard', 'structure', GRAVEYARD),
   ...kaykitPieces('/assets/kitchen', 'furniture', KITCHEN),
-  ...kaykitPieces('/assets/spacebase', 'structure', SPACEBASE),
+  ...kaykitPieces('/assets/spacebase', 'structure', SPACEBASE, 'futurist'),
+  ...kaykitPieces('/assets/citybits', 'structure', CITY, 'modern'),
+  ...kaykitPieces('/assets/hexvila', 'structure', HEXVILA, 'medieval'),
 ];

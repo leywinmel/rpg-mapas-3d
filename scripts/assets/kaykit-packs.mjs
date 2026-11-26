@@ -154,4 +154,71 @@ export const KAYKIT_PACKS = {
       ['tunnel_straight_A', 'kay-tunel'],
     ],
   },
+  /**
+   * Cidade moderna em miniatura (KayKit City Builder Bits): prédios sem a base de calçada,
+   * carros, semáforos, poste, caçamba e a caixa d'água. Com 5, o carro fica com as 5 casas dos
+   * carros do site.
+   */
+  city: {
+    scale: 5,
+    texture: 'kaykit-city',
+    pieces: [
+      ['building_A_withoutBase', 'kay-predio-a'],
+      ['building_B_withoutBase', 'kay-predio-b'],
+      ['building_C_withoutBase', 'kay-predio-c'],
+      ['building_D_withoutBase', 'kay-predio-d'],
+      ['building_E_withoutBase', 'kay-predio-e'],
+      ['building_F_withoutBase', 'kay-predio-f'],
+      ['building_G_withoutBase', 'kay-predio-g'],
+      ['building_H_withoutBase', 'kay-predio-h'],
+      ['car_police', 'kay-viatura'],
+      ['car_sedan', 'kay-sedan'],
+      ['car_hatchback', 'kay-hatch'],
+      ['car_stationwagon', 'kay-perua'],
+      ['dumpster', 'kay-cacamba'],
+      ['firehydrant', 'kay-hidrante'],
+      ['streetlight', 'kay-poste-rua'],
+      ['trafficlight_A', 'kay-semaforo'],
+      ['trafficlight_B', 'kay-semaforo-duplo'],
+      ['trash_A', 'kay-lixeira'],
+      ['watertower', 'kay-caixa-dagua'],
+      ['bench', 'kay-banco-rua'],
+    ],
+  },
+  /**
+   * Prédios de vila medieval em miniatura (KayKit Medieval Hexagon Pack, cor azul). Com 5, a casa
+   * tem 4 casas de lado e o castelo vira o marco do mapa.
+   */
+  hexagon: {
+    scale: 5,
+    texture: 'kaykit-hexagon',
+    pieces: [
+      ['building_castle_blue', 'kay-castelo'],
+      ['building_church_blue', 'kay-igreja'],
+      ['building_tavern_blue', 'kay-taverna'],
+      ['building_windmill_blue', 'kay-moinho-vento'],
+      ['building_watermill_blue', 'kay-moinho-agua'],
+      ['building_blacksmith_blue', 'kay-ferraria'],
+      ['building_market_blue', 'kay-mercado'],
+      ['building_barracks_blue', 'kay-quartel'],
+      ['building_archeryrange_blue', 'kay-campo-arqueiros'],
+      ['building_lumbermill_blue', 'kay-serraria'],
+      ['building_mine_blue', 'kay-mina'],
+      ['building_tower_A_blue', 'kay-torre-vigia'],
+      ['building_tower_catapult_blue', 'kay-torre-catapulta'],
+      ['building_home_A_blue', 'kay-casa-a'],
+      ['building_home_B_blue', 'kay-casa-b'],
+    ],
+  },
+  /** Os prédios sem cor do mesmo pacote: ponte, ruína, andaime e trigal. */
+  hexagonNeutral: {
+    scale: 5,
+    texture: 'kaykit-hexagon',
+    pieces: [
+      ['building_bridge_A', 'kay-ponte-pedra'],
+      ['building_destroyed', 'kay-ruina'],
+      ['building_scaffolding', 'kay-andaime'],
+      ['building_grain', 'kay-trigal'],
+    ],
+  },
 };
