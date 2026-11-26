@@ -107,6 +107,33 @@ export const KAYKIT_PACKS = {
       ['book_single', 'kay-livro'],
     ],
   },
+  /** Mais peças do KayKit Space Base Bits: cargas, contêineres, módulos de teto e terreno (RPG-82). */
+  spaceExtra: {
+    scale: 2.6,
+    texture: 'kaykit-space-base',
+    pieces: [
+      ['cargo_A', 'kay-carga-caixa'],
+      ['cargo_A_packed', 'kay-carga-caixa-embalada'],
+      ['cargo_B', 'kay-carga-cilindro'],
+      ['cargo_B_stacked', 'kay-carga-cilindros'],
+      ['cargodepot_B', 'kay-deposito-carga-b'],
+      ['cargodepot_C', 'kay-deposito-carga-c'],
+      ['containers_B', 'kay-conteineres-b'],
+      ['containers_C', 'kay-conteineres-c'],
+      ['containers_D', 'kay-conteineres-d'],
+      ['lander_B', 'kay-modulo-pouso-b'],
+      ['landingpad_small', 'kay-plataforma-pouso-pequena'],
+      ['rock_B', 'kay-rocha-marte-b'],
+      ['rocks_B', 'kay-rochas-marte-b'],
+      ['spacetruck_trailer', 'kay-reboque-espacial'],
+      ['windturbine_low', 'kay-turbina-baixa'],
+      ['structure_low', 'kay-estrutura-baixa'],
+      ['roofmodule_solarpanels', 'kay-teto-paineis'],
+      ['roofmodule_cargo_A', 'kay-teto-carga'],
+      ['terrain_mining', 'kay-terreno-mina'],
+      ['tunnel_straight_B', 'kay-tunel-b'],
+    ],
+  },
   /** Móveis de casa moderna (KayKit Furniture Bits). */
   furniture: {
     scale: PERSON_SCALE,
