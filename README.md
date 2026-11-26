@@ -230,6 +230,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   O "Oásis de Zahrim" (104 × 88) é uma parada de caravanas no deserto: o lago com o anel de
   palmeiras, o caravançará murado com o poço e as tendas, o mercado de tendas, a estrada com as casas
   de barro, as dunas e a ruína antiga com a estátua e os obeliscos.
+  A "Vila Mineira de Pedravela" (104 × 88) fica ao pé da serra: três bocas de mina (uma de ouro)
+  com o pátio dos carrinhos, a estrada que desce e cruza o rio pela ponte, a roda-d’água, a serraria,
+  a rua da vila com as casas e os bosques do sul.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

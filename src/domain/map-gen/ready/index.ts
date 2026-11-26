@@ -40,6 +40,7 @@ import { buildHarvestVillageMap, HARVEST_VILLAGE_SIZE } from './harvest-village'
 import { buildTournamentMap, TOURNAMENT_SIZE } from './tournament';
 import { buildWitchSwampMap, WITCH_SWAMP_SIZE } from './witch-swamp';
 import { buildDesertOasisMap, DESERT_OASIS_SIZE } from './desert-oasis';
+import { buildMiningTownMap, MINING_TOWN_SIZE } from './mining-town';
 import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -308,6 +309,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Parada de caravanas no deserto, 104×88: o lago do oásis com o anel de palmeiras, o caravançará murado com o poço e as tendas, o mercado de tendas, a estrada com as casas de barro do povoado, as dunas e a ruína antiga com a estátua e os obeliscos.',
     size: DESERT_OASIS_SIZE,
     build: buildDesertOasisMap,
+  },
+  {
+    id: 'vila-mineira-pedravela',
+    name: 'Vila Mineira de Pedravela',
+    description:
+      'Vila de mineiros ao pé da serra, 104×88: as três bocas de mina (uma de ouro) com o pátio dos carrinhos, a estrada que desce a serra e cruza o rio pela ponte, a roda-d’água, a serraria com os tocos cortados, a rua da vila com as casas e a taverna, e os bosques do sul.',
+    size: MINING_TOWN_SIZE,
+    build: buildMiningTownMap,
   },
   {
     id: 'deserto',
