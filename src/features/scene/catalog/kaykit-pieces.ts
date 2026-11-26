@@ -3,7 +3,7 @@
  * (lista em scripts/assets/kaykit-packs.mjs): móveis de casa (Furniture Bits), cemitério
  * (Halloween Bits), cozinha de restaurante (Restaurant Bits) e base em outro planeta (Space Base
  * Bits), cidade moderna (City Builder Bits) e vila medieval (Medieval Hexagon Pack: prédios,
- * muralhas, adereços e natureza). Altura e casas saem do próprio modelo; as peças de mais de uma casa repetem a medida em
+ * muralhas, adereços, natureza e os reinos de telhado vermelho, verde e amarelo). Altura e casas saem do próprio modelo; as peças de mais de uma casa repetem a medida em
  * PROP_FOOTPRINTS do domínio, para o gerador e os mapas prontos encaixarem igual à biblioteca.
  */
 import type { CatalogEntry, PieceCategory, PieceLight, PieceStyle } from './catalog-types';
@@ -1505,6 +1505,188 @@ const HEXNATURE: readonly KaykitSpec[] = [
   },
 ];
 
+const HEXVERDE: readonly KaykitSpec[] = [
+  {
+    key: 'kay-castelo-verde',
+    label: 'Castelo de torres verdes',
+    keywords: ['castelo', 'fortaleza', 'elfos', 'floresta', 'reino'],
+    icon: 'pillar',
+    height: 19.896,
+    footprint: { width: 10, depth: 11 },
+  },
+  {
+    key: 'kay-quartel-verde',
+    label: 'Quartel verde',
+    keywords: ['soldados', 'caserna', 'guarda', 'floresta'],
+    icon: 'roof',
+    height: 8.2,
+    footprint: { width: 7, depth: 8 },
+  },
+  {
+    key: 'kay-igreja-verde',
+    label: 'Templo de telhado verde',
+    keywords: ['templo', 'capela', 'druida', 'floresta'],
+    icon: 'roof',
+    height: 8.225,
+    footprint: { width: 5, depth: 6 },
+  },
+  {
+    key: 'kay-taverna-verde',
+    label: 'Taverna de telhado verde',
+    keywords: ['estalagem', 'bar', 'pousada', 'floresta'],
+    icon: 'roof',
+    height: 6.983,
+    footprint: { width: 6, depth: 7 },
+  },
+  {
+    key: 'kay-mercado-verde',
+    label: 'Mercado verde',
+    keywords: ['feira', 'comércio', 'barraca', 'floresta'],
+    icon: 'roof',
+    height: 4.909,
+    footprint: { width: 9, depth: 7 },
+  },
+  {
+    key: 'kay-casa-verde',
+    label: 'Casa de telhado verde',
+    keywords: ['casa', 'aldeia', 'camponês', 'floresta'],
+    icon: 'roof',
+    height: 4.65,
+    footprint: { width: 4, depth: 4 },
+  },
+  {
+    key: 'kay-sobrado-verde',
+    label: 'Sobrado de telhado verde',
+    keywords: ['casa', 'sobrado', 'aldeia', 'floresta'],
+    icon: 'roof',
+    height: 6.4,
+    footprint: { width: 5, depth: 6 },
+  },
+  {
+    key: 'kay-moinho-verde',
+    label: 'Moinho de vento verde',
+    keywords: ['moinho', 'trigo', 'fazenda', 'floresta'],
+    icon: 'fan',
+    height: 7.289,
+    footprint: { width: 6, depth: 4 },
+  },
+  {
+    key: 'kay-ferraria-verde',
+    label: 'Ferraria verde',
+    keywords: ['ferreiro', 'forja', 'armas', 'floresta'],
+    icon: 'roof',
+    height: 4.926,
+    footprint: { width: 7, depth: 6 },
+  },
+  {
+    key: 'kay-torre-verde',
+    label: 'Torre de vigia verde',
+    keywords: ['torre', 'sentinela', 'fronteira', 'floresta'],
+    icon: 'pillar',
+    height: 10.959,
+    footprint: { width: 5, depth: 6 },
+  },
+  {
+    key: 'kay-poco-verde',
+    label: 'Poço de telhado verde',
+    keywords: ['poço', 'água', 'praça', 'floresta'],
+    icon: 'cylinder',
+    height: 4.13,
+    footprint: { width: 3, depth: 4 },
+  },
+];
+
+const HEXAMARELO: readonly KaykitSpec[] = [
+  {
+    key: 'kay-castelo-amarelo',
+    label: 'Castelo de torres douradas',
+    keywords: ['castelo', 'fortaleza', 'ouro', 'mercadores', 'reino'],
+    icon: 'pillar',
+    height: 19.896,
+    footprint: { width: 10, depth: 11 },
+  },
+  {
+    key: 'kay-igreja-amarela',
+    label: 'Igreja de telhado dourado',
+    keywords: ['templo', 'capela', 'sino', 'vila'],
+    icon: 'roof',
+    height: 8.225,
+    footprint: { width: 5, depth: 6 },
+  },
+  {
+    key: 'kay-taverna-amarela',
+    label: 'Taverna de telhado dourado',
+    keywords: ['estalagem', 'bar', 'pousada', 'vila'],
+    icon: 'roof',
+    height: 6.983,
+    footprint: { width: 6, depth: 7 },
+  },
+  {
+    key: 'kay-mercado-amarelo',
+    label: 'Mercado dourado',
+    keywords: ['feira', 'comércio', 'barraca', 'mercadores'],
+    icon: 'roof',
+    height: 4.909,
+    footprint: { width: 9, depth: 7 },
+  },
+  {
+    key: 'kay-casa-amarela',
+    label: 'Casa de telhado dourado',
+    keywords: ['casa', 'aldeia', 'camponês', 'vila'],
+    icon: 'roof',
+    height: 4.65,
+    footprint: { width: 4, depth: 4 },
+  },
+  {
+    key: 'kay-sobrado-amarelo',
+    label: 'Sobrado de telhado dourado',
+    keywords: ['casa', 'sobrado', 'aldeia', 'vila'],
+    icon: 'roof',
+    height: 6.4,
+    footprint: { width: 5, depth: 6 },
+  },
+  {
+    key: 'kay-moinho-agua-amarelo',
+    label: 'Moinho d’água dourado',
+    keywords: ['moinho', 'rio', 'roda', 'vila'],
+    icon: 'roof',
+    height: 7.84,
+    footprint: { width: 5, depth: 6 },
+  },
+  {
+    key: 'kay-serraria-amarela',
+    label: 'Serraria dourada',
+    keywords: ['madeira', 'lenhador', 'tora', 'vila'],
+    icon: 'roof',
+    height: 8.539,
+    footprint: { width: 7, depth: 6 },
+  },
+  {
+    key: 'kay-torre-catapulta-amarela',
+    label: 'Torre com catapulta dourada',
+    keywords: ['torre', 'cerco', 'catapulta', 'defesa'],
+    icon: 'pillar',
+    height: 9.82,
+    footprint: { width: 5, depth: 7 },
+  },
+  {
+    key: 'kay-campo-arqueiros-amarelo',
+    label: 'Campo de arqueiros dourado',
+    keywords: ['tiro', 'arco', 'treino', 'soldados'],
+    icon: 'roof',
+    height: 8.959,
+    footprint: { width: 9, depth: 8 },
+  },
+  {
+    key: 'kay-mina-amarela',
+    label: 'Mina de ouro',
+    keywords: ['mina', 'caverna', 'ouro', 'anão'],
+    icon: 'mountain',
+    height: 5.683,
+    footprint: { width: 8, depth: 10 },
+  },
+];
+
 /**
  * Monta a pasta com a categoria de cada peça (a da pasta, ou a própria quando ela diz). Pacote de
  * uma época só (a cidade, a vila, a base) leva o estilo dela, para o filtro do editor separar.
@@ -1530,4 +1712,6 @@ export const KAYKIT_PIECES: readonly CatalogEntry[] = [
   ...kaykitPieces('/assets/hexvila', 'structure', HEXREINO, 'medieval'),
   ...kaykitPieces('/assets/hexvila', 'furniture', HEXPROPS, 'medieval'),
   ...kaykitPieces('/assets/hexvila', 'nature', HEXNATURE),
+  ...kaykitPieces('/assets/hexvila', 'structure', HEXVERDE, 'medieval'),
+  ...kaykitPieces('/assets/hexvila', 'structure', HEXAMARELO, 'medieval'),
 ];

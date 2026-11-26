@@ -170,7 +170,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   estacionamento e uma perseguição policial no asfalto. O "Cerco de Rubraforte" (96 × 80) é uma batalha
   inteira: a fortaleza vermelha murada, com torres nos cantos, castelo, quartel e portão, e ao sul o
   acampamento azul com tendas, paliçada, torres de catapulta e pedras caídas no campo; em volta,
-  montanhas, o lago, a aldeia queimada e os bosques.
+  montanhas, o lago, a aldeia queimada e os bosques. O "Vale das Duas Coroas" (128 × 112) é uma campanha
+  inteira: o reino verde de Verdelar entre pinhais e o reino dourado de Auricampo com a mina de ouro,
+  a praça neutra da feira na encruzilhada, o rio com três pontes, o acampamento dos viajantes e os trigais.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
@@ -415,7 +417,7 @@ Google não muda.
 - `scripts/assets/cyber-city.mjs <pasta dos .glb> public/assets/cyberpunk`: monta os prédios e os
   megaprédios do cyberpunk empilhando as seções do pacote Cyber City (papptimus, CC BY 4.0), que o
   Blender passa de FBX para `.glb` com o `fbx-to-glb.py`.
-- `scripts/assets/kaykit-props.mjs <dungeon|furniture|halloween|restaurant|space|city|hexagon|hexagonNeutral|hexagonRed|hexagonProps|hexagonNature> <pasta gltf do pacote> <saída>`:
+- `scripts/assets/kaykit-props.mjs <dungeon|furniture|halloween|restaurant|space|city|hexagon|hexagonNeutral|hexagonRed|hexagonGreen|hexagonYellow|hexagonProps|hexagonNature> <pasta gltf do pacote> <saída>`:
   converte as peças dos pacotes KayKit listados em `scripts/assets/kaykit-packs.mjs` (escala do pacote,
   malha em meshopt e a paleta do pacote numa WebP só) e imprime altura, footprint e cor de longe de cada peça para o catálogo.
 - Veículos do moderno (pacote Rgsdev, CC0, em FBX): o Blender passa para `.glb` com

@@ -28,6 +28,7 @@ import { buildSiegeMap, SIEGE_SIZE } from './siege';
 import { buildShipMap, SHIP_SIZE } from './ship';
 import { buildStationMap, STATION_SIZE } from './station';
 import { buildTavernMap, TAVERN_SIZE } from './tavern';
+import { buildTwoCrownsMap, TWO_CROWNS_SIZE } from './two-crowns';
 import { buildTempleSchoolMap, TEMPLE_SCHOOL_SIZE } from './temple-school';
 import { buildWalledTownMap, WALLED_TOWN_SIZE } from './walled-town';
 
@@ -128,6 +129,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Batalha inteira, 96×80: a fortaleza vermelha murada com castelo, quartel e portão, e ao sul o acampamento azul com tendas, paliçada e torres de catapulta. Montanhas, lago, aldeia queimada e bosques em volta.',
     size: SIEGE_SIZE,
     build: buildSiegeMap,
+  },
+  {
+    id: 'vale-duas-coroas',
+    name: 'Vale das Duas Coroas',
+    description:
+      'Campanha inteira, 128×112: o reino verde de Verdelar entre pinhais e o reino dourado de Auricampo com a mina de ouro, a praça neutra da feira na encruzilhada, o rio com três pontes, o acampamento dos viajantes e os trigais.',
+    size: TWO_CROWNS_SIZE,
+    build: buildTwoCrownsMap,
   },
   {
     id: 'deserto',
