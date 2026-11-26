@@ -38,6 +38,7 @@ import { buildOrcCampMap, ORC_CAMP_SIZE } from './orc-camp';
 import { buildGothicTownMap, GOTHIC_TOWN_SIZE } from './gothic-town';
 import { buildHarvestVillageMap, HARVEST_VILLAGE_SIZE } from './harvest-village';
 import { buildTournamentMap, TOURNAMENT_SIZE } from './tournament';
+import { buildWitchSwampMap, WITCH_SWAMP_SIZE } from './witch-swamp';
 import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -290,6 +291,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Campo de um torneio de cavaleiros, 104×88: a liça de areia com a barreira da justa, as arquibancadas, o pavilhão do rei com o banquete, o acampamento dos cavaleiros com as tendas e as bandeiras, o campo de arqueiros e os quartéis ao pé do castelo, a feira com as barracas e a taverna, e o povoado.',
     size: TOURNAMENT_SIZE,
     build: buildTournamentMap,
+  },
+  {
+    id: 'pantano-lodoverde',
+    name: 'Pântano de Lodoverde',
+    description:
+      'Brejo da bruxa, 104×88: dois canais em cruz com quatro pontes de madeira, os poços fundos, a cabana da bruxa com a fogueira e os ossos, a aldeia dos pescadores, as casas da margem norte, a ruína afundada no lodo com as covas, as árvores secas, as pedras e os botes.',
+    size: WITCH_SWAMP_SIZE,
+    build: buildWitchSwampMap,
   },
   {
     id: 'deserto',

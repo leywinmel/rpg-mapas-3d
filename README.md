@@ -224,6 +224,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   O "Torneio de Altamira" (104 × 88) é o campo de um torneio de cavaleiros: a liça de areia com a
   barreira da justa, as arquibancadas, o pavilhão do rei com o banquete, o acampamento das tendas,
   o campo de arqueiros e os quartéis ao pé do castelo, a feira com a taverna e o povoado.
+  O "Pântano de Lodoverde" (104 × 88) é o brejo da bruxa: dois canais em cruz com quatro pontes, os
+  poços fundos, a cabana da bruxa com a fogueira, a aldeia dos pescadores, a ruína afundada no lodo
+  com as covas, as árvores secas e os botes.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
