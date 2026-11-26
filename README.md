@@ -209,6 +209,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Ilha da Caveira" (104 × 88) é uma ilha pirata cercada de mar: a enseada com o navio no píer, a
   vila pirata com a taverna, o forte murado com os canhões, a selva com a ruína da caveira e o tesouro
   e o acampamento dos náufragos na praia leste.
+  A "Fortaleza de Khazdur" (104 × 88) é uma cidade anã escavada na montanha: o salão do rei no pátio
+  murado, o bairro das forjas, as casas dos clãs, a praça do mercado, a ponte de pedra sobre o abismo,
+  as minas com os túneis e o lago subterrâneo com o quartel da guarda.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
