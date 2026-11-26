@@ -117,6 +117,22 @@ export const MODEL_CREDITS: readonly Credit[] = [
     ...CC0,
   },
   {
+    work: 'KayKit City Builder Bits',
+    author: 'Kay Lousberg',
+    url: 'https://kaylousberg.itch.io/city-builder-bits',
+    usage:
+      'Cidade moderna: prédios de tijolo, viatura e carros, caçamba, hidrante, poste de rua, semáforos, bueiro, caixa-d’água e banco de praça.',
+    ...CC0,
+  },
+  {
+    work: 'KayKit Medieval Hexagon Pack',
+    author: 'Kay Lousberg',
+    url: 'https://kaylousberg.itch.io/kaykit-medieval-hexagon',
+    usage:
+      'Vila medieval: castelo, igreja, taverna, moinhos, ferraria, mercado, quartel, campo de arqueiros, serraria, mina, torres, casas, ponte de pedra, ruína, andaime e trigal.',
+    ...CC0,
+  },
+  {
     work: 'RPG Characters',
     author: 'Quaternius',
     url: 'https://opengameart.org/content/lowpoly-rpg-characters',

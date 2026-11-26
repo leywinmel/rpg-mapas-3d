@@ -21,10 +21,13 @@ const pack = KAYKIT_PACKS[PACK];
 if (!pack || !INPUT || !OUT) {
   throw new Error(`uso: node scripts/assets/kaykit-props.mjs <${Object.keys(KAYKIT_PACKS).join('|')}> <pasta gltf> <saída>`);
 }
-/** A paleta do pacote fica ao lado da pasta gltf, em texture/ ou textures/ conforme o pacote. */
+/**
+ * A paleta do pacote fica ao lado da pasta gltf, em texture/ ou textures/ conforme o pacote; no
+ * Medieval Hexagon ela vem dentro da própria pasta dos modelos.
+ */
 function findPalette() {
-  for (const folder of ['texture', 'textures']) {
-    const dir = join(INPUT, '..', folder);
+  for (const folder of ['../texture', '../textures', '.']) {
+    const dir = join(INPUT, folder);
     if (!existsSync(dir)) continue;
     const png = readdirSync(dir).find((name) => name.endsWith('.png'));
     if (png) return join(dir, png);

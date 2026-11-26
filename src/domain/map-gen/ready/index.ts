@@ -4,6 +4,7 @@
  */
 import type { GridSize } from '../../grid';
 import type { AssembledMap } from '../assemble';
+import { AURORA_AVENUE_SIZE, buildAuroraAvenueMap } from './aurora-avenue';
 import { buildCaveMap, CAVE_SIZE } from './cave';
 import { buildChromeDocksMap, CHROME_DOCKS_SIZE } from './chrome-docks';
 import { buildCryptMap, CRYPT_SIZE } from './crypt';
@@ -13,6 +14,7 @@ import { buildGasStationMap, GAS_STATION_SIZE } from './gas-station';
 import { buildGraveyardMap, GRAVEYARD_SIZE } from './graveyard';
 import { buildHospitalMap, HOSPITAL_SIZE } from './hospital';
 import { buildIslandMap, ISLAND_SIZE } from './island';
+import { buildKingdomMap, KINGDOM_SIZE } from './kingdom';
 import { buildMarsBaseMap, MARS_BASE_SIZE } from './mars-base';
 import { buildMedievalTownMap, MEDIEVAL_TOWN_SIZE } from './medieval-town';
 import { buildCityCenterMap, CITY_CENTER_SIZE } from './city-center';
@@ -101,6 +103,22 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Colônia grande num planeta vermelho: módulos ligados por túneis, hangar, laboratório e alojamentos, mineração, painéis solares, turbinas, pátio de carga e duas plataformas de pouso.',
     size: MARS_BASE_SIZE,
     build: buildMarsBaseMap,
+  },
+  {
+    id: 'reino-valdouro',
+    name: 'Reino de Valdouro',
+    description:
+      'Um reino inteiro, 80×80: o castelo com quartel, campo de arqueiros e quatro torres; a vila com mercado, igreja, taverna e ferraria; o rio com a ponte de pedra e o moinho; trigais, serraria, a mina e o bosque.',
+    size: KINGDOM_SIZE,
+    build: buildKingdomMap,
+  },
+  {
+    id: 'avenida-aurora',
+    name: 'Avenida Aurora',
+    description:
+      'Centro de cidade grande, 64×64: duas avenidas com semáforos, quatro quarteirões de prédios, becos com caçambas, praça arborizada, estacionamento e uma perseguição policial no asfalto.',
+    size: AURORA_AVENUE_SIZE,
+    build: buildAuroraAvenueMap,
   },
   {
     id: 'deserto',
