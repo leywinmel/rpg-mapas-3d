@@ -27,6 +27,7 @@ import { buildNeonDistrictMap, NEON_DISTRICT_SIZE } from './neon-district';
 import { buildIronDepthsMap, IRON_DEPTHS_SIZE } from './iron-depths';
 import { buildNewHopeMap, NEW_HOPE_SIZE } from './new-hope';
 import { buildSakuragawaMap, SAKURAGAWA_SIZE } from './sakuragawa';
+import { buildGoldenValeMap, GOLDEN_VALE_SIZE } from './golden-vale';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
 import { buildSiegeMap, SIEGE_SIZE } from './siege';
@@ -182,6 +183,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Vila japonesa inteira, 96×80: o rio com a ponte de pedra, as casas de madeira das ruas de cima, o templo com o pagode, o campanário e o portal torii, o jardim do lago, o bambuzal, a rua do mercado e o dojo com os bonecos de treino.',
     size: SAKURAGAWA_SIZE,
     build: buildSakuragawaMap,
+  },
+  {
+    id: 'fazenda-vale-dourado',
+    name: 'Fazenda do Vale Dourado',
+    description:
+      'Campo inteiro, 104×88: a sede, o celeiro e o terreiro com o poço; os trigais cercados e a horta de abóboras; o pasto, o pomar, o lago e o povoado com a ferraria; do outro lado do rio, o moinho de vento, a serraria, o moinho d’água e o bosque.',
+    size: GOLDEN_VALE_SIZE,
+    build: buildGoldenValeMap,
   },
   {
     id: 'deserto',

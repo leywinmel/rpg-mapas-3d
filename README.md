@@ -188,6 +188,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Vila de Sakuragawa" (96 × 80) é uma vila japonesa inteira: o rio com a ponte de pedra, as casas
   de madeira das ruas de cima, o templo com o pagode, o campanário e o portal torii, o jardim do lago,
   o bambuzal, a rua do mercado e o dojo com os bonecos de treino.
+  A "Fazenda do Vale Dourado" (104 × 88) é o campo inteiro: a sede, o celeiro e o terreiro com o
+  poço, os trigais cercados, a horta de abóboras, o pasto, o pomar, o lago, o povoado com a ferraria
+  e, do outro lado do rio, o moinho de vento, a serraria, o moinho d’água e o bosque.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
