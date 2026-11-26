@@ -134,6 +134,36 @@ export const KAYKIT_PACKS = {
       ['tunnel_straight_B', 'kay-tunel-b'],
     ],
   },
+  /** Mais peças do KayKit City Builder Bits (RPG-83). */
+  cityExtra: {
+    scale: 5,
+    texture: 'kaykit-city',
+    pieces: [
+      ['car_taxi', 'kay-taxi'],
+      ['trafficlight_C', 'kay-semaforo-pedestre'],
+      ['trash_B', 'kay-lixeira-b'],
+      ['bush', 'kay-arbusto-cidade'],
+      ['box_A', 'kay-caixa-papelao-a'],
+      ['box_B', 'kay-caixa-papelao-b'],
+    ],
+  },
+  /** Sobras do KayKit Halloween Bits: velas, cercas, pinheiros pequenos e cova de terra (RPG-83). */
+  halloweenMore: {
+    scale: 0.5,
+    texture: 'kaykit-halloween',
+    pieces: [
+      ['candle', 'kay-vela'],
+      ['fence_pillar', 'kay-pilar-cerca'],
+      ['fence_seperate', 'kay-cerca-ferro'],
+      ['pillar', 'kay-pilar-pedra'],
+      ['plaque', 'kay-placa-memorial'],
+      ['tree_pine_yellow_small', 'kay-pinheiro-amarelo-pequeno'],
+      ['tree_pine_orange_small', 'kay-pinheiro-laranja-pequeno'],
+      ['pumpkin_yellow_small', 'kay-abobora-amarela-pequena'],
+      ['bone_C', 'kay-osso-longo'],
+      ['floor_dirt_grave', 'kay-cova-terra'],
+    ],
+  },
   /** Móveis de casa moderna (KayKit Furniture Bits). */
   furniture: {
     scale: PERSON_SCALE,
