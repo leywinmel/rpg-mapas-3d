@@ -200,6 +200,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   O "Porto das Areias Douradas" (104 × 88) é uma cidade portuária no deserto: a doca com o navio
   mercante entre os píeres, o bazar com as bancas cobertas e o poço, o palácio murado do sultão com
   o jardim da fonte, o oásis com o lago e as palmeiras e o acampamento da caravana na praia.
+  As "Catacumbas do Ossário" (104 × 88) são uma masmorra gigante: a capela dos ossos com os pilares e
+  os sarcófagos, as galerias do ossário cheias de crânios, os túmulos dos nobres, o salão das
+  armadilhas, os aposentos dos sacerdotes, a cripta do tesouro e o covil do lich entre dois lagos negros.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
