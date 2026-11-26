@@ -420,41 +420,41 @@ describe('posto da rodovia', () => {
   });
 });
 
-describe('taverna do javali', () => {
-  /** Anda de casa em casa sem atravessar parede: passa pela parede com porta e pelos vãos. */
-  function walkFrom(model: MapModel, start: Cell): Set<string> {
-    const walls = new Set(
-      [...model.chunks.values()].flatMap((chunk) =>
-        chunk.walls
-          .filter((wall) => !wall.style.includes('porta'))
-          .map((wall) => `${wall.x},${wall.z},${wall.side}`),
-      ),
-    );
-    const blocked = (from: Cell, to: Cell) => {
-      if (to.x !== from.x) return walls.has(`${Math.max(from.x, to.x)},${from.z},west`);
-      return walls.has(`${from.x},${Math.max(from.z, to.z)},north`);
-    };
-    const seen = new Set([`${start.x},${start.z}`]);
-    const queue = [start];
-    for (let cell = queue.shift(); cell; cell = queue.shift()) {
-      for (const [dx, dz] of [
-        [1, 0],
-        [-1, 0],
-        [0, 1],
-        [0, -1],
-      ] as const) {
-        const next = { x: cell.x + dx, z: cell.z + dz };
-        const id = `${next.x},${next.z}`;
-        const outside =
-          next.x < 0 || next.z < 0 || next.x >= model.size.width || next.z >= model.size.depth;
-        if (outside || seen.has(id) || blocked(cell, next)) continue;
-        seen.add(id);
-        queue.push(next);
-      }
+/** Anda de casa em casa sem atravessar parede: passa pela parede com porta e pelos vãos. */
+function walkFrom(model: MapModel, start: Cell): Set<string> {
+  const walls = new Set(
+    [...model.chunks.values()].flatMap((chunk) =>
+      chunk.walls
+        .filter((wall) => !wall.style.includes('porta'))
+        .map((wall) => `${wall.x},${wall.z},${wall.side}`),
+    ),
+  );
+  const blocked = (from: Cell, to: Cell) => {
+    if (to.x !== from.x) return walls.has(`${Math.max(from.x, to.x)},${from.z},west`);
+    return walls.has(`${from.x},${Math.max(from.z, to.z)},north`);
+  };
+  const seen = new Set([`${start.x},${start.z}`]);
+  const queue = [start];
+  for (let cell = queue.shift(); cell; cell = queue.shift()) {
+    for (const [dx, dz] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ] as const) {
+      const next = { x: cell.x + dx, z: cell.z + dz };
+      const id = `${next.x},${next.z}`;
+      const outside =
+        next.x < 0 || next.z < 0 || next.x >= model.size.width || next.z >= model.size.depth;
+      if (outside || seen.has(id) || blocked(cell, next)) continue;
+      seen.add(id);
+      queue.push(next);
     }
-    return seen;
   }
+  return seen;
+}
 
+describe('taverna do javali', () => {
   it('shouldReachEveryRoomFromTheStreetThroughTheDoors', () => {
     const { model } = readyMap('taverna-javali')!.build();
     const reached = walkFrom(model, { x: 10, z: 21 });
@@ -467,5 +467,62 @@ describe('taverna do javali', () => {
       (piece) => piece.asset.source === 'catalog' && piece.asset.key.startsWith('kay-'),
     );
     expect(kaykit.length).toBeGreaterThan(60);
+  });
+});
+
+const kayPieces = (model: MapModel) =>
+  allPieces(model).filter(
+    (piece) => piece.asset.source === 'catalog' && piece.asset.key.startsWith('kay-'),
+  );
+const keysOf = (model: MapModel) =>
+  allPieces(model).flatMap((piece) => (piece.asset.source === 'catalog' ? [piece.asset.key] : []));
+
+describe('cemitério da colina', () => {
+  const { model } = readyMap('cemiterio-colina')!.build();
+
+  it('shouldReachEveryCellFromTheRoadThroughTheHutDoor', () => {
+    expect(walkFrom(model, { x: 19, z: 39 }).size).toBe(model.size.width * model.size.depth);
+  });
+
+  it('shouldHaveTheCryptTheOpenGraveAndRowsOfGraves', () => {
+    const keys = keysOf(model);
+    expect(keys.filter((key) => key === 'kay-mausoleu')).toHaveLength(1);
+    expect(keys).toContain('kay-cova-aberta');
+    expect(keys).toContain('kay-portao-cemiterio');
+    expect(kayPieces(model).length).toBeGreaterThan(150);
+  });
+});
+
+describe('restaurante da esquina', () => {
+  const { model } = readyMap('restaurante-esquina')!.build();
+
+  it('shouldReachEveryRoomFromTheSidewalkThroughTheDoors', () => {
+    expect(walkFrom(model, { x: 12, z: 26 }).size).toBe(model.size.width * model.size.depth);
+  });
+
+  it('shouldHaveAFullKitchenAndAFurnishedHouse', () => {
+    const keys = keysOf(model);
+    for (const key of ['kay-fogao', 'kay-forno', 'kay-geladeira', 'kay-pia', 'kay-cama-casal'])
+      expect(keys).toContain(key);
+    expect(keys.filter((key) => key === 'kay-mesa-redonda')).toHaveLength(6);
+  });
+});
+
+describe('base ares', () => {
+  const { model } = readyMap('base-ares')!.build();
+
+  it('shouldBeABigMap', () => {
+    expect(model.size).toEqual({ width: 64, depth: 64 });
+  });
+
+  it('shouldHaveTheModulesTunnelsAndLandingPads', () => {
+    const keys = keysOf(model);
+    const modules = keys.filter(
+      (key) => key.startsWith('kay-modulo-') && key !== 'kay-modulo-pouso',
+    );
+    expect(modules).toHaveLength(7);
+    expect(keys.filter((key) => key === 'kay-tunel')).toHaveLength(4);
+    expect(keys.filter((key) => key === 'kay-plataforma-pouso')).toHaveLength(2);
+    expect(keys).toContain('kay-hangar');
   });
 });
