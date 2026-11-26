@@ -236,6 +236,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Feira Itinerante de Lumevento" (104 × 88) é o circo no campo: o picadeiro de areia cercado de
   barreiras, o acampamento dos artistas com as tendas e as carroças, a avenida das barracas com os
   postes de lanterna, as mesas de comida, o lago com os botes, os trigais e os bosques.
+  A "Vinícola de Monterrubro" (104 × 88) é a quinta de vinho na encosta: as fileiras de vinhedos com
+  as cercas, o pátio de pedra do casarão com o poço e as carroças da colheita, a adega, as casas dos
+  trabalhadores, o açude com o moinho-d’água, o pomar e os bosques.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
