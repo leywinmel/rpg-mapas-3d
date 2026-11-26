@@ -29,6 +29,7 @@ import { buildNewHopeMap, NEW_HOPE_SIZE } from './new-hope';
 import { buildSakuragawaMap, SAKURAGAWA_SIZE } from './sakuragawa';
 import { buildGoldenValeMap, GOLDEN_VALE_SIZE } from './golden-vale';
 import { buildCorsairCoveMap, CORSAIR_COVE_SIZE } from './corsair-cove';
+import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
 import { buildSiegeMap, SIEGE_SIZE } from './siege';
@@ -200,6 +201,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Refúgio pirata inteiro, 104×88: a doca com o navio atracado entre os píeres e mais dois ao largo, o cais, a vila com a taverna e o armazém, a ruína velha, o forte de pedra com a torre e os canhões, o acampamento na praia e o tesouro enterrado.',
     size: CORSAIR_COVE_SIZE,
     build: buildCorsairCoveMap,
+  },
+  {
+    id: 'fiorde-hrafnvik',
+    name: 'Fiorde de Hrafnvik',
+    description:
+      'Vila nórdica no inverno, 104×88, toda coberta de neve: o fiorde com o barco longo do jarl entre os píeres, a fortaleza de paliçada com o grande salão e a torre de vigia, a vila com a ferraria e o armazém do cais, o acampamento dos caçadores, o círculo de pedras rúnicas, o lago congelado e as montanhas.',
+    size: HRAFNVIK_SIZE,
+    build: buildHrafnvikMap,
   },
   {
     id: 'deserto',

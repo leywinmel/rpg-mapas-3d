@@ -83,7 +83,7 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
 - **Cena limpa:** o mestre esconde barras, painéis e ferramentas com a tecla `U` ou o botão do
   olho riscado na barra da mesa; um botão discreto no canto traz tudo de volta. Os jogadores nunca
   veem as ferramentas de construção.
-  Entre os chãos há areia, chão rachado de deserto, lama e poças d'água sobre a pedra.
+  Entre os chãos há areia, chão rachado de deserto, lama, poças d'água sobre a pedra, neve e gelo.
 - **Mapas prontos:** em "Novo mapa", a opção "Mapas prontos" abre a biblioteca de mapas montados à
   mão, casa por casa, sem sorteio. Escolha um, dê um nome e ele abre pronto para jogar ou editar.
   O primeiro é o "Navio de guerra" (27 × 46 casas, no mar): porão com redes, carga, paiol e cela,
@@ -194,6 +194,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Enseada do Corsário" (104 × 88) é um refúgio pirata: a doca com o navio atracado entre os
   píeres, o cais, a vila com a taverna e o armazém, o forte de pedra com a torre e os canhões, o
   acampamento na praia e o tesouro enterrado.
+  O "Fiorde de Hrafnvik" (104 × 88) é uma vila nórdica na neve: o fiorde com o barco longo entre os
+  píeres, a fortaleza de paliçada com o grande salão e a torre de vigia, a vila com a ferraria, o
+  acampamento dos caçadores, o círculo de pedras rúnicas, o lago congelado e as montanhas.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
