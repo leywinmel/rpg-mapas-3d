@@ -12,6 +12,7 @@ import { buildDesertMap, DESERT_SIZE } from './desert';
 import { buildForestMap, FOREST_SIZE } from './forest';
 import { buildGasStationMap, GAS_STATION_SIZE } from './gas-station';
 import { buildGraveyardMap, GRAVEYARD_SIZE } from './graveyard';
+import { buildHauntedVillageMap, HAUNTED_VILLAGE_SIZE } from './haunted-village';
 import { buildHospitalMap, HOSPITAL_SIZE } from './hospital';
 import { buildIslandMap, ISLAND_SIZE } from './island';
 import { buildKingdomMap, KINGDOM_SIZE } from './kingdom';
@@ -146,6 +147,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Campanha inteira, 128×112: o reino verde de Verdelar entre pinhais e o reino dourado de Auricampo com a mina de ouro, a praça neutra da feira na encruzilhada, o rio com três pontes, o acampamento dos viajantes e os trigais.',
     size: TWO_CROWNS_SIZE,
     build: buildTwoCrownsMap,
+  },
+  {
+    id: 'vila-corvalha',
+    name: 'Vila Assombrada de Corvalha',
+    description:
+      'Aldeia abandonada inteira, 96×88: o cemitério murado com mausoléus e cinco fileiras de túmulos, a igreja e a torre, a vila de casas em ruínas com o poço e a taverna, o pântano com a cabana da bruxa, o campo de abóboras e a mata morta.',
+    size: HAUNTED_VILLAGE_SIZE,
+    build: buildHauntedVillageMap,
   },
   {
     id: 'deserto',

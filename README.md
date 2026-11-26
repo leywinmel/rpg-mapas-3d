@@ -176,6 +176,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Metrópole" (120 × 96) é o centro inteiro de uma cidade grande: quatro avenidas, oito quarteirões
   de prédios com becos e caçambas, o parque central com chafariz e estátuas, dois estacionamentos, o
   pátio da delegacia e uma batida no cruzamento.
+  A "Vila Assombrada de Corvalha" (96 × 88) é uma aldeia abandonada: o cemitério murado com mausoléus e
+  túmulos, a igreja e a torre, as casas em ruínas com o poço e a taverna, o pântano com a cabana da
+  bruxa, o campo de abóboras e a mata morta.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
