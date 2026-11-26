@@ -227,6 +227,42 @@ export const KAYKIT_PACKS = {
       ['building_home_A_red', 'kay-casa-vermelha'],
     ],
   },
+  /** O reino dos telhados verdes: o povo da floresta. */
+  hexagonGreen: {
+    scale: 5,
+    texture: 'kaykit-hexagon',
+    pieces: [
+      ['building_castle_green', 'kay-castelo-verde'],
+      ['building_barracks_green', 'kay-quartel-verde'],
+      ['building_church_green', 'kay-igreja-verde'],
+      ['building_tavern_green', 'kay-taverna-verde'],
+      ['building_market_green', 'kay-mercado-verde'],
+      ['building_home_A_green', 'kay-casa-verde'],
+      ['building_home_B_green', 'kay-sobrado-verde'],
+      ['building_windmill_green', 'kay-moinho-verde'],
+      ['building_blacksmith_green', 'kay-ferraria-verde'],
+      ['building_tower_A_green', 'kay-torre-verde'],
+      ['building_well_green', 'kay-poco-verde'],
+    ],
+  },
+  /** O reino dos telhados amarelos: os mercadores do trigo e do ouro. */
+  hexagonYellow: {
+    scale: 5,
+    texture: 'kaykit-hexagon',
+    pieces: [
+      ['building_castle_yellow', 'kay-castelo-amarelo'],
+      ['building_church_yellow', 'kay-igreja-amarela'],
+      ['building_tavern_yellow', 'kay-taverna-amarela'],
+      ['building_market_yellow', 'kay-mercado-amarelo'],
+      ['building_home_A_yellow', 'kay-casa-amarela'],
+      ['building_home_B_yellow', 'kay-sobrado-amarelo'],
+      ['building_watermill_yellow', 'kay-moinho-agua-amarelo'],
+      ['building_lumbermill_yellow', 'kay-serraria-amarela'],
+      ['building_tower_catapult_yellow', 'kay-torre-catapulta-amarela'],
+      ['building_archeryrange_yellow', 'kay-campo-arqueiros-amarelo'],
+      ['building_mine_yellow', 'kay-mina-amarela'],
+    ],
+  },
   /** Adereços da vila e do acampamento, na mesma escala dos prédios. */
   hexagonProps: {
     scale: 5,
