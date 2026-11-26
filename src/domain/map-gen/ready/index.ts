@@ -33,6 +33,7 @@ import { buildGoldenSandsMap, GOLDEN_SANDS_SIZE } from './golden-sands';
 import { buildOssuaryMap, OSSUARY_SIZE } from './ossuary';
 import { buildLotharielMap, LOTHARIEL_SIZE } from './lothariel';
 import { buildSkullIslandMap, SKULL_ISLAND_SIZE } from './skull-island';
+import { buildDwarfHoldMap, DWARF_HOLD_SIZE } from './dwarf-hold';
 import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -245,6 +246,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Ilha pirata, 104×88, com o mar em volta: a enseada com o navio atracado no píer, a vila pirata com a taverna e a fogueira, o forte murado com as torres e os canhões, a selva fechada com a ruína da caveira e o tesouro, e o acampamento dos náufragos na praia leste.',
     size: SKULL_ISLAND_SIZE,
     build: buildSkullIslandMap,
+  },
+  {
+    id: 'fortaleza-khazdur',
+    name: 'Fortaleza de Khazdur',
+    description:
+      'Cidade anã escavada na montanha, 104×88: o salão do rei no pátio murado, o bairro das forjas, as casas dos clãs, a praça do mercado, a ponte de pedra sobre o abismo, as minas com os túneis e o lago subterrâneo com o quartel da guarda.',
+    size: DWARF_HOLD_SIZE,
+    build: buildDwarfHoldMap,
   },
   {
     id: 'deserto',
