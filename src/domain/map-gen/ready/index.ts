@@ -24,6 +24,7 @@ import { buildColonyMap, COLONY_SIZE } from './colony';
 import { buildCornerBistroMap, CORNER_BISTRO_SIZE } from './corner-bistro';
 import { buildModernTownMap, MODERN_TOWN_SIZE } from './modern-town';
 import { buildNeonDistrictMap, NEON_DISTRICT_SIZE } from './neon-district';
+import { buildIronDepthsMap, IRON_DEPTHS_SIZE } from './iron-depths';
 import { buildNewHopeMap, NEW_HOPE_SIZE } from './new-hope';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -164,6 +165,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Colônia inteira em Marte, 112×96: o núcleo com o comando, os domos, o laboratório e o alojamento; o campo solar, as turbinas, o campo de pouso com naves e hangar; as estufas, o depósito de carga e o garimpo com as perfuratrizes.',
     size: NEW_HOPE_SIZE,
     build: buildNewHopeMap,
+  },
+  {
+    id: 'profundezas-ferro-negro',
+    name: 'Profundezas de Ferro Negro',
+    description:
+      'Masmorra inteira, 80×72: a escadaria da superfície, o depósito e o alojamento dos guardas, o grande salão de banquetes, a prisão de celas gradeadas, o arsenal com o tesouro, a galeria das armadilhas e o covil com o altar e os sarcófagos.',
+    size: IRON_DEPTHS_SIZE,
+    build: buildIronDepthsMap,
   },
   {
     id: 'deserto',

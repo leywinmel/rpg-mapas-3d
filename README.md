@@ -182,6 +182,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Colônia Nova Esperança" (112 × 96) é uma colônia inteira em Marte: o núcleo com o comando, os
   domos, o laboratório e o alojamento; o campo solar e as turbinas; o campo de pouso com naves e
   hangar; as estufas, o depósito de carga e o garimpo com as perfuratrizes.
+  As "Profundezas de Ferro Negro" (80 × 72) são uma masmorra inteira: a escadaria da superfície, o
+  depósito, o alojamento dos guardas, o grande salão de banquetes, a prisão de celas gradeadas, o
+  arsenal com o tesouro, a galeria das armadilhas e o covil com o altar e os sarcófagos.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

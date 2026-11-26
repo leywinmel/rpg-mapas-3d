@@ -32,6 +32,31 @@ export const KAYKIT_PACKS = {
       ['torch_mounted', 'kay-tocha-parede'],
     ],
   },
+  /** Masmorra maior (KayKit Dungeon Remastered, RPG-78): pilares, entulho, armadilhas, tesouro e escadas. */
+  dungeonExtra: {
+    scale: PERSON_SCALE,
+    texture: 'kaykit-dungeon',
+    pieces: [
+      ['pillar_decorated', 'kay-pilar-ornado'],
+      ['column', 'kay-coluna-masmorra'],
+      ['rubble_large', 'kay-entulho'],
+      ['rubble_half', 'kay-entulho-pequeno'],
+      ['floor_tile_big_spikes', 'kay-armadilha-chao'],
+      ['floor_tile_big_grate', 'kay-grade-chao'],
+      ['keyring_hanging', 'kay-chaveiro'],
+      ['table_long_broken', 'kay-mesa-quebrada'],
+      ['sword_shield_gold', 'kay-espada-escudo-ouro'],
+      ['sword_shield_broken', 'kay-espada-escudo-quebrados'],
+      ['chest', 'kay-bau-madeira'],
+      ['coin_stack_medium', 'kay-pilha-moedas'],
+      ['banner_triple_red', 'kay-estandarte-triplo'],
+      ['barrel_large_decorated', 'kay-barril-grande'],
+      ['box_stacked', 'kay-caixotes'],
+      ['torch_lit', 'kay-tocha-pe'],
+      ['stairs_walled', 'kay-escada-pedra'],
+      ['table_long_tablecloth_decorated_A', 'kay-mesa-banquete-toalha'],
+    ],
+  },
   /** Móveis de casa moderna (KayKit Furniture Bits). */
   furniture: {
     scale: PERSON_SCALE,
