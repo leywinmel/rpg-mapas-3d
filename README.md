@@ -173,6 +173,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   montanhas, o lago, a aldeia queimada e os bosques. O "Vale das Duas Coroas" (128 × 112) é uma campanha
   inteira: o reino verde de Verdelar entre pinhais e o reino dourado de Auricampo com a mina de ouro,
   a praça neutra da feira na encruzilhada, o rio com três pontes, o acampamento dos viajantes e os trigais.
+  A "Metrópole" (120 × 96) é o centro inteiro de uma cidade grande: quatro avenidas, oito quarteirões
+  de prédios com becos e caçambas, o parque central com chafariz e estátuas, dois estacionamentos, o
+  pátio da delegacia e uma batida no cruzamento.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

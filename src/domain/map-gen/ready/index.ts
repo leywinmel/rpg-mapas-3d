@@ -17,6 +17,7 @@ import { buildIslandMap, ISLAND_SIZE } from './island';
 import { buildKingdomMap, KINGDOM_SIZE } from './kingdom';
 import { buildMarsBaseMap, MARS_BASE_SIZE } from './mars-base';
 import { buildMedievalTownMap, MEDIEVAL_TOWN_SIZE } from './medieval-town';
+import { buildMetropolisMap, METROPOLIS_SIZE } from './metropolis';
 import { buildCityCenterMap, CITY_CENTER_SIZE } from './city-center';
 import { buildColonyMap, COLONY_SIZE } from './colony';
 import { buildCornerBistroMap, CORNER_BISTRO_SIZE } from './corner-bistro';
@@ -121,6 +122,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Centro de cidade grande, 64×64: duas avenidas com semáforos, quatro quarteirões de prédios, becos com caçambas, praça arborizada, estacionamento e uma perseguição policial no asfalto.',
     size: AURORA_AVENUE_SIZE,
     build: buildAuroraAvenueMap,
+  },
+  {
+    id: 'metropole',
+    name: 'Metrópole',
+    description:
+      'Centro de cidade grande, 120×96: quatro avenidas, oito quarteirões de prédios com becos e caçambas, o parque central com chafariz e estátuas, dois estacionamentos, o pátio da delegacia e uma batida no cruzamento.',
+    size: METROPOLIS_SIZE,
+    build: buildMetropolisMap,
   },
   {
     id: 'cerco-rubraforte',
