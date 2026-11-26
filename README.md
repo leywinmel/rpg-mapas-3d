@@ -206,6 +206,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   O "Bosque de Lothariel" (104 × 88) é uma cidade élfica na floresta: o salão da rainha com as torres,
   a praça do conselho com o mercado, as casas dos elfos, o bairro dos guardiões, o lago da lua com a
   ilha da estátua e o moinho d’água, o bosque sagrado dos druidas e a mata fechada em volta.
+  A "Ilha da Caveira" (104 × 88) é uma ilha pirata cercada de mar: a enseada com o navio no píer, a
+  vila pirata com a taverna, o forte murado com os canhões, a selva com a ruína da caveira e o tesouro
+  e o acampamento dos náufragos na praia leste.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
