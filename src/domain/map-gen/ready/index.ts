@@ -30,6 +30,7 @@ import { buildSakuragawaMap, SAKURAGAWA_SIZE } from './sakuragawa';
 import { buildGoldenValeMap, GOLDEN_VALE_SIZE } from './golden-vale';
 import { buildCorsairCoveMap, CORSAIR_COVE_SIZE } from './corsair-cove';
 import { buildGoldenSandsMap, GOLDEN_SANDS_SIZE } from './golden-sands';
+import { buildOssuaryMap, OSSUARY_SIZE } from './ossuary';
 import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -218,6 +219,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Cidade portuária no deserto, 104×88: a doca com o navio mercante entre os píeres, a avenida de pedra até o obelisco, o bazar com seis bancas cobertas e o poço, o palácio murado do sultão com o salão, as torres e o jardim da fonte, o oásis com o lago e as palmeiras, o acampamento da caravana e a ruína velha.',
     size: GOLDEN_SANDS_SIZE,
     build: buildGoldenSandsMap,
+  },
+  {
+    id: 'catacumbas-ossario',
+    name: 'Catacumbas do Ossário',
+    description:
+      'Masmorra gigante, 104×88: a escadaria da entrada, a capela dos ossos com pilares e sarcófagos, as galerias do ossário cheias de crânios, os túmulos dos nobres, o salão das armadilhas, os aposentos dos sacerdotes, a cripta do tesouro e o covil do lich entre dois lagos negros.',
+    size: OSSUARY_SIZE,
+    build: buildOssuaryMap,
   },
   {
     id: 'deserto',
