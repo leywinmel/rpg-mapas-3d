@@ -26,6 +26,7 @@ import { buildModernTownMap, MODERN_TOWN_SIZE } from './modern-town';
 import { buildNeonDistrictMap, NEON_DISTRICT_SIZE } from './neon-district';
 import { buildIronDepthsMap, IRON_DEPTHS_SIZE } from './iron-depths';
 import { buildNewHopeMap, NEW_HOPE_SIZE } from './new-hope';
+import { buildSakuragawaMap, SAKURAGAWA_SIZE } from './sakuragawa';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
 import { buildSiegeMap, SIEGE_SIZE } from './siege';
@@ -173,6 +174,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Masmorra inteira, 80×72: a escadaria da superfície, o depósito e o alojamento dos guardas, o grande salão de banquetes, a prisão de celas gradeadas, o arsenal com o tesouro, a galeria das armadilhas e o covil com o altar e os sarcófagos.',
     size: IRON_DEPTHS_SIZE,
     build: buildIronDepthsMap,
+  },
+  {
+    id: 'vila-sakuragawa',
+    name: 'Vila de Sakuragawa',
+    description:
+      'Vila japonesa inteira, 96×80: o rio com a ponte de pedra, as casas de madeira das ruas de cima, o templo com o pagode, o campanário e o portal torii, o jardim do lago, o bambuzal, a rua do mercado e o dojo com os bonecos de treino.',
+    size: SAKURAGAWA_SIZE,
+    build: buildSakuragawaMap,
   },
   {
     id: 'deserto',
