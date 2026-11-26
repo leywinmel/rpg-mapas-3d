@@ -215,6 +215,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   O "Fortim de Grukmar" (104 × 88) é o acampamento de guerra de uma horda orc: a paliçada com o salão
   do chefe, as tendas, a arena e a forja; fora dela, a mata seca, as catapultas, a ruína saqueada e a
   ponte sobre o rio até o posto dos batedores.
+  O "Burgo de Morvane" (104 × 88) é a cidade gótica de um conde vampiro: o castelo no pátio murado,
+  a catedral com a torre do sino, o bairro velho, o rio com duas pontes, a praça do cadafalso com o
+  mercado noturno, as vielas do sul, o cemitério cercado de ferro e a muralha com o portão.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

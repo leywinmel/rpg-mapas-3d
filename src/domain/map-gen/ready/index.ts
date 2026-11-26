@@ -35,6 +35,7 @@ import { buildLotharielMap, LOTHARIEL_SIZE } from './lothariel';
 import { buildSkullIslandMap, SKULL_ISLAND_SIZE } from './skull-island';
 import { buildDwarfHoldMap, DWARF_HOLD_SIZE } from './dwarf-hold';
 import { buildOrcCampMap, ORC_CAMP_SIZE } from './orc-camp';
+import { buildGothicTownMap, GOTHIC_TOWN_SIZE } from './gothic-town';
 import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -263,6 +264,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Acampamento de guerra orc, 104×88: a paliçada com o salão do chefe, as casas compridas, as tendas, a arena e a forja; fora dela, as montanhas, a mata seca, as catapultas, a ruína saqueada e a ponte sobre o rio até o posto dos batedores.',
     size: ORC_CAMP_SIZE,
     build: buildOrcCampMap,
+  },
+  {
+    id: 'burgo-morvane',
+    name: 'Burgo de Morvane',
+    description:
+      'Cidade gótica do conde vampiro, 104×88: o castelo no pátio murado, a catedral com a torre do sino, o bairro velho, o rio com duas pontes, a praça do cadafalso com o mercado noturno, as vielas do sul, o cemitério cercado de ferro com os mausoléus e a muralha com o portão.',
+    size: GOTHIC_TOWN_SIZE,
+    build: buildGothicTownMap,
   },
   {
     id: 'deserto',
