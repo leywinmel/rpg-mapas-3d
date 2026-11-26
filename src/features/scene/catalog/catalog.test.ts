@@ -14,6 +14,8 @@ const REQUIRED_KEYS = {
     'chao-rachado',
     'lama',
     'poca',
+    'neve',
+    'gelo',
   ],
   wall: ['parede-pedra', 'parede-madeira', 'grade'],
   prop: [

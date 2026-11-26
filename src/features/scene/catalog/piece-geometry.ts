@@ -292,6 +292,38 @@ function mudFloor(): ProceduralLayer[] {
   ];
 }
 
+/** Neve fofa: o manto claro com montinhos soprados pelo vento (RPG-86). */
+function snowFloor(): ProceduralLayer[] {
+  const random = seededRandom('neve-montes');
+  const parts: Part[] = [box([1, FLOOR_CAP_DEPTH, 1], C.snowTop, { y: CAP_BOTTOM })];
+  const drifts: Array<[number, number, number]> = [
+    [-0.25, -0.22, 0.12],
+    [0.26, 0.18, 0.1],
+    [0.05, 0.32, 0.07],
+  ];
+  for (const [x, z, radius] of drifts) {
+    parts.push(lump(radius, C.snowDrift, { x, y: 0, z, sy: 0.3 + random() * 0.1 }));
+  }
+  return [matte(parts, 'neve')];
+}
+
+/** Gelo de lago congelado: placa lisa azulada com rachaduras claras (RPG-86). */
+function iceFloor(): ProceduralLayer[] {
+  const random = seededRandom('gelo-rachaduras');
+  const parts: Part[] = [box([1, FLOOR_CAP_DEPTH, 1], C.iceTop, { y: CAP_BOTTOM })];
+  for (let index = 0; index < 3; index += 1) {
+    parts.push(
+      box([0.35 + random() * 0.3, 0.006, 0.018], C.iceCrack, {
+        x: (random() - 0.5) * 0.4,
+        y: 0.001,
+        z: -0.3 + index * 0.3,
+        ry: (random() - 0.5) * 1.6,
+      }),
+    );
+  }
+  return [matte(parts, 'gelo')];
+}
+
 /** Poça d'água sobre lajes de pedra: a rua depois da chuva (RPG-41). */
 function puddleFloor(): ProceduralLayer[] {
   return [
@@ -572,6 +604,8 @@ export const PROCEDURAL_BUILDERS: Readonly<Record<string, () => ProceduralLayer[
   'chao-rachado': crackedFloor,
   lama: mudFloor,
   poca: puddleFloor,
+  neve: snowFloor,
+  gelo: iceFloor,
   'parede-pedra': stoneWall,
   'parede-madeira': woodWall,
   grade: ironGrate,
