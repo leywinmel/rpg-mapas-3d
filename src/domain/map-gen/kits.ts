@@ -328,6 +328,11 @@ export const PROP_FOOTPRINTS: Readonly<Record<string, Footprint>> = {
   'kay-tapete-listrado-2': { width: 2, depth: 1 },
   'kay-tapete-oval-2': { width: 2, depth: 1 },
   'kay-tapete': { width: 2, depth: 1 },
+  // Cidade e cemitério (RPG-83): as peças maiores do City Builder e do Halloween Bits.
+  'kay-taxi': { width: 2, depth: 5 },
+  'kay-semaforo-pedestre': { width: 4, depth: 2 },
+  'kay-cerca-ferro': { width: 2, depth: 1 },
+  'kay-cova-terra': { width: 2, depth: 2 },
   // Base espacial (RPG-82): as peças maiores do KayKit Space Base Bits.
   'kay-carga-caixa': { width: 1, depth: 2 },
   'kay-carga-caixa-embalada': { width: 2, depth: 2 },

@@ -2301,6 +2301,144 @@ const ESPACO2: readonly KaykitSpec[] = [
   },
 ];
 
+const CIDADE2: readonly KaykitSpec[] = [
+  {
+    key: 'kay-taxi',
+    label: 'Táxi amarelo',
+    keywords: ['carro', 'cidade', 'rua', 'corrida'],
+    icon: 'car',
+    category: 'vehicle',
+    height: 2.172,
+    footprint: { width: 2, depth: 5 },
+  },
+  {
+    key: 'kay-semaforo-pedestre',
+    label: 'Semáforo com braço',
+    keywords: ['cidade', 'cruzamento', 'trânsito', 'avenida'],
+    icon: 'pillar',
+    height: 4.847,
+    footprint: { width: 4, depth: 2 },
+  },
+  {
+    key: 'kay-lixeira-b',
+    label: 'Saco de lixo',
+    keywords: ['cidade', 'beco', 'sujeira', 'lixo'],
+    icon: 'box',
+    category: 'furniture',
+    height: 0.202,
+  },
+  {
+    key: 'kay-arbusto-cidade',
+    label: 'Arbusto em vaso de calçada',
+    keywords: ['cidade', 'praça', 'calçada', 'jardim'],
+    icon: 'sprout',
+    category: 'nature',
+    height: 1.903,
+  },
+  {
+    key: 'kay-caixa-papelao-a',
+    label: 'Caixa de papelão',
+    keywords: ['mudança', 'depósito', 'entrega', 'beco'],
+    icon: 'box',
+    category: 'furniture',
+    height: 0.882,
+  },
+  {
+    key: 'kay-caixa-papelao-b',
+    label: 'Caixa de papelão aberta',
+    keywords: ['mudança', 'depósito', 'entrega', 'beco'],
+    icon: 'box',
+    category: 'furniture',
+    height: 0.848,
+  },
+];
+
+const OUTONO2: readonly KaykitSpec[] = [
+  {
+    key: 'kay-vela',
+    label: 'Vela',
+    keywords: ['vela', 'luz', 'altar', 'mesa'],
+    icon: 'flame',
+    category: 'furniture',
+    height: 0.393,
+    light: CANDLE_LOW,
+  },
+  {
+    key: 'kay-pilar-cerca',
+    label: 'Pilar de cerca de pedra',
+    keywords: ['cemitério', 'muro', 'mansão', 'pedra'],
+    icon: 'pillar',
+    category: 'structure',
+    height: 1.1,
+  },
+  {
+    key: 'kay-cerca-ferro',
+    label: 'Cerca de ferro',
+    keywords: ['cemitério', 'grade', 'mansão', 'jardim'],
+    icon: 'fence',
+    category: 'structure',
+    height: 1,
+    footprint: { width: 2, depth: 1 },
+  },
+  {
+    key: 'kay-pilar-pedra',
+    label: 'Pilar de pedra alto',
+    keywords: ['cemitério', 'ruína', 'templo', 'coluna'],
+    icon: 'pillar',
+    category: 'structure',
+    height: 2.2,
+  },
+  {
+    key: 'kay-placa-memorial',
+    label: 'Laje de túmulo',
+    keywords: ['cemitério', 'túmulo', 'jazigo', 'sepultura'],
+    icon: 'square',
+    category: 'structure',
+    height: 0.2,
+  },
+  {
+    key: 'kay-pinheiro-amarelo-pequeno',
+    label: 'Pinheiro de outono pequeno',
+    keywords: ['outono', 'floresta', 'árvore', 'bosque'],
+    icon: 'tree',
+    category: 'nature',
+    height: 2.021,
+  },
+  {
+    key: 'kay-pinheiro-laranja-pequeno',
+    label: 'Pinheiro laranja pequeno',
+    keywords: ['outono', 'floresta', 'árvore', 'bosque'],
+    icon: 'tree',
+    category: 'nature',
+    height: 2.021,
+  },
+  {
+    key: 'kay-abobora-amarela-pequena',
+    label: 'Abóbora amarela pequena',
+    keywords: ['horta', 'colheita', 'outono', 'fazenda'],
+    icon: 'sprout',
+    category: 'nature',
+    height: 0.275,
+  },
+  {
+    key: 'kay-osso-longo',
+    label: 'Osso comprido',
+    keywords: ['osso', 'covil', 'masmorra', 'fera'],
+    icon: 'statue',
+    category: 'furniture',
+    height: 0.138,
+  },
+  {
+    key: 'kay-cova-terra',
+    label: 'Cova aberta de pedra',
+    keywords: ['cemitério', 'enterro', 'túmulo', 'buraco'],
+    icon: 'statue',
+    category: 'structure',
+    height: 0.765,
+    footprint: { width: 2, depth: 2 },
+  },
+];
+
 /**
  * Monta a pasta com a categoria de cada peça (a da pasta, ou a própria quando ela diz). Pacote de
  * uma época só (a cidade, a vila, a base) leva o estilo dela, para o filtro do editor separar.
@@ -2332,4 +2470,6 @@ export const KAYKIT_PIECES: readonly CatalogEntry[] = [
   ...kaykitPieces('/assets/graveyard', 'structure', OUTONO),
   ...kaykitPieces('/assets/home', 'furniture', CASA2),
   ...kaykitPieces('/assets/spacebase', 'structure', ESPACO2, 'futurist'),
+  ...kaykitPieces('/assets/citybits', 'structure', CIDADE2, 'modern'),
+  ...kaykitPieces('/assets/graveyard', 'structure', OUTONO2),
 ];
