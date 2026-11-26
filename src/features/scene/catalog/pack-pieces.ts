@@ -9,6 +9,7 @@ import type { CatalogEntry } from './catalog-types';
 import { GENERIC_PIECES } from './generic-pieces';
 import { INSTITUTION_PIECES } from './institution-pieces';
 import { JAPANESE_PIECES } from './japanese-pieces';
+import { KAYKIT_PIECES } from './kaykit-pieces';
 
 /** Parede de pacote cobre um andar inteiro (porta e janela não se repetem empilhadas). */
 const STORY_SPAN = STORY_HEIGHT_STEPS * HEIGHT_STEP;
@@ -2197,4 +2198,5 @@ export const PACK_PIECES: readonly CatalogEntry[] = [
   ...GENERIC_PIECES,
   ...JAPANESE_PIECES,
   ...INSTITUTION_PIECES,
+  ...KAYKIT_PIECES,
 ];

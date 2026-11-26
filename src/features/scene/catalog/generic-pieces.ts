@@ -8,7 +8,7 @@
 import type { Footprint } from '@/domain/map-v2';
 import type { CatalogEntry, PieceCategory, PieceIcon, PieceLight } from './catalog-types';
 
-type GenericSpec = {
+export type GenericSpec = {
   key: string;
   label: string;
   keywords: readonly string[];
@@ -19,7 +19,7 @@ type GenericSpec = {
 };
 
 /** Monta as entradas de uma pasta de public/assets, todas da mesma categoria. */
-function genericPieces(
+export function genericPieces(
   folder: string,
   category: PieceCategory,
   specs: readonly GenericSpec[],
