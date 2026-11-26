@@ -212,6 +212,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Fortaleza de Khazdur" (104 × 88) é uma cidade anã escavada na montanha: o salão do rei no pátio
   murado, o bairro das forjas, as casas dos clãs, a praça do mercado, a ponte de pedra sobre o abismo,
   as minas com os túneis e o lago subterrâneo com o quartel da guarda.
+  O "Fortim de Grukmar" (104 × 88) é o acampamento de guerra de uma horda orc: a paliçada com o salão
+  do chefe, as tendas, a arena e a forja; fora dela, a mata seca, as catapultas, a ruína saqueada e a
+  ponte sobre o rio até o posto dos batedores.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.

@@ -34,6 +34,7 @@ import { buildOssuaryMap, OSSUARY_SIZE } from './ossuary';
 import { buildLotharielMap, LOTHARIEL_SIZE } from './lothariel';
 import { buildSkullIslandMap, SKULL_ISLAND_SIZE } from './skull-island';
 import { buildDwarfHoldMap, DWARF_HOLD_SIZE } from './dwarf-hold';
+import { buildOrcCampMap, ORC_CAMP_SIZE } from './orc-camp';
 import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -254,6 +255,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Cidade anã escavada na montanha, 104×88: o salão do rei no pátio murado, o bairro das forjas, as casas dos clãs, a praça do mercado, a ponte de pedra sobre o abismo, as minas com os túneis e o lago subterrâneo com o quartel da guarda.',
     size: DWARF_HOLD_SIZE,
     build: buildDwarfHoldMap,
+  },
+  {
+    id: 'fortim-grukmar',
+    name: 'Fortim de Grukmar',
+    description:
+      'Acampamento de guerra orc, 104×88: a paliçada com o salão do chefe, as casas compridas, as tendas, a arena e a forja; fora dela, as montanhas, a mata seca, as catapultas, a ruína saqueada e a ponte sobre o rio até o posto dos batedores.',
+    size: ORC_CAMP_SIZE,
+    build: buildOrcCampMap,
   },
   {
     id: 'deserto',
