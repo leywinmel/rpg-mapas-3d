@@ -191,6 +191,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Fazenda do Vale Dourado" (104 × 88) é o campo inteiro: a sede, o celeiro e o terreiro com o
   poço, os trigais cercados, a horta de abóboras, o pasto, o pomar, o lago, o povoado com a ferraria
   e, do outro lado do rio, o moinho de vento, a serraria, o moinho d’água e o bosque.
+  A "Enseada do Corsário" (104 × 88) é um refúgio pirata: a doca com o navio atracado entre os
+  píeres, o cais, a vila com a taverna e o armazém, o forte de pedra com a torre e os canhões, o
+  acampamento na praia e o tesouro enterrado.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
