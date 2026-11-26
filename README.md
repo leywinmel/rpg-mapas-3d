@@ -233,6 +233,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   A "Vila Mineira de Pedravela" (104 × 88) fica ao pé da serra: três bocas de mina (uma de ouro)
   com o pátio dos carrinhos, a estrada que desce e cruza o rio pela ponte, a roda-d’água, a serraria,
   a rua da vila com as casas e os bosques do sul.
+  A "Feira Itinerante de Lumevento" (104 × 88) é o circo no campo: o picadeiro de areia cercado de
+  barreiras, o acampamento dos artistas com as tendas e as carroças, a avenida das barracas com os
+  postes de lanterna, as mesas de comida, o lago com os botes, os trigais e os bosques.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
