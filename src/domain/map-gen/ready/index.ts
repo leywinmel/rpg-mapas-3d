@@ -29,6 +29,7 @@ import { buildNewHopeMap, NEW_HOPE_SIZE } from './new-hope';
 import { buildSakuragawaMap, SAKURAGAWA_SIZE } from './sakuragawa';
 import { buildGoldenValeMap, GOLDEN_VALE_SIZE } from './golden-vale';
 import { buildCorsairCoveMap, CORSAIR_COVE_SIZE } from './corsair-cove';
+import { buildGoldenSandsMap, GOLDEN_SANDS_SIZE } from './golden-sands';
 import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -209,6 +210,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Vila nórdica no inverno, 104×88, toda coberta de neve: o fiorde com o barco longo do jarl entre os píeres, a fortaleza de paliçada com o grande salão e a torre de vigia, a vila com a ferraria e o armazém do cais, o acampamento dos caçadores, o círculo de pedras rúnicas, o lago congelado e as montanhas.',
     size: HRAFNVIK_SIZE,
     build: buildHrafnvikMap,
+  },
+  {
+    id: 'porto-areias-douradas',
+    name: 'Porto das Areias Douradas',
+    description:
+      'Cidade portuária no deserto, 104×88: a doca com o navio mercante entre os píeres, a avenida de pedra até o obelisco, o bazar com seis bancas cobertas e o poço, o palácio murado do sultão com o salão, as torres e o jardim da fonte, o oásis com o lago e as palmeiras, o acampamento da caravana e a ruína velha.',
+    size: GOLDEN_SANDS_SIZE,
+    build: buildGoldenSandsMap,
   },
   {
     id: 'deserto',

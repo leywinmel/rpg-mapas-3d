@@ -197,6 +197,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   O "Fiorde de Hrafnvik" (104 × 88) é uma vila nórdica na neve: o fiorde com o barco longo entre os
   píeres, a fortaleza de paliçada com o grande salão e a torre de vigia, a vila com a ferraria, o
   acampamento dos caçadores, o círculo de pedras rúnicas, o lago congelado e as montanhas.
+  O "Porto das Areias Douradas" (104 × 88) é uma cidade portuária no deserto: a doca com o navio
+  mercante entre os píeres, o bazar com as bancas cobertas e o poço, o palácio murado do sultão com
+  o jardim da fonte, o oásis com o lago e as palmeiras e o acampamento da caravana na praia.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
