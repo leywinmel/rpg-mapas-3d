@@ -36,6 +36,7 @@ import { buildSkullIslandMap, SKULL_ISLAND_SIZE } from './skull-island';
 import { buildDwarfHoldMap, DWARF_HOLD_SIZE } from './dwarf-hold';
 import { buildOrcCampMap, ORC_CAMP_SIZE } from './orc-camp';
 import { buildGothicTownMap, GOTHIC_TOWN_SIZE } from './gothic-town';
+import { buildHarvestVillageMap, HARVEST_VILLAGE_SIZE } from './harvest-village';
 import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -272,6 +273,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Cidade gótica do conde vampiro, 104×88: o castelo no pátio murado, a catedral com a torre do sino, o bairro velho, o rio com duas pontes, a praça do cadafalso com o mercado noturno, as vielas do sul, o cemitério cercado de ferro com os mausoléus e a muralha com o portão.',
     size: GOTHIC_TOWN_SIZE,
     build: buildGothicTownMap,
+  },
+  {
+    id: 'aldeia-ribeira-clara',
+    name: 'Aldeia de Ribeira Clara',
+    description:
+      'Aldeia de lavradores na colheita, 104×88: a ponte de pedra sobre o ribeirão, o moinho d’água, o pomar, os trigais com os moinhos de vento, a praça da feira com o poço, a capela, as hortas, a serraria, o pasto cercado e o celeiro grande com o terreiro.',
+    size: HARVEST_VILLAGE_SIZE,
+    build: buildHarvestVillageMap,
   },
   {
     id: 'deserto',
