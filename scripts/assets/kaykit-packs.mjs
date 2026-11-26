@@ -1,0 +1,157 @@
+// Pacotes KayKit (Kay Lousberg, CC0) que o kaykit-props.mjs converte: pasta de saída, textura
+// compartilhada e a lista de peças (modelo do pacote e chave no catálogo). A frente olha para +z.
+// A escala põe o pacote na medida do boneco de 1,5: com 0,65 o tampo da mesa fica na cintura dele.
+
+/** Móveis e adereços em tamanho de gente. */
+const PERSON_SCALE = 0.65;
+
+export const KAYKIT_PACKS = {
+  /** Móveis de taverna e de masmorra (KayKit Dungeon Remastered). */
+  dungeon: {
+    scale: PERSON_SCALE,
+    texture: 'kaykit-dungeon',
+    pieces: [
+      ['bed_decorated', 'kay-cama'],
+      ['bed_floor', 'kay-cama-palha'],
+      ['keg_decorated', 'kay-barril-chope'],
+      ['barrel_small_stack', 'kay-barris'],
+      ['table_long_decorated_A', 'kay-mesa-banquete'],
+      ['table_medium_tablecloth', 'kay-mesa-toalha'],
+      ['table_small_decorated_A', 'kay-mesinha'],
+      ['stool', 'kay-banquinho'],
+      ['shelves', 'kay-estante'],
+      ['shelf_small_candles', 'kay-prateleira-velas'],
+      ['candle_triple', 'kay-candelabro'],
+      ['banner_patternA_red', 'kay-estandarte-vermelho'],
+      ['banner_shield_blue', 'kay-estandarte-azul'],
+      ['crates_stacked', 'kay-caixas'],
+      ['coin_stack_large', 'kay-moedas'],
+      ['chest_gold', 'kay-bau-ouro'],
+      ['sword_shield', 'kay-espada-escudo'],
+      ['trunk_large_A', 'kay-arca'],
+      ['torch_mounted', 'kay-tocha-parede'],
+    ],
+  },
+  /** Móveis de casa moderna (KayKit Furniture Bits). */
+  furniture: {
+    scale: PERSON_SCALE,
+    texture: 'kaykit-furniture',
+    pieces: [
+      ['armchair', 'kay-poltrona'],
+      ['couch_pillows', 'kay-sofa'],
+      ['bed_double_A', 'kay-cama-casal'],
+      ['bed_single_A', 'kay-cama-solteiro'],
+      ['cabinet_medium_decorated', 'kay-comoda'],
+      ['cabinet_small', 'kay-criado-mudo'],
+      ['chair_A', 'kay-cadeira-estofada'],
+      ['chair_A_wood', 'kay-cadeira-madeira'],
+      ['chair_stool', 'kay-banqueta'],
+      ['lamp_standing', 'kay-luminaria-pe'],
+      ['lamp_table', 'kay-abajur'],
+      ['table_medium', 'kay-mesa-jantar'],
+      ['table_medium_long', 'kay-mesa-comprida'],
+      ['table_low', 'kay-mesa-centro'],
+      ['table_small', 'kay-mesa-lateral'],
+      ['rug_rectangle_stripes_A', 'kay-tapete-listrado'],
+      ['rug_oval_A', 'kay-tapete-oval'],
+      ['cactus_medium_A', 'kay-cacto'],
+      ['pictureframe_standing_A', 'kay-porta-retrato'],
+      ['book_set', 'kay-livros'],
+    ],
+  },
+  /**
+   * Cemitério e Halloween (KayKit Halloween Bits). O pacote é maior que os outros: com 0,5 a lápide
+   * bate no peito do boneco e o caixão cabe em 1×2.
+   */
+  halloween: {
+    scale: 0.5,
+    texture: 'kaykit-halloween',
+    pieces: [
+      ['grave_A', 'kay-cova'],
+      ['grave_A_destroyed', 'kay-cova-aberta'],
+      ['grave_B', 'kay-tumulo'],
+      ['gravestone', 'kay-lapide'],
+      ['gravemarker_A', 'kay-cruz-tumulo'],
+      ['coffin', 'kay-caixao'],
+      ['coffin_decorated', 'kay-caixao-ornado'],
+      ['crypt', 'kay-mausoleu'],
+      ['shrine_candles', 'kay-santuario'],
+      ['arch_gate', 'kay-portao-cemiterio'],
+      ['fence', 'kay-grade-ferro'],
+      ['fence_broken', 'kay-grade-quebrada'],
+      ['pumpkin_orange_jackolantern', 'kay-abobora-lanterna'],
+      ['pumpkin_orange', 'kay-abobora'],
+      ['tree_dead_large', 'kay-arvore-morta'],
+      ['tree_dead_medium', 'kay-arvore-seca'],
+      ['tree_pine_orange_large', 'kay-pinheiro-outono'],
+      ['lantern_standing', 'kay-lanterna'],
+      ['post_lantern', 'kay-poste-lanterna'],
+      ['post_skull', 'kay-estaca-caveira'],
+      ['bench_decorated', 'kay-banco-cemiterio'],
+      ['skull_candle', 'kay-caveira-vela'],
+      ['ribcage', 'kay-costelas'],
+      ['bone_A', 'kay-ossos'],
+    ],
+  },
+  /** Cozinha e salão de restaurante (KayKit Restaurant Bits). */
+  restaurant: {
+    scale: PERSON_SCALE,
+    texture: 'kaykit-restaurant',
+    pieces: [
+      ['stove_multi_decorated', 'kay-fogao'],
+      ['oven', 'kay-forno'],
+      ['fridge_A_decorated', 'kay-geladeira'],
+      ['kitchencounter_sink_backsplash', 'kay-pia'],
+      ['kitchencounter_straight_A_decorated', 'kay-bancada'],
+      ['kitchencounter_straight_A', 'kay-bancada-lisa'],
+      ['kitchencounter_outercorner', 'kay-bancada-canto'],
+      ['kitchencabinet', 'kay-armario-cozinha'],
+      ['dishrack_plates', 'kay-escorredor'],
+      ['table_round_A_decorated', 'kay-mesa-redonda'],
+      ['table_round_A_small_decorated', 'kay-mesa-redonda-pequena'],
+      ['kitchentable_A_large_decorated', 'kay-mesa-cozinha'],
+      ['chair_A', 'kay-cadeira-restaurante'],
+      ['chair_stool', 'kay-banqueta-bar'],
+      ['crate_carrots', 'kay-caixa-cenouras'],
+      ['crate_tomatoes', 'kay-caixa-tomates'],
+      ['crate_potatoes', 'kay-caixa-batatas'],
+      ['crate_cheese', 'kay-caixa-queijos'],
+      ['stew_pot', 'kay-panela-ensopado'],
+      ['jar_A_large', 'kay-pote'],
+      ['food_dinner', 'kay-prato-jantar'],
+      ['food_burger', 'kay-hamburguer'],
+    ],
+  },
+  /**
+   * Base em outro planeta: módulos, pouso, carga e energia (KayKit Space Base Bits). O pacote é de
+   * cidade em miniatura: com 2,6 o módulo fica com 2,6 de altura e o jipe com quase 3 casas.
+   */
+  space: {
+    scale: 2.6,
+    texture: 'kaykit-space-base',
+    pieces: [
+      ['basemodule_A', 'kay-modulo-base'],
+      ['basemodule_B', 'kay-modulo-domo'],
+      ['basemodule_C', 'kay-modulo-laboratorio'],
+      ['basemodule_D', 'kay-modulo-alojamento'],
+      ['basemodule_E', 'kay-modulo-comando'],
+      ['basemodule_garage', 'kay-hangar'],
+      ['cargo_A_stacked', 'kay-carga'],
+      ['cargo_B_packed', 'kay-carga-embalada'],
+      ['cargodepot_A', 'kay-deposito-carga'],
+      ['containers_A', 'kay-conteineres'],
+      ['drill_structure', 'kay-perfuratriz'],
+      ['lander_A', 'kay-modulo-pouso'],
+      ['landingpad_large', 'kay-plataforma-pouso'],
+      ['solarpanel', 'kay-painel-solar'],
+      ['windturbine_tall', 'kay-turbina-eolica'],
+      ['spacetruck', 'kay-jipe-espacial'],
+      ['spacetruck_large', 'kay-caminhao-espacial'],
+      ['structure_tall', 'kay-torre-antena'],
+      ['lights', 'kay-holofotes'],
+      ['rock_A', 'kay-rocha-marte'],
+      ['rocks_A', 'kay-rochas-marte'],
+      ['tunnel_straight_A', 'kay-tunel'],
+    ],
+  },
+};

@@ -85,6 +85,38 @@ export const MODEL_CREDITS: readonly Credit[] = [
     ...CC0,
   },
   {
+    work: 'KayKit Furniture Bits',
+    author: 'Kay Lousberg',
+    url: 'https://kaylousberg.itch.io/furniture-bits',
+    usage:
+      'Móveis de casa moderna: poltrona, sofá, camas, cômoda, cadeiras, mesas, abajur, luminária, tapetes e livros.',
+    ...CC0,
+  },
+  {
+    work: 'KayKit Halloween Bits',
+    author: 'Kay Lousberg',
+    url: 'https://kaylousberg.itch.io/halloween-bits',
+    usage:
+      'Cemitério: covas, lápides, caixões, mausoléu, grades, portão, árvores mortas, abóboras, lanternas e ossos.',
+    ...CC0,
+  },
+  {
+    work: 'KayKit Restaurant Bits',
+    author: 'Kay Lousberg',
+    url: 'https://kaylousberg.itch.io/restaurant-bits',
+    usage:
+      'Cozinha e salão de restaurante: fogão, forno, geladeira, pia, bancadas, mesas, cadeiras, caixas de legumes e pratos.',
+    ...CC0,
+  },
+  {
+    work: 'KayKit Space Base Bits',
+    author: 'Kay Lousberg',
+    url: 'https://kaylousberg.itch.io/space-base-bits',
+    usage:
+      'Base em outro planeta: módulos, hangar, túnel, plataforma de pouso, carga, perfuratriz, painéis solares, turbina, rovers e rochas.',
+    ...CC0,
+  },
+  {
     work: 'RPG Characters',
     author: 'Quaternius',
     url: 'https://opengameart.org/content/lowpoly-rpg-characters',

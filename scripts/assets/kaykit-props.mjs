@@ -1,58 +1,49 @@
-// Converte os móveis e adereços do pacote "KayKit Dungeon Remastered" (Kay Lousberg, CC0) para o
+// Converte as peças de um pacote KayKit (Kay Lousberg, CC0; lista em kaykit-packs.mjs) para o
 // formato do site: põe na escala do boneco, centra no footprint, apoia no chão, comprime a malha e
 // troca a textura embutida (a mesma paleta em todos os modelos) por uma WebP compartilhada.
 // Imprime, para cada peça, a altura, o footprint e a cor de longe (média da paleta sob a malha),
 // prontos para o catálogo.
 // A imagem passa pelo sharp em outro processo (texture-webp.mjs e um leitor de pixels): o
 // gltf-transform carrega outro libvips e os dois no mesmo processo quebram.
-// uso: node scripts/assets/kaykit-props.mjs <pasta gltf do pacote> <public/assets/tavern>
+// uso: node scripts/assets/kaykit-props.mjs <pacote> <pasta gltf do pacote> <public/assets/...>
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { NodeIO, PropertyType, getBounds } from '@gltf-transform/core';
 import { ALL_EXTENSIONS, EXTMeshoptCompression, EXTTextureWebP } from '@gltf-transform/extensions';
 import { dedup, flatten, join as joinMeshes, prune, quantize, reorder, weld } from '@gltf-transform/functions';
 import { MeshoptEncoder } from 'meshoptimizer';
+import { KAYKIT_PACKS } from './kaykit-packs.mjs';
 
-const [INPUT, OUT] = process.argv.slice(2);
-/** A paleta do pacote, ao lado da pasta gltf. */
-const PALETTE_PNG = join(INPUT, '..', 'texture', 'dungeon_texture.png');
-if (!INPUT || !OUT) throw new Error('uso: node scripts/assets/kaykit-props.mjs <pasta gltf> <saída>');
+const [PACK, INPUT, OUT] = process.argv.slice(2);
+const pack = KAYKIT_PACKS[PACK];
+if (!pack || !INPUT || !OUT) {
+  throw new Error(`uso: node scripts/assets/kaykit-props.mjs <${Object.keys(KAYKIT_PACKS).join('|')}> <pasta gltf> <saída>`);
+}
+/** A paleta do pacote fica ao lado da pasta gltf, em texture/ ou textures/ conforme o pacote. */
+function findPalette() {
+  for (const folder of ['texture', 'textures']) {
+    const dir = join(INPUT, '..', folder);
+    if (!existsSync(dir)) continue;
+    const png = readdirSync(dir).find((name) => name.endsWith('.png'));
+    if (png) return join(dir, png);
+  }
+  throw new Error('paleta .png do pacote não encontrada');
+}
+const PALETTE_PNG = findPalette();
 
-/**
- * Unidade do pacote para casa do mapa: com 0,65 o tampo da mesa fica a 0,65 (cintura do boneco de
- * 1,5), o banquinho a um terço dele e a cama de casal cabe em 2×2.
- */
-const SCALE = 0.65;
+const SCALE = pack.scale;
 /** Quanto a peça pode passar da borda do footprint sem ganhar mais uma casa. */
 const OVERHANG = 0.3;
+/** Folga do arredondamento: 1,3 − 0,3 não pode virar 2 casas por um erro na última casa decimal. */
+const EPSILON = 1e-3;
 /** A paleta do pacote é de cores chapadas: 256 px bastam e o arquivo fica pequeno. */
 const TEXTURE_SIZE = 256;
-const TEXTURE_URI = 'textures/kaykit-dungeon.webp';
+const TEXTURE_URI = `textures/${pack.texture}.webp`;
 
-/** Modelo do pacote, chave da peça e giro: a frente de cada peça olha para +z. */
-const PIECES = [
-  ['bed_decorated', 'kay-cama'],
-  ['bed_floor', 'kay-cama-palha'],
-  ['keg_decorated', 'kay-barril-chope'],
-  ['barrel_small_stack', 'kay-barris'],
-  ['table_long_decorated_A', 'kay-mesa-banquete'],
-  ['table_medium_tablecloth', 'kay-mesa-toalha'],
-  ['table_small_decorated_A', 'kay-mesinha'],
-  ['stool', 'kay-banquinho'],
-  ['shelves', 'kay-estante'],
-  ['shelf_small_candles', 'kay-prateleira-velas'],
-  ['candle_triple', 'kay-candelabro'],
-  ['banner_patternA_red', 'kay-estandarte-vermelho'],
-  ['banner_shield_blue', 'kay-estandarte-azul'],
-  ['crates_stacked', 'kay-caixas'],
-  ['coin_stack_large', 'kay-moedas'],
-  ['chest_gold', 'kay-bau-ouro'],
-  ['sword_shield', 'kay-espada-escudo'],
-  ['trunk_large_A', 'kay-arca'],
-  ['torch_mounted', 'kay-tocha-parede'],
-];
+/** Modelo do pacote e chave da peça; a frente de cada peça olha para +z. */
+const PIECES = pack.pieces;
 
 mkdirSync(join(OUT, 'textures'), { recursive: true });
 await MeshoptEncoder.ready;
@@ -96,7 +87,9 @@ writeFileSync(process.argv[2], JSON.stringify({ width: info.width, height: info.
 palette = loadPalette();
 const entries = [];
 for (const [model, key] of PIECES) {
-  const path = join(INPUT, model.startsWith('chest') ? `${model}.glb` : `${model}.gltf.glb`);
+  // Cada pacote exporta de um jeito: .gltf com .bin, .gltf.glb ou .glb.
+  const path = ['.gltf', '.gltf.glb', '.glb'].map((ext) => join(INPUT, model + ext)).find(existsSync);
+  if (!path) throw new Error(`modelo ${model} não encontrado`);
   const doc = await io.read(path);
   const root = doc.getRoot();
   // A imagem não vai dentro do arquivo: todos apontam para a mesma WebP.
@@ -140,8 +133,8 @@ for (const [model, key] of PIECES) {
     height: Number(size[1].toFixed(3)),
     size: size.map((value) => Number(value.toFixed(2))),
     footprint: {
-      width: Math.max(1, Math.ceil(size[0] - OVERHANG)),
-      depth: Math.max(1, Math.ceil(size[2] - OVERHANG)),
+      width: Math.max(1, Math.ceil(size[0] - OVERHANG - EPSILON)),
+      depth: Math.max(1, Math.ceil(size[2] - OVERHANG - EPSILON)),
     },
     farColor: far,
   });
