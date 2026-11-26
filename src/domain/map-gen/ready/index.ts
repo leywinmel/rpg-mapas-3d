@@ -31,6 +31,7 @@ import { buildGoldenValeMap, GOLDEN_VALE_SIZE } from './golden-vale';
 import { buildCorsairCoveMap, CORSAIR_COVE_SIZE } from './corsair-cove';
 import { buildGoldenSandsMap, GOLDEN_SANDS_SIZE } from './golden-sands';
 import { buildOssuaryMap, OSSUARY_SIZE } from './ossuary';
+import { buildLotharielMap, LOTHARIEL_SIZE } from './lothariel';
 import { buildHrafnvikMap, HRAFNVIK_SIZE } from './hrafnvik';
 import { buildPortMap, PORT_SIZE } from './port';
 import { buildSchoolMap, SCHOOL_SIZE } from './school';
@@ -227,6 +228,14 @@ export const READY_MAPS: readonly ReadyMap[] = [
       'Masmorra gigante, 104×88: a escadaria da entrada, a capela dos ossos com pilares e sarcófagos, as galerias do ossário cheias de crânios, os túmulos dos nobres, o salão das armadilhas, os aposentos dos sacerdotes, a cripta do tesouro e o covil do lich entre dois lagos negros.',
     size: OSSUARY_SIZE,
     build: buildOssuaryMap,
+  },
+  {
+    id: 'bosque-lothariel',
+    name: 'Bosque de Lothariel',
+    description:
+      'Cidade élfica na floresta, 104×88: o salão da rainha com o pátio, a fonte e as torres, a praça do conselho com o mercado, as casas dos elfos, o bairro dos guardiões com a torre de vigia, o lago da lua com a ilha da estátua e o moinho d’água, o bosque sagrado dos druidas e a mata fechada em volta.',
+    size: LOTHARIEL_SIZE,
+    build: buildLotharielMap,
   },
   {
     id: 'deserto',

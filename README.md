@@ -203,6 +203,9 @@ Dentro da mesa, o mestre monta os mapas e os jogadores acompanham.
   As "Catacumbas do Ossário" (104 × 88) são uma masmorra gigante: a capela dos ossos com os pilares e
   os sarcófagos, as galerias do ossário cheias de crânios, os túmulos dos nobres, o salão das
   armadilhas, os aposentos dos sacerdotes, a cripta do tesouro e o covil do lich entre dois lagos negros.
+  O "Bosque de Lothariel" (104 × 88) é uma cidade élfica na floresta: o salão da rainha com as torres,
+  a praça do conselho com o mercado, as casas dos elfos, o bairro dos guardiões, o lago da lua com a
+  ilha da estátua e o moinho d’água, o bosque sagrado dos druidas e a mata fechada em volta.
 - **Gerar mapa:** em "Novo mapa", a opção "Gerar mapa" escolhe o tipo. "Vila ou cidade" monta o mapa inteiro com ruas,
   casas mobiliadas (móveis encostados nas paredes, balcão e prateleiras nas lojas) com portas,
   janelas e telhados, postes e adereços nas calçadas e nos quintais, praças, árvores e veículos.
